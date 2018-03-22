@@ -1,5 +1,10 @@
 inspecode:
   ktlint:
+  - ignore: 'backend.native/tests/'
+    auto-fix: true
+    thresholds:
+      num-issues: 999
+  - input: 'backend.native/tests/'
     auto-fix: true
     thresholds:
       num-issues: 999
