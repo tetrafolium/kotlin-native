@@ -1,78 +1,9 @@
 inspecode:
 
   ktlint:
-  - input:
-    - 'runtime/'
     auto-fix: true
     thresholds:
-      num-issues: 999
-  - input:
-    - 'sample/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'platformLibs/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - ignore:
-    - 'runtime/'
-    - 'sample/'
-    - 'platformLibs/'
-    - 'backend.native/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/'
-    ignore:
-    - 'backend.native/tests/external/codegen/box/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/'
-    ignore:
-    - 'backend.native/tests/external/codegen/box/reflection/'
-    - 'backend.native/tests/external/codegen/box/ranges/'
-    - 'backend.native/tests/external/codegen/box/coroutines/'
-    - 'backend.native/tests/external/codegen/box/classes/'
-    - 'backend.native/tests/external/codegen/box/controlStructures/'
-    - 'backend.native/tests/external/codegen/box/callableReference/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/reflection/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/ranges/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/coroutines/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/classes/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/controlStructures/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
-  - input:
-    - 'backend.native/tests/external/codegen/box/callableReference/'
-    auto-fix: true
-    thresholds:
-      num-issues: 999
+      num-issues: 1000
 
   grep:
     options:
@@ -80,7 +11,11 @@ inspecode:
       --regexp:
       - "(BUG|FIXME|HACK|XXX):"   # excludes "TODO:" (too many)
     thresholds:
-      num-issues: 999
+      num-issues: 1000
+
+  jscpd:
+    thresholds:
+      num-issues: 1000
 
   misspell:
     auto-fix: true
@@ -88,4 +23,4 @@ inspecode:
       -i:
       - "adn"
     thresholds:
-      num-issues: 999
+      num-issues: 1000
