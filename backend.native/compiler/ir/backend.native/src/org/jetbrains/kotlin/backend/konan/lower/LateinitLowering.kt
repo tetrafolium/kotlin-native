@@ -1,59 +1,34 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package org.jetbrains.kotlin.backend.konan.lower
 
-import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.FileLoweringPass
 import org.jetbrains.kotlin.backend.common.lower.*
+import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.descriptors.resolveFakeOverride
-import org.jetbrains.kotlin.builtins.KotlinBuiltIns
-import org.jetbrains.kotlin.descriptors.VariableDescriptor
+import org.jetbrains.kotlin.backend.konan.irasdescriptors.isReal
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.*
-import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrProperty
-import org.jetbrains.kotlin.ir.declarations.IrVariable
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetValue
 import org.jetbrains.kotlin.ir.expressions.IrPropertyReference
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
-import org.jetbrains.kotlin.ir.symbols.IrFieldSymbol
-import org.jetbrains.kotlin.ir.symbols.IrSymbol
+import org.jetbrains.kotlin.ir.symbols.IrVariableSymbol
+import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
-import org.jetbrains.kotlin.incremental.components.NoLookupLocation
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetFieldImpl
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.types.TypeUtils
 
 internal class LateinitLowering(
-        val context: CommonBackendContext,
+        val context: Context,
         private val generateParameterNameInAssertion: Boolean = false
 ) : FileLoweringPass {
 
-    private val KOTLIN_FQ_NAME                  = FqName("kotlin")
-    private val kotlinPackageScope              = context.ir.irModule.descriptor.getPackage(KOTLIN_FQ_NAME).memberScope
-    private val isInitializedPropertyDescriptor = kotlinPackageScope
-            .getContributedVariables(Name.identifier("isInitialized"), NoLookupLocation.FROM_BACKEND).single {
-                it.extensionReceiverParameter.let { it != null && TypeUtils.getClassDescriptor(it.type) == context.reflectionTypes.kProperty0 }
-            }
-    private val isInitializedGetterDescriptor   = isInitializedPropertyDescriptor.getter!!
+    private val isInitializedGetter = context.ir.symbols.isInitializedGetter
 
     override fun lower(irFile: IrFile) {
         irFile.transformChildrenVoid(object : IrBuildingTransformer(context) {
@@ -61,11 +36,11 @@ internal class LateinitLowering(
             override fun visitVariable(declaration: IrVariable): IrStatement {
                 declaration.transformChildrenVoid(this)
 
-                val descriptor = declaration.descriptor
-                if (!descriptor.isLateInit) return declaration
+                if (!declaration.isLateinit) return declaration
 
-                assert(declaration.initializer == null, { "'lateinit' modifier is not allowed for variables with initializer" })
-                assert(!KotlinBuiltIns.isPrimitiveType(descriptor.type), { "'lateinit' modifier is not allowed on primitive types" })
+                assert(declaration.initializer == null) {
+                    "'lateinit' modifier is not allowed for variables with initializer"
+                }
                 builder.at(declaration).run {
                     declaration.initializer = irNull()
                 }
@@ -74,18 +49,16 @@ internal class LateinitLowering(
 
             override fun visitGetValue(expression: IrGetValue): IrExpression {
                 val symbol = expression.symbol
-                val descriptor = symbol.descriptor as? VariableDescriptor
-                if (descriptor == null || !descriptor.isLateInit) return expression
+                if (symbol !is IrVariableSymbol || !symbol.owner.isLateinit) return expression
 
-                assert(!KotlinBuiltIns.isPrimitiveType(descriptor.type), { "'lateinit' modifier is not allowed on primitive types" })
                 builder.at(expression).run {
                     return irBlock(expression) {
                         // TODO: do data flow analysis to check if value is proved to be not-null.
                         +irIfThen(
-                                irEqualsNull(irGet(symbol)),
-                                throwUninitializedPropertyAccessException(symbol)
+                                irEqualsNull(irGet(expression.type, symbol)),
+                                throwUninitializedPropertyAccessException(symbol.owner.name)
                         )
-                        +irGet(symbol)
+                        +irGet(expression.type, symbol)
                     }
                 }
             }
@@ -93,24 +66,18 @@ internal class LateinitLowering(
             override fun visitCall(expression: IrCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
-                val descriptor = expression.descriptor
-                if (descriptor != isInitializedGetterDescriptor) return expression
+                if (expression.symbol != isInitializedGetter) return expression
 
                 val propertyReference = expression.extensionReceiver!! as IrPropertyReference
-                assert(propertyReference.extensionReceiver == null, { "'lateinit' modifier is not allowed on extension properties" })
-                // TODO: Take propertyReference.fieldSymbol as soon as it will show up in IR.
-                val propertyDescriptor = propertyReference.descriptor.resolveFakeOverride().original
+                assert(propertyReference.extensionReceiver == null) {
+                    "'lateinit' modifier is not allowed on extension properties"
+                }
+                val getter = propertyReference.getter?.owner ?: TODO(propertyReference.dump())
+                val property = getter.resolveFakeOverride().correspondingProperty!!
 
-                val type = propertyDescriptor.type
-                assert(!KotlinBuiltIns.isPrimitiveType(type), { "'lateinit' modifier is not allowed on primitive types" })
                 builder.at(expression).run {
-                    @Suppress("DEPRECATION")
-                    val fieldValue = IrGetFieldImpl(
-                            expression.startOffset,
-                            expression.endOffset,
-                            propertyDescriptor,
-                            propertyReference.dispatchReceiver
-                    )
+                    val field = property.backingField!!
+                    val fieldValue = irGetField(propertyReference.dispatchReceiver, field)
                     return irNotEquals(fieldValue, irNull())
                 }
             }
@@ -118,13 +85,15 @@ internal class LateinitLowering(
             override fun visitProperty(declaration: IrProperty): IrStatement {
                 declaration.transformChildrenVoid(this)
 
-                if (!declaration.descriptor.isLateInit || !declaration.descriptor.kind.isReal)
+                if (!declaration.isLateinit || !declaration.isReal)
                     return declaration
 
                 val backingField = declaration.backingField!!
-                transformGetter(backingField.symbol, declaration.getter!!)
+                transformGetter(backingField, declaration.getter!!)
 
-                assert(backingField.initializer == null, { "'lateinit' modifier is not allowed for properties with initializer" })
+                assert(backingField.initializer == null) {
+                    "'lateinit' modifier is not allowed for properties with initializer"
+                }
                 val irBuilder = context.createIrBuilder(backingField.symbol, declaration.startOffset, declaration.endOffset)
                 irBuilder.run {
                     backingField.initializer = irExprBody(irNull())
@@ -133,20 +102,18 @@ internal class LateinitLowering(
                 return declaration
             }
 
-            private fun transformGetter(backingFieldSymbol: IrFieldSymbol, getter: IrFunction) {
-                val type = backingFieldSymbol.descriptor.type
-                assert(!KotlinBuiltIns.isPrimitiveType(type), { "'lateinit' modifier is not allowed on primitive types" })
+            private fun transformGetter(backingField: IrField, getter: IrFunction) {
                 val irBuilder = context.createIrBuilder(getter.symbol, getter.startOffset, getter.endOffset)
                 irBuilder.run {
                     getter.body = irBlockBody {
                         val resultVar = irTemporary(
-                                irGetField(getter.dispatchReceiverParameter?.let { irGet(it.symbol) }, backingFieldSymbol)
+                                irGetField(getter.dispatchReceiverParameter?.let { irGet(it) }, backingField)
                         )
                         +irIfThenElse(
-                                context.builtIns.nothingType,
-                                irNotEquals(irGet(resultVar.symbol), irNull()),
-                                irReturn(irGet(resultVar.symbol)),
-                                throwUninitializedPropertyAccessException(backingFieldSymbol)
+                                context.irBuiltIns.nothingType,
+                                irNotEquals(irGet(resultVar), irNull()),
+                                irReturn(irGet(resultVar)),
+                                throwUninitializedPropertyAccessException(backingField.name)
                         )
                     }
                 }
@@ -154,16 +121,16 @@ internal class LateinitLowering(
         })
     }
 
-    private fun IrBuilderWithScope.throwUninitializedPropertyAccessException(backingFieldSymbol: IrSymbol) =
-            irCall(throwErrorFunction).apply {
+    private fun IrBuilderWithScope.throwUninitializedPropertyAccessException(name: Name) =
+            irCall(throwErrorFunction, context.irBuiltIns.nothingType).apply {
                 if (generateParameterNameInAssertion) {
                     putValueArgument(
                             0,
                             IrConstImpl.string(
                                     startOffset,
                                     endOffset,
-                                    context.builtIns.stringType,
-                                    backingFieldSymbol.descriptor.name.asString()
+                                    context.irBuiltIns.stringType,
+                                    name.asString()
                             )
                     )
                 }

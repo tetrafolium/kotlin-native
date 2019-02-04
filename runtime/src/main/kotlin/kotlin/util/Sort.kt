@@ -1,86 +1,115 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package kotlin.util
 
 import kotlin.comparisons.*
 
-// TODO: Implement sort for primitives with a custom comparator.
-
-// Yes, rather naive qsort for now.
-// Array<T>     =============================================================================
-private fun <T> partition(array: Array<T>, left: Int, right: Int): Int {
-    var i = left
-    var j = right
+private fun <T: Comparable<T>> mergeSort(array: Array<T>, start: Int, endInclusive: Int) {
     @Suppress("UNCHECKED_CAST")
-    val pivot = array[(left + right) / 2] as Comparable<T>
-    while (i <= j) {
-        while (pivot.compareTo(array[i]) > 0) {
-            i++
-        }
-        while (pivot.compareTo(array[j]) < 0) {
-            j--
-        }
-        if (i <= j) {
-            val tmp = array[i]
-            array[i] = array[j]
-            array[j] = tmp
-            i++
-            j--
+    val buffer = arrayOfNulls<Any?>(array.size) as Array<T>
+    val result = mergeSort(array, buffer, start, endInclusive)
+    if (result !== array) {
+        result.forEachIndexed { i, v -> array[i] = v }
+    }
+}
+
+// Both start and end are inclusive indices.
+private fun <T: Comparable<T>> mergeSort(array: Array<T>, buffer: Array<T>, start: Int, end: Int): Array<T> {
+    if (start == end) {
+        return array
+    }
+
+    val median = (start + end) / 2
+    val left = mergeSort(array, buffer, start, median)
+    val right = mergeSort(array, buffer, median + 1, end)
+
+    val target = if (left === buffer) array else buffer
+
+    // Merge.
+    var leftIndex = start
+    var rightIndex = median + 1
+    for (i in start..end) {
+        when {
+            leftIndex <= median && rightIndex <= end -> {
+                val leftValue = left[leftIndex]
+                val rightValue = right[rightIndex]
+
+                if (leftValue <= rightValue) {
+                    target[i] = leftValue
+                    leftIndex++
+                } else {
+                    target[i] = rightValue
+                    rightIndex++
+                }
+            }
+            leftIndex <= median -> {
+                target[i] = left[leftIndex]
+                leftIndex++
+            }
+            else /* rightIndex <= end */ -> {
+                target[i] = right[rightIndex]
+                rightIndex++
+            }
         }
     }
-    return i
+
+    return target
 }
 
-private fun <T> quickSort(array: Array<T>, left: Int, right: Int) {
-    val index = partition(array, left, right)
-    if (left < index - 1)
-        quickSort(array, left, index - 1)
-    if (index < right)
-        quickSort(array, index, right)
+// Sort with comparator.
+private fun <T> mergeSort(array: Array<T>, start: Int, endInclusive: Int, comparator: Comparator<T>) {
+    @Suppress("UNCHECKED_CAST")
+    val buffer = arrayOfNulls<Any?>(array.size) as Array<T>
+    val result = mergeSort(array, buffer, start, endInclusive, comparator)
+    if (result !== array) {
+        result.forEachIndexed { i, v -> array[i] = v }
+    }
 }
 
-private fun <T> partition(
-        array: Array<T>, left: Int, right: Int, comparator: Comparator<T>): Int {
-    var i = left
-    var j = right
-    val pivot = array[(left + right) / 2]
-    while (i <= j) {
-        while (comparator.compare(array[i], pivot) < 0)
-            i++
-        while (comparator.compare(array[j], pivot) > 0)
-            j--
-        if (i <= j) {
-            val tmp = array[i]
-            array[i] = array[j]
-            array[j] = tmp
-            i++
-            j--
+// Both start and end are inclusive indices.
+private fun <T> mergeSort(array: Array<T>, buffer: Array<T>, start: Int, end: Int, comparator: Comparator<T>): Array<T> {
+    if (start == end) {
+        return array
+    }
+
+    val median = (start + end) / 2
+    val left = mergeSort(array, buffer, start, median, comparator)
+    val right = mergeSort(array, buffer, median + 1, end, comparator)
+
+    val target = if (left === buffer) array else buffer
+
+    // Merge.
+    var leftIndex = start
+    var rightIndex = median + 1
+    for (i in start..end) {
+        when {
+            leftIndex <= median && rightIndex <= end -> {
+                val leftValue = left[leftIndex]
+                val rightValue = right[rightIndex]
+
+                if (comparator.compare(leftValue, rightValue) <= 0) {
+                    target[i] = leftValue
+                    leftIndex++
+                } else {
+                    target[i] = rightValue
+                    rightIndex++
+                }
+            }
+            leftIndex <= median -> {
+                target[i] = left[leftIndex]
+                leftIndex++
+            }
+            else /* rightIndex <= end */ -> {
+                target[i] = right[rightIndex]
+                rightIndex++
+            }
         }
     }
-    return i
-}
 
-private fun <T> quickSort(
-        array: Array<T>, left: Int, right: Int, comparator: Comparator<T>) {
-    val index = partition(array, left, right, comparator)
-    if (left < index - 1)
-        quickSort(array, left, index - 1, comparator)
-    if (index < right)
-        quickSort(array, index, right, comparator)
+    return target
 }
 
 // ByteArray    =============================================================================
@@ -245,9 +274,9 @@ private fun partition(
     var j = right
     val pivot = array[(left + right) / 2]
     while (i <= j) {
-        while (array[i] < pivot)
+        while (array[i].compareTo(pivot) < 0)
             i++
-        while (array[j] > pivot)
+        while (array[j].compareTo(pivot) > 0)
             j--
         if (i <= j) {
             val tmp = array[i]
@@ -276,9 +305,9 @@ private fun partition(
     var j = right
     val pivot = array[(left + right) / 2]
     while (i <= j) {
-        while (array[i] < pivot)
+        while (array[i].compareTo(pivot) < 0)
             i++
-        while (array[j] > pivot)
+        while (array[j].compareTo(pivot) > 0)
             j--
         if (i <= j) {
             val tmp = array[i]
@@ -339,16 +368,16 @@ private fun quickSort(
 internal fun <T> sortArrayWith(
         array: Array<out T>, fromIndex: Int = 0, toIndex: Int = array.size, comparator: Comparator<T>) {
     @Suppress("UNCHECKED_CAST")
-    quickSort(array as Array<T>, fromIndex, toIndex - 1, comparator)
+    mergeSort(array as Array<T>, fromIndex, toIndex - 1, comparator)
 }
 
 /**
  * Sorts a subarray of [Comparable] elements specified by [fromIndex] (inclusive) and
  * [toIndex] (exclusive) parameters using the qsort algorithm.
  */
-internal fun <T> sortArrayComparable(array: Array<out T>) {
+internal fun <T: Comparable<T>> sortArrayComparable(array: Array<out T>) {
     @Suppress("UNCHECKED_CAST")
-    quickSort(array as Array<T>, 0, array.size - 1)
+    mergeSort(array as Array<T>, 0, array.size - 1)
 }
 
 /**

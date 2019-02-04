@@ -1,8 +1,7 @@
 import org.jetbrains.kotlin.KlibInstall
 import org.jetbrains.kotlin.konan.target.*
 import org.jetbrains.kotlin.konan.target.KonanTarget
-import org.jetbrains.kotlin.konan.target.KonanTarget.*
-import org.jetbrains.kotlin.konan.util.DefFile
+import org.jetbrains.kotlin.konan.util.*
 
 import static org.jetbrains.kotlin.konan.util.VisibleNamedKt.getVisibleName
 
@@ -10,26 +9,26 @@ apply plugin: 'konan'
 
 buildscript {
     repositories {
-        mavenCentral()
         maven {
-            url kotlinCompilerRepo
+            url 'https://cache-redirector.jetbrains.com/maven-central'
+        }
+        maven {
+            url buildKotlinCompilerRepo
         }
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-native-gradle-plugin"
+        classpath "org.jetbrains.kotlin:kotlin-native-gradle-plugin:$gradlePluginVersion"
     }
 
     ext.konanHome = distDir.absolutePath
-    ext.jvmArgs = project.findProperty("platformLibsJvmArgs") ?: "-Xmx4G"
+    ext.jvmArgs = project.findProperty("platformLibsJvmArgs") ?: "-Xmx6G"
     ext.setProperty("konan.home", konanHome)
     ext.setProperty("konan.jvmArgs", jvmArgs)
 }
 
 //#region Util functions.
 private ArrayList<DefFile> targetDefFiles(KonanTarget  target) {
-    def substitution = ['arch': target.visibleName,
-                        'os'  : target.detailedName]
     file("src/platform/${getVisibleName(target.family)}")
             .listFiles()
             .findAll { it.name.endsWith(".def") }
@@ -38,7 +37,7 @@ private ArrayList<DefFile> targetDefFiles(KonanTarget  target) {
             .findAll { ! ((target instanceof KonanTarget.LINUX_ARM32_HFP ||
                            target instanceof KonanTarget.LINUX_MIPS32 || 
                            target instanceof KonanTarget.LINUX_MIPSEL32) && it.name == 'zlib.def') }
-            .collect { new DefFile(it, substitution) }
+            .collect { TargetDefFileKt.DefFile(it, target) }
 }
 
 private String defFileToLibName(String target, String name) {
@@ -46,6 +45,8 @@ private String defFileToLibName(String target, String name) {
 }
 //#endregion
 
+// TODO: I think most for the non-DSL language below can either be incorporated into DSL
+// or moved out of .gradle file.
 project.rootProject.ext.platformManager.enabled.each { target ->
 
     def targetName = target.visibleName
@@ -63,13 +64,14 @@ project.rootProject.ext.platformManager.enabled.each { target ->
                 libraries {
                     klibs df.config.depends
                 }
-                extraOpts '--purge_user_libs'
+                extraOpts '-Xpurge-user-libs'
             }
         }
 
         def libTask = konanArtifacts."$libName"."$targetName"
         libTask.dependsOn df.config.depends.collect{ defFileToLibName(targetName, it) }
         libTask.dependsOn ":${targetName}CrossDist"
+        libTask.enableParallel = true
 
         task "$libName"(type: KlibInstall) {
             klib = libTask.artifact

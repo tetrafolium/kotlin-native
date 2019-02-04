@@ -38,7 +38,7 @@ typealias KotlinExpression = String
  * For this identifier constructs the string to be parsed by Kotlin as `SimpleName`
  * defined [here](https://kotlinlang.org/docs/reference/grammar.html#SimpleName).
  */
-fun String.asSimpleName(): String = if (this in kotlinKeywords) {
+fun String.asSimpleName(): String = if (this in kotlinKeywords || this.contains("$")) {
     "`$this`"
 } else {
     this
@@ -68,7 +68,7 @@ private val charactersAllowedInKotlinStringLiterals: Set<Char> = mutableSetOf<Ch
     addAll('a' .. 'z')
     addAll('A' .. 'Z')
     addAll('0' .. '9')
-    addAll(listOf('_', '@', ':', ';', '.', ',', '{', '}', '=', '[', ']', '^', '#', '*', ' '))
+    addAll(listOf('_', '@', ':', ';', '.', ',', '{', '}', '=', '[', ']', '^', '#', '*', ' ', '(', ')'))
 }
 
 fun block(header: String, lines: Iterable<String>) = block(header, lines.asSequence())
@@ -83,3 +83,10 @@ val annotationForUnableToImport
 
 fun String.applyToStrings(vararg arguments: String) =
         "${this}(${arguments.joinToString { it.quoteAsKotlinLiteral() }})"
+
+fun List<KotlinParameter>.renderParameters(scope: KotlinScope) = buildString {
+    this@renderParameters.renderParametersTo(scope, this)
+}
+
+fun List<KotlinParameter>.renderParametersTo(scope: KotlinScope, buffer: Appendable) =
+        this.joinTo(buffer, ", ") { it.render(scope) }

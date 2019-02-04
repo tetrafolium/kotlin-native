@@ -1,20 +1,56 @@
-apply plugin: 'konan'
+import java.nio.file.Paths
 
-konan.targets = ['macbook', 'linux']
+plugins {
+    id 'kotlin-multiplatform'
+    id 'maven-publish'
+}
 
-konanArtifacts {
-    interop('libcurl') {
-        target('linux') {
-            includeDirs.headerFilterOnly '/usr/include'
-        }
-        target('macbook') {
-            includeDirs.headerFilterOnly '/opt/local/include', '/usr/local/include'
-        }
+group 'org.jetbrains.kotlin.sample.native'
+version '1.0'
+
+def localRepo = rootProject.file('build/.m2-local')
+
+publishing {
+    repositories {
+        maven { url = "file://$localRepo" }
     }
+}
 
-    program('Curl') {
-        libraries {
-            artifact 'libcurl'
+task cleanLocalRepo(type: Delete) {
+    delete localRepo
+}
+
+// Determine host preset.
+def hostPreset = MPPTools.defaultHostPreset(project, [kotlin.presets.macosX64, kotlin.presets.linuxX64, kotlin.presets.mingwX64])
+
+kotlin {
+    targets {
+        fromPreset(hostPreset, 'libcurl') {
+            compilations.main.cinterops {
+                libcurl {
+                    switch (hostPreset) {
+                        case presets.macosX64:
+                            includeDirs.headerFilterOnly '/opt/local/include', '/usr/local/include'
+                            break
+                        case presets.linuxX64:
+                            includeDirs.headerFilterOnly '/usr/include', '/usr/include/x86_64-linux-gnu'
+                            break
+                        case presets.mingwX64:
+                            includeDirs.headerFilterOnly "${MPPTools.mingwPath()}/include"
+                            break
+                    }
+                }
+            }
+
+            mavenPublication {
+                pom {
+                    withXml {
+                        def root = asNode()
+                        root.appendNode('name', 'libcurl interop library')
+                        root.appendNode('description', 'A library providing interoperability with host libcurl')
+                    }
+                }
+            }
         }
     }
 }

@@ -38,6 +38,10 @@ class SimpleBridgeGeneratorImpl(
             BridgedType.SHORT -> "jshort"
             BridgedType.INT -> "jint"
             BridgedType.LONG -> "jlong"
+            BridgedType.UBYTE -> "jbyte"
+            BridgedType.USHORT -> "jshort"
+            BridgedType.UINT -> "jint"
+            BridgedType.ULONG -> "jlong"
             BridgedType.FLOAT -> "jfloat"
             BridgedType.DOUBLE -> "jdouble"
             BridgedType.NATIVE_PTR -> "jlong"
@@ -49,6 +53,10 @@ class SimpleBridgeGeneratorImpl(
             BridgedType.SHORT -> "int16_t"
             BridgedType.INT -> "int32_t"
             BridgedType.LONG -> "int64_t"
+            BridgedType.UBYTE -> "uint8_t"
+            BridgedType.USHORT -> "uint16_t"
+            BridgedType.UINT -> "uint32_t"
+            BridgedType.ULONG -> "uint64_t"
             BridgedType.FLOAT -> "float"
             BridgedType.DOUBLE -> "double"
             BridgedType.NATIVE_PTR -> "void*"
@@ -107,7 +115,7 @@ class SimpleBridgeGeneratorImpl(
                 "JNIEXPORT $cReturnType JNICALL $functionName ($joinedCParameters)"
             }
             KotlinPlatform.NATIVE -> {
-                val functionName = pkgName.replace('.', '_') + "_$kotlinFunctionName"
+                val functionName = pkgName.replace(INVALID_CLANG_IDENTIFIER_REGEX, "_") + "_$kotlinFunctionName"
                 kotlinLines.add("@SymbolName(${functionName.quoteAsKotlinLiteral()})")
                 "$cReturnType $functionName ($joinedCParameters)"
             }
@@ -167,8 +175,8 @@ class SimpleBridgeGeneratorImpl(
         val joinedCParameters = cFunctionParameters.joinToString { (name, type) -> "$type $name" }
         val cReturnType = returnType.nativeType
 
-        val symbolName = pkgName.replace('.', '_') + "_$kotlinFunctionName"
-        kotlinLines.add("@konan.internal.ExportForCppRuntime(${symbolName.quoteAsKotlinLiteral()})")
+        val symbolName = pkgName.replace(INVALID_CLANG_IDENTIFIER_REGEX, "_") + "_$kotlinFunctionName"
+        kotlinLines.add("@kotlin.native.internal.ExportForCppRuntime(${symbolName.quoteAsKotlinLiteral()})")
         val cFunctionHeader = "$cReturnType $symbolName($joinedCParameters)"
 
         nativeLines.add("$cFunctionHeader;")
@@ -236,5 +244,9 @@ class SimpleBridgeGeneratorImpl(
             override fun isSupported(nativeBacked: NativeBacked): Boolean =
                     nativeBacked !in excludedClients
         }
+    }
+
+    companion object {
+        private val INVALID_CLANG_IDENTIFIER_REGEX = "[^a-zA-Z1-9_]".toRegex()
     }
 }

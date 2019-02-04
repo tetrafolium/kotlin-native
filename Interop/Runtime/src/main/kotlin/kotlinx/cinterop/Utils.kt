@@ -66,7 +66,7 @@ open class DeferScope {
 }
 
 abstract class AutofreeScope : DeferScope(), NativePlacement {
-    override abstract fun alloc(size: Long, align: Int): NativePointed
+    abstract override fun alloc(size: Long, align: Int): NativePointed
 }
 
 open class ArenaBase(private val parent: NativeFreeablePlacement = nativeHeap) : AutofreeScope() {
@@ -107,7 +107,19 @@ class Arena(parent: NativeFreeablePlacement = nativeHeap) : ArenaBase(parent) {
  * @param T must not be abstract
  */
 inline fun <reified T : CVariable> NativePlacement.alloc(): T =
-        alloc(sizeOf<T>(), alignOf<T>()).reinterpret()
+        alloc(typeOf<T>()).reinterpret()
+
+@PublishedApi
+internal fun NativePlacement.alloc(type: CVariable.Type): NativePointed =
+        alloc(type.size, type.align)
+
+/**
+ * Allocates variable of given type and initializes it applying given block.
+ *
+ * @param T must not be abstract
+ */
+inline fun <reified T : CVariable> NativePlacement.alloc(initialize: T.() -> Unit): T =
+        alloc<T>().also { it.initialize() }
 
 /**
  * Allocates C array of given elements type and length.
@@ -225,6 +237,8 @@ fun <T : CVariable> zeroValue(size: Int, align: Int): CValue<T> = object : CValu
 inline fun <reified T : CVariable> zeroValue(): CValue<T> =
         zeroValue<T>(sizeOf<T>().toInt(), alignOf<T>())
 
+inline fun <reified T : CVariable> cValue(): CValue<T> = zeroValue<T>()
+
 private fun <T : CPointed> NativePlacement.placeBytes(bytes: ByteArray, align: Int): CPointer<T> {
     val result = this.alloc(size = bytes.size, align = align)
     nativeMemUtils.putByteArray(bytes, result, bytes.size)
@@ -253,9 +267,12 @@ fun <T : CVariable> CPointed.readValue(size: Long, align: Int): CValue<T> {
     }
 }
 
+@PublishedApi internal fun <T : CVariable> CPointed.readValue(type: CVariable.Type): CValue<T> =
+    readValue(type.size, type.align)
+
 // Note: can't be declared as property due to possible clash with a struct field.
 // TODO: find better name.
-inline fun <reified T : CStructVar> T.readValue(): CValue<T> = this.readValue(sizeOf<T>(), alignOf<T>())
+inline fun <reified T : CStructVar> T.readValue(): CValue<T> = this.readValue(typeOf<T>())
 
 fun CValue<*>.write(location: NativePtr) {
     // TODO: probably CValue must be redesigned.
@@ -342,24 +359,22 @@ fun <T : CPointed> Array<CPointer<T>?>.toCValues() = cValuesOf(*this)
 
 fun <T : CPointed> List<CPointer<T>?>.toCValues() = this.toTypedArray().toCValues()
 
+private class CString(val bytes: ByteArray): CValues<ByteVar>() {
+    override val size get() = bytes.size + 1
+
+    override fun getPointer(scope: AutofreeScope): CPointer<ByteVar> {
+        val result = scope.allocArray<ByteVar>(bytes.size + 1)
+        nativeMemUtils.putByteArray(bytes, result.pointed, bytes.size)
+        result[bytes.size] = 0.toByte()
+        return result
+    }
+}
+
 /**
  * @return the value of zero-terminated UTF-8-encoded C string constructed from given [kotlin.String].
  */
 val String.cstr: CValues<ByteVar>
-    get() {
-        val bytes = encodeToUtf8(this)
-
-        return object : CValues<ByteVar>() {
-            override val size get() = bytes.size + 1
-
-            override fun getPointer(scope: AutofreeScope): CPointer<ByteVar> {
-                val result = scope.allocArray<ByteVar>(bytes.size + 1)
-                nativeMemUtils.putByteArray(bytes, result.pointed, bytes.size)
-                result[bytes.size] = 0.toByte()
-                return result
-            }
-        }
-    }
+    get() = CString(encodeToUtf8(this))
 
 /**
  * Convert this list of Kotlin strings to C array of C strings,
@@ -375,26 +390,28 @@ fun List<String>.toCStringArray(autofreeScope: AutofreeScope): CPointer<CPointer
 fun Array<String>.toCStringArray(autofreeScope: AutofreeScope): CPointer<CPointerVar<ByteVar>> =
         autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
 
-val String.wcstr: CValues<ShortVar>
-    get() {
-        val chars = CharArray(this.length, { i -> this.get(i)})
-        return object : CValues<ShortVar>() {
-            override val size get() = 2 * (chars.size + 1)
 
-            override fun getPointer(scope: AutofreeScope): CPointer<ShortVar> {
-                val result = scope.allocArray<ShortVar>(chars.size + 1)
-                nativeMemUtils.putCharArray(chars, result.pointed, chars.size)
-                result[chars.size] = 0.toShort()
-                return result
-            }
-        }
+private class WCString(val chars: CharArray): CValues<UShortVar>() {
+    override val size get() = 2 * (chars.size + 1)
+
+    override fun getPointer(scope: AutofreeScope): CPointer<UShortVar> {
+        val result = scope.allocArray<UShortVar>(chars.size + 1)
+        nativeMemUtils.putCharArray(chars, result.pointed, chars.size)
+        // TODO: fix, after KT-29627 is fixed.
+        nativeMemUtils.putShort((result + chars.size)!!.pointed, 0)
+        return result
     }
+}
+
+val String.wcstr: CValues<UShortVar>
+    get() = WCString(this.toCharArray())
 
 /**
  * TODO: should the name of the function reflect the encoding?
  *
  * @return the [kotlin.String] decoded from given zero-terminated UTF-8-encoded C string.
  */
+// TODO: optimize
 fun CPointer<ByteVar>.toKString(): String {
     val nativeBytes = this
 
@@ -412,6 +429,9 @@ class MemScope : ArenaBase() {
 
     val memScope: MemScope
         get() = this
+
+    val <T: CVariable> CValues<T>.ptr: CPointer<T>
+        get() = this@ptr.getPointer(this@MemScope)
 }
 
 // TODO: consider renaming `memScoped` because it now supports `defer`.

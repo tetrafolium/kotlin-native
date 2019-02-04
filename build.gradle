@@ -17,6 +17,22 @@ import groovy.io.FileType
 import org.jetbrains.kotlin.konan.target.*
 import org.jetbrains.kotlin.konan.properties.*
 import org.jetbrains.kotlin.konan.util.*
+import org.jetbrains.kotlin.CopySamples
+
+buildscript {
+    apply from: "gradle/kotlinGradlePlugin.gradle"
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-native-shared:$konanVersion"
+    }
+}
+import org.jetbrains.kotlin.konan.*
+
+// Allows generating wrappers for the root build and all the samples during execution of the default 'wrapper' task.
+// Run './gradlew wrapper --gradle-version <version>' to update all the wrappers.
+apply plugin: org.jetbrains.kotlin.GradleWrappers
+
+wrappers.projects = ['samples', 'samples/calculator', 'samples/androidNativeActivity', 'samples/curl']
+wrapper.distributionType = Wrapper.DistributionType.ALL
 
 defaultTasks 'clean', 'dist'
 
@@ -27,10 +43,21 @@ ext {
     dependenciesDir = DependencyProcessor.defaultDependenciesRoot
     platformManager = new PlatformManager(DistributionKt.buildDistribution(projectDir.absolutePath))
 
-    kotlinCompilerModule="org.jetbrains.kotlin:kotlin-compiler:${kotlinCompilerVersion}"
-    kotlinStdLibModule="org.jetbrains.kotlin:kotlin-stdlib:${kotlinStdLibVersion}"
-    kotlinReflectModule="org.jetbrains.kotlin:kotlin-reflect:${kotlinReflectVersion}"
-    kotlinScriptRuntimeModule="org.jetbrains.kotlin:kotlin-script-runtime:${kotlinScriptRuntimeVersion}"
+    kotlinCommonStdlibModule="org.jetbrains.kotlin:kotlin-stdlib-common:${kotlinVersion}:sources"
+    kotlinCompilerModule="org.jetbrains.kotlin:kotlin-compiler:${kotlinVersion}"
+    kotlinStdLibModule="org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+    kotlinTestCommonModule="org.jetbrains.kotlin:kotlin-test-common:${kotlinVersion}:sources"
+    kotlinTestAnnotationsCommonModule="org.jetbrains.kotlin:kotlin-test-annotations-common:${kotlinVersion}:sources"
+    kotlinReflectModule="org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
+    kotlinScriptRuntimeModule="org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}"
+
+    konanVersionFull = KonanVersion.Companion.CURRENT
+
+    if (konanVersionFull.meta == MetaVersion.RELEASE) {
+        gradlePluginVersion = kotlinVersion
+    } else {
+        gradlePluginVersion = "$kotlinVersion-native-${KonanVersion.Companion.CURRENT.toString()}"
+    }
 }
 
 allprojects {
@@ -39,7 +66,9 @@ allprojects {
     }
 
     repositories {
-        mavenCentral()
+        maven {
+            url 'https://cache-redirector.jetbrains.com/maven-central'
+        }
         maven {
             url kotlinCompilerRepo
         }
@@ -146,18 +175,25 @@ task gradlePluginJar {
     dependsOn gradle.includedBuild('kotlin-native-gradle-plugin').task(':shadowJar')
 }
 
-task gradlePluginCheck() {
+task gradlePluginCheck {
     dependsOn gradle.includedBuild('kotlin-native-gradle-plugin').task(':check')
 }
 
 task gradlePluginUpload {
     dependsOn gradle.includedBuild('kotlin-native-gradle-plugin').task(':bintrayUpload')
+    // Publish releases to the plugin-portal too.
+    if (konanVersionFull.meta == MetaVersion.RELEASE) {
+        dependsOn gradle.includedBuild('kotlin-native-gradle-plugin').task(':publishPlugins')
+    }
 }
 
 task dist_compiler(dependsOn: "distCompiler")
 task dist_runtime(dependsOn: "distRuntime")
 task cross_dist(dependsOn: "crossDist")
 task list_dist(dependsOn: "listDist")
+task build {
+    dependsOn ':dist', ':distPlatformLibs'
+}
 
 task distCompiler(type: Copy) {
     dependsOn ':backend.native:jar'
@@ -223,6 +259,14 @@ task distCompiler(type: Copy) {
         into('konan/lib')
     }
 
+    from(file("${gradle.includedBuild('konan.metadata').projectDir}/build/libs")) {
+        into('konan/lib')
+    }
+
+    from(file("${gradle.includedBuild('konan.serializer').projectDir}/build/libs")) {
+        into('konan/lib')
+    }
+
     from(file('cmd')) {
         fileMode(0755)
         into('bin')
@@ -242,6 +286,7 @@ task listDist(type: Exec) {
 task distRuntime(type: Copy) {
     dependsOn "${hostName}CrossDistRuntime"
     dependsOn('commonDistRuntime')
+    dependsOn(':backend.native:teamcityPublishStdLibSources')
 }
 
 def stdlib = 'klib/common/stdlib'
@@ -332,7 +377,7 @@ task bundle(type: (isWindows()) ? Zip : Tar) {
     dependsOn('crossDistPlatformLibs')
     dependsOn('crossDist')
     def simpleOsName = HostManager.simpleOsName()
-    baseName = "kotlin-native-$simpleOsName-${project.konanVersion}"
+    baseName = "kotlin-native-$simpleOsName-$konanVersionFull"
     from("$project.rootDir/dist") {
         include '**'
         exclude 'dependencies'
@@ -347,46 +392,84 @@ task bundle(type: (isWindows()) ? Zip : Tar) {
         into baseName
     }
     from(project.rootDir) {
-        include 'INTEROP.md'
         include 'RELEASE_NOTES.md'
-        include 'GRADLE_PLUGIN.md'
-        include 'PLATFORM_LIBS.md'
-        include 'samples/**'
-        exclude 'samples/gradle.properties'
-        exclude 'samples/settings.gradle'
-        exclude 'samples/androidNativeActivity/settings.gradle'
-        exclude 'samples/androidNativeActivity/gradle.properties'
-        exclude '**/build'
-        exclude '**/.gradle'
-        exclude 'samples/**/*.kt.bc-build'
         into baseName
     }
 
-    from(project.file("samples")) {
-        include 'settings.gradle'
-        include 'androidNativeActivity/settings.gradle'
-        into "$baseName/samples"
-        filter { it.startsWith("includeBuild") ? null : it }
-    }
-
-    from(project.file("samples")) {
-        include 'gradle.properties'
-        include 'androidNativeActivity/gradle.properties'
-        into "$baseName/samples"
-        filter { it.startsWith("konan.home=") ? "konan.home=../.." : it }
-    }
-
     destinationDir = file('.')
-    if (!isWindows()) {
+
+    if (isWindows()) {
+        zip64 true
+    } else {
         extension = 'tar.gz'
         compression = Compression.GZIP
     }
 }
 
+task 'tc-dist'(type: (isWindows()) ? Zip : Tar) {
+    dependsOn('distPlatformLibs')
+    dependsOn('dist')
+    def simpleOsName = HostManager.simpleOsName()
+    baseName = "kotlin-native-dist-$simpleOsName-$konanVersionFull"
+    from("$project.rootDir/dist") {
+        include '**'
+        exclude 'dependencies'
+        into baseName
+    }
+
+    destinationDir = file('.')
+
+    if (isWindows()) {
+        zip64 true
+    } else {
+        extension = 'tar.gz'
+        compression = Compression.GZIP
+    }
+}
+
+task samples {
+    dependsOn 'samplesZip', 'samplesTar'
+}
+
+task samplesZip(type: Zip)
+task samplesTar(type: Tar) {
+    extension = 'tar.gz'
+    compression = Compression.GZIP
+}
+
+configure([samplesZip, samplesTar]) {
+    baseName "kotlin-native-samples-$konanVersionFull"
+    destinationDir = projectDir
+    into(baseName)
+
+    from(file('samples')) {
+        // Process properties files separately.
+        exclude '**/gradle.properties'
+    }
+
+    from(file('samples')) {
+        include '**/gradle.properties'
+        filter {
+            it.startsWith('org.jetbrains.kotlin.native.home=') || it.startsWith('# Use custom Kotlin/Native home:') ? null : it
+        }
+    }
+
+    // Exclude build artifacts.
+    exclude '**/build'
+    exclude '**/.gradle'
+    exclude '**/.idea'
+    exclude '**/*.kt.bc-build/'
+}
+
+task copy_samples(dependsOn: 'copySamples')
+task copySamples(type: CopySamples) {
+    destinationDir file('build/samples-under-test')
+}
+
 task uploadBundle {
     dependsOn ':bundle'
     doLast {
-        def kind = konanVersion.contains("dev") ? "dev" : "releases"
+        def kind = (konanVersionFull.meta == MetaVersion.DEV) ? "dev" : "releases"
         def ftpSettings = [
                 server: project.findProperty("cdnUrl") ?: System.getenv("CDN_URL"),
                 userid: project.findProperty("cdnUser") ?: System.getenv("CDN_USER"),
@@ -405,20 +488,25 @@ task uploadBundle {
     }
 }
 
-task performance {
+// TODO return when problems with HostManagers will be solved
+/*task performance {
     dependsOn 'dist'
     dependsOn ':performance:bench'
+}*/
+
+task teamcityKonanVersion {
+    doLast {
+        println("##teamcity[setParameter name='kotlin.native.version.base' value='$konanVersion']")
+        println("##teamcity[setParameter name='kotlin.native.version.full' value='$konanVersionFull']")
+        println("##teamcity[setParameter name='kotlin.native.version.meta' value='${konanVersionFull.meta.toString().toLowerCase()}']")
+        println("##teamcity[buildNumber '${konanVersionFull.toString(true, true)}']")
+    }
 }
 
 task clean {
+    dependsOn subprojects.collect { it.tasks.matching { it.name == "clean" } }
     doLast {
         delete distDir
         delete bundle.outputs.files
     }
-}
-
-// Don't run with other tasks (e.g. ./gradlew cleanAll bundle)
-task cleanAll {
-    dependsOn gradle.includedBuilds.collect { it.task(":clean") }
-    dependsOn project.getTasksByName("clean", true)
 }

@@ -32,6 +32,10 @@ class DefFile(val file:File?, val config:DefFileConfig, val manifestAddendProper
             properties.getSpaceSeparated("headers")
         }
 
+        val modules by lazy {
+            properties.getSpaceSeparated("modules")
+        }
+
         val language by lazy {
             properties.getProperty("language")
         }
@@ -64,6 +68,10 @@ class DefFile(val file:File?, val config:DefFileConfig, val manifestAddendProper
             properties.getSpaceSeparated("excludedFunctions")
         }
 
+        val excludedMacros by lazy {
+            properties.getSpaceSeparated("excludedMacros")
+        }
+
         val staticLibraries by lazy {
             properties.getSpaceSeparated("staticLibraries")
         }
@@ -94,6 +102,14 @@ class DefFile(val file:File?, val config:DefFileConfig, val manifestAddendProper
 
         val depends by lazy {
             properties.getSpaceSeparated("depends")
+        }
+
+        val exportForwardDeclarations by lazy {
+            properties.getSpaceSeparated("exportForwardDeclarations")
+        }
+
+        val disableDesignatedInitializerChecks by lazy {
+            properties.getProperty("disableDesignatedInitializerChecks")?.toBoolean() ?: false
         }
     }
 }
@@ -135,23 +151,6 @@ private fun parseDefFile(file: File?, substitutions: Map<String, String>): Tripl
      substitute(properties, substitutions)
 
      return Triple(properties, manifestAddendProperties, headerLines)
-}
-
-// Performs substitution similar to:
-//  foo = ${foo} ${foo.${arch}} ${foo.${os}}
-fun substitute(properties: Properties, substitutions: Map<String, String>) {
-    for (key in properties.stringPropertyNames()) {
-        for (substitution in substitutions.values) {
-            val suffix = ".$substitution"
-            if (key.endsWith(suffix)) {
-                val baseKey = key.removeSuffix(suffix)
-                val oldValue = properties.getProperty(baseKey, "")
-                val appendedValue = properties.getProperty(key, "")
-                val newValue = if (oldValue != "") "$oldValue $appendedValue" else appendedValue
-                properties.setProperty(baseKey, newValue)
-            }
-        }
-    }
 }
 
 private fun Properties.duplicate() = Properties().apply { putAll(this@duplicate) }

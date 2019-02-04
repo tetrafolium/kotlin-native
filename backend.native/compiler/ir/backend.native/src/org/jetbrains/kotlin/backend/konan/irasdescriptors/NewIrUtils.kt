@@ -1,50 +1,32 @@
 /*
- * Copyright 2010-2018 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package org.jetbrains.kotlin.backend.konan.irasdescriptors
 
 import org.jetbrains.kotlin.backend.common.atMostOne
-import org.jetbrains.kotlin.backend.konan.descriptors.backingField
+import org.jetbrains.kotlin.backend.konan.descriptors.getArgumentValueOrNull
+import org.jetbrains.kotlin.backend.konan.descriptors.konanBackingField
 import org.jetbrains.kotlin.backend.konan.descriptors.isInterface
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrFieldImpl
-import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
-import org.jetbrains.kotlin.ir.expressions.getTypeArgumentOrDefault
-import org.jetbrains.kotlin.ir.util.SymbolTable
-import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
-import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
-import org.jetbrains.kotlin.ir.visitors.acceptVoid
+import org.jetbrains.kotlin.ir.expressions.*
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.types.*
+import org.jetbrains.kotlin.ir.util.explicitParameters
+import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.ir.util.isFunction
+import org.jetbrains.kotlin.ir.util.isSuspendFunction
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedPropertyDescriptor
-import org.jetbrains.kotlin.types.ErrorUtils
-import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.TypeUtils
 
 val IrConstructor.constructedClass get() = this.parent as IrClass
-
-val <T : IrDeclaration> T.original get() = this
-val IrDeclaration.containingDeclaration get() = this.parent
 
 val IrDeclarationParent.fqNameSafe: FqName get() = when (this) {
     is IrPackageFragment -> this.fqName
@@ -52,6 +34,16 @@ val IrDeclarationParent.fqNameSafe: FqName get() = when (this) {
 
     else -> error(this)
 }
+
+val IrClass.classId: ClassId?
+    get() {
+        val parent = this.parent
+        return when (parent) {
+            is IrClass -> parent.classId?.createNestedClassId(this.name)
+            is IrPackageFragment -> ClassId.topLevel(parent.fqName.child(this.name))
+            else -> null
+        }
+    }
 
 val IrDeclaration.name: Name
     get() = when (this) {
@@ -83,32 +75,15 @@ val IrFunction.allParameters: List<IrValueParameter>
         explicitParameters
     }
 
-/**
- * @return naturally-ordered list of the parameters that can have values specified at call site.
- */
-val IrFunction.explicitParameters: List<IrValueParameter>
-    get() {
-        val result = ArrayList<IrValueParameter>(valueParameters.size + 2)
-
-        this.dispatchReceiverParameter?.let {
-            result.add(it)
-        }
-
-        this.extensionReceiverParameter?.let {
-            result.add(it)
-        }
-
-        result.addAll(valueParameters)
-
-        return result
-    }
-
 val IrValueParameter.isVararg get() = this.varargElementType != null
 
 val IrFunction.isSuspend get() = this is IrSimpleFunction && this.isSuspend
 
 fun IrClass.isUnit() = this.fqNameSafe == KotlinBuiltIns.FQ_NAMES.unit.toSafe()
 
+fun IrClass.isKotlinArray() = this.fqNameSafe == KotlinBuiltIns.FQ_NAMES.array.toSafe()
+
+val IrClass.superClasses get() = this.superTypes.map { it.classifierOrFail as IrClassSymbol }
 fun IrClass.getSuperClassNotAny() = this.superClasses.map { it.owner }.atMostOne { !it.isInterface && !it.isAny() }
 
 fun IrClass.isAny() = this.fqNameSafe == KotlinBuiltIns.FQ_NAMES.any.toSafe()
@@ -118,14 +93,16 @@ fun IrClass.getSuperInterfaces() = this.superClasses.map { it.owner }.filter { i
 
 val IrProperty.konanBackingField: IrField?
     get() {
+        assert(this.isReal)
         this.backingField?.let { return it }
 
-        (this.descriptor as? DeserializedPropertyDescriptor)?.backingField?.let { backingFieldDescriptor ->
+        (this.descriptor as? DeserializedPropertyDescriptor)?.konanBackingField?.let { backingFieldDescriptor ->
             val result = IrFieldImpl(
                     this.startOffset,
                     this.endOffset,
                     IrDeclarationOrigin.PROPERTY_BACKING_FIELD,
-                    backingFieldDescriptor
+                    backingFieldDescriptor,
+                    this.getter!!.returnType
             ).also {
                 it.parent = this.parent
             }
@@ -136,12 +113,11 @@ val IrProperty.konanBackingField: IrField?
         return null
     }
 
-val IrClass.defaultType: KotlinType
-    get() = this.thisReceiver!!.type
-
-val IrField.containingClass get() = this.parent as? IrClass
-
 val IrFunction.isReal get() = this.origin != IrDeclarationOrigin.FAKE_OVERRIDE
+
+// Note: psi2ir doesn't set `origin = FAKE_OVERRIDE` for fields and properties yet.
+val IrProperty.isReal: Boolean get() = this.descriptor.kind.isReal
+val IrField.isReal: Boolean get() = this.descriptor.kind.isReal
 
 val IrSimpleFunction.isOverridable: Boolean
     get() = visibility != Visibilities.PRIVATE
@@ -170,66 +146,48 @@ fun IrSimpleFunction.overrides(other: IrSimpleFunction): Boolean {
 
 fun IrClass.isSpecialClassWithNoSupertypes() = this.isAny() || this.isNothing()
 
-val IrClass.constructors get() = this.declarations.filterIsInstance<IrConstructor>()
+private val IrCall.annotationClass
+    get() = (this.symbol.owner as IrConstructor).constructedClass
 
-internal val IrValueParameter.isValueParameter get() = this.index >= 0
+fun List<IrCall>.hasAnnotation(fqName: FqName): Boolean =
+        this.any { it.annotationClass.fqNameSafe == fqName }
 
-fun IrModuleFragment.referenceAllTypeExternalClassifiers(symbolTable: SymbolTable) {
-    val moduleDescriptor = this.descriptor
+fun IrAnnotationContainer.hasAnnotation(fqName: FqName) =
+        this.annotations.hasAnnotation(fqName)
 
-    fun KotlinType.referenceAllClassifiers() {
-        TypeUtils.getClassDescriptor(this)?.let {
-            if (!ErrorUtils.isError(it) && it.module != moduleDescriptor) {
-                if (it.kind == ClassKind.ENUM_ENTRY) {
-                    symbolTable.referenceEnumEntry(it)
-                } else {
-                    symbolTable.referenceClass(it)
-                }
-            }
-        }
-
-        this.constructor.supertypes.forEach {
-            it.referenceAllClassifiers()
-        }
-    }
-
-    val visitor = object : IrElementVisitorVoid {
-        override fun visitElement(element: IrElement) {
-            element.acceptChildrenVoid(this)
-        }
-
-        override fun visitValueParameter(declaration: IrValueParameter) {
-            super.visitValueParameter(declaration)
-            declaration.type.referenceAllClassifiers()
-        }
-
-        override fun visitVariable(declaration: IrVariable) {
-            super.visitVariable(declaration)
-            declaration.type.referenceAllClassifiers()
-        }
-
-        override fun visitExpression(expression: IrExpression) {
-            super.visitExpression(expression)
-            expression.type.referenceAllClassifiers()
-        }
-
-        override fun visitFunction(declaration: IrFunction) {
-            super.visitFunction(declaration)
-            declaration.returnType.referenceAllClassifiers()
-        }
-
-        override fun visitFunctionAccess(expression: IrFunctionAccessExpression) {
-            super.visitFunctionAccess(expression)
-            expression.descriptor.original.typeParameters.forEach {
-                expression.getTypeArgumentOrDefault(it).referenceAllClassifiers()
-            }
-        }
-    }
-
-    this.acceptVoid(visitor)
-    this.dependencyModules.forEach { module ->
-        module.externalPackageFragments.forEach {
-            it.acceptVoid(visitor)
-        }
-    }
+fun List<IrCall>.findAnnotation(fqName: FqName): IrCall? = this.firstOrNull {
+    it.annotationClass.fqNameSafe == fqName
 }
+
+fun <T> IrDeclaration.getAnnotationArgumentValue(fqName: FqName, argumentName: String): T? {
+    val annotation = this.annotations.findAnnotation(fqName)
+    if (annotation == null) {
+        // As a last resort try searching the descriptor.
+        // This is needed for a period while we don't have IR for platform libraries.
+        return this.descriptor.annotations
+            .findAnnotation(fqName)
+            ?.getArgumentValueOrNull<T>(argumentName)
+    }
+    for (index in 0 until annotation.valueArgumentsCount) {
+        val parameter = annotation.symbol.owner.valueParameters[index]
+        if (parameter.name == Name.identifier(argumentName)) {
+            val actual = annotation.getValueArgument(index) as? IrConst<T>
+            return actual?.value
+        }
+    }
+    return null
+}
+
+fun IrValueParameter.isInlineParameter(): Boolean =
+    !this.isNoinline && (this.type.isFunction() || this.type.isSuspendFunction()) && !this.type.isMarkedNullable()
+
+val IrDeclaration.parentDeclarationsWithSelf: Sequence<IrDeclaration>
+    get() = generateSequence(this, { it.parent as? IrDeclaration })
+
+fun IrClass.companionObject() = this.declarations.singleOrNull {it is IrClass && it.isCompanion }
+
+val IrDeclaration.isGetter get() = this is IrSimpleFunction && this == this.correspondingProperty?.getter
+
+val IrDeclaration.isSetter get() = this is IrSimpleFunction && this == this.correspondingProperty?.setter
+
+val IrDeclaration.isAccessor get() = this.isGetter || this.isSetter

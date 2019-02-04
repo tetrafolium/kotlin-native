@@ -1,4 +1,11 @@
+/*
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
+ */
+
 import kotlinx.cinterop.*
+
+import kotlin.native.CName
 
 // Top level functions.
 fun hello() {
@@ -13,15 +20,15 @@ open class Base {
 
     open fun fooParam(arg0: String, arg1: Int) = println("Base.fooParam: $arg0 $arg1")
 
-    @konan.internal.CName(fullName = "", shortName = "strangeName") fun странноеИмя() = 111
+    @CName(externName = "", shortName = "strangeName") fun странноеИмя() = 111
 
 }
 
 // Top level functions.
-@konan.internal.CName(fullName = "topLevelFunctionFromC", shortName = "topLevelFunctionFromCShort")
+@CName(externName = "topLevelFunctionFromC", shortName = "topLevelFunctionFromCShort")
 fun topLevelFunction(x1: Int, x2: Int) = x1 - x2
 
-@konan.internal.CName("topLevelFunctionVoidFromC")
+@CName("topLevelFunctionVoidFromC")
 fun topLevelFunctionVoid(x1: Int, pointer: COpaquePointer?) {
     assert(x1 == 42)
     assert(pointer == null)
@@ -41,6 +48,10 @@ interface Codeable {
 
 val an_object = object : Codeable {
     override fun asCode() = 42
+}
+
+object Singleton {
+    override fun toString() = "I am single"
 }
 
 class Child : Base() {
@@ -70,4 +81,14 @@ class Impl2 : Impl1() {
     override fun foo(arg0: String, arg1: Int, arg2: I) {
         println("Impl2.I: $arg0 $arg1 ${arg2::class.qualifiedName}")
     }
+}
+
+inline class IC1(val value: Int)
+inline class IC2(val value: String)
+inline class IC3(val value: Base?)
+
+fun useInlineClasses(ic1: IC1, ic2: IC2, ic3: IC3) {
+    assert(ic1.value == 42)
+    assert(ic2.value == "bar")
+    assert(ic3.value is Base)
 }

@@ -19,9 +19,7 @@ package org.jetbrains.kotlin.native.interop.gen.jvm
 import org.jetbrains.kotlin.konan.TempFiles
 import org.jetbrains.kotlin.konan.exec.Command
 import org.jetbrains.kotlin.konan.util.DefFile
-import org.jetbrains.kotlin.native.interop.gen.HeadersInclusionPolicyImpl
-import org.jetbrains.kotlin.native.interop.gen.ImportsImpl
-import org.jetbrains.kotlin.native.interop.gen.argsToCompiler
+import org.jetbrains.kotlin.native.interop.gen.*
 import org.jetbrains.kotlin.native.interop.gen.wasm.processIdlLib
 import org.jetbrains.kotlin.native.interop.indexer.*
 import org.jetbrains.kotlin.native.interop.tool.*
@@ -49,23 +47,6 @@ private fun String.asArgList(key: String) =
         else
             listOf(this)
 
-// Performs substitution similar to:
-//  foo = ${foo} ${foo.${arch}} ${foo.${os}}
-private fun substitute(properties: Properties, substitutions: Map<String, String>) {
-    for (key in properties.stringPropertyNames()) {
-        for (substitution in substitutions.values) {
-            val suffix = ".$substitution"
-            if (key.endsWith(suffix)) {
-                val baseKey = key.removeSuffix(suffix)
-                val oldValue = properties.getProperty(baseKey, "")
-                val appendedValue = properties.getProperty(key, "")
-                val newValue = if (oldValue != "") "$oldValue $appendedValue" else appendedValue
-                properties.setProperty(baseKey, newValue)
-            }
-        }
-    }
-}
-
 private fun <T> Collection<T>.atMostOne(): T? {
     return when (this.size) {
         0 -> null
@@ -83,15 +64,6 @@ private fun runCmd(command: Array<String>, verbose: Boolean = false) {
     Command(*command).getOutputLines(true).let { lines ->
         if (verbose) lines.forEach(::println)
     }
-}
-
-private fun loadProperties(file: File?, substitutions: Map<String, String>): Properties {
-    val result = Properties()
-    file?.bufferedReader()?.use { reader ->
-        result.load(reader)
-    }
-    substitute(result, substitutions)
-    return result
 }
 
 private fun Properties.storeProperties(file: File) {
@@ -121,6 +93,7 @@ Following flags are supported:
   -shims <boolean> adds generation of shims tracing native library calls
   -pkg <fully qualified package name> place the resulting definitions into the package
   -h <file>.h header files to parse
+  -o <file>.klib specifies the resulting library file
 """)
 }
 
@@ -216,44 +189,15 @@ private fun processCLib(args: Array<String>): Array<String>? {
         return null
     }
 
-    val tool = ToolConfig(
-        arguments.target,
-        flavor
-    )
-    tool.downloadDependencies()
+    val tool = prepareTool(arguments.target, flavor)
 
     val def = DefFile(defFile, tool.substitutions)
 
-    val additionalHeaders = arguments.header
-    val additionalCompilerOpts = arguments.compilerOpts
     val additionalLinkerOpts = arguments.linkerOpts
     val generateShims = arguments.shims
     val verbose = arguments.verbose
 
-    System.load(tool.libclang)
-
-    val headerFiles = def.config.headers + additionalHeaders
     val language = selectNativeLanguage(def.config)
-    val compilerOpts: List<String> = mutableListOf<String>().apply {
-        addAll(def.config.compilerOpts)
-        addAll(tool.defaultCompilerOpts)
-        addAll(additionalCompilerOpts)
-        addAll(getCompilerFlagsForVfsOverlay(arguments.headerFilterPrefix, def))
-        addAll(when (language) {
-            Language.C -> emptyList()
-            Language.OBJECTIVE_C -> {
-                // "Objective-C" within interop means "Objective-C with ARC":
-                listOf("-fobjc-arc")
-                // Using this flag here has two effects:
-                // 1. The headers are parsed with ARC enabled, thus the API is visible correctly.
-                // 2. The generated Objective-C stubs are compiled with ARC enabled, so reference counting
-                // calls are inserted automatically.
-            }
-        })
-    }
-
-    val excludeSystemLibs = def.config.excludeSystemLibs
-    val excludeDependentModules = def.config.excludeDependentModules
 
     val entryPoint = def.config.entryPoints.atMostOne()
     val linkerOpts =
@@ -264,6 +208,7 @@ private fun processCLib(args: Array<String>): Array<String>? {
     val linker = "${tool.llvmHome}/bin/$linkerName"
     val compiler = "${tool.llvmHome}/bin/clang"
     val excludedFunctions = def.config.excludedFunctions.toSet()
+    val excludedMacros = def.config.excludedMacros.toSet()
     val staticLibraries = def.config.staticLibraries + arguments.staticLibrary
     val libraryPaths = def.config.libraryPaths + arguments.libraryPath
     val fqParts = (arguments.pkg ?: def.config.packageName)?.let {
@@ -280,31 +225,24 @@ private fun processCLib(args: Array<String>): Array<String>? {
 
     val tempFiles = TempFiles(libName, arguments.temporaryFilesDir)
 
-    val headerFilterGlobs = def.config.headerFilter
     val imports = parseImports(arguments.import)
-    val headerInclusionPolicy = HeadersInclusionPolicyImpl(headerFilterGlobs, imports)
 
-    val library = NativeLibrary(
-            includes = headerFiles,
-            additionalPreambleLines = def.defHeaderLines,
-            compilerArgs = compilerOpts + tool.platformCompilerOpts,
-            headerToIdMapper = HeaderToIdMapper(sysRoot = tool.sysRoot),
-            language = language,
-            excludeSystemLibs = excludeSystemLibs,
-            excludeDepdendentModules = excludeDependentModules,
-            headerInclusionPolicy = headerInclusionPolicy
-    )
+    val library = buildNativeLibrary(tool, def, arguments, imports)
 
     val configuration = InteropConfiguration(
             library = library,
             pkgName = outKtPkg,
             excludedFunctions = excludedFunctions,
+            excludedMacros = excludedMacros,
             strictEnums = def.config.strictEnums.toSet(),
             nonStrictEnums = def.config.nonStrictEnums.toSet(),
-            noStringConversion = def.config.noStringConversion.toSet()
+            noStringConversion = def.config.noStringConversion.toSet(),
+            exportForwardDeclarations = def.config.exportForwardDeclarations,
+            disableDesignatedInitializerChecks = def.config.disableDesignatedInitializerChecks,
+            target = tool.target
     )
 
-    val nativeIndex = buildNativeIndex(library)
+    val nativeIndex = buildNativeIndex(library, verbose)
 
     val gen = StubGenerator(nativeIndex, configuration, libName, generateShims, verbose, flavor, imports)
 
@@ -359,4 +297,89 @@ private fun processCLib(args: Array<String>): Array<String>? {
         runCmd(compilerCmd, verbose)
     }
     return argsToCompiler(staticLibraries, libraryPaths)
+}
+
+internal fun prepareTool(target: String?, flavor: KotlinPlatform): ToolConfig {
+    val tool = ToolConfig(target, flavor)
+    tool.downloadDependencies()
+
+    System.load(tool.libclang)
+
+    return tool
+}
+
+internal fun buildNativeLibrary(
+        tool: ToolConfig,
+        def: DefFile,
+        arguments: CInteropArguments,
+        imports: ImportsImpl
+): NativeLibrary {
+    val additionalHeaders = arguments.header
+    val additionalCompilerOpts = arguments.compilerOpts
+
+    val headerFiles = def.config.headers + additionalHeaders
+    val language = selectNativeLanguage(def.config)
+    val compilerOpts: List<String> = mutableListOf<String>().apply {
+        addAll(def.config.compilerOpts)
+        addAll(tool.defaultCompilerOpts)
+        addAll(additionalCompilerOpts)
+        addAll(getCompilerFlagsForVfsOverlay(arguments.headerFilterPrefix, def))
+        addAll(when (language) {
+            Language.C -> emptyList()
+            Language.OBJECTIVE_C -> {
+                // "Objective-C" within interop means "Objective-C with ARC":
+                listOf("-fobjc-arc")
+                // Using this flag here has two effects:
+                // 1. The headers are parsed with ARC enabled, thus the API is visible correctly.
+                // 2. The generated Objective-C stubs are compiled with ARC enabled, so reference counting
+                // calls are inserted automatically.
+            }
+        })
+    }
+
+    val compilation = object : Compilation {
+        override val includes = headerFiles
+        override val additionalPreambleLines = def.defHeaderLines
+        override val compilerArgs = compilerOpts + tool.platformCompilerOpts
+        override val language = language
+    }
+
+    val headerFilter: NativeLibraryHeaderFilter
+    val includes: List<String>
+
+    val modules = def.config.modules
+
+    if (modules.isEmpty()) {
+        val excludeDependentModules = def.config.excludeDependentModules
+
+        val headerFilterGlobs = def.config.headerFilter
+        val headerInclusionPolicy = HeaderInclusionPolicyImpl(headerFilterGlobs)
+
+        headerFilter = NativeLibraryHeaderFilter.NameBased(headerInclusionPolicy, excludeDependentModules)
+        includes = headerFiles
+    } else {
+        require(language == Language.OBJECTIVE_C) { "cinterop supports 'modules' only when 'language = Objective-C'" }
+        require(headerFiles.isEmpty()) { "cinterop doesn't support having headers and modules specified at the same time" }
+        require(def.config.headerFilter.isEmpty()) { "cinterop doesn't support 'headerFilter' with 'modules'" }
+
+        val modulesInfo = getModulesInfo(compilation, modules)
+
+        headerFilter = NativeLibraryHeaderFilter.Predefined(modulesInfo.ownHeaders)
+        includes = modulesInfo.topLevelHeaders
+    }
+
+    val excludeSystemLibs = def.config.excludeSystemLibs
+
+    val headerExclusionPolicy = HeaderExclusionPolicyImpl(imports)
+
+    return NativeLibrary(
+            includes = includes,
+            additionalPreambleLines = compilation.additionalPreambleLines,
+            compilerArgs = compilation.compilerArgs,
+            headerToIdMapper = HeaderToIdMapper(sysRoot = tool.sysRoot),
+            language = compilation.language,
+            excludeSystemLibs = excludeSystemLibs,
+            headerExclusionPolicy = headerExclusionPolicy,
+            headerFilter = headerFilter
+    )
 }

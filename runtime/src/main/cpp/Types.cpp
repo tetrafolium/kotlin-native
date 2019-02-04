@@ -24,7 +24,7 @@ KBoolean IsInstance(const ObjHeader* obj, const TypeInfo* type_info) {
   RuntimeAssert(obj != nullptr, "must not be null");
   const TypeInfo* obj_type_info = obj->type_info();
   // If it is an interface - check in list of implemented interfaces.
-  if (type_info->fieldsCount_ < 0) {
+  if ((type_info->flags_ & TF_INTERFACE) != 0) {
     for (int i = 0; i < obj_type_info->implementedInterfacesCount_; ++i) {
       if (obj_type_info->implementedInterfaces_[i] == type_info) {
         return 1;
@@ -47,7 +47,7 @@ void CheckInstance(const ObjHeader* obj, const TypeInfo* type_info) {
   if (IsInstance(obj, type_info)) {
     return;
   }
-  ThrowClassCastException();
+  ThrowClassCastException(obj, type_info);
 }
 
 KBoolean Kotlin_TypeInfo_isInstance(KConstRef obj, KNativePtr typeInfo) {

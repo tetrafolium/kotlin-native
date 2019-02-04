@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
+ * Copyright 2010-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,26 @@
 
 package org.jetbrains.ring
 
-import kotlin.system.measureNanoTime
+expect fun writeToFile(fileName: String, text: String)
 
-//-----------------------------------------------------------------------------//
-
-class Blackhole {
+expect class Blackhole {
     companion object {
-        var consumer = 0
-        fun consume(value: Any) {
-            consumer += value.hashCode()
-        }
+        var consumer: Int
+        fun consume(value: Any)
     }
 }
 
-//-----------------------------------------------------------------------------//
-
-class Random() {
+expect class Random() {
     companion object {
-        var seedInt = 0
-        fun nextInt(boundary: Int = 100): Int {
-            seedInt = (3 * seedInt + 11) % boundary
-            return seedInt
-        }
+        var seedInt: Int
+        fun nextInt(boundary: Int = 100): Int
 
-        var seedDouble: Double = 0.1
-        fun nextDouble(boundary: Double = 100.0): Double {
-            seedDouble = (7.0 * seedDouble + 7.0) % boundary
-            return seedDouble
-        }
+        var seedDouble: Double
+        fun nextDouble(boundary: Double = 100.0): Double
     }
 }
+
+expect fun assert(value: Boolean)
+
+expect inline fun measureNanoTime(block: () -> Unit): Long
+

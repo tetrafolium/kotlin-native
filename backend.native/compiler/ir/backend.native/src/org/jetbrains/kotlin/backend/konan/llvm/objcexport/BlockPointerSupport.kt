@@ -1,36 +1,27 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package org.jetbrains.kotlin.backend.konan.llvm.objcexport
 
-import llvm.*
-import org.jetbrains.kotlin.backend.konan.descriptors.CurrentKonanModule
+import llvm.LLVMLinkage
+import llvm.LLVMSetLinkage
+import llvm.LLVMStoreSizeOfType
+import llvm.LLVMValueRef
 import org.jetbrains.kotlin.backend.konan.llvm.*
-import org.jetbrains.kotlin.descriptors.FunctionDescriptor
+import org.jetbrains.kotlin.descriptors.konan.CurrentKonanModuleOrigin
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
-internal fun ObjCExportCodeGenerator.generateKotlinFunctionImpl(invokeMethod: FunctionDescriptor): ConstPointer {
+internal fun ObjCExportCodeGenerator.generateKotlinFunctionImpl(invokeMethod: IrSimpleFunction): ConstPointer {
     // TODO: consider also overriding methods of `Any`.
 
     val numberOfParameters = invokeMethod.valueParameters.size
 
     val function = generateFunction(
             codegen,
-            codegen.getLlvmFunctionType(context.ir.get(invokeMethod)),
+            codegen.getLlvmFunctionType(invokeMethod),
             "invokeFunction$numberOfParameters"
     ) {
         val args = (0 until numberOfParameters).map { index -> kotlinReferenceToObjC(param(index + 1)) }
@@ -100,6 +91,9 @@ internal class BlockAdapterToFunctionGenerator(val objCExportCodeGenerator: ObjC
         LLVMSetLinkage(it, LLVMLinkage.LLVMInternalLinkage)
     }
 
+    fun org.jetbrains.kotlin.backend.konan.Context.LongInt(value: Long) =
+            if (is64Bit()) Int64(value) else Int32(value.toInt())
+
     private fun generateDescriptorForBlockAdapterToFunction(numberOfParameters: Int): ConstValue {
         val signature = buildString {
             append('@')
@@ -116,17 +110,17 @@ internal class BlockAdapterToFunctionGenerator(val objCExportCodeGenerator: ObjC
             }
         }
 
-        assert(codegen.context.is64Bit())
-
         return Struct(blockDescriptorType,
-                Int64(0),
-                Int64(LLVMStoreSizeOfType(codegen.runtime.targetData, blockLiteralType)),
+                codegen.context.LongInt(0L),
+                codegen.context.LongInt(LLVMStoreSizeOfType(codegen.runtime.targetData, blockLiteralType)),
                 constPointer(copyHelper),
                 constPointer(disposeHelper),
                 codegen.staticData.cStringLiteral(signature),
                 NullPointer(int8Type)
         )
     }
+
+
 
     private fun FunctionGenerationContext.storeRefUnsafe(value: LLVMValueRef, slot: LLVMValueRef) {
         assert(value.type == kObjHeaderPtr)
@@ -182,7 +176,7 @@ internal class BlockAdapterToFunctionGenerator(val objCExportCodeGenerator: ObjC
             val isa = codegen.importGlobal(
                     "_NSConcreteStackBlock",
                     int8TypePtr,
-                    CurrentKonanModule
+                    CurrentKonanModuleOrigin
             )
 
             val flags = Int32((1 shl 25) or (1 shl 30) or (1 shl 31)).llvm
@@ -206,7 +200,7 @@ internal class BlockAdapterToFunctionGenerator(val objCExportCodeGenerator: ObjC
             val retainBlock = context.llvm.externalFunction(
                     "objc_retainBlock",
                     functionType(int8TypePtr, false, int8TypePtr),
-                    CurrentKonanModule
+                    CurrentKonanModuleOrigin
             )
 
             val copiedBlock = callFromBridge(retainBlock, listOf(bitcast(int8TypePtr, blockOnStack)))
@@ -214,7 +208,7 @@ internal class BlockAdapterToFunctionGenerator(val objCExportCodeGenerator: ObjC
             val autoreleaseReturnValue = context.llvm.externalFunction(
                     "objc_autoreleaseReturnValue",
                     functionType(int8TypePtr, false, int8TypePtr),
-                    CurrentKonanModule
+                    CurrentKonanModuleOrigin
             )
 
             ret(callFromBridge(autoreleaseReturnValue, listOf(copiedBlock)))

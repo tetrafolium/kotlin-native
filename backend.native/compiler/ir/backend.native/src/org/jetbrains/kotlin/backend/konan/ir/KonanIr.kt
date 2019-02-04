@@ -1,43 +1,31 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package org.jetbrains.kotlin.backend.konan.ir
 
+import org.jetbrains.kotlin.backend.konan.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.backend.konan.optimizations.DataFlowIR
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor
 import org.jetbrains.kotlin.ir.SourceManager
 import org.jetbrains.kotlin.ir.SourceRangeInfo
+import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
-import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrClassReference
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.impl.IrCallWithIndexedArgumentsBase
 import org.jetbrains.kotlin.ir.expressions.impl.IrExpressionBase
 import org.jetbrains.kotlin.ir.expressions.impl.IrTerminalDeclarationReferenceBase
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
-import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.types.KotlinType
 
 //-----------------------------------------------------------------------------//
 /**
@@ -58,12 +46,19 @@ class NaiveSourceBasedFileEntryImpl(override val name: String) : SourceManager.F
     init {
         val file = File(name)
         if (file.isFile) {
+            // TODO: could be incorrect, if file is not in system's line terminator format.
+            // Maybe use (0..document.lineCount - 1)
+            //                .map { document.getLineStartOffset(it) }
+            //                .toIntArray()
+            // as in PSI.
+            val separatorLength = System.lineSeparator().length
             val buffer = mutableListOf<Int>()
             var currentOffset = 0
             file.forEachLine { line ->
                 buffer.add(currentOffset)
-                currentOffset += line.length
+                currentOffset += line.length + separatorLength
             }
+            buffer.add(currentOffset)
             lineStartOffsets = buffer.toIntArray()
         } else {
             lineStartOffsets = IntArray(0)
@@ -73,29 +68,31 @@ class NaiveSourceBasedFileEntryImpl(override val name: String) : SourceManager.F
     //-------------------------------------------------------------------------//
 
     override fun getLineNumber(offset: Int): Int {
+        assert(offset != UNDEFINED_OFFSET)
+        if (offset == SYNTHETIC_OFFSET) return 0
         val index = lineStartOffsets.binarySearch(offset)
-        return if (index >= 0) index else -index - 1
+        return if (index >= 0) index else -index - 2
     }
 
     //-------------------------------------------------------------------------//
 
     override fun getColumnNumber(offset: Int): Int {
+        assert(offset != UNDEFINED_OFFSET)
+        if (offset == SYNTHETIC_OFFSET) return 0
         var lineNumber = getLineNumber(offset)
-        if (lineNumber >= lineStartOffsets.size) {
-            lineNumber = lineStartOffsets.size - 1
-        }
-        if (lineNumber < 0) lineNumber = 0
-        if (lineStartOffsets.size == 0) return offset
         return offset - lineStartOffsets[lineNumber]
     }
 
     //-------------------------------------------------------------------------//
 
     override val maxOffset: Int
-        get() = TODO("not implemented")
+        //get() = TODO("not implemented")
+        get() = UNDEFINED_OFFSET
 
     override fun getSourceRangeInfo(beginOffset: Int, endOffset: Int): SourceRangeInfo {
-        TODO("not implemented")
+        //TODO("not implemented")
+        return SourceRangeInfo(name, beginOffset, -1, -1, endOffset, -1, -1)
+
     }
 }
 
@@ -107,6 +104,8 @@ class IrFileImpl(entry: SourceManager.FileEntry) : IrFile {
 
     //-------------------------------------------------------------------------//
 
+    override val annotations: MutableList<IrCall>
+        get() = TODO("not implemented")
     override val fqName: FqName
         get() = TODO("not implemented")
     override val fileAnnotations: MutableList<AnnotationDescriptor>
@@ -134,58 +133,14 @@ class IrFileImpl(entry: SourceManager.FileEntry) : IrFile {
 
 //-----------------------------------------------------------------------------//
 
-interface IrSuspensionPoint : IrExpression {
-    var suspensionPointIdParameter: IrVariable
-    var result: IrExpression
-    var resumeResult: IrExpression
-}
+internal interface IrPrivateFunctionCall : IrExpression {
+    val valueArgumentsCount: Int
+    fun getValueArgument(index: Int): IrExpression?
+    fun putValueArgument(index: Int, valueArgument: IrExpression?)
+    fun removeValueArgument(index: Int)
 
-interface IrSuspendableExpression : IrExpression {
-    var suspensionPointId: IrExpression
-    var result: IrExpression
-}
-
-class IrSuspensionPointImpl(startOffset: Int, endOffset: Int, type: KotlinType,
-                            override var suspensionPointIdParameter: IrVariable,
-                            override var result: IrExpression,
-                            override var resumeResult: IrExpression)
-    : IrExpressionBase(startOffset, endOffset, type), IrSuspensionPoint {
-
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-            visitor.visitExpression(this, data)
-
-    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
-        suspensionPointIdParameter.accept(visitor, data)
-        result.accept(visitor, data)
-        resumeResult.accept(visitor, data)
-    }
-
-    override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
-        suspensionPointIdParameter = suspensionPointIdParameter.transform(transformer, data) as IrVariable
-        result = result.transform(transformer, data)
-        resumeResult = resumeResult.transform(transformer, data)
-    }
-}
-
-class IrSuspendableExpressionImpl(startOffset: Int, endOffset: Int, type: KotlinType,
-                                  override var suspensionPointId: IrExpression, override var result: IrExpression)
-    : IrExpressionBase(startOffset, endOffset, type), IrSuspendableExpression {
-
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-            visitor.visitExpression(this, data)
-
-    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
-        suspensionPointId.accept(visitor, data)
-        result.accept(visitor, data)
-    }
-
-    override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
-        suspensionPointId = suspensionPointId.transform(transformer, data)
-        result = result.transform(transformer, data)
-    }
-}
-
-internal interface IrPrivateFunctionCall : IrCall {
+    val virtualCallee: IrCall?
+    val dfgSymbol: DataFlowIR.FunctionSymbol.Declared
     val moduleDescriptor: ModuleDescriptor
     val totalFunctions: Int
     val functionIndex: Int
@@ -193,41 +148,66 @@ internal interface IrPrivateFunctionCall : IrCall {
 
 internal class IrPrivateFunctionCallImpl(startOffset: Int,
                                          endOffset: Int,
-                                         type: KotlinType,
-                                         override val symbol: IrFunctionSymbol,
-                                         override val descriptor: FunctionDescriptor,
-                                         typeArguments: Map<TypeParameterDescriptor, KotlinType>?,
+                                         type: IrType,
+                                         override val valueArgumentsCount: Int,
+                                         override val virtualCallee: IrCall?,
+                                         override val dfgSymbol: DataFlowIR.FunctionSymbol.Declared,
                                          override val moduleDescriptor: ModuleDescriptor,
                                          override val totalFunctions: Int,
                                          override val functionIndex: Int
-) : IrPrivateFunctionCall,
-        IrCallWithIndexedArgumentsBase(startOffset, endOffset, type, symbol.descriptor.valueParameters.size, typeArguments) {
+) : IrPrivateFunctionCall, IrExpressionBase(startOffset, endOffset, type) {
 
-    override val superQualifierSymbol: IrClassSymbol?
-        get() = null
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R {
+        return visitor.visitExpression(this, data)
+    }
 
-    override val superQualifier: ClassDescriptor?
-        get() = null
+    private val argumentsByParameterIndex: Array<IrExpression?> = arrayOfNulls(valueArgumentsCount)
 
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-            visitor.visitCall(this, data)
+    override fun getValueArgument(index: Int): IrExpression? {
+        if (index >= valueArgumentsCount) {
+            throw AssertionError("$this: No such value argument slot: $index")
+        }
+        return argumentsByParameterIndex[index]
+    }
 
+    override fun putValueArgument(index: Int, valueArgument: IrExpression?) {
+        if (index >= valueArgumentsCount) {
+            throw AssertionError("$this: No such value argument slot: $index")
+        }
+        argumentsByParameterIndex[index] = valueArgument
+    }
+
+    override fun removeValueArgument(index: Int) {
+        argumentsByParameterIndex[index] = null
+    }
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        argumentsByParameterIndex.forEach { it?.accept(visitor, data) }
+    }
+
+    override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
+        argumentsByParameterIndex.forEachIndexed { i, irExpression ->
+            argumentsByParameterIndex[i] = irExpression?.transform(transformer, data)
+        }
+    }
 }
 
 internal interface IrPrivateClassReference : IrClassReference {
     val moduleDescriptor: ModuleDescriptor
     val totalClasses: Int
     val classIndex: Int
+    val dfgSymbol: DataFlowIR.Type.Declared
 }
 
 internal class IrPrivateClassReferenceImpl(startOffset: Int,
                                            endOffset: Int,
-                                           type: KotlinType,
+                                           type: IrType,
                                            symbol: IrClassifierSymbol,
-                                           override val classType: KotlinType,
+                                           override val classType: IrType,
                                            override val moduleDescriptor: ModuleDescriptor,
                                            override val totalClasses: Int,
-                                           override val classIndex: Int
+                                           override val classIndex: Int,
+                                           override val dfgSymbol: DataFlowIR.Type.Declared
 ) : IrPrivateClassReference,
         IrTerminalDeclarationReferenceBase<IrClassifierSymbol, ClassifierDescriptor>(
                 startOffset, endOffset, type,

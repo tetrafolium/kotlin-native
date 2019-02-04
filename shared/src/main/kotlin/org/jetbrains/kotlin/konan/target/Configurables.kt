@@ -24,6 +24,7 @@ interface Configurables : TargetableExternalStorage {
 
     val llvmHome get() = hostString("llvmHome")
     val llvmVersion get() = hostString("llvmVersion")
+    val libffiDir get() = hostString("libffiDir")
 
     // TODO: Delegate to a map?
     val llvmLtoNooptFlags get() = targetList("llvmLtoNooptFlags")
@@ -37,7 +38,6 @@ interface Configurables : TargetableExternalStorage {
     val linkerDynamicFlags get() = targetList("linkerDynamicFlags")
     val llvmDebugOptFlags get() = targetList("llvmDebugOptFlags")
     val targetSysRoot get() = targetString("targetSysRoot")
-    val libffiDir get() = targetString("libffiDir")
 
     // Notice: these ones are host-target.
     val targetToolchain get() = hostTargetString("targetToolchain")
@@ -45,7 +45,6 @@ interface Configurables : TargetableExternalStorage {
     val absoluteTargetSysRoot get() = absolute(targetSysRoot)
     val absoluteTargetToolchain get() = absolute(targetToolchain)
     val absoluteLlvmHome get() = absolute(llvmHome)
-    val absoluteLibffiDir get() = absolute(libffiDir)
 }
 
 interface NonAppleConfigurables : Configurables {
@@ -76,7 +75,6 @@ interface RaspberryPiConfigurables : LinuxBasedConfigurables
 interface AndroidConfigurables : NonAppleConfigurables
 
 interface WasmConfigurables : NonAppleConfigurables {
-    val s2wasmFlags get()   = targetList("s2wasmFlags")
 
     val llcFlags get()      = targetList("llcFlags")
     val llcNooptFlags get() = targetList("llcNooptFlags")
@@ -87,6 +85,8 @@ interface WasmConfigurables : NonAppleConfigurables {
     val optNooptFlags get() = targetList("optNooptFlags")
     val optOptFlags get()   = targetList("optOptFlags")
     val optDebugFlags get() = targetList("optDebugFlags")
+
+    val lldFlags get()      = targetList("lld")
 }
 
 interface ZephyrConfigurables : NonAppleConfigurables {

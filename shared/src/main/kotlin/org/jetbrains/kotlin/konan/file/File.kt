@@ -16,6 +16,9 @@
 
 package org.jetbrains.kotlin.konan.file
 
+// FIXME(ddol): KLIB-REFACTORING-CLEANUP: remove the whole file!
+
+import org.jetbrains.kotlin.konan.util.removeSuffixIfPresent
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -36,7 +39,9 @@ data class File constructor(internal val javaPath: Path) {
     val absoluteFile: File
         get() = File(absolutePath)
     val name: String
-        get() = javaPath.fileName.toString()
+        get() = javaPath.fileName.toString().removeSuffixIfPresent("/") // https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8153248
+    val extension: String
+        get() = name.substringAfterLast('.', "")
     val parent: String
         get() = javaPath.parent.toString()
     val parentFile: File
@@ -52,6 +57,8 @@ data class File constructor(internal val javaPath: Path) {
         get() = javaPath.isAbsolute()
     val listFiles: List<File>
         get() = Files.newDirectoryStream(javaPath).use { stream -> stream.map { File(it) } }
+    val listFilesOrEmpty: List<File>
+        get() = if (exists) listFiles else emptyList()
 
     fun child(name: String) = File(this, name)
 
@@ -150,10 +157,18 @@ data class File constructor(internal val javaPath: Path) {
 
         val javaHome
             get() = File(System.getProperty("java.home"))
-
+        val pathSeparator = java.io.File.pathSeparator
+        val separator = java.io.File.separator
     }
 
     fun readStrings() = mutableListOf<String>().also { list -> forEachLine{list.add(it)}}
+
+    override fun equals(other: Any?): Boolean {
+        val otherFile = other as? File ?: return false
+        return otherFile.javaPath.toAbsolutePath() == javaPath.toAbsolutePath()
+    }
+
+    override fun hashCode() = javaPath.toAbsolutePath().hashCode()
 }
 
 fun String.File(): File = File(this)
@@ -163,38 +178,6 @@ fun createTempFile(name: String, suffix: String? = null)
     = Files.createTempFile(name, suffix).File()
 fun createTempDir(name: String): File 
     = Files.createTempDirectory(name).File()
-
-private val File.zipUri: URI
-        get() = URI.create("jar:${this.toPath().toUri()}")
-
-fun File.zipFileSystem(mutable: Boolean = false): FileSystem {
-    val zipUri = this.zipUri
-    val attributes = hashMapOf("create" to mutable.toString())
-    return try {
-        FileSystems.newFileSystem(zipUri, attributes, null)
-    } catch (e: FileSystemAlreadyExistsException) {
-        FileSystems.getFileSystem(zipUri)
-    }
-}
-
-fun File.mutableZipFileSystem() = this.zipFileSystem(mutable = true)
-
-fun File.zipPath(path: String): Path
-    = this.zipFileSystem().getPath(path)
-
-val File.asZipRoot: File
-    get() = File(this.zipPath("/"))
-
-val File.asWritableZipRoot: File
-    get() = File(this.mutableZipFileSystem().getPath("/"))
-
-private fun File.toPath() = Paths.get(this.path)
-
-fun File.zipDirAs(unixFile: File) {
-    val zipRoot = unixFile.asWritableZipRoot
-    this.recursiveCopyTo(zipRoot)
-    zipRoot.javaPath.fileSystem.close()
-}
 
 fun Path.recursiveCopyTo(destPath: Path) {
     val sourcePath = this
@@ -234,13 +217,5 @@ inline fun <T : AutoCloseable?, R> T.use(block: (T) -> R): R {
         if (!closed) {
             this?.close()
         }
-    }
-}
-
-fun Path.unzipTo(directory: Path) {
-    val zipUri = URI.create("jar:" + this.toUri())
-    FileSystems.newFileSystem(zipUri, emptyMap<String, Any?>(), null).use { zipfs ->
-        val zipPath = zipfs.getPath("/")
-        zipPath.recursiveCopyTo(directory)
     }
 }

@@ -16,8 +16,11 @@
 
 package  org.jetbrains.kotlin.native.interop.tool
 
-import org.jetbrains.kotlin.konan.target.*
-import org.jetbrains.kotlin.konan.util.visibleName
+import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
+import org.jetbrains.kotlin.konan.target.PlatformManager
+import org.jetbrains.kotlin.konan.target.customerDistribution
+import org.jetbrains.kotlin.konan.util.defaultTargetSubstitutions
 import org.jetbrains.kotlin.native.interop.gen.jvm.KotlinPlatform
 
 class ToolConfig(userProvidedTargetName: String?, flavor: KotlinPlatform) {
@@ -27,13 +30,11 @@ class ToolConfig(userProvidedTargetName: String?, flavor: KotlinPlatform) {
     private val platformManager = PlatformManager(distribution)
     private val targetManager = platformManager.targetManager(userProvidedTargetName)
     private val host = HostManager.host
-    private val target = targetManager.target
+    val target = targetManager.target
 
     private val platform = platformManager.platform(target)
 
-    val substitutions = mapOf<String, String>(
-            "target" to target.detailedName,
-            "arch" to target.architecture.visibleName)
+    val substitutions = defaultTargetSubstitutions(target)
 
     fun downloadDependencies() = platform.downloadDependencies()
 

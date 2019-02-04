@@ -1,55 +1,43 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package org.jetbrains.kotlin.backend.konan
 
 import org.jetbrains.kotlin.backend.common.runOnFilePostfix
 import org.jetbrains.kotlin.backend.common.lower.*
-import org.jetbrains.kotlin.backend.common.validateIrModule
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.referenceAllTypeExternalClassifiers
 import org.jetbrains.kotlin.backend.konan.lower.*
-import org.jetbrains.kotlin.backend.konan.lower.DefaultArgumentStubGenerator
-import org.jetbrains.kotlin.backend.konan.lower.DefaultParameterInjector
+import org.jetbrains.kotlin.backend.konan.lower.ExpectDeclarationsRemoving
+import org.jetbrains.kotlin.backend.konan.lower.FinallyBlocksLowering
+import org.jetbrains.kotlin.backend.konan.lower.InitializersLowering
 import org.jetbrains.kotlin.backend.konan.lower.LateinitLowering
-import org.jetbrains.kotlin.backend.konan.lower.LocalDeclarationsLowering
+import org.jetbrains.kotlin.backend.konan.lower.VarargInjectionLowering
+import org.jetbrains.kotlin.backend.konan.lower.loops.ForLoopsLowering
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.declarations.name
 import org.jetbrains.kotlin.ir.util.checkDeclarationParents
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.ir.util.replaceUnboundSymbols
 
-internal class KonanLower(val context: Context) {
+internal class KonanLower(val context: Context, val parentPhaser: PhaseManager) {
 
     fun lower() {
         val irModule = context.irModule!!
 
         // Phases to run against whole module.
-        lowerModule(irModule)
+        lowerModule(irModule, parentPhaser)
 
         // Phases to run against a file.
         irModule.files.forEach {
-            lowerFile(it)
+            lowerFile(it, PhaseManager(context, parentPhaser))
         }
 
         irModule.checkDeclarationParents()
     }
 
-    private fun lowerModule(irModule: IrModuleFragment) {
-        val phaser = PhaseManager(context)
-
+    private fun lowerModule(irModule: IrModuleFragment, phaser: PhaseManager) {
         phaser.phase(KonanPhase.REMOVE_EXPECT_DECLARATIONS) {
             irModule.files.forEach(ExpectDeclarationsRemoving(context)::lower)
         }
@@ -69,33 +57,23 @@ internal class KonanLower(val context: Context) {
 
         phaser.phase(KonanPhase.LOWER_AFTER_INLINE) {
             irModule.files.forEach(PostInlineLowering(context)::lower)
+            // TODO: Seems like this should be deleted in PsiToIR.
+            irModule.files.forEach(ContractsDslRemover(context)::lower)
         }
 
         phaser.phase(KonanPhase.LOWER_INTEROP_PART1) {
             irModule.files.forEach(InteropLoweringPart1(context)::lower)
         }
 
-        phaser.phase(KonanPhase.LOWER_LATEINIT) {
-            irModule.files.forEach(LateinitLowering(context)::lower)
-        }
-
-        val symbolTable = context.ir.symbols.symbolTable
-        irModule.referenceAllTypeExternalClassifiers(symbolTable)
-
-        do {
-            @Suppress("DEPRECATION")
-            irModule.replaceUnboundSymbols(context)
-            irModule.referenceAllTypeExternalClassifiers(symbolTable)
-        } while (symbolTable.unboundClasses.isNotEmpty())
-
         irModule.patchDeclarationParents()
 
-        validateIrModule(context, irModule)
+//        validateIrModule(context, irModule) // Temporarily disabled until moving to new IR finished.
     }
 
-    private fun lowerFile(irFile: IrFile) {
-        val phaser = PhaseManager(context)
-
+    private fun lowerFile(irFile: IrFile, phaser: PhaseManager) {
+        phaser.phase(KonanPhase.LOWER_LATEINIT) {
+            LateinitLowering(context).lower(irFile)
+        }
         phaser.phase(KonanPhase.LOWER_STRING_CONCAT) {
             StringConcatenationLowering(context).lower(irFile)
         }
@@ -130,11 +108,11 @@ internal class KonanLower(val context: Context) {
             FinallyBlocksLowering(context).lower(irFile)
         }
         phaser.phase(KonanPhase.LOWER_DEFAULT_PARAMETER_EXTENT) {
-            DefaultArgumentStubGenerator(context).runOnFilePostfix(irFile)
-            DefaultParameterInjector(context).runOnFilePostfix(irFile)
+            DefaultArgumentStubGenerator(context, skipInlineMethods = false).runOnFilePostfix(irFile)
+            KonanDefaultParameterInjector(context).runOnFilePostfix(irFile)
         }
         phaser.phase(KonanPhase.LOWER_BUILTIN_OPERATORS) {
-            BuiltinOperatorLowering(context).runOnFilePostfix(irFile)
+            BuiltinOperatorLowering(context).lower(irFile)
         }
         phaser.phase(KonanPhase.LOWER_INNER_CLASSES) {
             InnerClassLowering(context).runOnFilePostfix(irFile)
@@ -149,7 +127,7 @@ internal class KonanLower(val context: Context) {
             CompileTimeEvaluateLowering(context).lower(irFile)
         }
         phaser.phase(KonanPhase.LOWER_COROUTINES) {
-            SuspendFunctionsLowering(context).runOnFilePostfix(irFile)
+            SuspendFunctionsLowering(context).lower(irFile)
         }
         phaser.phase(KonanPhase.LOWER_TYPE_OPERATORS) {
             TypeOperatorLowering(context).runOnFilePostfix(irFile)

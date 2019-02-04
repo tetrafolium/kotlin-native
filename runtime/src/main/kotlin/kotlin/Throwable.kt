@@ -1,20 +1,12 @@
 /*
- * Copyright 2010-2017 JetBrains s.r.o.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package kotlin
+
+import kotlin.native.internal.ExportTypeInfo
+import kotlin.native.internal.NativePtrArray
 
 /**
  * The base class for all errors and exceptions. Only instances of this class can be thrown or caught.
@@ -31,12 +23,19 @@ public open class Throwable(open val message: String?, open val cause: Throwable
 
     constructor() : this(null, null)
 
-    private val stacktrace: Array<String> = getCurrentStackTrace()
+    private val stackTrace = getCurrentStackTrace()
 
-    fun printStackTrace() {
+    private val stackTraceStrings: Array<String> by lazy {
+        getStackTraceStrings(stackTrace)
+    }
+
+    public fun getStackTrace(): Array<String> = stackTraceStrings
+
+    public fun printStackTrace() {
         println(this.toString())
-        for (element in stacktrace) {
-            println("        at " + element)
+
+        for (element in stackTraceStrings) {
+            println("        at $element")
         }
 
         this.cause?.printEnclosedStackTrace(this)
@@ -49,7 +48,7 @@ public open class Throwable(open val message: String?, open val cause: Throwable
         this.printStackTrace()
     }
 
-    override fun toString(): String {
+    override public fun toString(): String {
         val kClass = this::class
         val s = kClass.qualifiedName ?: kClass.simpleName ?: "Throwable"
         return if (message != null) s + ": " + message.toString() else s
@@ -57,4 +56,7 @@ public open class Throwable(open val message: String?, open val cause: Throwable
 }
 
 @SymbolName("Kotlin_getCurrentStackTrace")
-private external fun getCurrentStackTrace(): Array<String>
+private external fun getCurrentStackTrace(): NativePtrArray
+
+@SymbolName("Kotlin_getStackTraceStrings")
+private external fun getStackTraceStrings(stackTrace: NativePtrArray): Array<String>

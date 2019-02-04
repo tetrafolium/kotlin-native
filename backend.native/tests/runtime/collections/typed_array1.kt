@@ -1,3 +1,8 @@
+/*
+ * Copyright 2010-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
+ */
+
 package runtime.collections.typed_array1
 
 import kotlin.test.*
@@ -7,32 +12,32 @@ import kotlin.test.*
     val results = mutableSetOf<Any>()
     var counter = 0
     try {
-        results += array.shortAt(16)
+        results += array.getShortAt(16)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }
     try {
-        results += array.charAt(22)
+        results += array.getCharAt(22)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }
     try {
-        results += array.intAt(15)
+        results += array.getIntAt(15)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }
     try {
-        results += array.longAt(14)
+        results += array.getLongAt(14)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }
     try {
-        results += array.floatAt(14)
+        results += array.getFloatAt(14)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }
     try {
-        results += array.doubleAt(13)
+        results += array.getDoubleAt(13)
     } catch (e: ArrayIndexOutOfBoundsException) {
         counter++
     }

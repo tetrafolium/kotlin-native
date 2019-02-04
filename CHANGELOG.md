@@ -1,3 +1,81 @@
+## v1.1.0 (Dec 2018)
+  * Performance optimizations:
+    * runtime: optimization of queue of finalization
+    * compiler: loop generation optimization
+	* compiler: reduce RTTI size
+	* runtime: reduce size of the object header
+  * Contracts support
+  * Regex engine: fix quantifier processing
+
+## v0.9.3 (Sep 2018)
+  * Bugfixes
+
+## v0.9.2 (Sep 2018)
+  * Support Xcode 10.0
+  * iOS 9.0 is the minimal supported version for all targets
+  * Swift interop improvements
+  * Support shared top level values of some immutable types (i.e. String and atomic references)
+  * Support release Kotlin 1.3.0
+
+## v0.9.1 (Sep 2018)
+  * Improve naming in produced Objective-C frameworks. Use ‘Kotlin’ prefix instead of ‘Stdlib’ prefix.
+  * Improvements in KLIB: Library versioning, IDEA-friendly internal format.
+
+# v0.9 (Sep 2018)
+  * Support Kotlin 1.3M2
+    * Note: Common modules of multiplatform projects also should use Kotlin 1.3
+  * Major standard library (native parts) rework and rename
+  * New Gradle plugin with multiplatform integration and reworked DSL
+  * Support unsigned types in Kotlin and interop
+  * Support non-experimental coroutines API (kotlin.coroutines)
+  * Top level object var/val can only be accessed from the main thread
+  * Support lazy properties in singleton objects
+  * Update LLVM to 6.0.1
+
+## v0.8 (Jul 2018)
+  * Singleton objects are frozen after creation, and shared between threads
+  * String and primitives types are frozen by default
+  * Common stdlib with Kotlin/JVM and Kotlin/JS
+  * Implemented `kotlin.random.*` and `Collection.shuffle`
+  * Implemented atomic integers and atomic references
+  * Multiple bugfixes in compiler (coroutines, inliner)
+  * Support 32-bit iOS (target `ios_arm32`)
+  * New experimental Gradle plugin
+  * Support Xcode 9.4.1
+  * Optimizations (switch by enum, memory management)
+
+## v0.7.1 (Jun 2018)
+  * Bugfixes in the runtime (indexOf, GC for kotlin.Array, enum equality) and the compiler
+  * Fix NSBlock problem, preventing upload of binaries to the AppStore
+  * Create primitive type boxes and kotlin.String as frozen by default
+  * Support Gradle 4.7, provide separate run task for each executable
+  * Support Xcode 9.4 and CoreML and ClassKit frameworks on Apple platforms
+  * Improved runtime Kotlin variable examination
+  * Minor performance optimizations in compiled code and runtime
+  * Add `disableDesignatedInitializerChecks` definition file support
+
+## v0.7 (May 2018)
+  * Interop with Objective-C/Swift changes:
+     * Uniform direct and reverse interops (values could be passed in both directions now)
+     * Interop by exceptions
+     * Type conversion and checks (`as`, `is`) for interop types
+     * Seamless interop on numbers, strings, lists, maps and sets
+     * Better interop on constructors and initializers
+  * Switched to Xcode 9.3 on Apple platforms
+  * Introduced object freezing API, frozen object could be used from multiple threads
+  * Kotlin enums are frozen by default
+  * Switch to Gradle 4.6
+  * Use Gradle native dependency model, allowing to use `.klib` as Maven artifacts
+  * Introduced typed arrays API
+  * Introduced weak references API
+  * Activated global devirtualization analysis
+  * Performance improvements (box caching, bridge inlining, others)
+
+## v0.6.2 (Mar 2018)
+  * Support several `expectedBy`-dependencies in Gradle plugin.
+  * Improved interaction between Gradle plugin and IDE.
+  * Various bugfixes
+
 ## v0.6.1 (Mar 2018)
   * Various bugfixes
   * Support total ordering in FP comparisons
