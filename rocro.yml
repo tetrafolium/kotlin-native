@@ -1,4 +1,5 @@
 inspecode:
+
   ktlint:
   - input:
     - 'runtime/'
@@ -72,5 +73,19 @@ inspecode:
     auto-fix: true
     thresholds:
       num-issues: 999
-  grep:     default
-  misspell: auto-fix
+
+  grep:
+    options:
+      --extended-regexp:
+      --regexp:
+      - "(BUG|FIXME|HACK|XXX):"   # excludes "TODO:" (too many)
+    thresholds:
+      num-issues: 999
+
+  misspell:
+    auto-fix: true
+    options:
+      -i:
+      - "adn"
+    thresholds:
+      num-issues: 999
