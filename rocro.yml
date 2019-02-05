@@ -1,26 +1,88 @@
 inspecode:
 
-  ktlint:
+  astyle:       # supports: C C++ Objective-C C# Java
     auto-fix: true
     thresholds:
       num-issues: 1000
 
-  grep:
+  clang-format: # supports: C C++ Objective-C
+    auto-fix: true
+    thresholds:
+      num-issues: 1000
+
+  cpd:          # supports: C C++ C# Go Java JavaScript Objective-C PHP Python Ruby Scala Swift
+    thresholds:
+      num-issues: 1000
+
+  cppcheck:     # supports: C C++
+    thresholds:
+      num-issues: 1000
+
+  cpplint:      # supports: C++
+    thresholds:
+      num-issues: 1000
+
+  grep:         # supports: All Languages
     options:
       --extended-regexp:
       --regexp:
       - "(BUG|FIXME|HACK|XXX):"   # excludes "TODO:" (too many)
     thresholds:
-      num-issues: 1000
+      num-issues: 15
 
-  jscpd:
+  infer:        # supports: C C++ Java
     thresholds:
       num-issues: 1000
 
-  misspell:
+  jscpd:        # supports: C C++ C# CoffeeScript CSS Go HTML Java JavaScript Kotlin Objective-C PHP Python Ruby Scala Swift TypeScript
+    thresholds:
+      num-issues: 28
+
+  ktlint:       # supports: Kotlin
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+        ##### breakdown of num-issues by rules:
+        #     8872 TOTAL
+        #     2322 (parameter-list-wrapping)
+        #     1348 (no-multi-spaces)
+        #     1157 (no-wildcard-imports)
+        #      729 (indent)
+        #      671 (colon-spacing)
+        #      531 (no-trailing-spaces)
+        #      454 (modifier-order)
+        #      319 (no-consecutive-blank-lines)
+        #      228 (curly-spacing)
+        #      204 (no-blank-line-before-rbrace)
+        #      169 (chain-wrapping)
+        #      122 (no-line-break-before-assignment)
+        #      105 (no-unused-imports)
+        #       93 (op-spacing)
+        #       78 (no-unit-return)
+        #       71 (keyword-spacing)
+        #       69 (range-spacing)
+        #       66 (comma-spacing)
+        #       65 (string-template)
+        #       38 (no-semi)
+        #       19 (no-empty-class-body)
+        #       14 ()
+
+  misspell:     # supports: All Languages
     auto-fix: true
     options:
       -i:
       - "adn"
+    thresholds:
+      num-issues: 44
+
+  scan-build:   # supports: C C++
+    thresholds:
+      num-issues: 1000
+
+  uncrustify:   # supports: C C++ C# Objective-C Java
+    thresholds:
+      num-issues: 1000
+
+  unused:       # supports: C C++ C# Go HTML Java JavaScript Objective-C PHP Python Ruby Shell
     thresholds:
       num-issues: 1000
