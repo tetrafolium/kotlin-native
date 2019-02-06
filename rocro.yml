@@ -3,18 +3,20 @@ inspecode:
   astyle:       # supports: C C++ Objective-C C# Java
     auto-fix: true
     thresholds:
-      num-issues: 1000
+      num-issues: 80
 
-  clang-format: # supports: C C++ Objective-C
-    auto-fix: true
-    thresholds:
-      num-issues: 1000
+  #### Failed ... xargs: clang-format: terminated by signal 9
+  #clang-format: # supports: C C++ Objective-C
+  #  auto-fix: false
+  #  thresholds:
+  #    num-issues: 1000
 
   cpd:          # supports: C C++ C# Go Java JavaScript Objective-C PHP Python Ruby Scala Swift
     thresholds:
-      num-issues: 1000
+      num-issues: 14
 
-  #### cppcheck core domped ... reported: tractrix/codelift#1397
+  #### Failed ... Error in `cppcheck': double free or corruption
+  ####    reported: tractrix/codelift#1397
   #cppcheck:     # supports: C C++
   #  thresholds:
   #    num-issues: 1000
@@ -84,9 +86,10 @@ inspecode:
   #  thresholds:
   #    num-issues: 1000
 
-  uncrustify:   # supports: C C++ C# Objective-C Java
-    thresholds:
-      num-issues: 1000
+  #### Failed ... Uncrustify finished with errors.
+  #uncrustify:   # supports: C C++ C# Objective-C Java
+  #  thresholds:
+  #    num-issues: 1000
 
   unused:       # supports: C C++ C# Go HTML Java JavaScript Objective-C PHP Python Ruby Shell
     thresholds:
