@@ -60,11 +60,29 @@ inspecode:
       num-issues: 1000  # 8872 issues
   - input:
     - "./backend.native/tests/"
+    ignore:
+    - "./backend.native/tests/codegen/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./backend.native/tests/codegen/"
     auto-fix: true
     thresholds:
       num-issues: 1000  # 8872 issues
   - input:
     - "./runtime/"
+    ignore:
+    - "./runtime/src/main/kotlin/kotlin/collections/"
+    - "./runtime/src/main/kotlin/kotlin/native/"
+    - "./runtime/src/main/kotlin/kotlin/text/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./runtime/src/main/kotlin/kotlin/collections/"
+    - "./runtime/src/main/kotlin/kotlin/native/"
+    - "./runtime/src/main/kotlin/kotlin/text/"
     auto-fix: true
     thresholds:
       num-issues: 1000  # 8872 issues
