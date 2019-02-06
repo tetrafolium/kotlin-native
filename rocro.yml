@@ -14,13 +14,17 @@ inspecode:
     thresholds:
       num-issues: 1000
 
-  cppcheck:     # supports: C C++
-    thresholds:
-      num-issues: 1000
+  #### cppcheck core domped ... reported: tractrix/codelift#1397
+  #cppcheck:     # supports: C C++
+  #  thresholds:
+  #    num-issues: 1000
 
   cpplint:      # supports: C++
+    options:
+      --filter:
+      - "-whitespace"   # 4258 issues
     thresholds:
-      num-issues: 1000
+      num-issues: 588
 
   grep:         # supports: All Languages
     options:
@@ -75,9 +79,10 @@ inspecode:
     thresholds:
       num-issues: 44
 
-  scan-build:   # supports: C C++
-    thresholds:
-      num-issues: 1000
+  #### Aborted ... comment-out temporary
+  #scan-build:   # supports: C C++
+  #  thresholds:
+  #    num-issues: 1000
 
   uncrustify:   # supports: C C++ C# Objective-C Java
     thresholds:
