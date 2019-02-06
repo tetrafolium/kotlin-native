@@ -45,33 +45,54 @@ inspecode:
       num-issues: 28
 
   ktlint:       # supports: Kotlin
+  - input:
+    - "./Interop/"
     auto-fix: true
     thresholds:
       num-issues: 1000  # 8872 issues
-        ##### breakdown of num-issues by rules:
-        #     8872 TOTAL
-        #     2322 (parameter-list-wrapping)
-        #     1348 (no-multi-spaces)
-        #     1157 (no-wildcard-imports)
-        #      729 (indent)
-        #      671 (colon-spacing)
-        #      531 (no-trailing-spaces)
-        #      454 (modifier-order)
-        #      319 (no-consecutive-blank-lines)
-        #      228 (curly-spacing)
-        #      204 (no-blank-line-before-rbrace)
-        #      169 (chain-wrapping)
-        #      122 (no-line-break-before-assignment)
-        #      105 (no-unused-imports)
-        #       93 (op-spacing)
-        #       78 (no-unit-return)
-        #       71 (keyword-spacing)
-        #       69 (range-spacing)
-        #       66 (comma-spacing)
-        #       65 (string-template)
-        #       38 (no-semi)
-        #       19 (no-empty-class-body)
-        #       14 ()
+  - input:
+    - "./backend.native/"
+    ignore:
+    - "./backend.native/compiler/"
+    - "./backend.native/tests/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./backend.native/tests/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./runtime/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./samples/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./shared/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - input:
+    - "./tools/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
+  - ignore:
+    - "./Interop/"
+    - "./backend.native/"
+    - "./runtime/"
+    - "./samples/"
+    - "./shared/"
+    - "./tools/"
+    auto-fix: true
+    thresholds:
+      num-issues: 1000  # 8872 issues
 
   misspell:     # supports: All Languages
     auto-fix: true
