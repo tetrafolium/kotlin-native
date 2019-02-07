@@ -49,27 +49,63 @@ inspecode:
     - "./Interop/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 899
   - input:
     - "./backend.native/"
     ignore:
-    - "./backend.native/compiler/"
+    - "./backend.native/compiler/ir/backend.native/src/org/jetbrains/kotlin/backend/konan/"
     - "./backend.native/tests/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 86
+  - input:
+    - "./backend.native/compiler/ir/backend.native/src/org/jetbrains/kotlin/backend/konan/"
+    ignore:
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/"
+    - "!**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/Dwarf.kt"
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/lower/"
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/optimizations/"
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/serialization/"
+    auto-fix: true
+    thresholds:
+      num-issues: 935
+  - input:
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/"
+    ignore:
+    - "!**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/Dwarf.kt"
+    auto-fix: true
+    thresholds:
+      num-issues: 822
+  - input:
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/lower/"
+    auto-fix: true
+    thresholds:
+      num-issues: 846
+  - input:
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/optimizations/"
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/serialization/"
+    auto-fix: true
+    thresholds:
+      num-issues: 799
   - input:
     - "./backend.native/tests/"
     ignore:
     - "./backend.native/tests/codegen/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 633
   - input:
     - "./backend.native/tests/codegen/"
+    ignore:
+    - "./backend.native/tests/codegen/function/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 772
+  - input:
+    - "./backend.native/tests/codegen/function/"
+    auto-fix: true
+    thresholds:
+      num-issues: 283
   - input:
     - "./runtime/"
     ignore:
@@ -78,39 +114,29 @@ inspecode:
     - "./runtime/src/main/kotlin/kotlin/text/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 572
   - input:
     - "./runtime/src/main/kotlin/kotlin/collections/"
     - "./runtime/src/main/kotlin/kotlin/native/"
     - "./runtime/src/main/kotlin/kotlin/text/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 864
   - input:
     - "./samples/"
-    auto-fix: true
-    thresholds:
-      num-issues: 1000  # 8872 issues
-  - input:
     - "./shared/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
-  - input:
-    - "./tools/"
-    auto-fix: true
-    thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 849
   - ignore:
     - "./Interop/"
     - "./backend.native/"
     - "./runtime/"
     - "./samples/"
     - "./shared/"
-    - "./tools/"
     auto-fix: true
     thresholds:
-      num-issues: 1000  # 8872 issues
+      num-issues: 940
 
   misspell:     # supports: All Languages
     auto-fix: true
