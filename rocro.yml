@@ -57,7 +57,7 @@ inspecode:
     - "./backend.native/tests/"
     auto-fix: true
     thresholds:
-      num-issues: 86
+      num-issues: 127
   - input:
     - "./backend.native/compiler/ir/backend.native/src/org/jetbrains/kotlin/backend/konan/"
     ignore:
@@ -68,25 +68,25 @@ inspecode:
     - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/serialization/"
     auto-fix: true
     thresholds:
-      num-issues: 935
+      num-issues: 961
   - input:
     - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/"
     ignore:
-    - "!**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/Dwarf.kt"
+    - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/llvm/Dwarf.kt"
     auto-fix: true
     thresholds:
-      num-issues: 822
+      num-issues: 798
   - input:
     - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/lower/"
     auto-fix: true
     thresholds:
-      num-issues: 846
+      num-issues: 532
   - input:
     - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/optimizations/"
     - "**/backend.native/src/org/jetbrains/kotlin/backend/konan/serialization/"
     auto-fix: true
     thresholds:
-      num-issues: 799
+      num-issues: 637
   - input:
     - "./backend.native/tests/"
     ignore:
@@ -158,4 +158,4 @@ inspecode:
 
   unused:       # supports: C C++ C# Go HTML Java JavaScript Objective-C PHP Python Ruby Shell
     thresholds:
-      num-issues: 1000
+      num-issues: 500
