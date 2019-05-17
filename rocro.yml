@@ -3,3 +3,5 @@ inspecode:
     auto-fix: false
     thresholds:
       num-issues: 1000
+    machine:
+      cpu: 1.5
