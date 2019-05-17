@@ -1,7 +1,4 @@
 inspecode:
-  clang-format: # supports: C C++ Objective-C
-    auto-fix: false
+  uncrustify: # supports: C C++ Objective-C
     thresholds:
       num-issues: 1000
-    machine:
-      cpu: 1.5
