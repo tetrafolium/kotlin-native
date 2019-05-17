@@ -1,0 +1,41 @@
+template:
+  languages: &LANGUAGES
+    - C
+    - C++
+    - C#
+    - Objective-C
+    - D
+    - Java
+    - PAWN
+    - Vala
+  issue: &CODE_STYLE_ISSUE
+    description: This file should be beautified by Uncrustify.
+    category: Code Style
+    type: Code Style Violation
+    severity: Error
+    weight: 1
+
+default:
+  context:
+    languages: *LANGUAGES
+    # config: &DEFAULT_CONFIG
+    #   inputPatterns:
+    #     exclude:
+    #       - "fragments"
+  report: &DEFAULT_REPORT
+    # issues:
+    #   - <<: *CODE_STYLE_ISSUE
+    #     snippets:
+    #       - c/align equ.c
+    #   - <<: *CODE_STYLE_ISSUE
+    #     snippets:
+    #       - cpp/init_align.h
+    #   - <<: *CODE_STYLE_ISSUE
+    #     snippets:
+    #       - d/strings.d
+    #   - <<: *CODE_STYLE_ISSUE
+    #     snippets:
+    #       - pawn/enum.pawn
+    #   - <<: *CODE_STYLE_ISSUE
+    #     snippets:
+    #       - vala/list.vala
