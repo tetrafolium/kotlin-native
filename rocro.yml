@@ -1,0 +1,5 @@
+inspecode:
+  clang-format: # supports: C C++ Objective-C
+    auto-fix: false
+    thresholds:
+      num-issues: 1000

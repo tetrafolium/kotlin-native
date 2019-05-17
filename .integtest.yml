@@ -2,12 +2,7 @@ template:
   languages: &LANGUAGES
     - C
     - C++
-    - C#
     - Objective-C
-    - D
-    - Java
-    - PAWN
-    - Vala
   issue: &CODE_STYLE_ISSUE
     description: This file should be beautified by Uncrustify.
     category: Code Style
