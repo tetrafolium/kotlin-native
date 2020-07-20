@@ -24,10 +24,10 @@ import java.io.File
  * Finds all "macro constants" and registers them as [NativeIndex.constants] in given index.
  */
 internal fun findMacros(
-        nativeIndex: NativeIndexImpl,
-        compilation: CompilationWithPCH,
-        translationUnit: CXTranslationUnit,
-        headers: Set<CXFile?>
+    nativeIndex: NativeIndexImpl,
+    compilation: CompilationWithPCH,
+    translationUnit: CXTranslationUnit,
+    headers: Set<CXFile?>
 ) {
     val names = collectMacroNames(nativeIndex, translationUnit, headers)
     // TODO: apply user-defined filters.
@@ -49,9 +49,9 @@ private typealias TypeConverter = (CValue<CXType>) -> Type
  * @return the list of constants.
  */
 private fun expandMacros(
-        library: CompilationWithPCH,
-        names: List<String>,
-        typeConverter: TypeConverter
+    library: CompilationWithPCH,
+    names: List<String>,
+    typeConverter: TypeConverter
 ): List<MacroDef> {
     withIndex(excludeDeclarationsFromPCH = true) { index ->
         val sourceFile = library.createTempSource()
@@ -72,7 +72,7 @@ private fun expandMacros(
 
             while (unprocessedMacros.isNotEmpty()) {
                 val processedMacros =
-                        tryExpandMacros(library, translationUnit, sourceFile, unprocessedMacros, typeConverter)
+                    tryExpandMacros(library, translationUnit, sourceFile, unprocessedMacros, typeConverter)
 
                 unprocessedMacros -= (processedMacros.keys + unprocessedMacros.first())
                 // Note: removing first macro should not have any effect, doing this to ensure the loop is finite.
@@ -97,11 +97,11 @@ private fun expandMacros(
  * As a side effect, modifies the [sourceFile] and reparses the [translationUnit].
  */
 private fun tryExpandMacros(
-        library: CompilationWithPCH,
-        translationUnit: CXTranslationUnit,
-        sourceFile: File,
-        names: List<String>,
-        typeConverter: TypeConverter
+    library: CompilationWithPCH,
+    translationUnit: CXTranslationUnit,
+    sourceFile: File,
+    names: List<String>,
+    typeConverter: TypeConverter
 ): Map<String, MacroDef?> {
 
     reparseWithCodeSnippets(library, translationUnit, sourceFile, names)
@@ -161,9 +161,12 @@ private const val CODE_SNIPPET_FUNCTION_NAME_PREFIX = "kni_indexer_function_"
  * generate a bridge for this macro.
  *  - Otherwise the macro is skipped.
  */
-private fun reparseWithCodeSnippets(library: CompilationWithPCH,
-                                    translationUnit: CXTranslationUnit, sourceFile: File,
-                                    names: List<String>) {
+private fun reparseWithCodeSnippets(
+    library: CompilationWithPCH,
+    translationUnit: CXTranslationUnit,
+    sourceFile: File,
+    names: List<String>
+) {
 
     // TODO: consider using CXUnsavedFile instead of writing the modified file to OS file system.
     sourceFile.bufferedWriter().use { writer ->
@@ -172,9 +175,11 @@ private fun reparseWithCodeSnippets(library: CompilationWithPCH,
         names.forEach { name ->
             val codeSnippetLines = when (library.language) {
                 Language.C, Language.OBJECTIVE_C ->
-                    listOf("void $CODE_SNIPPET_FUNCTION_NAME_PREFIX$name() {",
-                            "    __auto_type KNI_INDEXER_VARIABLE_$name = $name;",
-                            "}")
+                    listOf(
+                        "void $CODE_SNIPPET_FUNCTION_NAME_PREFIX$name() {",
+                        "    __auto_type KNI_INDEXER_VARIABLE_$name = $name;",
+                        "}"
+                    )
             }
 
             assert(codeSnippetLines.size == CODE_SNIPPET_LINES_NUMBER)
@@ -189,9 +194,9 @@ private fun reparseWithCodeSnippets(library: CompilationWithPCH,
  * and returns the constant on success.
  */
 private fun processCodeSnippet(
-        functionCursor: CValue<CXCursor>,
-        name: String,
-        typeConverter: TypeConverter
+    functionCursor: CValue<CXCursor>,
+    name: String,
+    typeConverter: TypeConverter
 ): MacroDef? {
 
     val kindsToSkip = setOf(CXCursorKind.CXCursor_CompoundStmt)
@@ -240,7 +245,7 @@ private fun processCodeSnippet(
         val type = typeOrNull!!
         return if (evalResultOrNull == null) {
             // The macro cannot be evaluated as a constant so we will wrap it in a bridge.
-            when(type.unwrapTypedefs()) {
+            when (type.unwrapTypedefs()) {
                 is PrimitiveType,
                 is PointerType,
                 is ObjCPointer -> WrappedMacroDef(name, type)
@@ -272,7 +277,6 @@ private fun processCodeSnippet(
                 CXEvalResultKind.CXEval_UnExposed -> null
             }
         }
-
     } finally {
         evalResultOrNull?.let { clang_EvalResult_dispose(it) }
     }
@@ -295,11 +299,11 @@ private fun collectMacroNames(nativeIndex: NativeIndexImpl, translationUnit: CXT
         }
 
         if (cursor.kind == CXCursorKind.CXCursor_MacroDefinition &&
-                nativeIndex.library.includesDeclaration(cursor) &&
-                file != null && // Builtin macros mostly seem to be useless.
-                file in headers &&
-                canMacroBeConstant(cursor))
-        {
+            nativeIndex.library.includesDeclaration(cursor) &&
+            file != null && // Builtin macros mostly seem to be useless.
+            file in headers &&
+            canMacroBeConstant(cursor)
+        ) {
             val spelling = getCursorSpelling(cursor)
             result.add(spelling)
         }

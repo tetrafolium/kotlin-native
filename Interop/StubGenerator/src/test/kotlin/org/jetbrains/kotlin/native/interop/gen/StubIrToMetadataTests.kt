@@ -24,34 +24,34 @@ class StubIrToMetadataTests {
         val cDeclaration = FunctionDecl(name, emptyList(), intType, "", false, false)
         val origin = StubOrigin.Function(cDeclaration)
         return FunctionStub(
-                name = cDeclaration.name,
-                returnType = intStubType,
-                parameters = listOf(),
-                origin = origin,
-                annotations = emptyList(),
-                external = true,
-                receiver = null,
-                modality = MemberStubModality.FINAL
+            name = cDeclaration.name,
+            returnType = intStubType,
+            parameters = listOf(),
+            origin = origin,
+            annotations = emptyList(),
+            external = true,
+            receiver = null,
+            modality = MemberStubModality.FINAL
         )
     }
 
     private fun createTrivialIntegerConstantProperty(name: String, value: Long): PropertyStub {
         val origin = StubOrigin.Constant(IntegerConstantDef(name, intType, value))
         return PropertyStub(
-                name = name,
-                type = intStubType,
-                kind = PropertyStub.Kind.Constant(IntegralConstantStub(value, intType.size, true)),
-                origin = origin
+            name = name,
+            type = intStubType,
+            kind = PropertyStub.Kind.Constant(IntegralConstantStub(value, intType.size, true)),
+            origin = origin
         )
     }
 
     private fun createMetadata(
-            fqName: String,
-            functions: List<FunctionStub> = emptyList(),
-            properties: List<PropertyStub> = emptyList()
+        fqName: String,
+        functions: List<FunctionStub> = emptyList(),
+        properties: List<PropertyStub> = emptyList()
     ) = SimpleStubContainer(functions = functions, properties = properties)
-            .let { ModuleMetadataEmitter(fqName, it).emit() }
-            .also(this::checkUniqIdPresence)
+        .let { ModuleMetadataEmitter(fqName, it).emit() }
+        .also(this::checkUniqIdPresence)
 
     private fun checkUniqIdPresence(metadata: KmModuleFragment) {
         metadata.classes.forEach { assertNotNull(it.uniqId) }
@@ -67,7 +67,7 @@ class StubIrToMetadataTests {
         val packageName = "single_function"
         val function = createTrivialFunction("hello")
         val metadata = createMetadata(packageName, functions = listOf(function))
-        with (metadata) {
+        with(metadata) {
             assertEquals(packageName, packageName)
             assertTrue(classes.isEmpty())
             assertNotNull(pkg)
@@ -86,7 +86,7 @@ class StubIrToMetadataTests {
     fun `single constant`() {
         val property = createTrivialIntegerConstantProperty("meaning", 42)
         val metadata = createMetadata("single_property", properties = listOf(property))
-        with (metadata) {
+        with(metadata) {
             assertNotNull(pkg)
             assertTrue(pkg!!.properties.size == 1)
 

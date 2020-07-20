@@ -14,7 +14,7 @@ internal class StubIrUniqIdProvider(private val context: ManglingContext) {
     private val mangler: InteropMangler = KotlinLikeInteropMangler(context)
 
     fun createChild(suffix: String): StubIrUniqIdProvider =
-            StubIrUniqIdProvider(ManglingContext.Entity(suffix, context))
+        StubIrUniqIdProvider(ManglingContext.Entity(suffix, context))
 
     fun uniqIdForFunction(function: FunctionStub): UniqId = with(mangler) {
         when (function.origin) {
@@ -26,7 +26,7 @@ internal class StubIrUniqIdProvider(private val context: ManglingContext) {
         }.toUniqId()
     }
 
-    fun uniqIdForProperty(property: PropertyStub): UniqId = with (mangler) {
+    fun uniqIdForProperty(property: PropertyStub): UniqId = with(mangler) {
         when (property.origin) {
             is StubOrigin.ObjCProperty -> property.origin.property.uniqueSymbolName
             is StubOrigin.Constant -> property.origin.constantDef.uniqueSymbolName
@@ -48,29 +48,31 @@ internal class StubIrUniqIdProvider(private val context: ManglingContext) {
         else -> null
     }
 
-    fun uniqIdForTypeAlias(typeAlias: TypealiasStub): UniqId = with (mangler) {
+    fun uniqIdForTypeAlias(typeAlias: TypealiasStub): UniqId = with(mangler) {
         uniqSymbolNameForTypeAlias(typeAlias.origin)
-                ?: error("Unexpected origin ${typeAlias.origin} for typealias ${typeAlias.alias.fqName}.")
+            ?: error("Unexpected origin ${typeAlias.origin} for typealias ${typeAlias.alias.fqName}.")
     }.toUniqId()
 
     private fun InteropMangler.uniqSymbolNameForClass(origin: StubOrigin): String? = when (origin) {
-        is StubOrigin.ObjCClass -> if (origin.isMeta) {
-            origin.clazz.metaClassUniqueSymbolName
-        } else {
-            origin.clazz.uniqueSymbolName
-        }
-        is StubOrigin.ObjCProtocol -> if (origin.isMeta) {
-            origin.protocol.metaClassUniqueSymbolName
-        } else {
-            origin.protocol.uniqueSymbolName
-        }
+        is StubOrigin.ObjCClass ->
+            if (origin.isMeta) {
+                origin.clazz.metaClassUniqueSymbolName
+            } else {
+                origin.clazz.uniqueSymbolName
+            }
+        is StubOrigin.ObjCProtocol ->
+            if (origin.isMeta) {
+                origin.protocol.metaClassUniqueSymbolName
+            } else {
+                origin.protocol.uniqueSymbolName
+            }
         is StubOrigin.Struct -> origin.struct.uniqueSymbolName
         is StubOrigin.Enum -> origin.enum.uniqueSymbolName
         is StubOrigin.VarOf -> "${uniqSymbolNameForClass(origin.typeOrigin)}#Var"
         else -> null
     }
 
-    fun uniqIdForClass(classStub: ClassStub): UniqId = with (mangler) {
+    fun uniqIdForClass(classStub: ClassStub): UniqId = with(mangler) {
         when (classStub) {
             is ClassStub.Simple,
             is ClassStub.Enum -> uniqSymbolNameForClass(classStub.origin)
@@ -86,12 +88,12 @@ internal class StubIrUniqIdProvider(private val context: ManglingContext) {
         else -> null
     }
 
-    fun uniqIdForConstructor(constructorStub: ConstructorStub): UniqId = with (mangler) {
+    fun uniqIdForConstructor(constructorStub: ConstructorStub): UniqId = with(mangler) {
         uniqSymbolNameForConstructor(constructorStub.origin)
-                ?: error("Unexpected origin ${constructorStub.origin} for constructor.")
+            ?: error("Unexpected origin ${constructorStub.origin} for constructor.")
     }.toUniqId()
 
-    fun uniqIdForEnumEntry(enumEntry: EnumEntryStub, enum: ClassStub.Enum): UniqId = with (mangler) {
+    fun uniqIdForEnumEntry(enumEntry: EnumEntryStub, enum: ClassStub.Enum): UniqId = with(mangler) {
         "${uniqSymbolNameForClass(enum.origin)}#${enumEntry.origin.constant.name}"
     }.toUniqId()
 

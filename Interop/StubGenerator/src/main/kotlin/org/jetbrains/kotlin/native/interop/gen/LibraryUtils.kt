@@ -21,9 +21,9 @@ import org.jetbrains.kotlin.konan.file.File
 internal fun resolveLibraries(staticLibraries: List<String>, libraryPaths: List<String>): List<String> {
     val result = mutableListOf<String>()
     staticLibraries.forEach { library ->
-        
-        val resolution = libraryPaths.map { "$it/$library" } 
-                .find { File(it).exists }
+
+        val resolution = libraryPaths.map { "$it/$library" }
+            .find { File(it).exists }
 
         if (resolution != null) {
             result.add(resolution)
@@ -36,9 +36,8 @@ internal fun resolveLibraries(staticLibraries: List<String>, libraryPaths: List<
 
 internal fun argsToCompiler(staticLibraries: Array<String>, libraryPaths: Array<String>) = argsToCompiler(staticLibraries.toList(), libraryPaths.toList())
 
-internal fun argsToCompiler(staticLibraries: List<String>, libraryPaths: List<String>) = 
+internal fun argsToCompiler(staticLibraries: List<String>, libraryPaths: List<String>) =
     resolveLibraries(staticLibraries, libraryPaths)
         .map { it -> listOf("-include-binary", it) }
         .flatten()
         .toTypedArray()
-

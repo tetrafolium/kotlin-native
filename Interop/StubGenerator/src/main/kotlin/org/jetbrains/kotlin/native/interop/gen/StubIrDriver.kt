@@ -13,29 +13,29 @@ import java.io.File
 import java.util.*
 
 class StubIrContext(
-        val log: (String) -> Unit,
-        val configuration: InteropConfiguration,
-        val nativeIndex: NativeIndex,
-        val imports: Imports,
-        val platform: KotlinPlatform,
-        val generationMode: GenerationMode,
-        val libName: String
+    val log: (String) -> Unit,
+    val configuration: InteropConfiguration,
+    val nativeIndex: NativeIndex,
+    val imports: Imports,
+    val platform: KotlinPlatform,
+    val generationMode: GenerationMode,
+    val libName: String
 ) {
     val libraryForCStubs = configuration.library.copy(
-            includes = mutableListOf<String>().apply {
-                add("stdint.h")
-                add("string.h")
-                if (platform == KotlinPlatform.JVM) {
-                    add("jni.h")
-                }
-                addAll(configuration.library.includes)
-            },
-            compilerArgs = configuration.library.compilerArgs,
-            additionalPreambleLines = configuration.library.additionalPreambleLines +
-                    when (configuration.library.language) {
-                        Language.C -> emptyList()
-                        Language.OBJECTIVE_C -> listOf("void objc_terminate();")
-                    }
+        includes = mutableListOf<String>().apply {
+            add("stdint.h")
+            add("string.h")
+            if (platform == KotlinPlatform.JVM) {
+                add("jni.h")
+            }
+            addAll(configuration.library.includes)
+        },
+        compilerArgs = configuration.library.compilerArgs,
+        additionalPreambleLines = configuration.library.additionalPreambleLines +
+            when (configuration.library.language) {
+                Language.C -> emptyList()
+                Language.OBJECTIVE_C -> listOf("void objc_terminate();")
+            }
     ).precompileHeaders()
 
     // TODO: Used only for JVM.
@@ -83,10 +83,10 @@ class StubIrContext(
         val exportForwardDeclarations = configuration.exportForwardDeclarations.toMutableList()
 
         nativeIndex.structs
-                .filter { it.def == null }
-                .mapTo(exportForwardDeclarations) {
-                    "$cnamesStructsPackageName.${getKotlinName(it)}"
-                }
+            .filter { it.def == null }
+            .mapTo(exportForwardDeclarations) {
+                "$cnamesStructsPackageName.${getKotlinName(it)}"
+            }
 
         properties["exportForwardDeclarations"] = exportForwardDeclarations.joinToString(" ")
 
@@ -99,20 +99,20 @@ class StubIrContext(
 }
 
 class StubIrDriver(
-        private val context: StubIrContext,
-        private val options: DriverOptions
+    private val context: StubIrContext,
+    private val options: DriverOptions
 ) {
     data class DriverOptions(
-            val entryPoint: String?,
-            val moduleName: String,
-            val outCFile: File,
-            val outKtFileCreator: () -> File
+        val entryPoint: String?,
+        val moduleName: String,
+        val outCFile: File,
+        val outKtFileCreator: () -> File
     )
 
     sealed class Result {
         object SourceCode : Result()
 
-        class Metadata(val metadata: KlibModuleMetadata): Result()
+        class Metadata(val metadata: KlibModuleMetadata) : Result()
     }
 
     fun run(): Result {
@@ -134,7 +134,9 @@ class StubIrDriver(
     }
 
     private fun emitSourceCode(
-            outKtFile: File, builderResult: StubIrBuilderResult, bridgeBuilderResult: BridgeBuilderResult
+        outKtFile: File,
+        builderResult: StubIrBuilderResult,
+        bridgeBuilderResult: BridgeBuilderResult
     ): Result.SourceCode {
         outKtFile.bufferedWriter().use { ktFile ->
             StubIrTextEmitter(context, builderResult, bridgeBuilderResult).emit(ktFile)
@@ -143,7 +145,9 @@ class StubIrDriver(
     }
 
     private fun emitMetadata(
-            builderResult: StubIrBuilderResult, moduleName: String, bridgeBuilderResult: BridgeBuilderResult
+        builderResult: StubIrBuilderResult,
+        moduleName: String,
+        bridgeBuilderResult: BridgeBuilderResult
     ) = Result.Metadata(StubIrMetadataEmitter(context, builderResult, moduleName, bridgeBuilderResult).emit())
 
     private fun emitCFile(context: StubIrContext, cFile: Appendable, entryPoint: String?, nativeBridges: NativeBridges) {

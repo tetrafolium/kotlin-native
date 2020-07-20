@@ -28,19 +28,19 @@ data class TypedNativeValue(val type: Type, val value: NativeExpression)
  */
 interface MappingBridgeGenerator {
     fun kotlinToNative(
-            builder: KotlinCodeBuilder,
-            nativeBacked: NativeBacked,
-            returnType: Type,
-            kotlinValues: List<TypedKotlinValue>,
-            independent: Boolean,
-            block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
+        builder: KotlinCodeBuilder,
+        nativeBacked: NativeBacked,
+        returnType: Type,
+        kotlinValues: List<TypedKotlinValue>,
+        independent: Boolean,
+        block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
     ): KotlinExpression
 
     fun nativeToKotlin(
-            builder: NativeCodeBuilder,
-            nativeBacked: NativeBacked,
-            returnType: Type,
-            nativeValues: List<TypedNativeValue>,
-            block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
+        builder: NativeCodeBuilder,
+        nativeBacked: NativeBacked,
+        returnType: Type,
+        nativeValues: List<TypedNativeValue>,
+        block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
     ): NativeExpression
 }

@@ -24,12 +24,12 @@ import org.jetbrains.kotlin.native.interop.indexer.mapFragmentIsCompilable
 internal val INVALID_CLANG_IDENTIFIER_REGEX = "[^a-zA-Z1-9_]".toRegex()
 
 class SimpleBridgeGeneratorImpl(
-        private val platform: KotlinPlatform,
-        private val pkgName: String,
-        private val jvmFileClassName: String,
-        private val libraryForCStubs: CompilationWithPCH,
-        override val topLevelNativeScope: NativeScope,
-        private val topLevelKotlinScope: KotlinScope
+    private val platform: KotlinPlatform,
+    private val pkgName: String,
+    private val jvmFileClassName: String,
+    private val libraryForCStubs: CompilationWithPCH,
+    override val topLevelNativeScope: NativeScope,
+    private val topLevelKotlinScope: KotlinScope
 ) : SimpleBridgeGenerator {
 
     private var nextUniqueId = 0
@@ -72,11 +72,11 @@ class SimpleBridgeGeneratorImpl(
     private inner class NativeBridge(val kotlinLines: List<String>, val nativeLines: List<String>)
 
     override fun kotlinToNative(
-            nativeBacked: NativeBacked,
-            returnType: BridgedType,
-            kotlinValues: List<BridgeTypedKotlinValue>,
-            independent: Boolean,
-            block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
+        nativeBacked: NativeBacked,
+        returnType: BridgedType,
+        kotlinValues: List<BridgeTypedKotlinValue>,
+        independent: Boolean,
+        block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
     ): KotlinExpression {
 
         val kotlinLines = mutableListOf<String>()
@@ -91,8 +91,8 @@ class SimpleBridgeGeneratorImpl(
 
         val cFunctionParameters = when (platform) {
             KotlinPlatform.JVM -> mutableListOf(
-                    "jniEnv" to "JNIEnv*",
-                    "jclss" to "jclass"
+                "jniEnv" to "JNIEnv*",
+                "jclss" to "jclass"
             )
             KotlinPlatform.NATIVE -> mutableListOf()
         }
@@ -156,10 +156,10 @@ class SimpleBridgeGeneratorImpl(
     }
 
     override fun nativeToKotlin(
-            nativeBacked: NativeBacked,
-            returnType: BridgedType,
-            nativeValues: List<BridgeTypedNativeValue>,
-            block: KotlinCodeBuilder.(arguments: List<KotlinExpression>) -> KotlinExpression
+        nativeBacked: NativeBacked,
+        returnType: BridgedType,
+        nativeValues: List<BridgeTypedNativeValue>,
+        block: KotlinCodeBuilder.(arguments: List<KotlinExpression>) -> KotlinExpression
     ): NativeExpression {
 
         if (platform != KotlinPlatform.NATIVE) TODO()
@@ -207,7 +207,6 @@ class SimpleBridgeGeneratorImpl(
         insertNativeBridge(nativeBacked, kotlinLines, nativeLines)
 
         return "$symbolName(${nativeValues.joinToString { it.value }})"
-
     }
 
     override fun insertNativeBridge(nativeBacked: NativeBacked, kotlinLines: List<String>, nativeLines: List<String>) {
@@ -222,12 +221,12 @@ class SimpleBridgeGeneratorImpl(
         val excludedClients = mutableSetOf<NativeBacked>()
 
         nativeBridges.map { it.second.nativeLines }
-                .mapFragmentIsCompilable(libraryForCStubs)
-                .forEachIndexed { index, isCompilable ->
-                    if (!isCompilable) {
-                        excludedClients.add(nativeBridges[index].first)
-                    }
+            .mapFragmentIsCompilable(libraryForCStubs)
+            .forEachIndexed { index, isCompilable ->
+                if (!isCompilable) {
+                    excludedClients.add(nativeBridges[index].first)
                 }
+            }
 
         nativeBridges.mapNotNullTo(includedBridges) { (nativeBacked, nativeBridge) ->
             if (nativeBacked in excludedClients) {
@@ -247,7 +246,7 @@ class SimpleBridgeGeneratorImpl(
                 get() = includedBridges.asSequence().flatMap { it.nativeLines.asSequence() }
 
             override fun isSupported(nativeBacked: NativeBacked): Boolean =
-                    nativeBacked !in excludedClients
+                nativeBacked !in excludedClients
         }
     }
 }

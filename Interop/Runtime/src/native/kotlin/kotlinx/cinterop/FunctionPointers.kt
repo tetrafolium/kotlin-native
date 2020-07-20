@@ -16,9 +16,8 @@
 
 package kotlinx.cinterop
 
-import kotlin.native.internal.TypedIntrinsic
 import kotlin.native.internal.IntrinsicType
-import kotlin.native.internal.ExportForCompiler
+import kotlin.native.internal.TypedIntrinsic
 
 @TypedIntrinsic(IntrinsicType.INTEROP_FUNPTR_INVOKE) external operator fun <R> CPointer<CFunction<() -> R>>.invoke(): R
 

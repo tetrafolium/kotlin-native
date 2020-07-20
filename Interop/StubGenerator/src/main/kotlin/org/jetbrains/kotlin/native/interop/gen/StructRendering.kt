@@ -27,7 +27,7 @@ private fun tryRenderStruct(def: StructDef): String? {
                     offset = it.offsetBytes + it.typeSize
 
                     tryRenderVar(it.type, name)
-                            ?.plus(if (alignment == defaultAlignment) "" else "__attribute__((aligned($alignment)))")
+                        ?.plus(if (alignment == defaultAlignment) "" else "__attribute__((aligned($alignment)))")
                 }
 
                 is BitField, // TODO: tryRenderVar(it.type, name)?.plus(" : ${it.size}")
@@ -41,26 +41,25 @@ private fun tryRenderStruct(def: StructDef): String? {
 }
 
 private fun guessAlignment(offset: Long, paddedOffset: Long, defaultAlignment: Long): Long? =
-        longArrayOf(defaultAlignment, 1L, 2L, 4L, 8L, 16L, 32L).firstOrNull {
-            alignUp(offset, it) == paddedOffset
-        }
+    longArrayOf(defaultAlignment, 1L, 2L, 4L, 8L, 16L, 32L).firstOrNull {
+        alignUp(offset, it) == paddedOffset
+    }
 
 private fun alignUp(x: Long, alignment: Long): Long = (x + alignment - 1) and ((alignment - 1).inv())
 
 private fun tryRenderUnion(def: StructDef): String? =
-        if (def.members.any { it.offset != 0L }) null else buildString {
-            append("union { ")
-            def.members.forEachIndexed { index, it ->
-                val decl = when (it) {
-                    is Field -> tryRenderVar(it.type, "p$index")
-                    is BitField, is IncompleteField -> null
-                } ?: return null
+    if (def.members.any { it.offset != 0L }) null else buildString {
+        append("union { ")
+        def.members.forEachIndexed { index, it ->
+            val decl = when (it) {
+                is Field -> tryRenderVar(it.type, "p$index")
+                is BitField, is IncompleteField -> null
+            } ?: return null
 
-                append("$decl; ")
-            }
-            append("}")
-
+            append("$decl; ")
         }
+        append("}")
+    }
 
 private fun tryRenderVar(type: Type, name: String): String? = when (type) {
     CharType, is BoolType -> "char $name"

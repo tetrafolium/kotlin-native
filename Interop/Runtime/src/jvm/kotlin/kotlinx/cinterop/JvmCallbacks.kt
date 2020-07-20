@@ -52,11 +52,12 @@ private fun getVariableCType(type: KType): CType<*>? {
         LongVarOf::class -> SInt64
         CPointerVarOf::class -> Pointer
         // TODO: floats, enums.
-        else -> if (classifier.isSubclassOf(CStructVar::class)) {
-            getStructCType(classifier)
-        } else {
-            null
-        }
+        else ->
+            if (classifier.isSubclassOf(CStructVar::class)) {
+                getStructCType(classifier)
+            } else {
+                null
+            }
     }
 }
 
@@ -67,8 +68,8 @@ private fun getStructCType(structClass: KClass<*>): CType<*> = structTypeCache.c
     // so they don't require to be checked strictly.
 
     val annotations = structClass.annotations
-    val cNaturalStruct = annotations.filterIsInstance<CNaturalStruct>().firstOrNull() ?:
-            error("struct ${structClass.simpleName} has custom layout")
+    val cNaturalStruct = annotations.filterIsInstance<CNaturalStruct>().firstOrNull()
+        ?: error("struct ${structClass.simpleName} has custom layout")
 
     val propertiesByName = structClass.declaredMemberProperties.groupBy { it.name }
 
@@ -104,8 +105,8 @@ private fun getStructCType(structClass: KClass<*>): CType<*> = structTypeCache.c
 }
 
 private fun getStructValueCType(type: KType): CType<*> {
-    val structClass = type.arguments.singleOrNull()?.type?.classifier as? KClass<*> ?:
-            error("'$type' type is incomplete")
+    val structClass = type.arguments.singleOrNull()?.type?.classifier as? KClass<*>
+        ?: error("'$type' type is incomplete")
 
     return getStructCType(structClass)
 }
@@ -138,11 +139,12 @@ private fun getArgOrRetValCType(type: KType): CType<*> {
         CPointer::class -> Pointer
         // TODO: floats
         CValue::class -> getStructValueCType(type)
-        else -> if (classifier.isSubclassOf(CEnum::class)) {
-            getEnumCType(classifier)
-        } else {
-            null
-        }
+        else ->
+            if (classifier.isSubclassOf(CEnum::class)) {
+                getEnumCType(classifier)
+            } else {
+                null
+            }
     } ?: error("$type is not supported in callback signature")
 
     if (type.isMarkedNullable != (classifier == CPointer::class)) {
@@ -163,8 +165,8 @@ private fun createStaticCFunction(function: Function<*>): CPointer<CFunction<*>>
         throw IllegalArgumentException(errorMessage)
     }
 
-    val kFunction = function as? KFunction<*> ?: function.reflect() ?:
-            throw IllegalArgumentException(errorMessage)
+    val kFunction = function as? KFunction<*> ?: function.reflect()
+        ?: throw IllegalArgumentException(errorMessage)
 
     val returnType = getArgOrRetValCType(kFunction.returnType)
     val paramTypes = kFunction.parameters.map { getArgOrRetValCType(it.type) }
@@ -200,19 +202,21 @@ private val createdStaticFunctions = ConcurrentHashMap<Class<*>, CPointer<CFunct
 
 @Suppress("UNCHECKED_CAST")
 internal fun <F : Function<*>> staticCFunctionImpl(function: F) =
-        createdStaticFunctions.computeIfAbsent(function.javaClass) {
-            createStaticCFunction(function)
-        } as CPointer<CFunction<F>>
+    createdStaticFunctions.computeIfAbsent(function.javaClass) {
+        createStaticCFunction(function)
+    } as CPointer<CFunction<F>>
 
-private val invokeMethods = (0 .. 22).map { arity ->
-    Class.forName("kotlin.jvm.functions.Function$arity").getMethod("invoke",
-            *Array<Class<*>>(arity) { java.lang.Object::class.java })
+private val invokeMethods = (0..22).map { arity ->
+    Class.forName("kotlin.jvm.functions.Function$arity").getMethod(
+        "invoke",
+        *Array<Class<*>>(arity) { java.lang.Object::class.java }
+    )
 }
 
 private fun createStaticCFunctionImpl(
-        returnType: CType<Any?>,
-        paramTypes: List<CType<*>>,
-        function: Function<*>
+    returnType: CType<Any?>,
+    paramTypes: List<CType<*>>,
+    function: Function<*>
 ): NativePtr {
     val ffiCif = ffiCreateCif(returnType.ffiType, paramTypes.map { it.ffiType })
 
@@ -273,11 +277,11 @@ private inline fun Array<CType<*>>.read(args: CArrayPointer<COpaquePointerVar>, 
     this[index].read(args[index].rawValue)
 
 private inline fun ffiClosureImpl(
-        returnType: CType<Any?>,
-        crossinline invoke: (args: CArrayPointer<COpaquePointerVar>) -> Any?
+    returnType: CType<Any?>,
+    crossinline invoke: (args: CArrayPointer<COpaquePointerVar>) -> Any?
 ): FfiClosureImpl {
     // Called through [ffi_fun] when a native function created with [ffiCreateClosure] is invoked.
-    return LongConsumer {  retAndArgsRaw ->
+    return LongConsumer { retAndArgsRaw ->
         val retAndArgs = retAndArgsRaw.toCPointer<CPointerVar<*>>()!!
 
         // Pointer to memory to be filled with return value of the invoked native function:
@@ -348,9 +352,9 @@ private object Pointer : CType<CPointer<*>?>(ffiTypePointer()) {
 }
 
 private class Struct(val size: Long, val align: Int, elementTypes: List<CType<*>>) : CType<CValue<*>>(
-        ffiTypeStruct(
-                elementTypes.map { it.ffiType }
-        )
+    ffiTypeStruct(
+        elementTypes.map { it.ffiType }
+    )
 ) {
     override fun read(location: NativePtr) = interpretPointed<ByteVar>(location).readValue<CStructVar>(size, align)
 
@@ -372,7 +376,6 @@ private typealias FfiClosureImpl = LongConsumer
 private typealias UserData = FfiClosureImpl
 
 private val topLevelInitializer = loadKonanLibrary("callbacks")
-
 
 /**
  * Reference to `ffi_type` struct instance.

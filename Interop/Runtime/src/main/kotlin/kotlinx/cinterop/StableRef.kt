@@ -28,7 +28,7 @@ typealias StableObjPtr = StableRef<*>
  */
 @Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS")
 public inline class StableRef<out T : Any> @PublishedApi internal constructor(
-        private val stablePtr: COpaquePointer
+    private val stablePtr: COpaquePointer
 ) {
 
     companion object {
@@ -43,8 +43,10 @@ public inline class StableRef<out T : Any> @PublishedApi internal constructor(
          *
          * @param value must be a [value] of some [StableRef]
          */
-        @Deprecated("Use CPointer<*>.asStableRef<T>() instead", ReplaceWith("ptr.asStableRef<T>()"),
-                DeprecationLevel.ERROR)
+        @Deprecated(
+            "Use CPointer<*>.asStableRef<T>() instead", ReplaceWith("ptr.asStableRef<T>()"),
+            DeprecationLevel.ERROR
+        )
         fun fromValue(value: COpaquePointer) = value.asStableRef<Any>()
     }
     @Deprecated("Use .asCPointer() instead", ReplaceWith("this.asCPointer()"), DeprecationLevel.ERROR)
@@ -68,7 +70,6 @@ public inline class StableRef<out T : Any> @PublishedApi internal constructor(
      */
     @Suppress("UNCHECKED_CAST")
     fun get() = derefStablePointer(this.stablePtr) as T
-
 }
 
 /**

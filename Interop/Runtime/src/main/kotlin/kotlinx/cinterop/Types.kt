@@ -99,7 +99,7 @@ public abstract class CValues<T : CVariable> : CValuesRef<T>() {
             return false
         }
 
-        for (index in 0 .. thisBytes.size - 1) {
+        for (index in 0..thisBytes.size - 1) {
             if (thisBytes[index] != otherBytes[index]) {
                 return false
             }
@@ -221,7 +221,6 @@ public abstract class CVariable(rawPtr: NativePtr) : CPointed(rawPtr) {
         init {
             require(size % align == 0L)
         }
-
     }
 }
 
@@ -396,7 +395,6 @@ public var <T : Double> DoubleVarOf<T>.value: T
     get() = nativeMemUtils.getDouble(this) as T
     set(value) = nativeMemUtils.putDouble(this, value)
 
-
 public class CPointerVarOf<T : CPointer<*>>(rawPtr: NativePtr) : CVariable(rawPtr) {
     companion object : CVariable.Type(pointerSize.toLong(), pointerSize)
 }
@@ -416,7 +414,7 @@ public inline var <P : CPointer<*>> CPointerVarOf<P>.value: P?
 
 /**
  * The code or data pointed by the value of this variable.
- * 
+ *
  * @param T must not be abstract
  */
 public inline var <reified T : CPointed, reified P : CPointer<T>> CPointerVarOf<P>.pointed: T?
@@ -439,16 +437,16 @@ public inline operator fun <reified T : CVariable> CPointer<T>.get(index: Int): 
 @Suppress("NOTHING_TO_INLINE")
 @JvmName("plus\$CPointer")
 public inline operator fun <T : CPointerVarOf<*>> CPointer<T>?.plus(index: Long): CPointer<T>? =
-        interpretCPointer(this.rawValue + index * pointerSize)
+    interpretCPointer(this.rawValue + index * pointerSize)
 
 @Suppress("NOTHING_TO_INLINE")
 @JvmName("plus\$CPointer")
 public inline operator fun <T : CPointerVarOf<*>> CPointer<T>?.plus(index: Int): CPointer<T>? =
-        this + index.toLong()
+    this + index.toLong()
 
 @Suppress("NOTHING_TO_INLINE")
 public inline operator fun <T : CPointer<*>> CPointer<CPointerVarOf<T>>.get(index: Int): T? =
-        (this + index)!!.pointed.value
+    (this + index)!!.pointed.value
 
 @Suppress("NOTHING_TO_INLINE")
 public inline operator fun <T : CPointer<*>> CPointer<CPointerVarOf<T>>.set(index: Int, value: T?) {
@@ -457,7 +455,7 @@ public inline operator fun <T : CPointer<*>> CPointer<CPointerVarOf<T>>.set(inde
 
 @Suppress("NOTHING_TO_INLINE")
 public inline operator fun <T : CPointer<*>> CPointer<CPointerVarOf<T>>.get(index: Long): T? =
-        (this + index)!!.pointed.value
+    (this + index)!!.pointed.value
 
 @Suppress("NOTHING_TO_INLINE")
 public inline operator fun <T : CPointer<*>> CPointer<CPointerVarOf<T>>.set(index: Long, value: T?) {

@@ -94,7 +94,6 @@ public open class ArenaBase(private val parent: NativeFreeablePlacement = native
             chunk = interpretNullableOpaquePointed(nextChunk)
         }
     }
-
 }
 
 public class Arena(parent: NativeFreeablePlacement = nativeHeap) : ArenaBase(parent) {
@@ -107,11 +106,11 @@ public class Arena(parent: NativeFreeablePlacement = nativeHeap) : ArenaBase(par
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.alloc(): T =
-        alloc(typeOf<T>()).reinterpret()
+    alloc(typeOf<T>()).reinterpret()
 
 @PublishedApi
 internal fun NativePlacement.alloc(type: CVariable.Type): NativePointed =
-        alloc(type.size, type.align)
+    alloc(type.size, type.align)
 
 /**
  * Allocates variable of given type and initializes it applying given block.
@@ -119,7 +118,7 @@ internal fun NativePlacement.alloc(type: CVariable.Type): NativePointed =
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.alloc(initialize: T.() -> Unit): T =
-        alloc<T>().also { it.initialize() }
+    alloc<T>().also { it.initialize() }
 
 /**
  * Allocates C array of given elements type and length.
@@ -127,7 +126,7 @@ public inline fun <reified T : CVariable> NativePlacement.alloc(initialize: T.()
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Long): CArrayPointer<T> =
-        alloc(sizeOf<T>() * length, alignOf<T>()).reinterpret<T>().ptr
+    alloc(sizeOf<T>() * length, alignOf<T>()).reinterpret<T>().ptr
 
 /**
  * Allocates C array of given elements type and length.
@@ -135,18 +134,20 @@ public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Lon
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Int): CArrayPointer<T> =
-        allocArray(length.toLong())
+    allocArray(length.toLong())
 
 /**
  * Allocates C array of given elements type and length, and initializes its elements applying given block.
  *
  * @param T must not be abstract
  */
-public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Long,
-                                                              initializer: T.(index: Long)->Unit): CArrayPointer<T> {
+public inline fun <reified T : CVariable> NativePlacement.allocArray(
+    length: Long,
+    initializer: T.(index: Long) -> Unit
+): CArrayPointer<T> {
     val res = allocArray<T>(length)
 
-    (0 .. length - 1).forEach { index ->
+    (0..length - 1).forEach { index ->
         res[index].initializer(index)
     }
 
@@ -159,10 +160,11 @@ public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Lon
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.allocArray(
-        length: Int, initializer: T.(index: Int)->Unit): CArrayPointer<T> = allocArray(length.toLong()) { index ->
-            this.initializer(index.toInt())
-        }
-
+    length: Int,
+    initializer: T.(index: Int) -> Unit
+): CArrayPointer<T> = allocArray(length.toLong()) { index ->
+    this.initializer(index.toInt())
+}
 
 /**
  * Allocates C array of pointers to given elements.
@@ -179,13 +181,13 @@ public fun <T : CPointed> NativePlacement.allocArrayOfPointersTo(elements: List<
  * Allocates C array of pointers to given elements.
  */
 public fun <T : CPointed> NativePlacement.allocArrayOfPointersTo(vararg elements: T?) =
-        allocArrayOfPointersTo(listOf(*elements))
+    allocArrayOfPointersTo(listOf(*elements))
 
 /**
  * Allocates C array of given values.
  */
 public inline fun <reified T : CPointer<*>>
-        NativePlacement.allocArrayOf(vararg elements: T?): CArrayPointer<CPointerVarOf<T>> {
+NativePlacement.allocArrayOf(vararg elements: T?): CArrayPointer<CPointerVarOf<T>> {
     return allocArrayOf(listOf(*elements))
 }
 
@@ -193,7 +195,7 @@ public inline fun <reified T : CPointer<*>>
  * Allocates C array of given values.
  */
 public inline fun <reified T : CPointer<*>>
-        NativePlacement.allocArrayOf(elements: List<T?>): CArrayPointer<CPointerVarOf<T>> {
+NativePlacement.allocArrayOf(elements: List<T?>): CArrayPointer<CPointerVarOf<T>> {
 
     val res = allocArray<CPointerVarOf<T>>(elements.size)
     var index = 0
@@ -223,7 +225,7 @@ public fun NativePlacement.allocArrayOf(vararg elements: Float): CArrayPointer<F
 public fun <T : CPointed> NativePlacement.allocPointerTo() = alloc<CPointerVar<T>>()
 
 @PublishedApi
-internal class ZeroValue<T: CVariable>(private val sizeBytes: Int, private val alignBytes: Int): CValue<T>() {
+internal class ZeroValue<T : CVariable>(private val sizeBytes: Int, private val alignBytes: Int) : CValue<T>() {
     // Optimization to avoid unneeded virtual calls in base class implementation.
     override fun getPointer(scope: AutofreeScope): CPointer<T> {
         return place(interpretCPointer(scope.alloc(size, align).rawPtr)!!)
@@ -236,7 +238,6 @@ internal class ZeroValue<T: CVariable>(private val sizeBytes: Int, private val a
     override val size get() = sizeBytes
 
     override val align get() = alignBytes
-
 }
 @Suppress("NOTHING_TO_INLINE")
 public inline fun <T : CVariable> zeroValue(size: Int, align: Int): CValue<T> = ZeroValue(size, align)
@@ -264,7 +265,7 @@ public fun <T : CVariable> CPointed.readValues(size: Int, align: Int): CValues<T
 }
 
 public inline fun <reified T : CVariable> T.readValues(count: Int): CValues<T> =
-        this.readValues<T>(size = count * sizeOf<T>().toInt(), align = alignOf<T>())
+    this.readValues<T>(size = count * sizeOf<T>().toInt(), align = alignOf<T>())
 
 public fun <T : CVariable> CPointed.readValue(size: Long, align: Int): CValue<T> {
     val bytes = ByteArray(size.toInt())
@@ -291,7 +292,7 @@ public fun <T : CVariable> CPointed.readValue(size: Long, align: Int): CValue<T>
 // TODO: find better name.
 public inline fun <reified T : CStructVar> T.readValue(): CValue<T> = this.readValue(typeOf<T>())
 
-public fun <T: CVariable> CValue<T>.write(location: NativePtr) {
+public fun <T : CVariable> CValue<T>.write(location: NativePtr) {
     this.place(interpretCPointer(location)!!)
 }
 
@@ -299,9 +300,9 @@ public fun <T: CVariable> CValue<T>.write(location: NativePtr) {
 public fun <T : CVariable> CValues<T>.getBytes(): ByteArray = memScoped {
     val result = ByteArray(size)
     nativeMemUtils.getByteArray(
-            source = this@getBytes.placeTo(memScope).reinterpret<ByteVar>().pointed,
-            dest = result,
-            length = result.size
+        source = this@getBytes.placeTo(memScope).reinterpret<ByteVar>().pointed,
+        dest = result,
+        length = result.size
     )
     result
 }
@@ -345,22 +346,22 @@ fun cValuesOf(vararg elements: Byte): CValues<ByteVar> = object : CValues<ByteVa
 }
 
 public fun cValuesOf(vararg elements: Short): CValues<ShortVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun cValuesOf(vararg elements: Int): CValues<IntVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun cValuesOf(vararg elements: Long): CValues<LongVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun cValuesOf(vararg elements: Float): CValues<FloatVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun cValuesOf(vararg elements: Double): CValues<DoubleVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun <T : CPointed> cValuesOf(vararg elements: CPointer<T>?): CValues<CPointerVar<T>> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 public fun ByteArray.toCValues() = cValuesOf(*this)
 public fun ShortArray.toCValues() = cValuesOf(*this)
@@ -371,7 +372,7 @@ public fun DoubleArray.toCValues() = cValuesOf(*this)
 public fun <T : CPointed> Array<CPointer<T>?>.toCValues() = cValuesOf(*this)
 public fun <T : CPointed> List<CPointer<T>?>.toCValues() = this.toTypedArray().toCValues()
 
-private class CString(val bytes: ByteArray): CValues<ByteVar>() {
+private class CString(val bytes: ByteArray) : CValues<ByteVar>() {
     override val size get() = bytes.size + 1
     override val align get() = 1
 
@@ -403,17 +404,16 @@ public val String.utf8: CValues<ByteVar>
  * allocating memory for the array and C strings with given [AutofreeScope].
  */
 public fun List<String>.toCStringArray(autofreeScope: AutofreeScope): CPointer<CPointerVar<ByteVar>> =
-        autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
+    autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
 
 /**
  * Convert this array of Kotlin strings to C array of C strings,
  * allocating memory for the array and C strings with given [AutofreeScope].
  */
 public fun Array<String>.toCStringArray(autofreeScope: AutofreeScope): CPointer<CPointerVar<ByteVar>> =
-        autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
+    autofreeScope.allocArrayOf(this.map { it.cstr.getPointer(autofreeScope) })
 
-
-private class U16CString(val chars: CharArray): CValues<UShortVar>() {
+private class U16CString(val chars: CharArray) : CValues<UShortVar>() {
     override val size get() = 2 * (chars.size + 1)
 
     override val align get() = 2
@@ -443,7 +443,7 @@ public val String.wcstr: CValues<UShortVar>
 public val String.utf16: CValues<UShortVar>
     get() = U16CString(this.toCharArray())
 
-private class U32CString(val chars: CharArray): CValues<IntVar>() {
+private class U32CString(val chars: CharArray) : CValues<IntVar>() {
     override val size get() = 4 * (chars.size + 1)
 
     override val align get() = 4
@@ -479,7 +479,6 @@ private class U32CString(val chars: CharArray): CValues<IntVar>() {
  */
 public val String.utf32: CValues<IntVar>
     get() = U32CString(this.toCharArray())
-
 
 // TODO: optimize
 /**
@@ -562,7 +561,7 @@ public fun CPointer<IntVar>.toKStringFromUtf32(): String {
  */
 @OptIn(ExperimentalStdlibApi::class)
 @SinceKotlin("1.3")
-public fun ByteArray.toKString() : String {
+public fun ByteArray.toKString(): String {
     val realEndIndex = realEndIndex(this, 0, this.size)
     return decodeToString(0, realEndIndex)
 }
@@ -582,10 +581,10 @@ public fun ByteArray.toKString() : String {
 @OptIn(ExperimentalStdlibApi::class)
 @SinceKotlin("1.3")
 public fun ByteArray.toKString(
-        startIndex: Int = 0,
-        endIndex: Int = this.size,
-        throwOnInvalidSequence: Boolean = false
-) : String {
+    startIndex: Int = 0,
+    endIndex: Int = this.size,
+    throwOnInvalidSequence: Boolean = false
+): String {
     checkBoundsIndexes(startIndex, endIndex, this.size)
     val realEndIndex = realEndIndex(this, startIndex, endIndex)
     return decodeToString(startIndex, realEndIndex, throwOnInvalidSequence)
@@ -613,7 +612,7 @@ public class MemScope : ArenaBase() {
     val memScope: MemScope
         get() = this
 
-    val <T: CVariable> CValues<T>.ptr: CPointer<T>
+    val <T : CVariable> CValues<T>.ptr: CPointer<T>
         get() = this@ptr.getPointer(this@MemScope)
 }
 
@@ -623,7 +622,7 @@ public class MemScope : ArenaBase() {
  * Runs given [block] providing allocation of memory
  * which will be automatically disposed at the end of this scope.
  */
-public inline fun <R> memScoped(block: MemScope.()->R): R {
+public inline fun <R> memScoped(block: MemScope.() -> R): R {
     val memScope = MemScope()
     try {
         return memScope.block()

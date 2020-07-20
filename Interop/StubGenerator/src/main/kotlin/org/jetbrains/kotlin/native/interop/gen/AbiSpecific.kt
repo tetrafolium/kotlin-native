@@ -101,13 +101,13 @@ private fun Type.isIntegerLikeType(): Boolean = when (this) {
             false
         } else {
             def.size <= 4 &&
-                    def.members.all {
-                        when (it) {
-                            is BitField -> it.type.isIntegerLikeType()
-                            is Field -> it.offset == 0L && it.type.isIntegerLikeType()
-                            is IncompleteField -> false
-                        }
+                def.members.all {
+                    when (it) {
+                        is BitField -> it.type.isIntegerLikeType()
+                        is Field -> it.offset == 0L && it.type.isIntegerLikeType()
+                        is IncompleteField -> false
                     }
+                }
         }
     }
     is ObjCPointer, is PointerType, CharType, is BoolType -> true
@@ -123,8 +123,8 @@ private fun Type.hasUnalignedMembers(): Boolean = when (this) {
     is RecordType -> this.decl.def!!.let { def ->
         def.fields.any {
             !it.isAligned ||
-                    // Check members of fields too:
-                    it.type.hasUnalignedMembers()
+                // Check members of fields too:
+                it.type.hasUnalignedMembers()
         }
     }
     is ArrayType -> this.elemType.hasUnalignedMembers()

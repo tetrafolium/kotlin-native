@@ -30,7 +30,6 @@ data class Pinned<out T : Any> internal constructor(private val stablePtr: COpaq
      * Returns the underlying pinned object.
      */
     fun get(): T = @Suppress("UNCHECKED_CAST") (derefStablePointer(stablePtr) as T)
-
 }
 
 fun <T : Any> T.pin() = Pinned<T>(createStablePointer(this))
@@ -82,7 +81,7 @@ fun Pinned<DoubleArray>.addressOf(index: Int): CPointer<DoubleVar> = this.get().
 fun DoubleArray.refTo(index: Int): CValuesRef<DoubleVar> = this.usingPinned { addressOf(index) }
 
 private inline fun <T : Any, P : CPointed> T.usingPinned(
-        crossinline block: Pinned<T>.() -> CPointer<P>
+    crossinline block: Pinned<T>.() -> CPointer<P>
 ) = object : CValuesRef<P>() {
 
     override fun getPointer(scope: AutofreeScope): CPointer<P> {

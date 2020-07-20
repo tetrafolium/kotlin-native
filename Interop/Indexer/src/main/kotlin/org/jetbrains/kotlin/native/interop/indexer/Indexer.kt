@@ -26,10 +26,12 @@ private class StructDeclImpl(spelling: String, override val location: Location) 
 }
 
 private class StructDefImpl(
-        size: Long, align: Int, decl: StructDecl,
-        override val kind: Kind
+    size: Long,
+    align: Int,
+    decl: StructDecl,
+    override val kind: Kind
 ) : StructDef(
-        size, align, decl
+    size, align, decl
 ) {
     override val members = mutableListOf<StructMember>()
 }
@@ -45,9 +47,9 @@ private interface ObjCContainerImpl {
 }
 
 private class ObjCProtocolImpl(
-        name: String,
-        override val location: Location,
-        override val isForwardDeclaration: Boolean
+    name: String,
+    override val location: Location,
+    override val isForwardDeclaration: Boolean
 ) : ObjCProtocol(name), ObjCContainerImpl {
     override val protocols = mutableListOf<ObjCProtocol>()
     override val methods = mutableListOf<ObjCMethod>()
@@ -55,10 +57,10 @@ private class ObjCProtocolImpl(
 }
 
 private class ObjCClassImpl(
-        name: String,
-        override val location: Location,
-        override val isForwardDeclaration: Boolean,
-        override val binaryName: String?
+    name: String,
+    override val location: Location,
+    override val isForwardDeclaration: Boolean,
+    override val binaryName: String?
 ) : ObjCClass(name), ObjCContainerImpl {
     override val protocols = mutableListOf<ObjCProtocol>()
     override val methods = mutableListOf<ObjCMethod>()
@@ -67,7 +69,8 @@ private class ObjCClassImpl(
 }
 
 private class ObjCCategoryImpl(
-        name: String, clazz: ObjCClass
+    name: String,
+    clazz: ObjCClass
 ) : ObjCCategory(name, clazz), ObjCContainerImpl {
     override val protocols = mutableListOf<ObjCProtocol>()
     override val methods = mutableListOf<ObjCMethod>()
@@ -108,7 +111,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                 value
             }
         }
-
     }
 
     internal fun getHeaderId(file: CXFile?): HeaderId = getHeaderId(this.library, file)
@@ -175,7 +177,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private fun getStructDeclAt(
-            cursor: CValue<CXCursor>
+        cursor: CValue<CXCursor>
     ): StructDeclImpl = structRegistry.getOrPut(cursor, { createStructDecl(cursor) }) { decl ->
         val definitionCursor = clang_getCursorDefinition(cursor)
         if (clang_Cursor_isNull(definitionCursor) == 0) {
@@ -201,12 +203,12 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         val align = clang_Type_getAlignOf(type).toInt()
 
         val structDef = StructDefImpl(
-                size, align, structDecl,
-                when (cursor.kind) {
-                    CXCursorKind.CXCursor_UnionDecl -> StructDef.Kind.UNION
-                    CXCursorKind.CXCursor_StructDecl -> StructDef.Kind.STRUCT
-                    else -> error(cursor.kind)
-                }
+            size, align, structDecl,
+            when (cursor.kind) {
+                CXCursorKind.CXCursor_UnionDecl -> StructDef.Kind.UNION
+                CXCursorKind.CXCursor_StructDecl -> StructDef.Kind.STRUCT
+                else -> error(cursor.kind)
+            }
         )
 
         structDef.members += fields
@@ -225,11 +227,11 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                 } else if (clang_Cursor_isBitField(fieldCursor) == 0) {
                     val canonicalFieldType = clang_getCanonicalType(clang_getCursorType(fieldCursor))
                     Field(
-                            name,
-                            fieldType,
-                            offset,
-                            clang_Type_getSizeOf(canonicalFieldType),
-                            clang_Type_getAlignOf(canonicalFieldType)
+                        name,
+                        fieldType,
+                        offset,
+                        clang_Type_getSizeOf(canonicalFieldType),
+                        clang_Type_getAlignOf(canonicalFieldType)
                     )
                 } else {
                     val size = clang_getFieldDeclBitWidth(fieldCursor)
@@ -258,8 +260,10 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             if (clang_isCursorDefinition(definitionCursor) != 0) {
                 return getEnumDefAt(definitionCursor)
             } else {
-                TODO("support enum forward declarations: " +
-                        clang_getTypeSpelling(clang_getCursorType(cursor)).convertAndDispose())
+                TODO(
+                    "support enum forward declarations: " +
+                        clang_getTypeSpelling(clang_getCursorType(cursor)).convertAndDispose()
+                )
             }
         }
 
@@ -327,13 +331,17 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             }
         }
 
-        return objCClassRegistry.getOrPut(cursor, {
-            ObjCClassImpl(name, getLocation(cursor), isForwardDeclaration = false,
-                    binaryName = getObjCBinaryName(cursor).takeIf { it != name })
-        }) {
+        return objCClassRegistry.getOrPut(
+            cursor,
+            {
+                ObjCClassImpl(
+                    name, getLocation(cursor), isForwardDeclaration = false,
+                    binaryName = getObjCBinaryName(cursor).takeIf { it != name }
+                )
+            }
+        ) {
             addChildrenToObjCContainer(cursor, it)
         }
-
     }
 
     private fun getObjCProtocolAt(cursor: CValue<CXCursor>): ObjCProtocolImpl {
@@ -351,9 +359,12 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             }
         }
 
-        return objCProtocolRegistry.getOrPut(cursor, {
-            ObjCProtocolImpl(name, getLocation(cursor), isForwardDeclaration = false)
-        }) {
+        return objCProtocolRegistry.getOrPut(
+            cursor,
+            {
+                ObjCProtocolImpl(name, getLocation(cursor), isForwardDeclaration = false)
+            }
+        ) {
             addChildrenToObjCContainer(cursor, it)
         }
     }
@@ -361,7 +372,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     private fun getObjCBinaryName(cursor: CValue<CXCursor>): String {
         val prefix = "_OBJC_CLASS_\$_"
         val symbolName = clang_Cursor_getObjCManglings(cursor)!!.convertAndDispose()
-                .single { it.startsWith(prefix) }
+            .single { it.startsWith(prefix) }
 
         return symbolName.substring(prefix.length)
     }
@@ -381,7 +392,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             addChildrenToObjCContainer(cursor, category)
             category
         }
-
     }
 
     private fun addChildrenToObjCContainer(cursor: CValue<CXCursor>, result: ObjCContainerImpl) {
@@ -434,17 +444,17 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             }
 
             if (underlying is ObjCPointer && (name == "Class" || name == "id") ||
-                    underlying is PointerType && name == "SEL") {
+                underlying is PointerType && name == "SEL"
+            ) {
 
                 // Ignore implicit Objective-C typedefs:
                 return underlying
             }
         }
 
-
-
         if ((underlying is RecordType && underlying.decl.spelling.split(' ').last() == name) ||
-                (underlying is EnumType && underlying.def.spelling.split(' ').last() == name)) {
+            (underlying is EnumType && underlying.def.spelling.split(' ').last() == name)
+        ) {
 
             // special handling for:
             // typedef struct { ... } name;
@@ -462,7 +472,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private fun convertCursorType(cursor: CValue<CXCursor>) =
-            convertType(clang_getCursorType(cursor), clang_getDeclTypeAttributes(cursor))
+        convertType(clang_getCursorType(cursor), clang_getDeclTypeAttributes(cursor))
 
     private inline fun objCType(supplier: () -> ObjCPointer) = when (library.language) {
         Language.C -> UnsupportedType
@@ -472,7 +482,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     // We omit `const` qualifier for IntegerType and FloatingType to make `CBridgeGen` simpler.
     // See KT-28102.
     private fun String.dropConstQualifier() =
-            substringAfterLast("const ")
+        substringAfterLast("const ")
 
     private fun convertUnqualifiedPrimitiveType(type: CValue<CXType>): Type = when (type.kind) {
         CXTypeKind.CXType_Char_U, CXTypeKind.CXType_Char_S -> {
@@ -482,21 +492,21 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
 
         CXTypeKind.CXType_UChar, CXTypeKind.CXType_UShort,
         CXTypeKind.CXType_UInt, CXTypeKind.CXType_ULong, CXTypeKind.CXType_ULongLong -> IntegerType(
-                size = type.getSize().toInt(),
-                isSigned = false,
-                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+            size = type.getSize().toInt(),
+            isSigned = false,
+            spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
         )
 
         CXTypeKind.CXType_SChar, CXTypeKind.CXType_Short,
         CXTypeKind.CXType_Int, CXTypeKind.CXType_Long, CXTypeKind.CXType_LongLong -> IntegerType(
-                size = type.getSize().toInt(),
-                isSigned = true,
-                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+            size = type.getSize().toInt(),
+            isSigned = true,
+            spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
         )
 
         CXTypeKind.CXType_Float, CXTypeKind.CXType_Double -> FloatingType(
-                size = type.getSize().toInt(),
-                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+            size = type.getSize().toInt(),
+            spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
         )
 
         CXType_Unexposed -> {
@@ -585,12 +595,12 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             CXType_Pointer -> {
                 val pointeeType = clang_getPointeeType(type)
                 val pointeeIsConst =
-                        (clang_isConstQualifiedType(clang_getCanonicalType(pointeeType)) != 0)
+                    (clang_isConstQualifiedType(clang_getCanonicalType(pointeeType)) != 0)
 
                 val convertedPointeeType = convertType(pointeeType)
                 PointerType(
-                        if (convertedPointeeType == UnsupportedType) VoidType else convertedPointeeType,
-                        pointeeIsConst = pointeeIsConst
+                    if (convertedPointeeType == UnsupportedType) VoidType else convertedPointeeType,
+                    pointeeIsConst = pointeeIsConst
                 )
             }
 
@@ -629,12 +639,12 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                         //   (as opposed to `typedef NSObject* Object;`).
                         // Note: it is not yet represented as Kotlin `typealias`.
                         ObjCObjectPointer(
-                                getObjCClassAt(getTypedefUnderlyingObjCClass(declaration)),
-                                nullability,
-                                getProtocols(type)
+                            getObjCClassAt(getTypedefUnderlyingObjCClass(declaration)),
+                            nullability,
+                            getProtocols(type)
                         )
 
-                    else -> TODO("${declarationKind.toString()} ${clang_getTypeSpelling(type).convertAndDispose()}")
+                    else -> TODO("$declarationKind ${clang_getTypeSpelling(type).convertAndDispose()}")
                 }
             }
 
@@ -659,7 +669,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             CXCursorKind.CXCursor_TypedefDecl -> getTypedefUnderlyingObjCClass(underlyingTypeDecl)
             CXCursorKind.CXCursor_ObjCInterfaceDecl -> underlyingTypeDecl
             else -> TODO(
-                    """typedef = ${getCursorSpelling(typedefDecl)}
+                """typedef = ${getCursorSpelling(typedefDecl)}
                         |underlying decl kind = ${underlyingTypeDecl.kind}
                         |underlying = ${clang_getTypeSpelling(underlyingType).convertAndDispose()}""".trimMargin()
             )
@@ -667,7 +677,8 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private fun getNullability(
-            type: CValue<CXType>, typeAttributes: CValue<CXTypeAttributes>?
+        type: CValue<CXType>,
+        typeAttributes: CValue<CXTypeAttributes>?
     ): ObjCPointer.Nullability {
 
         if (typeAttributes == null) return ObjCPointer.Nullability.Unspecified
@@ -699,8 +710,10 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             // Ignore functions with long signatures since we have no basic class for such functional types in the stdlib.
             // TODO: Remove this limitation when functional types with long signatures are supported.
             if (numArgs > 22) {
-                log("Warning: cannot generate a Kotlin functional type for a pointer to a function with more than 22 parameters. " +
-                        "An opaque pointer will be used instead.")
+                log(
+                    "Warning: cannot generate a Kotlin functional type for a pointer to a function with more than 22 parameters. " +
+                        "An opaque pointer will be used instead."
+                )
                 return VoidType
             }
 
@@ -726,7 +739,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         // TODO: also use nullability attributes of parameters and return value.
 
         val functionType = convertFunctionType(pointee) as? FunctionType
-                ?: return ObjCIdType(nullability, protocols = emptyList())
+            ?: return ObjCIdType(nullability, protocols = emptyList())
 
         return ObjCBlockPointer(nullability, functionType.parameterTypes, functionType.returnType)
     }
@@ -758,10 +771,10 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private fun isTargetAttribute(cursor: CValue<CXCursor>): Boolean = clang_isAttribute(cursor.kind) != 0 &&
-            getExtentFirstToken(cursor) == TARGET_ATTRIBUTE
+        getExtentFirstToken(cursor) == TARGET_ATTRIBUTE
 
     private fun getExtentFirstToken(cursor: CValue<CXCursor>) =
-            getToken(clang_Cursor_getTranslationUnit(cursor)!!, clang_getRangeStart(clang_getCursorExtent(cursor)))
+        getToken(clang_Cursor_getTranslationUnit(cursor)!!, clang_getRangeStart(clang_getCursorExtent(cursor)))
 
     // TODO: implement with clang_getToken after updating libclang.
     private fun getToken(translationUnit: CXTranslationUnit, location: CValue<CXSourceLocation>): String? = memScoped {
@@ -784,7 +797,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
     }
 
-    fun indexDeclaration(info: CXIdxDeclInfo): Unit {
+    fun indexDeclaration(info: CXIdxDeclInfo) {
         val cursor = info.cursor.readValue()
         val entityInfo = info.entityInfo!!.pointed
         val entityName = entityInfo.name?.toKString()
@@ -826,9 +839,9 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                     // Top-level variable.
                     globalById.getOrPut(getDeclarationId(cursor)) {
                         GlobalDecl(
-                                name = entityName!!,
-                                type = convertCursorType(cursor),
-                                isConst = clang_isConstQualifiedType(clang_getCursorType(cursor)) != 0
+                            name = entityName!!,
+                            type = convertCursorType(cursor),
+                            isConst = clang_isConstQualifiedType(clang_getCursorType(cursor)) != 0
                         )
                     }
                 }
@@ -937,14 +950,14 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
 
         return ObjCMethod(
-                selector, encoding, parameters, returnType,
-                isVariadic = clang_Cursor_isVariadic(cursor) != 0,
-                isClass = isClass,
-                nsConsumesSelf = clang_Cursor_isObjCConsumingSelfMethod(cursor) != 0,
-                nsReturnsRetained = clang_Cursor_isObjCReturningRetainedMethod(cursor) != 0,
-                isOptional = (clang_Cursor_isObjCOptional(cursor) != 0),
-                isInit = (clang_Cursor_isObjCInitMethod(cursor) != 0),
-                isExplicitlyDesignatedInitializer = hasAttribute(cursor, OBJC_DESGINATED_INITIALIZER)
+            selector, encoding, parameters, returnType,
+            isVariadic = clang_Cursor_isVariadic(cursor) != 0,
+            isClass = isClass,
+            nsConsumesSelf = clang_Cursor_isObjCConsumingSelfMethod(cursor) != 0,
+            nsReturnsRetained = clang_Cursor_isObjCReturningRetainedMethod(cursor) != 0,
+            isOptional = (clang_Cursor_isObjCOptional(cursor) != 0),
+            isInit = (clang_Cursor_isObjCInitMethod(cursor) != 0),
+            isExplicitlyDesignatedInitializer = hasAttribute(cursor, OBJC_DESGINATED_INITIALIZER)
         )
     }
 
@@ -963,8 +976,10 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             val argCursor = clang_Cursor_getArgument(cursor, it)
             val argName = getCursorSpelling(argCursor)
             val type = convertCursorType(argCursor)
-            Parameter(argName, type,
-                    nsConsumed = hasAttribute(argCursor, NS_CONSUMED))
+            Parameter(
+                argName, type,
+                nsConsumed = hasAttribute(argCursor, NS_CONSUMED)
+            )
         }
         return args
     }
@@ -984,7 +999,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
         return result
     }
-
 }
 
 fun buildNativeIndexImpl(library: NativeLibrary, verbose: Boolean): IndexerResult {
@@ -996,8 +1010,8 @@ fun buildNativeIndexImpl(library: NativeLibrary, verbose: Boolean): IndexerResul
 private fun indexDeclarations(nativeIndex: NativeIndexImpl): CompilationWithPCH {
     withIndex { index ->
         val translationUnit = nativeIndex.library.copyWithArgsForPCH().parse(
-                index,
-                options = CXTranslationUnit_DetailedPreprocessingRecord or CXTranslationUnit_ForSerialization
+            index,
+            options = CXTranslationUnit_DetailedPreprocessingRecord or CXTranslationUnit_ForSerialization
         )
         try {
             translationUnit.ensureNoCompileErrors()
@@ -1010,19 +1024,22 @@ private fun indexDeclarations(nativeIndex: NativeIndexImpl): CompilationWithPCH 
                 nativeIndex.getHeaderId(it)
             }
 
-            indexTranslationUnit(index, translationUnit, 0, object : Indexer {
-                override fun indexDeclaration(info: CXIdxDeclInfo) {
-                    val file = memScoped {
-                        val fileVar = alloc<CXFileVar>()
-                        clang_indexLoc_getFileLocation(info.loc.readValue(), null, fileVar.ptr, null, null, null)
-                        fileVar.value
-                    }
+            indexTranslationUnit(
+                index, translationUnit, 0,
+                object : Indexer {
+                    override fun indexDeclaration(info: CXIdxDeclInfo) {
+                        val file = memScoped {
+                            val fileVar = alloc<CXFileVar>()
+                            clang_indexLoc_getFileLocation(info.loc.readValue(), null, fileVar.ptr, null, null, null)
+                            fileVar.value
+                        }
 
-                    if (file in headers) {
-                        nativeIndex.indexDeclaration(info)
+                        if (file in headers) {
+                            nativeIndex.indexDeclaration(info)
+                        }
                     }
                 }
-            })
+            )
 
             visitChildren(clang_getTranslationUnitCursor(translationUnit)) { cursor, _ ->
                 val file = getContainingFile(cursor)

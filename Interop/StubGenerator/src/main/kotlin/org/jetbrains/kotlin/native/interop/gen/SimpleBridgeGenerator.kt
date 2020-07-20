@@ -58,11 +58,11 @@ interface SimpleBridgeGenerator {
      * @param block produces native code lines into the builder and returns the expression to be used as the result.
      */
     fun kotlinToNative(
-            nativeBacked: NativeBacked,
-            returnType: BridgedType,
-            kotlinValues: List<BridgeTypedKotlinValue>,
-            independent: Boolean,
-            block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
+        nativeBacked: NativeBacked,
+        returnType: BridgedType,
+        kotlinValues: List<BridgeTypedKotlinValue>,
+        independent: Boolean,
+        block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
     ): KotlinExpression
 
     /**
@@ -70,16 +70,16 @@ interface SimpleBridgeGenerator {
      * use inside the Kotlin code produced by [block] and then return the result back.
      */
     fun nativeToKotlin(
-            nativeBacked: NativeBacked,
-            returnType: BridgedType,
-            nativeValues: List<BridgeTypedNativeValue>,
-            block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
+        nativeBacked: NativeBacked,
+        returnType: BridgedType,
+        nativeValues: List<BridgeTypedNativeValue>,
+        block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
     ): NativeExpression
 
     fun insertNativeBridge(
-            nativeBacked: NativeBacked,
-            kotlinLines: List<String>,
-            nativeLines: List<String>
+        nativeBacked: NativeBacked,
+        kotlinLines: List<String>,
+        nativeLines: List<String>
     )
 
     /**
@@ -98,4 +98,3 @@ interface NativeBridges {
     val kotlinLines: Sequence<String>
     val nativeLines: Sequence<String>
 }
-

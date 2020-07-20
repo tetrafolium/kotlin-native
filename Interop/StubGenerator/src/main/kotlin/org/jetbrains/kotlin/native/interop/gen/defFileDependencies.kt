@@ -34,7 +34,7 @@ fun defFileDependencies(args: Array<String>) {
 }
 
 private fun makeDependencyAssigner(targets: List<String>, defFiles: List<File>) =
-        CompositeDependencyAssigner(targets.map { makeDependencyAssignerForTarget(it, defFiles) })
+    CompositeDependencyAssigner(targets.map { makeDependencyAssignerForTarget(it, defFiles) })
 
 private fun makeDependencyAssignerForTarget(target: String, defFiles: List<File>): SingleTargetDependencyAssigner {
     val tool = prepareTool(target, KotlinPlatform.NATIVE)
@@ -42,10 +42,10 @@ private fun makeDependencyAssignerForTarget(target: String, defFiles: List<File>
     cinteropArguments.argParser.parse(arrayOf())
     val libraries = defFiles.associateWith {
         buildNativeLibrary(
-                tool,
-                DefFile(it, tool.substitutions),
-                cinteropArguments,
-                ImportsImpl(emptyMap())
+            tool,
+            DefFile(it, tool.substitutions),
+            cinteropArguments,
+            ImportsImpl(emptyMap())
         ).getHeaderPaths()
     }
     return SingleTargetDependencyAssigner(libraries)
@@ -88,7 +88,7 @@ private class CompositeDependencyAssigner(val dependencyAssigners: List<Dependen
     override fun getReady(): Map<File, Set<String>> {
         return dependencyAssigners.map { it.getReady() }.reduce { left, right ->
             (left.keys intersect right.keys)
-                    .associateWith { left.getValue(it) union right.getValue(it) }
+                .associateWith { left.getValue(it) union right.getValue(it) }
         }.also {
             require(it.isNotEmpty()) { "incompatible dependencies" } // TODO: add more info.
         }
@@ -100,7 +100,7 @@ private class CompositeDependencyAssigner(val dependencyAssigners: List<Dependen
 }
 
 private class SingleTargetDependencyAssigner(
-        defFilesToHeaders: Map<File, NativeLibraryHeaders<String>>
+    defFilesToHeaders: Map<File, NativeLibraryHeaders<String>>
 ) : DependencyAssigner {
     private val pendingDefFilesToHeaders = defFilesToHeaders.toMutableMap()
 
@@ -117,8 +117,10 @@ private class SingleTargetDependencyAssigner(
         }
 
         if (unownedHeadersToDefFiles.isNotEmpty()) {
-            error("Unowned headers:\n" +
-                    unownedHeadersToDefFiles.entries.joinToString("\n") { "${it.key}\n  imported by: ${it.value.name}" })
+            error(
+                "Unowned headers:\n" +
+                    unownedHeadersToDefFiles.entries.joinToString("\n") { "${it.key}\n  imported by: ${it.value.name}" }
+            )
         }
     }
 
@@ -132,7 +134,7 @@ private class SingleTargetDependencyAssigner(
 
             headers@for (header in (headers.ownHeaders + headers.importedHeaders)) {
                 val dependency = processedHeadersToDefFiles[header]
-                        ?: if (header in headers.ownHeaders) continue@headers else continue@defFiles
+                    ?: if (header in headers.ownHeaders) continue@headers else continue@defFiles
 
                 depends.add(dependency.nameWithoutExtension)
             }

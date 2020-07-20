@@ -44,22 +44,22 @@ class BridgeGenerationComponentsBuilder {
 
     fun build(): BridgeGenerationComponents = object : BridgeGenerationComponents {
         override val getterToBridgeInfo =
-                this@BridgeGenerationComponentsBuilder.getterToBridgeInfo.toMap()
+            this@BridgeGenerationComponentsBuilder.getterToBridgeInfo.toMap()
 
         override val setterToBridgeInfo =
-                this@BridgeGenerationComponentsBuilder.setterToBridgeInfo.toMap()
+            this@BridgeGenerationComponentsBuilder.setterToBridgeInfo.toMap()
 
         override val enumToTypeMirror =
-                this@BridgeGenerationComponentsBuilder.enumToTypeMirror.toMap()
+            this@BridgeGenerationComponentsBuilder.enumToTypeMirror.toMap()
 
         override val wCStringParameters: Set<FunctionParameterStub> =
-                this@BridgeGenerationComponentsBuilder.wCStringParameters.toSet()
+            this@BridgeGenerationComponentsBuilder.wCStringParameters.toSet()
 
         override val cStringParameters: Set<FunctionParameterStub> =
-                this@BridgeGenerationComponentsBuilder.cStringParameters.toSet()
+            this@BridgeGenerationComponentsBuilder.cStringParameters.toSet()
 
         override val arrayGetterInfo: Map<PropertyAccessor.Getter, BridgeGenerationInfo> =
-                this@BridgeGenerationComponentsBuilder.arrayGetterBridgeInfo.toMap()
+            this@BridgeGenerationComponentsBuilder.arrayGetterBridgeInfo.toMap()
     }
 }
 
@@ -137,7 +137,7 @@ internal interface StubElementBuilder {
 }
 
 class StubsBuildingContextImpl(
-        private val stubIrContext: StubIrContext
+    private val stubIrContext: StubIrContext
 ) : StubsBuildingContext {
 
     override val configuration: InteropConfiguration = stubIrContext.configuration
@@ -152,7 +152,7 @@ class StubsBuildingContextImpl(
     override fun isOverloading(func: FunctionDecl) = !uniqFunctions.add(func.name) // TODO: params & return type.
 
     override fun generateNextUniqueId(prefix: String) =
-            prefix + pkgName.replace('.', '_') + theCounter++
+        prefix + pkgName.replace('.', '_') + theCounter++
 
     override fun mirror(type: Type): TypeMirror = mirror(declarationMapper, type)
 
@@ -186,11 +186,12 @@ class StubsBuildingContextImpl(
             val baseName = structDecl.kotlinName
             val pkg = when (platform) {
                 KotlinPlatform.JVM -> pkgName
-                KotlinPlatform.NATIVE -> if (structDecl.def == null) {
-                    cnamesStructsPackageName // to be imported as forward declaration.
-                } else {
-                    getPackageFor(structDecl)
-                }
+                KotlinPlatform.NATIVE ->
+                    if (structDecl.def == null) {
+                        cnamesStructsPackageName // to be imported as forward declaration.
+                    } else {
+                        getPackageFor(structDecl)
+                    }
             }
             return Classifier.topLevel(pkg, baseName)
         }
@@ -211,7 +212,7 @@ class StubsBuildingContextImpl(
     }
 
     override val macroConstantsByName: Map<String, MacroDef> =
-            (nativeIndex.macroConstants + nativeIndex.wrappedMacros).associateBy { it.name }
+        (nativeIndex.macroConstants + nativeIndex.wrappedMacros).associateBy { it.name }
 
     /**
      * The name to be used for this enum in Kotlin
@@ -220,10 +221,9 @@ class StubsBuildingContextImpl(
         get() = if (spelling.startsWith("enum ")) {
             spelling.substringAfter(' ')
         } else {
-            assert (!isAnonymous)
+            assert(!isAnonymous)
             spelling
         }
-
 
     private val pkgName: String
         get() = configuration.pkgName
@@ -267,10 +267,10 @@ class StubsBuildingContextImpl(
 }
 
 data class StubIrBuilderResult(
-        val stubs: SimpleStubContainer,
-        val declarationMapper: DeclarationMapper,
-        val bridgeGenerationComponents: BridgeGenerationComponents,
-        val wrapperGenerationComponents: WrapperGenerationComponents
+    val stubs: SimpleStubContainer,
+    val declarationMapper: DeclarationMapper,
+    val bridgeGenerationComponents: BridgeGenerationComponents,
+    val wrapperGenerationComponents: WrapperGenerationComponents
 )
 
 /**
@@ -290,7 +290,7 @@ class StubIrBuilder(private val context: StubIrContext) {
     private fun addStubs(stubs: List<StubIrElement>) = stubs.forEach(this::addStub)
 
     private fun addStub(stub: StubIrElement) {
-        when(stub) {
+        when (stub) {
             is ClassStub -> classes += stub
             is FunctionStub -> functions += stub
             is PropertyStub -> globals += stub
@@ -310,7 +310,7 @@ class StubIrBuilder(private val context: StubIrContext) {
 
     fun build(): StubIrBuilderResult {
         nativeIndex.objCProtocols.filter { !it.isForwardDeclaration }.forEach { generateStubsForObjCProtocol(it) }
-        nativeIndex.objCClasses.filter { !it.isForwardDeclaration && !it.isNSStringSubclass()} .forEach { generateStubsForObjCClass(it) }
+        nativeIndex.objCClasses.filter { !it.isForwardDeclaration && !it.isNSStringSubclass() }.forEach { generateStubsForObjCClass(it) }
         nativeIndex.objCCategories.filter { !it.clazz.isNSStringSubclass() }.forEach { generateStubsForObjCCategory(it) }
         nativeIndex.structs.forEach { generateStubsForStruct(it) }
         nativeIndex.enums.forEach { generateStubsForEnum(it) }
@@ -322,18 +322,18 @@ class StubIrBuilder(private val context: StubIrContext) {
 
         val meta = StubContainerMeta()
         val stubs = SimpleStubContainer(
-                meta,
-                classes.toList(),
-                functions.toList(),
-                globals.toList(),
-                typealiases.toList(),
-                containers.toList()
+            meta,
+            classes.toList(),
+            functions.toList(),
+            globals.toList(),
+            typealiases.toList(),
+            containers.toList()
         )
         return StubIrBuilderResult(
-                stubs,
-                buildingContext.declarationMapper,
-                buildingContext.bridgeComponentsBuilder.build(),
-                buildingContext.wrapperComponentsBuilder.build()
+            stubs,
+            buildingContext.declarationMapper,
+            buildingContext.bridgeComponentsBuilder.build(),
+            buildingContext.wrapperComponentsBuilder.build()
         )
     }
 

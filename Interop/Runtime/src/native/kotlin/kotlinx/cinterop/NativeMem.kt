@@ -17,9 +17,8 @@
 package kotlinx.cinterop
 
 import kotlin.native.*
-import kotlin.native.internal.Intrinsic
-import kotlin.native.internal.TypedIntrinsic
 import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
 
 @PublishedApi
 internal inline val pointerSize: Int
@@ -97,7 +96,7 @@ internal object nativeMemUtils {
     }
 
     // TODO: optimize
-    fun zeroMemory(dest: NativePointed, length: Int): Unit {
+    fun zeroMemory(dest: NativePointed, length: Int) {
         val destArray = dest.reinterpret<ByteVar>().ptr
         var index = 0
         while (index < length) {
@@ -107,7 +106,7 @@ internal object nativeMemUtils {
     }
 
     // TODO: optimize
-    fun copyMemory(dest: NativePointed, length: Int, src: NativePointed): Unit {
+    fun copyMemory(dest: NativePointed, length: Int, src: NativePointed) {
         val destArray = dest.reinterpret<ByteVar>().ptr
         val srcArray = src.reinterpret<ByteVar>().ptr
         var index = 0

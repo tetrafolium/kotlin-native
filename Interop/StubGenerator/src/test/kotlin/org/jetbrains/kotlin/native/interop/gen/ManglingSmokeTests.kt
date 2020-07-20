@@ -40,12 +40,12 @@ class ManglingSmokeTests {
         val cBoolTypedef = Typedef(TypedefDef(CBoolType, "MyBool", fakeLocation))
 
         val functions = listOf(
-                FunctionDecl("a", listOf(Parameter("a", CBoolType, false)), CBoolType, "", false, false),
-                FunctionDecl("a", listOf(Parameter("b", CBoolType, false)), cBoolTypedef, "", false, false),
-                FunctionDecl("a", listOf(Parameter("a", cBoolTypedef, false)), CBoolType, "", false, false),
-                FunctionDecl("a", listOf(Parameter("a", cBoolTypedef, false)), cBoolTypedef, "", false, false)
+            FunctionDecl("a", listOf(Parameter("a", CBoolType, false)), CBoolType, "", false, false),
+            FunctionDecl("a", listOf(Parameter("b", CBoolType, false)), cBoolTypedef, "", false, false),
+            FunctionDecl("a", listOf(Parameter("a", cBoolTypedef, false)), CBoolType, "", false, false),
+            FunctionDecl("a", listOf(Parameter("a", cBoolTypedef, false)), cBoolTypedef, "", false, false)
         )
-        with (mangler) {
+        with(mangler) {
             functions.reduce { left, right ->
                 assertEquals(left.uniqueSymbolName, right.uniqueSymbolName)
                 left
@@ -58,7 +58,7 @@ class ManglingSmokeTests {
 
         val functionDeclarationA = FunctionDecl("a", listOf(Parameter("a", CBoolType, false)), CBoolType, "", false, false)
         val functionDeclarationB = FunctionDecl("a", listOf(Parameter("b", CBoolType, false)), CBoolType, "", false, false)
-        with (mangler) {
+        with(mangler) {
             assertEquals(functionDeclarationA.uniqueSymbolName, functionDeclarationB.uniqueSymbolName)
         }
     }
@@ -67,7 +67,7 @@ class ManglingSmokeTests {
     fun `parameter type name embedded in function name`() {
         val functionDeclarationA = FunctionDecl("a", listOf(Parameter("a", CharType, false)), CBoolType, "", false, false)
         val functionDeclarationB = FunctionDecl("achar", emptyList(), CBoolType, "", false, false)
-        with (mangler) {
+        with(mangler) {
             assertNotEquals(functionDeclarationA.uniqueSymbolName, functionDeclarationB.uniqueSymbolName)
         }
     }
@@ -76,15 +76,19 @@ class ManglingSmokeTests {
     fun `objc methods with same names but different parameters`() {
         val nsStringPtrType = ObjCObjectPointer(nsStringClass, ObjCPointer.Nullability.Nullable, listOf())
 
-        val methodA = ObjCMethod("name::", "v28@0:8@16i24",
-                listOf(Parameter("name", nsStringPtrType, false), Parameter("age", int32Type, false)), VoidType,
-                false, false, false, false, false, false, false)
+        val methodA = ObjCMethod(
+            "name::", "v28@0:8@16i24",
+            listOf(Parameter("name", nsStringPtrType, false), Parameter("age", int32Type, false)), VoidType,
+            false, false, false, false, false, false, false
+        )
 
-        val methodB = ObjCMethod("name:", "v20@0:8i16",
-                listOf(Parameter("age", int32Type, false)), VoidType,
-                false, false, false, false, false, false, false)
+        val methodB = ObjCMethod(
+            "name:", "v20@0:8i16",
+            listOf(Parameter("age", int32Type, false)), VoidType,
+            false, false, false, false, false, false, false
+        )
 
-        with (mangler) {
+        with(mangler) {
             assertNotEquals(methodA.uniqueSymbolName, methodB.uniqueSymbolName)
         }
     }
@@ -93,15 +97,19 @@ class ManglingSmokeTests {
     fun `objc methods with same names but different parameter names`() {
         val nsStringPtrType = ObjCObjectPointer(nsStringClass, ObjCPointer.Nullability.Nullable, listOf())
 
-        val methodA = ObjCMethod("desc:a:", "v28@0:8@16i24",
-                listOf(Parameter("name", int32Type, false), Parameter("a", int32Type, false)), VoidType,
-                false, false, false, false, false, false, false)
+        val methodA = ObjCMethod(
+            "desc:a:", "v28@0:8@16i24",
+            listOf(Parameter("name", int32Type, false), Parameter("a", int32Type, false)), VoidType,
+            false, false, false, false, false, false, false
+        )
 
-        val methodB = ObjCMethod("desc:b:", "v28@0:8@16i24",
-                listOf(Parameter("name", int32Type, false), Parameter("b", int32Type, false)), VoidType,
-                false, false, false, false, false, false, false)
+        val methodB = ObjCMethod(
+            "desc:b:", "v28@0:8@16i24",
+            listOf(Parameter("name", int32Type, false), Parameter("b", int32Type, false)), VoidType,
+            false, false, false, false, false, false, false
+        )
 
-        with (mangler) {
+        with(mangler) {
             assertNotEquals(methodA.uniqueSymbolName, methodB.uniqueSymbolName)
         }
     }
@@ -110,7 +118,7 @@ class ManglingSmokeTests {
     fun `struct smoke`() {
         val structA = FakeStructDecl("struct_name")
         val structB = FakeStructDecl("structName")
-        with (mangler) {
+        with(mangler) {
             assertNotEquals(structA.uniqueSymbolName, structB.uniqueSymbolName)
         }
     }
@@ -119,7 +127,7 @@ class ManglingSmokeTests {
     fun `constants smoke`() {
         val constant = IntegerConstantDef("DEBUG", CBoolType, 1)
         val macro = WrappedMacroDef("DEBUG", CBoolType)
-        with (mangler) {
+        with(mangler) {
             assertEquals(constant.uniqueSymbolName, macro.uniqueSymbolName)
         }
     }
@@ -135,8 +143,8 @@ class ManglingSmokeTests {
         val declaration = WrappedMacroDef("DEBUG", CBoolType)
 
         assertNotEquals(
-                with(manglerA) { declaration.uniqueSymbolName },
-                with(manglerB) { declaration.uniqueSymbolName }
+            with(manglerA) { declaration.uniqueSymbolName },
+            with(manglerB) { declaration.uniqueSymbolName }
         )
     }
 
@@ -150,13 +158,15 @@ class ManglingSmokeTests {
         val manglerA = KotlinLikeInteropMangler(classA)
         val manglerB = KotlinLikeInteropMangler(classB)
 
-        val getter = ObjCMethod("size", "Q16@0:8", emptyList(), IntegerType(64, false, "unsigned long"),
-                false, false, false, false, false, false, false)
+        val getter = ObjCMethod(
+            "size", "Q16@0:8", emptyList(), IntegerType(64, false, "unsigned long"),
+            false, false, false, false, false, false, false
+        )
         val property = ObjCProperty("size", getter, null)
 
         assertNotEquals(
-                with(manglerA) { property.uniqueSymbolName },
-                with(manglerB) { property.uniqueSymbolName }
+            with(manglerA) { property.uniqueSymbolName },
+            with(manglerB) { property.uniqueSymbolName }
         )
     }
 }

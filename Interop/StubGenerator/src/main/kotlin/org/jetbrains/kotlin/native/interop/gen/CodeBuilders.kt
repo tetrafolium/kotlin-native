@@ -23,7 +23,7 @@ interface NativeScope {
 class NativeCodeBuilder(val scope: NativeScope) {
     val lines = mutableListOf<String>()
 
-    fun out(line: String): Unit {
+    fun out(line: String) {
         lines.add(line)
     }
 }

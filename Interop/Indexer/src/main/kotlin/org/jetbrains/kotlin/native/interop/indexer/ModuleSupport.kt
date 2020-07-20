@@ -32,7 +32,7 @@ private fun buildModulesInfo(index: CXIndex, modules: List<String>, modulesASTFi
     return ModulesInfo(topLevelHeaders.toList(), ownHeaders)
 }
 
-internal open class ModularCompilation(compilation: Compilation): Compilation by compilation, Disposable {
+internal open class ModularCompilation(compilation: Compilation) : Compilation by compilation, Disposable {
 
     companion object {
         private const val moduleCacheFlag = "-fmodules-cache-path="
@@ -45,7 +45,7 @@ internal open class ModularCompilation(compilation: Compilation): Compilation by
     }
 
     override val compilerArgs: List<String> = compilation.compilerArgs +
-            listOfNotNull("-fmodules", moduleCacheDirectory?.let { "$moduleCacheFlag${it.absolutePath}" })
+        listOfNotNull("-fmodules", moduleCacheDirectory?.let { "$moduleCacheFlag${it.absolutePath}" })
 
     override fun dispose() {
         moduleCacheDirectory?.deleteRecursively()
@@ -54,23 +54,26 @@ internal open class ModularCompilation(compilation: Compilation): Compilation by
 
 private fun getModulesASTFiles(index: CXIndex, compilation: ModularCompilation, modules: List<String>): List<String> {
     val compilationWithImports = compilation.copy(
-            additionalPreambleLines = modules.map { "@import $it;" } + compilation.additionalPreambleLines
+        additionalPreambleLines = modules.map { "@import $it;" } + compilation.additionalPreambleLines
     )
 
     val result = linkedSetOf<String>()
 
     val translationUnit = compilationWithImports.parse(
-            index,
-            options = CXTranslationUnit_DetailedPreprocessingRecord
+        index,
+        options = CXTranslationUnit_DetailedPreprocessingRecord
     )
     try {
         translationUnit.ensureNoCompileErrors()
 
-        indexTranslationUnit(index, translationUnit, 0, object : Indexer {
-            override fun importedASTFile(info: CXIdxImportedASTFileInfo) {
-                result += info.file!!.canonicalPath
+        indexTranslationUnit(
+            index, translationUnit, 0,
+            object : Indexer {
+                override fun importedASTFile(info: CXIdxImportedASTFileInfo) {
+                    result += info.file!!.canonicalPath
+                }
             }
-        })
+        )
     } finally {
         clang_disposeTranslationUnit(translationUnit)
     }
@@ -78,40 +81,42 @@ private fun getModulesASTFiles(index: CXIndex, compilation: ModularCompilation, 
 }
 
 private fun getModulesHeaders(
-        index: CXIndex,
-        translationUnit: CXTranslationUnit,
-        modules: Set<String>,
-        topLevelHeaders: LinkedHashSet<String>
+    index: CXIndex,
+    translationUnit: CXTranslationUnit,
+    modules: Set<String>,
+    topLevelHeaders: LinkedHashSet<String>
 ): Set<CXFile> {
     val nonModularIncludes = mutableMapOf<CXFile, MutableSet<CXFile>>()
     val result = mutableSetOf<CXFile>()
 
-    indexTranslationUnit(index, translationUnit, 0, object : Indexer {
-        override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
-            val file = info.file!!
-            val includer = clang_indexLoc_getCXSourceLocation(info.hashLoc.readValue()).getContainingFile()
+    indexTranslationUnit(
+        index, translationUnit, 0,
+        object : Indexer {
+            override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
+                val file = info.file!!
+                val includer = clang_indexLoc_getCXSourceLocation(info.hashLoc.readValue()).getContainingFile()
 
-            if (includer == null) {
-                // i.e. the header is included by the module itself.
-                topLevelHeaders += file.path
-            }
-
-            val module = clang_getModuleForFile(translationUnit, file)
-
-            if (module != null) {
-                val moduleWithParents = generateSequence(module, { clang_Module_getParent(it) }).map {
-                    clang_Module_getFullName(it).convertAndDispose()
+                if (includer == null) {
+                    // i.e. the header is included by the module itself.
+                    topLevelHeaders += file.path
                 }
 
-                if (moduleWithParents.any { it in modules }) {
-                    result += file
+                val module = clang_getModuleForFile(translationUnit, file)
+
+                if (module != null) {
+                    val moduleWithParents = generateSequence(module, { clang_Module_getParent(it) }).map {
+                        clang_Module_getFullName(it).convertAndDispose()
+                    }
+
+                    if (moduleWithParents.any { it in modules }) {
+                        result += file
+                    }
+                } else if (includer != null) {
+                    nonModularIncludes.getOrPut(includer, { mutableSetOf() }) += file
                 }
-            } else if (includer != null) {
-                nonModularIncludes.getOrPut(includer, { mutableSetOf() }) += file
             }
         }
-    })
-
+    )
 
     // There are cases when non-modular includes should also be considered as a part of module. For example:
     // 1. Some module maps are broken,

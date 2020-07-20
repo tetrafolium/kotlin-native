@@ -18,11 +18,11 @@
 
 package kotlinx.cinterop
 import kotlin.native.*
-import kotlin.native.internal.ExportTypeInfo
 import kotlin.native.internal.ExportForCppRuntime
-import kotlin.native.internal.TypedIntrinsic
-import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.ExportTypeInfo
 import kotlin.native.internal.FilterExceptions
+import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
 
 interface ObjCObject
 interface ObjCClass : ObjCObject
@@ -40,13 +40,13 @@ abstract class ObjCObjectBase protected constructor() : ObjCObject {
     @Retention(AnnotationRetention.SOURCE)
     annotation class OverrideInit
 }
-abstract class ObjCObjectBaseMeta protected constructor() : ObjCObjectBase(), ObjCObjectMeta {}
+abstract class ObjCObjectBaseMeta protected constructor() : ObjCObjectBase(), ObjCObjectMeta
 
 fun optional(): Nothing = throw RuntimeException("Do not call me!!!")
 
 @Deprecated(
-        "Add @OverrideInit to constructor to make it override Objective-C initializer",
-        level = DeprecationLevel.ERROR
+    "Add @OverrideInit to constructor to make it override Objective-C initializer",
+    level = DeprecationLevel.ERROR
 )
 @TypedIntrinsic(IntrinsicType.OBJC_INIT_BY)
 external fun <T : ObjCObjectBase> T.initBy(constructorCall: T): T
@@ -82,7 +82,7 @@ inline fun <reified T : Any> unwrapKotlinObjectHolder(holder: Any?): T {
 
 @PublishedApi
 @SymbolName("Kotlin_Interop_unwrapKotlinObjectHolder")
-external internal fun unwrapKotlinObjectHolderImpl(ptr: NativePtr): Any
+internal external fun unwrapKotlinObjectHolderImpl(ptr: NativePtr): Any
 
 class ObjCObjectVar<T>(rawPtr: NativePtr) : CVariable(rawPtr) {
     companion object : CVariable.Type(pointerSize.toLong(), pointerSize)
@@ -137,7 +137,8 @@ private fun getObjCClassByName(name: NativePtr): NativePtr {
     val result = objc_lookUpClass(name)
     if (result == nativeNullPtr) {
         val className = interpretCPointer<ByteVar>(name)!!.toKString()
-        val message = """Objective-C class '$className' not found.
+        val message =
+            """Objective-C class '$className' not found.
             |Ensure that the containing framework or library was linked.""".trimMargin()
 
         throw RuntimeException(message)
@@ -168,7 +169,6 @@ internal external fun getMessenger(superClass: NativePtr): COpaquePointer?
 @PublishedApi
 @TypedIntrinsic(IntrinsicType.OBJC_GET_MESSENGER_STRET)
 internal external fun getMessengerStret(superClass: NativePtr): COpaquePointer?
-
 
 internal class ObjCWeakReferenceImpl : kotlin.native.ref.WeakReferenceImpl() {
     @SymbolName("Konan_ObjCInterop_getWeakReference")

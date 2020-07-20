@@ -10,7 +10,7 @@ private val StubOrigin.ObjCMethod.isOptional: Boolean
     get() = container is ObjCProtocol && method.isOptional
 
 fun FunctionStub.isOptionalObjCMethod(): Boolean = this.origin is StubOrigin.ObjCMethod &&
-        this.origin.isOptional
+    this.origin.isOptional
 
 val StubContainer.isInterface: Boolean
     get() = if (this is ClassStub.Simple) {
@@ -42,11 +42,11 @@ fun StubContainer.computeNamesToBeDeclared(pkgName: String): List<String> {
     }.onEach { checkPackageCorrectness(it) }.map { it.topLevelName }
 
     val typealiasNames = typealiases
-            .onEach { checkPackageCorrectness(it.alias) }
-            .map { it.alias.topLevelName }
+        .onEach { checkPackageCorrectness(it.alias) }
+        .map { it.alias.topLevelName }
 
     val namesFromNestedContainers = simpleContainers
-            .flatMap { it.computeNamesToBeDeclared(pkgName) }
+        .flatMap { it.computeNamesToBeDeclared(pkgName) }
 
     return classNames + typealiasNames + namesFromNestedContainers
 }
@@ -54,11 +54,12 @@ fun StubContainer.computeNamesToBeDeclared(pkgName: String): List<String> {
 val StubContainer.defaultMemberModality: MemberStubModality
     get() = when (this) {
         is SimpleStubContainer -> MemberStubModality.FINAL
-        is ClassStub.Simple -> if (this.modality == ClassStubModality.INTERFACE) {
-            MemberStubModality.ABSTRACT
-        } else {
-            MemberStubModality.FINAL
-        }
+        is ClassStub.Simple ->
+            if (this.modality == ClassStubModality.INTERFACE) {
+                MemberStubModality.ABSTRACT
+            } else {
+                MemberStubModality.FINAL
+            }
         is ClassStub.Companion -> MemberStubModality.FINAL
         is ClassStub.Enum -> MemberStubModality.FINAL
     }
@@ -70,7 +71,7 @@ val ClassStub.explicitPrimaryConstructor: ConstructorStub?
     get() = functions.filterIsInstance<ConstructorStub>().firstOrNull(ConstructorStub::isPrimary)
 
 fun ClassStub.nestedName(): String =
-        classifier.getRelativeFqName().substringAfterLast('.')
+    classifier.getRelativeFqName().substringAfterLast('.')
 
 fun ConstantStub.determineConstantAnnotationClassifier(): Classifier = when (this) {
     is StringConstantStub -> "String"

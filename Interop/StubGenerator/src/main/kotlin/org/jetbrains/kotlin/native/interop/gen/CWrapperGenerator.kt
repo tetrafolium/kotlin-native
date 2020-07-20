@@ -20,52 +20,52 @@ internal class CWrappersGenerator(private val context: StubIrContext) {
     private var currentFunctionWrapperId = 0
 
     private val packageName =
-            context.configuration.pkgName.replace(INVALID_CLANG_IDENTIFIER_REGEX, "_")
+        context.configuration.pkgName.replace(INVALID_CLANG_IDENTIFIER_REGEX, "_")
 
     private fun generateFunctionWrapperName(functionName: String): String {
         return "${packageName}_${functionName}_wrapper${currentFunctionWrapperId++}"
     }
 
     private fun bindSymbolToFunction(symbol: String, function: String): List<String> = listOf(
-            "const void* $symbol __asm(${symbol.quoteAsKotlinLiteral()});",
-            "const void* $symbol = &$function;"
+        "const void* $symbol __asm(${symbol.quoteAsKotlinLiteral()});",
+        "const void* $symbol = &$function;"
     )
 
     private data class Parameter(val type: String, val name: String)
 
     private fun createWrapper(
-            symbolName: String,
-            wrapperName: String,
-            returnType: String,
-            parameters: List<Parameter>,
-            body: String
+        symbolName: String,
+        wrapperName: String,
+        returnType: String,
+        parameters: List<Parameter>,
+        body: String
     ): List<String> = listOf(
-            "__attribute__((always_inline))",
-            "$returnType $wrapperName(${parameters.joinToString { "${it.type} ${it.name}" }}) {",
-            body,
-            "}",
-            *bindSymbolToFunction(symbolName, wrapperName).toTypedArray()
+        "__attribute__((always_inline))",
+        "$returnType $wrapperName(${parameters.joinToString { "${it.type} ${it.name}" }}) {",
+        body,
+        "}",
+        *bindSymbolToFunction(symbolName, wrapperName).toTypedArray()
     )
 
     fun generateCCalleeWrapper(function: FunctionDecl, symbolName: String): CCalleeWrapper =
-            if (function.isVararg) {
-                CCalleeWrapper(bindSymbolToFunction(symbolName, function.name))
-            } else {
-                val wrapperName = generateFunctionWrapperName(function.name)
+        if (function.isVararg) {
+            CCalleeWrapper(bindSymbolToFunction(symbolName, function.name))
+        } else {
+            val wrapperName = generateFunctionWrapperName(function.name)
 
-                val returnType = function.returnType.getStringRepresentation()
-                val parameters = function.parameters.mapIndexed { index, parameter ->
-                    Parameter(parameter.type.getStringRepresentation(), "p$index")
-                }
-                val callExpression = "${function.name}(${parameters.joinToString { it.name }});"
-                val wrapperBody = if (function.returnType.unwrapTypedefs() is VoidType) {
-                    callExpression
-                } else {
-                    "return $callExpression"
-                }
-                val wrapper = createWrapper(symbolName, wrapperName, returnType, parameters, wrapperBody)
-                CCalleeWrapper(wrapper)
+            val returnType = function.returnType.getStringRepresentation()
+            val parameters = function.parameters.mapIndexed { index, parameter ->
+                Parameter(parameter.type.getStringRepresentation(), "p$index")
             }
+            val callExpression = "${function.name}(${parameters.joinToString { it.name }});"
+            val wrapperBody = if (function.returnType.unwrapTypedefs() is VoidType) {
+                callExpression
+            } else {
+                "return $callExpression"
+            }
+            val wrapper = createWrapper(symbolName, wrapperName, returnType, parameters, wrapperBody)
+            CCalleeWrapper(wrapper)
+        }
 
     fun generateCGlobalGetter(globalDecl: GlobalDecl, symbolName: String): CCalleeWrapper {
         val wrapperName = generateFunctionWrapperName("${globalDecl.name}_getter")

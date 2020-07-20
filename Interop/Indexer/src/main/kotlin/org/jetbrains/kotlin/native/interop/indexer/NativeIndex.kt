@@ -43,8 +43,8 @@ interface HeaderExclusionPolicy {
 
 sealed class NativeLibraryHeaderFilter {
     class NameBased(
-            val policy: HeaderInclusionPolicy,
-            val excludeDepdendentModules: Boolean
+        val policy: HeaderInclusionPolicy,
+        val excludeDepdendentModules: Boolean
     ) : NativeLibraryHeaderFilter()
 
     class Predefined(val headers: Set<String>) : NativeLibraryHeaderFilter()
@@ -58,12 +58,12 @@ interface Compilation {
 }
 
 data class CompilationWithPCH(
-        override val compilerArgs: List<String>,
-        override val language: Language
+    override val compilerArgs: List<String>,
+    override val language: Language
 ) : Compilation {
 
-    constructor(compilerArgs: List<String>, precompiledHeader: String, language: Language)
-            : this(compilerArgs + listOf("-include-pch", precompiledHeader), language)
+    constructor(compilerArgs: List<String>, precompiledHeader: String, language: Language) :
+        this(compilerArgs + listOf("-include-pch", precompiledHeader), language)
 
     override val includes: List<String>
         get() = emptyList()
@@ -74,14 +74,16 @@ data class CompilationWithPCH(
 
 // TODO: Compilation hierarchy seems to require some refactoring.
 
-data class NativeLibrary(override val includes: List<String>,
-                         override val additionalPreambleLines: List<String>,
-                         override val compilerArgs: List<String>,
-                         val headerToIdMapper: HeaderToIdMapper,
-                         override val language: Language,
-                         val excludeSystemLibs: Boolean, // TODO: drop?
-                         val headerExclusionPolicy: HeaderExclusionPolicy,
-                         val headerFilter: NativeLibraryHeaderFilter) : Compilation
+data class NativeLibrary(
+    override val includes: List<String>,
+    override val additionalPreambleLines: List<String>,
+    override val compilerArgs: List<String>,
+    val headerToIdMapper: HeaderToIdMapper,
+    override val language: Language,
+    val excludeSystemLibs: Boolean, // TODO: drop?
+    val headerExclusionPolicy: HeaderExclusionPolicy,
+    val headerFilter: NativeLibraryHeaderFilter
+) : Compilation
 
 data class IndexerResult(val index: NativeIndex, val compilation: CompilationWithPCH)
 
@@ -127,8 +129,8 @@ sealed class StructMember(val name: String, val type: Type) {
 /**
  * C struct field.
  */
-class Field(name: String, type: Type, override val offset: Long, val typeSize: Long, val typeAlign: Long)
-    : StructMember(name, type)
+class Field(name: String, type: Type, override val offset: Long, val typeSize: Long, val typeAlign: Long) :
+    StructMember(name, type)
 
 val Field.isAligned: Boolean
     get() = offset % (typeAlign * 8) == 0L
@@ -190,9 +192,17 @@ sealed class ObjCClassOrProtocol(val name: String) : ObjCContainer(), TypeDeclar
 }
 
 data class ObjCMethod(
-        val selector: String, val encoding: String, val parameters: List<Parameter>, private val returnType: Type,
-        val isVariadic: Boolean, val isClass: Boolean, val nsConsumesSelf: Boolean, val nsReturnsRetained: Boolean,
-        val isOptional: Boolean, val isInit: Boolean, val isExplicitlyDesignatedInitializer: Boolean
+    val selector: String,
+    val encoding: String,
+    val parameters: List<Parameter>,
+    private val returnType: Type,
+    val isVariadic: Boolean,
+    val isClass: Boolean,
+    val nsConsumesSelf: Boolean,
+    val nsReturnsRetained: Boolean,
+    val isOptional: Boolean,
+    val isInit: Boolean,
+    val isExplicitlyDesignatedInitializer: Boolean
 ) {
 
     fun returnsInstancetype(): Boolean = returnType is ObjCInstanceType
@@ -227,8 +237,14 @@ data class Parameter(val name: String?, val type: Type, val nsConsumed: Boolean)
 /**
  * C function declaration.
  */
-class FunctionDecl(val name: String, val parameters: List<Parameter>, val returnType: Type, val binaryName: String,
-                   val isDefined: Boolean, val isVararg: Boolean)
+class FunctionDecl(
+    val name: String,
+    val parameters: List<Parameter>,
+    val returnType: Type,
+    val binaryName: String,
+    val isDefined: Boolean,
+    val isVararg: Boolean
+)
 
 /**
  * C typedef definition.
@@ -241,7 +257,7 @@ class TypedefDef(val aliased: Type, val name: String, override val location: Loc
 
 abstract class MacroDef(val name: String)
 
-abstract class ConstantDef(name: String, val type: Type): MacroDef(name)
+abstract class ConstantDef(name: String, val type: Type) : MacroDef(name)
 class IntegerConstantDef(name: String, type: Type, val value: Long) : ConstantDef(name, type)
 class FloatingConstantDef(name: String, type: Type, val value: Double) : ConstantDef(name, type)
 class StringConstantDef(name: String, type: Type, val value: String) : ConstantDef(name, type)
@@ -259,7 +275,7 @@ interface PrimitiveType : Type
 
 object CharType : PrimitiveType
 
-open class BoolType: PrimitiveType
+open class BoolType : PrimitiveType
 
 object CBoolType : BoolType()
 
@@ -307,25 +323,26 @@ sealed class ObjCQualifiedPointer : ObjCPointer() {
 }
 
 data class ObjCObjectPointer(
-        val def: ObjCClass,
-        override val nullability: Nullability,
-        override val protocols: List<ObjCProtocol>
+    val def: ObjCClass,
+    override val nullability: Nullability,
+    override val protocols: List<ObjCProtocol>
 ) : ObjCQualifiedPointer()
 
 data class ObjCClassPointer(
-        override val nullability: Nullability,
-        override val protocols: List<ObjCProtocol>
+    override val nullability: Nullability,
+    override val protocols: List<ObjCProtocol>
 ) : ObjCQualifiedPointer()
 
 data class ObjCIdType(
-        override val nullability: Nullability,
-        override val protocols: List<ObjCProtocol>
+    override val nullability: Nullability,
+    override val protocols: List<ObjCProtocol>
 ) : ObjCQualifiedPointer()
 
 data class ObjCInstanceType(override val nullability: Nullability) : ObjCPointer()
 data class ObjCBlockPointer(
-        override val nullability: Nullability,
-        val parameterTypes: List<Type>, val returnType: Type
+    override val nullability: Nullability,
+    val parameterTypes: List<Type>,
+    val returnType: Type
 ) : ObjCPointer()
 
 object UnsupportedType : Type

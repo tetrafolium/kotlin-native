@@ -53,7 +53,7 @@ internal fun CPointer<CXStringSet>.convertAndDispose(): Set<String> = try {
 }
 
 internal fun getCursorSpelling(cursor: CValue<CXCursor>) =
-        clang_getCursorSpelling(cursor).convertAndDispose()
+    clang_getCursorSpelling(cursor).convertAndDispose()
 
 internal fun CValue<CXType>.getSize(): Long {
     val size = clang_Type_getSizeOf(this)
@@ -64,13 +64,13 @@ internal fun CValue<CXType>.getSize(): Long {
 }
 
 internal inline fun <R> withIndex(
-        excludeDeclarationsFromPCH: Boolean = false,
-        displayDiagnostics: Boolean = false,
-        block: (index: CXIndex) -> R
+    excludeDeclarationsFromPCH: Boolean = false,
+    displayDiagnostics: Boolean = false,
+    block: (index: CXIndex) -> R
 ): R {
     val index = clang_createIndex(
-            excludeDeclarationsFromPCH = if (excludeDeclarationsFromPCH) 1 else 0,
-            displayDiagnostics = if (displayDiagnostics) 1 else 0
+        excludeDeclarationsFromPCH = if (excludeDeclarationsFromPCH) 1 else 0,
+        displayDiagnostics = if (displayDiagnostics) 1 else 0
     )!!
 
     return try {
@@ -81,32 +81,34 @@ internal inline fun <R> withIndex(
 }
 
 internal fun parseTranslationUnit(
-        index: CXIndex,
-        sourceFile: File,
-        compilerArgs: List<String>,
-        options: Int
+    index: CXIndex,
+    sourceFile: File,
+    compilerArgs: List<String>,
+    options: Int
 ): CXTranslationUnit {
 
     memScoped {
         val resultVar = alloc<CXTranslationUnitVar>()
 
         val errorCode = clang_parseTranslationUnit2(
-                index,
-                sourceFile.absolutePath,
-                compilerArgs.toNativeStringArray(memScope), compilerArgs.size,
-                null, 0,
-                options,
-                resultVar.ptr
+            index,
+            sourceFile.absolutePath,
+            compilerArgs.toNativeStringArray(memScope), compilerArgs.size,
+            null, 0,
+            options,
+            resultVar.ptr
         )
 
         if (errorCode != CXErrorCode.CXError_Success) {
             val copiedSourceFile = sourceFile.copyTo(createTempFile(suffix = sourceFile.name), overwrite = true)
 
-            error("""
+            error(
+                """
                 clang_parseTranslationUnit2 failed with $errorCode;
                 sourceFile = ${copiedSourceFile.absolutePath}
                 arguments = ${compilerArgs.joinToString(" ")}
-                """.trimIndent())
+                """.trimIndent()
+            )
         }
 
         return resultVar.value!!
@@ -114,36 +116,39 @@ internal fun parseTranslationUnit(
 }
 
 internal fun Compilation.parse(index: CXIndex, options: Int = 0): CXTranslationUnit =
-        parseTranslationUnit(index, this.createTempSource(), this.compilerArgs, options)
+    parseTranslationUnit(index, this.createTempSource(), this.compilerArgs, options)
 
-internal data class Diagnostic(val severity: CXDiagnosticSeverity, val format: String,
-                               val location: CValue<CXSourceLocation>)
+internal data class Diagnostic(
+    val severity: CXDiagnosticSeverity,
+    val format: String,
+    val location: CValue<CXSourceLocation>
+)
 
 internal fun CXTranslationUnit.getDiagnostics(): Sequence<Diagnostic> {
     val numDiagnostics = clang_getNumDiagnostics(this)
     return (0 until numDiagnostics).asSequence()
-            .map { index ->
-                val diagnostic = clang_getDiagnostic(this, index)
-                try {
-                    val severity = clang_getDiagnosticSeverity(diagnostic)
+        .map { index ->
+            val diagnostic = clang_getDiagnostic(this, index)
+            try {
+                val severity = clang_getDiagnosticSeverity(diagnostic)
 
-                    val format = clang_formatDiagnostic(diagnostic, clang_defaultDiagnosticDisplayOptions())
-                            .convertAndDispose()
+                val format = clang_formatDiagnostic(diagnostic, clang_defaultDiagnosticDisplayOptions())
+                    .convertAndDispose()
 
-                    val location = clang_getDiagnosticLocation(diagnostic)
+                val location = clang_getDiagnosticLocation(diagnostic)
 
-                    Diagnostic(severity, format, location)
-                } finally {
-                    clang_disposeDiagnostic(diagnostic)
-                }
+                Diagnostic(severity, format, location)
+            } finally {
+                clang_disposeDiagnostic(diagnostic)
             }
+        }
 }
 
 internal fun CXTranslationUnit.getCompileErrors(): Sequence<String> =
-        getDiagnostics().filter { it.isError() }.map { it.format }
+    getDiagnostics().filter { it.isError() }.map { it.format }
 
 private fun Diagnostic.isError() = (severity == CXDiagnosticSeverity.CXDiagnostic_Error) ||
-        (severity == CXDiagnosticSeverity.CXDiagnostic_Fatal)
+    (severity == CXDiagnosticSeverity.CXDiagnostic_Fatal)
 
 internal fun CXTranslationUnit.hasCompileErrors() = (this.getCompileErrors().firstOrNull() != null)
 
@@ -158,17 +163,21 @@ internal fun visitChildren(parent: CValue<CXCursor>, visitor: CursorVisitor) {
     val visitorStableRef = StableRef.create(visitor)
     try {
         val clientData = visitorStableRef.asCPointer()
-        clang_visitChildren(parent, staticCFunction { cursorIt, parentIt, clientDataIt ->
-            val visitorIt = clientDataIt!!.asStableRef<CursorVisitor>().get()
-            visitorIt(cursorIt, parentIt)
-        }, clientData)
+        clang_visitChildren(
+            parent,
+            staticCFunction { cursorIt, parentIt, clientDataIt ->
+                val visitorIt = clientDataIt!!.asStableRef<CursorVisitor>().get()
+                visitorIt(cursorIt, parentIt)
+            },
+            clientData
+        )
     } finally {
         visitorStableRef.dispose()
     }
 }
 
 internal fun visitChildren(translationUnit: CXTranslationUnit, visitor: CursorVisitor) =
-        visitChildren(clang_getTranslationUnitCursor(translationUnit), visitor)
+    visitChildren(clang_getTranslationUnitCursor(translationUnit), visitor)
 
 internal fun getFields(type: CValue<CXType>): List<CValue<CXCursor>> {
     val result = mutableListOf<CValue<CXCursor>>()
@@ -177,12 +186,15 @@ internal fun getFields(type: CValue<CXType>): List<CValue<CXCursor>> {
         val clientData = resultStableRef.asCPointer()
 
         @Suppress("NAME_SHADOWING")
-        clang_Type_visitFields(type, staticCFunction { cursor, clientData ->
-            val result = clientData!!.asStableRef<MutableList<CValue<CXCursor>>>().get()
-            result.add(cursor)
-            CXVisitorResult.CXVisit_Continue
-        }, clientData)
-
+        clang_Type_visitFields(
+            type,
+            staticCFunction { cursor, clientData ->
+                val result = clientData!!.asStableRef<MutableList<CValue<CXCursor>>>().get()
+                result.add(cursor)
+                CXVisitorResult.CXVisit_Continue
+            },
+            clientData
+        )
     } finally {
         resultStableRef.dispose()
     }
@@ -252,27 +264,27 @@ internal fun Compilation.createTempSource(): File {
 }
 
 fun Compilation.copy(
-        includes: List<String> = this.includes,
-        additionalPreambleLines: List<String> = this.additionalPreambleLines,
-        compilerArgs: List<String> = this.compilerArgs,
-        language: Language = this.language
+    includes: List<String> = this.includes,
+    additionalPreambleLines: List<String> = this.additionalPreambleLines,
+    compilerArgs: List<String> = this.compilerArgs,
+    language: Language = this.language
 ): Compilation = CompilationImpl(
-        includes = includes,
-        additionalPreambleLines = additionalPreambleLines,
-        compilerArgs = compilerArgs,
-        language = language
+    includes = includes,
+    additionalPreambleLines = additionalPreambleLines,
+    compilerArgs = compilerArgs,
+    language = language
 )
 
 // Clang-8 crashes when consuming a precompiled header built with -fmodule-map-file argument (see KT-34467).
 // We ignore this argument when building a pch to workaround this crash.
 fun Compilation.copyWithArgsForPCH(): Compilation =
-        copy(compilerArgs = compilerArgs.filterNot { it.startsWith("-fmodule-map-file") })
+    copy(compilerArgs = compilerArgs.filterNot { it.startsWith("-fmodule-map-file") })
 
 data class CompilationImpl(
-        override val includes: List<String>,
-        override val additionalPreambleLines: List<String>,
-        override val compilerArgs: List<String>,
-        override val language: Language
+    override val includes: List<String>,
+    override val additionalPreambleLines: List<String>,
+    override val compilerArgs: List<String>,
+    override val language: Language
 ) : Compilation
 
 /**
@@ -307,22 +319,22 @@ internal fun NativeLibrary.includesDeclaration(cursor: CValue<CXCursor>): Boolea
 }
 
 internal fun CXTranslationUnit.getErrorLineNumbers(): Sequence<Int> =
-        getDiagnostics().filter {
-            it.isError()
-        }.map {
-            memScoped {
-                val lineNumberVar = alloc<IntVar>()
-                clang_getFileLocation(it.location, null, lineNumberVar.ptr, null, null)
-                lineNumberVar.value
-            }
+    getDiagnostics().filter {
+        it.isError()
+    }.map {
+        memScoped {
+            val lineNumberVar = alloc<IntVar>()
+            clang_getFileLocation(it.location, null, lineNumberVar.ptr, null, null)
+            lineNumberVar.value
         }
+    }
 
 /**
  * For each list of lines, checks if the code fragment composed from these lines is compilable against given library.
  */
 fun List<List<String>>.mapFragmentIsCompilable(originalLibrary: CompilationWithPCH): List<Boolean> {
     val library: CompilationWithPCH = originalLibrary
-            .copy(compilerArgs = originalLibrary.compilerArgs + "-ferror-limit=0")
+        .copy(compilerArgs = originalLibrary.compilerArgs + "-ferror-limit=0")
 
     val indicesOfNonCompilable = mutableSetOf<Int>()
 
@@ -353,7 +365,7 @@ fun List<List<String>>.mapFragmentIsCompilable(originalLibrary: CompilationWithP
                 fragmentsToCheck.retainAll {
                     val firstLineNumber = lastLineNumber + 1
                     lastLineNumber += it.value.size
-                    (firstLineNumber .. lastLineNumber).any { it in errorLineNumbers }
+                    (firstLineNumber..lastLineNumber).any { it in errorLineNumbers }
                 }
 
                 if (fragmentsToCheck.isNotEmpty()) {
@@ -438,8 +450,10 @@ internal fun indexTranslationUnit(index: CXIndex, translationUnit: CXTranslation
 
             val indexAction = clang_IndexAction_create(index)
             try {
-                val result = clang_indexTranslationUnit(indexAction, clientData,
-                        indexerCallbacks.ptr, IndexerCallbacks.size.toInt(), options, translationUnit)
+                val result = clang_indexTranslationUnit(
+                    indexAction, clientData,
+                    indexerCallbacks.ptr, IndexerCallbacks.size.toInt(), options, translationUnit
+                )
 
                 if (result != 0) {
                     throw Error("clang_indexTranslationUnit returned $result")
@@ -454,8 +468,8 @@ internal fun indexTranslationUnit(index: CXIndex, translationUnit: CXTranslation
 }
 
 internal class ModulesMap(
-        val compilation: Compilation,
-        val translationUnit: CXTranslationUnit
+    val compilation: Compilation,
+    val translationUnit: CXTranslationUnit
 ) : Closeable {
 
     private val modularCompilation: ModularCompilation
@@ -475,16 +489,15 @@ internal class ModulesMap(
     init {
         try {
             modularCompilation = ModularCompilation(compilation)
-                    .toBeDisposedWith { it.dispose() }
+                .toBeDisposedWith { it.dispose() }
 
             index = clang_createIndex(0, 0)!!
-                    .toBeDisposedWith { clang_disposeIndex(it) }
+                .toBeDisposedWith { clang_disposeIndex(it) }
 
             translationUnitWithModules = modularCompilation.parse(index)
-                    .toBeDisposedWith { clang_disposeTranslationUnit(it) }
+                .toBeDisposedWith { clang_disposeTranslationUnit(it) }
 
             translationUnitWithModules.ensureNoCompileErrors()
-
         } catch (e: Throwable) {
             this.close()
             throw e
@@ -497,7 +510,7 @@ internal class ModulesMap(
         // `file` is bound to `translationUnit`, however `translationUnitWithModules` is used to access modules.
         // Find the corresponding file in `translationUnitWithModules`:
         val fileInTuWithModules =
-                clang_getFile(translationUnitWithModules, clang_getFileName(file).convertAndDispose())!!
+            clang_getFile(translationUnitWithModules, clang_getFileName(file).convertAndDispose())!!
 
         return clang_getModuleForFile(translationUnitWithModules, fileInTuWithModules)?.let { Module(it) }
     }
@@ -513,17 +526,17 @@ internal fun getHeaderId(library: NativeLibrary, header: CXFile?): HeaderId {
 }
 
 internal fun getFilteredHeaders(
-        nativeIndex: NativeIndexImpl,
-        index: CXIndex,
-        translationUnit: CXTranslationUnit
+    nativeIndex: NativeIndexImpl,
+    index: CXIndex,
+    translationUnit: CXTranslationUnit
 ): Set<CXFile?> = getHeaders(nativeIndex.library, index, translationUnit).ownHeaders
 
 class NativeLibraryHeaders<Header>(val ownHeaders: Set<Header>, val importedHeaders: Set<Header>)
 
 internal fun getHeaders(
-        library: NativeLibrary,
-        index: CXIndex,
-        translationUnit: CXTranslationUnit
+    library: NativeLibrary,
+    index: CXIndex,
+    translationUnit: CXTranslationUnit
 ): NativeLibraryHeaders<CXFile?> {
     val ownHeaders = mutableSetOf<CXFile?>()
     val allHeaders = mutableSetOf<CXFile?>(null)
@@ -544,61 +557,64 @@ internal fun getHeaders(
 }
 
 private fun filterHeadersByName(
-        compilation: Compilation,
-        filter: NativeLibraryHeaderFilter.NameBased,
-        index: CXIndex,
-        translationUnit: CXTranslationUnit,
-        ownHeaders: MutableSet<CXFile?>,
-        allHeaders: MutableSet<CXFile?>
+    compilation: Compilation,
+    filter: NativeLibraryHeaderFilter.NameBased,
+    index: CXIndex,
+    translationUnit: CXTranslationUnit,
+    ownHeaders: MutableSet<CXFile?>,
+    allHeaders: MutableSet<CXFile?>
 ) {
     val topLevelFiles = mutableListOf<CXFile>()
     var mainFile: CXFile? = null
 
-    indexTranslationUnit(index, translationUnit, 0, object : Indexer {
-        val headerToName = mutableMapOf<CXFile, String>()
-        // The *name* of the header here is the path relative to the include path element., e.g. `curl/curl.h`.
+    indexTranslationUnit(
+        index, translationUnit, 0,
+        object : Indexer {
+            val headerToName = mutableMapOf<CXFile, String>()
+            // The *name* of the header here is the path relative to the include path element., e.g. `curl/curl.h`.
 
-        override fun enteredMainFile(file: CXFile) {
-            mainFile = file
-            allHeaders += file
-        }
-
-        override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
-            val includeLocation = clang_indexLoc_getCXSourceLocation(info.hashLoc.readValue())
-            val file = info.file!!
-
-            allHeaders += file
-
-            if (clang_Location_isFromMainFile(includeLocation) != 0) {
-                topLevelFiles.add(file)
+            override fun enteredMainFile(file: CXFile) {
+                mainFile = file
+                allHeaders += file
             }
 
-            val name = info.filename!!.toKString()
-            val headerName = if (info.isAngled != 0) {
-                // If the header is included with `#include <$name>`, then `name` is probably
-                // the path relative to the include path element.
-                name
-            } else {
-                // If it is included with `#include "$name"`, then `name` can also be the path relative to the includer.
-                val includerFile = includeLocation.getContainingFile()!!
-                val includerName = headerToName[includerFile] ?: ""
-                val includerPath = includerFile.path
+            override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
+                val includeLocation = clang_indexLoc_getCXSourceLocation(info.hashLoc.readValue())
+                val file = info.file!!
 
-                if (clang_getFile(translationUnit, Paths.get(includerPath).resolveSibling(name).toString()) == file) {
-                    // included file is accessible from the includer by `name` used as relative path, so
-                    // `name` seems to be relative to the includer:
-                    Paths.get(includerName).resolveSibling(name).normalize().toString()
-                } else {
+                allHeaders += file
+
+                if (clang_Location_isFromMainFile(includeLocation) != 0) {
+                    topLevelFiles.add(file)
+                }
+
+                val name = info.filename!!.toKString()
+                val headerName = if (info.isAngled != 0) {
+                    // If the header is included with `#include <$name>`, then `name` is probably
+                    // the path relative to the include path element.
                     name
+                } else {
+                    // If it is included with `#include "$name"`, then `name` can also be the path relative to the includer.
+                    val includerFile = includeLocation.getContainingFile()!!
+                    val includerName = headerToName[includerFile] ?: ""
+                    val includerPath = includerFile.path
+
+                    if (clang_getFile(translationUnit, Paths.get(includerPath).resolveSibling(name).toString()) == file) {
+                        // included file is accessible from the includer by `name` used as relative path, so
+                        // `name` seems to be relative to the includer:
+                        Paths.get(includerName).resolveSibling(name).normalize().toString()
+                    } else {
+                        name
+                    }
+                }
+
+                headerToName[file] = headerName
+                if (!filter.policy.excludeUnused(headerName)) {
+                    ownHeaders.add(file)
                 }
             }
-
-            headerToName[file] = headerName
-            if (!filter.policy.excludeUnused(headerName)) {
-                ownHeaders.add(file)
-            }
         }
-    })
+    )
 
     if (filter.excludeDepdendentModules) {
         ModulesMap(compilation, translationUnit).use { modulesMap ->
@@ -621,36 +637,39 @@ private fun filterHeadersByName(
 }
 
 private fun filterHeadersByPredefined(
-        filter: NativeLibraryHeaderFilter.Predefined,
-        index: CXIndex,
-        translationUnit: CXTranslationUnit,
-        ownHeaders: MutableSet<CXFile?>,
-        allHeaders: MutableSet<CXFile?>
+    filter: NativeLibraryHeaderFilter.Predefined,
+    index: CXIndex,
+    translationUnit: CXTranslationUnit,
+    ownHeaders: MutableSet<CXFile?>,
+    allHeaders: MutableSet<CXFile?>
 ) {
     // Note: suboptimal but simple.
-    indexTranslationUnit(index, translationUnit, 0, object : Indexer {
-        override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
-            val file = info.file
-            allHeaders += file
-            if (file?.canonicalPath in filter.headers) {
-                ownHeaders += file
+    indexTranslationUnit(
+        index, translationUnit, 0,
+        object : Indexer {
+            override fun ppIncludedFile(info: CXIdxIncludedFileInfo) {
+                val file = info.file
+                allHeaders += file
+                if (file?.canonicalPath in filter.headers) {
+                    ownHeaders += file
+                }
             }
         }
-    })
+    )
 }
 
 fun NativeLibrary.getHeaderPaths(): NativeLibraryHeaders<String> {
     withIndex { index ->
         val translationUnit =
-                this.parse(index, options = CXTranslationUnit_DetailedPreprocessingRecord).ensureNoCompileErrors()
+            this.parse(index, options = CXTranslationUnit_DetailedPreprocessingRecord).ensureNoCompileErrors()
         try {
 
             fun getPath(file: CXFile?) = if (file == null) "<builtins>" else file.canonicalPath
 
             val headers = getHeaders(this, index, translationUnit)
             return NativeLibraryHeaders(
-                    headers.ownHeaders.map(::getPath).toSet(),
-                    headers.importedHeaders.map(::getPath).toSet()
+                headers.ownHeaders.map(::getPath).toSet(),
+                headers.importedHeaders.map(::getPath).toSet()
             )
         } finally {
             clang_disposeTranslationUnit(translationUnit)
@@ -659,10 +678,10 @@ fun NativeLibrary.getHeaderPaths(): NativeLibraryHeaders<String> {
 }
 
 fun ObjCMethod.replaces(other: ObjCMethod): Boolean =
-        this.isClass == other.isClass && this.selector == other.selector
+    this.isClass == other.isClass && this.selector == other.selector
 
 fun ObjCProperty.replaces(other: ObjCProperty): Boolean =
-        this.getter.replaces(other.getter)
+    this.getter.replaces(other.getter)
 
 fun File.sha256(): String {
     val digest = MessageDigest.getInstance("SHA-256")
@@ -699,9 +718,9 @@ private fun createVfsOverlayFileContents(virtualPathToReal: Map<Path, Path>): By
     try {
         fun addFileMapping(realPath: Path, virtualPath: Path) {
             clang_VirtualFileOverlay_addFileMapping(
-                    overlay,
-                    virtualPath = virtualPath.toAbsolutePath().toString(),
-                    realPath = realPath.toAbsolutePath().toString()
+                overlay,
+                virtualPath = virtualPath.toAbsolutePath().toString(),
+                realPath = realPath.toAbsolutePath().toString()
             )
         }
 
@@ -710,8 +729,8 @@ private fun createVfsOverlayFileContents(virtualPathToReal: Map<Path, Path>): By
                 realPath.toFile().walkTopDown().forEach {
                     if (!it.isDirectory) {
                         addFileMapping(
-                                realPath = it.toPath(),
-                                virtualPath = virtualPath.resolve(realPath.relativize(it.toPath()))
+                            realPath = it.toPath(),
+                            virtualPath = virtualPath.resolve(realPath.relativize(it.toPath()))
                         )
                     }
                 }

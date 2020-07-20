@@ -26,17 +26,17 @@ import org.jetbrains.kotlin.native.interop.indexer.unwrapTypedefs
  * maps the type using [mirror].
  */
 class MappingBridgeGeneratorImpl(
-        val declarationMapper: DeclarationMapper,
-        val simpleBridgeGenerator: SimpleBridgeGenerator
+    val declarationMapper: DeclarationMapper,
+    val simpleBridgeGenerator: SimpleBridgeGenerator
 ) : MappingBridgeGenerator {
 
     override fun kotlinToNative(
-            builder: KotlinCodeBuilder,
-            nativeBacked: NativeBacked,
-            returnType: Type,
-            kotlinValues: List<TypedKotlinValue>,
-            independent: Boolean,
-            block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
+        builder: KotlinCodeBuilder,
+        nativeBacked: NativeBacked,
+        returnType: Type,
+        kotlinValues: List<TypedKotlinValue>,
+        independent: Boolean,
+        block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
     ): KotlinExpression {
         val bridgeArguments = mutableListOf<BridgeTypedKotlinValue>()
 
@@ -71,7 +71,7 @@ class MappingBridgeGeneratorImpl(
         }
 
         val callExpr = simpleBridgeGenerator.kotlinToNative(
-                nativeBacked, bridgeReturnType, bridgeArguments, independent
+            nativeBacked, bridgeReturnType, bridgeArguments, independent
         ) { bridgeNativeValues ->
 
             val nativeValues = mutableListOf<String>()
@@ -81,9 +81,9 @@ class MappingBridgeGeneratorImpl(
                     nativeValues.add("*(${unwrappedType.decl.spelling}*)${bridgeNativeValues[index]}")
                 } else {
                     nativeValues.add(
-                            mirror(declarationMapper, type).info.cFromBridged(
-                                    bridgeNativeValues[index], scope, nativeBacked
-                            )
+                        mirror(declarationMapper, type).info.cFromBridged(
+                            bridgeNativeValues[index], scope, nativeBacked
+                        )
                     )
                 }
             }
@@ -124,11 +124,11 @@ class MappingBridgeGeneratorImpl(
     }
 
     override fun nativeToKotlin(
-            builder: NativeCodeBuilder,
-            nativeBacked: NativeBacked,
-            returnType: Type,
-            nativeValues: List<TypedNativeValue>,
-            block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
+        builder: NativeCodeBuilder,
+        nativeBacked: NativeBacked,
+        returnType: Type,
+        nativeValues: List<TypedNativeValue>,
+        block: KotlinCodeBuilder.(kotlinValues: List<KotlinExpression>) -> KotlinExpression
     ): NativeExpression {
 
         val bridgeArguments = mutableListOf<BridgeTypedNativeValue>()
@@ -160,9 +160,9 @@ class MappingBridgeGeneratorImpl(
         }
 
         val callExpr = simpleBridgeGenerator.nativeToKotlin(
-                nativeBacked,
-                bridgeReturnType,
-                bridgeArguments
+            nativeBacked,
+            bridgeReturnType,
+            bridgeArguments
         ) { bridgeKotlinValues ->
             val kotlinValues = mutableListOf<String>()
             nativeValues.forEachIndexed { index, (type, _) ->
@@ -170,7 +170,7 @@ class MappingBridgeGeneratorImpl(
                 if (type.unwrapTypedefs() is RecordType) {
                     val pointedTypeName = mirror.pointedType.render(this.scope)
                     kotlinValues.add(
-                            "interpretPointed<$pointedTypeName>(${bridgeKotlinValues[index]}).readValue()"
+                        "interpretPointed<$pointedTypeName>(${bridgeKotlinValues[index]}).readValue()"
                     )
                 } else {
                     kotlinValues.add(mirror.info.argFromBridged(bridgeKotlinValues[index], this.scope, nativeBacked))

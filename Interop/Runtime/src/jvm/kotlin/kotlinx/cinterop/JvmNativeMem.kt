@@ -44,10 +44,10 @@ internal object nativeMemUtils {
 
     fun getShort(mem: NativePointed) = unsafe.getShort(mem.address)
     fun putShort(mem: NativePointed, value: Short) = unsafe.putShort(mem.address, value)
-    
+
     fun getInt(mem: NativePointed) = unsafe.getInt(mem.address)
     fun putInt(mem: NativePointed, value: Int) = unsafe.putInt(mem.address, value)
-    
+
     fun getLong(mem: NativePointed) = unsafe.getLong(mem.address)
     fun putLong(mem: NativePointed, value: Long) = unsafe.putLong(mem.address, value)
 
@@ -84,11 +84,10 @@ internal object nativeMemUtils {
     }
 
     fun zeroMemory(dest: NativePointed, length: Int): Unit =
-            unsafe.setMemory(dest.address, length.toLong(), 0)
+        unsafe.setMemory(dest.address, length.toLong(), 0)
 
     fun copyMemory(dest: NativePointed, length: Int, src: NativePointed) =
-            unsafe.copyMemory(src.address, dest.address, length.toLong())
-
+        unsafe.copyMemory(src.address, dest.address, length.toLong())
 
     @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
     inline fun <reified T> allocateInstance(): T {
@@ -97,7 +96,7 @@ internal object nativeMemUtils {
 
     fun alloc(size: Long, align: Int): NativePointed {
         val address = unsafe.allocateMemory(
-                if (size == 0L) 1L else size // It is a hack: `sun.misc.Unsafe` can't allocate zero bytes
+            if (size == 0L) 1L else size // It is a hack: `sun.misc.Unsafe` can't allocate zero bytes
         )
 
         if (address % align != 0L) TODO(align.toString())

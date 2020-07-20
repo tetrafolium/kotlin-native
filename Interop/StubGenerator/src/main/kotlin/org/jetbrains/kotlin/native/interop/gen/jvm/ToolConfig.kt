@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package  org.jetbrains.kotlin.native.interop.tool
+package org.jetbrains.kotlin.native.interop.tool
 
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
@@ -42,10 +42,10 @@ class ToolConfig(userProvidedTargetName: String?, flavor: KotlinPlatform) {
     fun downloadDependencies() = platform.downloadDependencies()
 
     val defaultCompilerOpts =
-            platform.clang.targetLibclangArgs.toList()
+        platform.clang.targetLibclangArgs.toList()
 
     val platformCompilerOpts = if (flavor == KotlinPlatform.JVM)
-            platform.clang.hostCompilerArgsForJni.toList() else emptyList()
+        platform.clang.hostCompilerArgsForJni.toList() else emptyList()
 
     val llvmHome = platform.absoluteLlvmHome
     val sysRoot = platform.absoluteTargetSysRoot

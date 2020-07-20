@@ -16,10 +16,10 @@ import java.lang.IllegalStateException
  * [omitEmptyLines] is useful for testing output (e.g. diff calculating).
  */
 class StubIrTextEmitter(
-        private val context: StubIrContext,
-        private val builderResult: StubIrBuilderResult,
-        private val bridgeBuilderResult: BridgeBuilderResult,
-        private val omitEmptyLines: Boolean = false
+    private val context: StubIrContext,
+    private val builderResult: StubIrBuilderResult,
+    private val bridgeBuilderResult: BridgeBuilderResult,
+    private val omitEmptyLines: Boolean = false
 ) {
     private val kotlinFile = bridgeBuilderResult.kotlinFile
     private val nativeBridges = bridgeBuilderResult.nativeBridges
@@ -160,12 +160,12 @@ class StubIrTextEmitter(
                         emitEnumEntries(element)
                     }
                     element.children
-                            // We render a primary constructor as part of a header.
-                            .filterNot { it is ConstructorStub && it.isPrimary }
-                            .forEach {
-                                emitEmptyLine()
-                                it.accept(this, element)
-                            }
+                        // We render a primary constructor as part of a header.
+                        .filterNot { it is ConstructorStub && it.isPrimary }
+                        .forEach {
+                            emitEmptyLine()
+                            it.accept(this, element)
+                        }
                     if (element is ClassStub.Enum) {
                         emitEnumVarClass(element)
                     }
@@ -192,8 +192,8 @@ class StubIrTextEmitter(
             }
             if (!nativeBridges.isSupported(element)) {
                 sequenceOf(
-                        annotationForUnableToImport,
-                        "$header = throw UnsupportedOperationException()"
+                    annotationForUnableToImport,
+                    "$header = throw UnsupportedOperationException()"
                 ).forEach(out)
                 return
             }
@@ -224,7 +224,6 @@ class StubIrTextEmitter(
         }
 
         override fun visitPropertyAccessor(propertyAccessor: PropertyAccessor, data: StubContainer?) {
-
         }
 
         override fun visitSimpleStubContainer(simpleStubContainer: SimpleStubContainer, data: StubContainer?) {
@@ -292,8 +291,9 @@ class StubIrTextEmitter(
         }
         val header = "$receiver$name: ${renderStubType(element.type)}"
 
-        if (element.kind is PropertyStub.Kind.Val && !nativeBridges.isSupported(element.kind.getter)
-                || element.kind is PropertyStub.Kind.Var && !nativeBridges.isSupported(element.kind.getter)) {
+        if (element.kind is PropertyStub.Kind.Val && !nativeBridges.isSupported(element.kind.getter) ||
+            element.kind is PropertyStub.Kind.Var && !nativeBridges.isSupported(element.kind.getter)
+        ) {
             out(annotationForUnableToImport)
             out("val $header")
             out("    get() = TODO()")
@@ -307,10 +307,10 @@ class StubIrTextEmitter(
                 }
                 is PropertyStub.Kind.Val -> {
                     val shouldWriteInline = kind.getter.let {
-                        (it is PropertyAccessor.Getter.SimpleGetter && it.constant != null)
-                                // We should render access to constructor parameter inline.
-                                // Otherwise, it may be access to the property itself. (val f: Any get() = f)
-                                || it is PropertyAccessor.Getter.GetConstructorParameter
+                        (it is PropertyAccessor.Getter.SimpleGetter && it.constant != null) ||
+                            // We should render access to constructor parameter inline.
+                            // Otherwise, it may be access to the property itself. (val f: Any get() = f)
+                            it is PropertyAccessor.Getter.GetConstructorParameter
                     }
                     if (shouldWriteInline) {
                         out("${modality}val $header ${renderGetter(kind.getter)}")
@@ -351,14 +351,14 @@ class StubIrTextEmitter(
     }
 
     private fun renderMemberModality(modality: MemberStubModality, container: StubContainer?): String =
-            if (container?.defaultMemberModality == modality) {
-                ""
-            } else
-                when (modality) {
-                    MemberStubModality.OPEN -> "open "
-                    MemberStubModality.FINAL -> "final "
-                    MemberStubModality.ABSTRACT -> "abstract "
-                }
+        if (container?.defaultMemberModality == modality) {
+            ""
+        } else
+            when (modality) {
+                MemberStubModality.OPEN -> "open "
+                MemberStubModality.FINAL -> "final "
+                MemberStubModality.ABSTRACT -> "abstract "
+            }
 
     private fun renderVisibilityModifier(visibilityModifier: VisibilityModifier) = when (visibilityModifier) {
         VisibilityModifier.PRIVATE -> "private "
@@ -391,7 +391,7 @@ class StubIrTextEmitter(
     }
 
     private fun renderClassifierDeclaration(classifier: Classifier): String =
-            kotlinFile.declare(classifier).asSimpleName()
+        kotlinFile.declare(classifier).asSimpleName()
 
     private fun renderClassStubModality(classStubModality: ClassStubModality): String = when (classStubModality) {
         ClassStubModality.INTERFACE -> "interface "
@@ -401,11 +401,11 @@ class StubIrTextEmitter(
     }
 
     private fun renderConstructorParams(parameters: List<FunctionParameterStub>): String =
-            if (parameters.isEmpty()) {
-                ""
-            } else {
-                parameters.joinToString(prefix = "(", postfix = ")") { renderFunctionParameter(it) }
-            }
+        if (parameters.isEmpty()) {
+            ""
+        } else {
+            parameters.joinToString(prefix = "(", postfix = ")") { renderFunctionParameter(it) }
+        }
 
     private fun renderSuperInit(superClassInit: SuperClassInit): String {
         val parameters = superClassInit.arguments.joinToString(prefix = "(", postfix = ")") { renderValueUsage(it) }
@@ -490,8 +490,8 @@ class StubIrTextEmitter(
             "@CLength(${annotationStub.length})"
         is AnnotationStub.Deprecated ->
             "@Deprecated(${annotationStub.message.quoteAsKotlinLiteral()}, " +
-                    "ReplaceWith(${annotationStub.replaceWith.quoteAsKotlinLiteral()}), " +
-                    "DeprecationLevel.ERROR)"
+                "ReplaceWith(${annotationStub.replaceWith.quoteAsKotlinLiteral()}), " +
+                "DeprecationLevel.ERROR)"
         is AnnotationStub.CEnumEntryAlias,
         is AnnotationStub.CEnumVarTypeSize,
         is AnnotationStub.CStruct.MemberAt,
@@ -502,7 +502,7 @@ class StubIrTextEmitter(
     }
 
     private fun renderEnumEntry(enumEntryStub: EnumEntryStub): String =
-            "${enumEntryStub.name.asSimpleName()}(${renderValueUsage(enumEntryStub.constant)})"
+        "${enumEntryStub.name.asSimpleName()}(${renderValueUsage(enumEntryStub.constant)})"
 
     private fun renderGetter(accessor: PropertyAccessor.Getter): String {
         val annotations = accessor.annotations.joinToString(separator = "") { renderAnnotation(it) + " " }

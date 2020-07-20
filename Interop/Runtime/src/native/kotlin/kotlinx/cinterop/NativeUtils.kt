@@ -16,9 +16,8 @@
 
 package kotlinx.cinterop
 
-import kotlin.native.internal.Intrinsic
-import kotlin.native.internal.TypedIntrinsic
 import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
 
 internal fun decodeFromUtf8(bytes: ByteArray): String = bytes.decodeToString()
 internal fun encodeToUtf8(str: String): ByteArray = str.encodeToByteArray()
@@ -51,16 +50,16 @@ external inline fun <reified R : Number> Number.narrow(): R
 internal annotation class JvmName(val name: String)
 
 fun cValuesOf(vararg elements: UByte): CValues<UByteVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 fun cValuesOf(vararg elements: UShort): CValues<UShortVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 fun cValuesOf(vararg elements: UInt): CValues<UIntVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 fun cValuesOf(vararg elements: ULong): CValues<ULongVar> =
-        createValues(elements.size) { index -> this.value = elements[index] }
+    createValues(elements.size) { index -> this.value = elements[index] }
 
 fun UByteArray.toCValues() = cValuesOf(*this)
 fun UShortArray.toCValues() = cValuesOf(*this)

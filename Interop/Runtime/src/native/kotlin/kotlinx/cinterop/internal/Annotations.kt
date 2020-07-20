@@ -5,8 +5,8 @@ package kotlinx.cinterop.internal
 annotation class CStruct(val spelling: String) {
     @Retention(AnnotationRetention.BINARY)
     @Target(
-            AnnotationTarget.PROPERTY_GETTER,
-            AnnotationTarget.PROPERTY_SETTER
+        AnnotationTarget.PROPERTY_GETTER,
+        AnnotationTarget.PROPERTY_SETTER
     )
     annotation class MemberAt(val offset: Long)
 
@@ -16,8 +16,8 @@ annotation class CStruct(val spelling: String) {
 
     @Retention(AnnotationRetention.BINARY)
     @Target(
-            AnnotationTarget.PROPERTY_GETTER,
-            AnnotationTarget.PROPERTY_SETTER
+        AnnotationTarget.PROPERTY_GETTER,
+        AnnotationTarget.PROPERTY_SETTER
     )
     annotation class BitField(val offset: Long, val size: Int)
 
@@ -26,9 +26,9 @@ annotation class CStruct(val spelling: String) {
 }
 
 @Target(
-        AnnotationTarget.FUNCTION,
-        AnnotationTarget.PROPERTY_GETTER,
-        AnnotationTarget.PROPERTY_SETTER
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER
 )
 @Retention(AnnotationRetention.BINARY)
 public annotation class CCall(val id: String) {

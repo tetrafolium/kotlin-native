@@ -23,14 +23,13 @@ interface Imports {
     fun getPackage(location: Location): String?
 }
 
-
 class PackageInfo(val name: String, val library: KonanLibrary)
 
 class ImportsImpl(internal val headerIdToPackage: Map<HeaderId, PackageInfo>) : Imports {
 
     override fun getPackage(location: Location): String? {
         val packageInfo = headerIdToPackage[location.headerId]
-                ?: return null
+            ?: return null
         accessedLibraries += packageInfo.library
         return packageInfo.name
     }
@@ -58,15 +57,14 @@ class HeaderInclusionPolicyImpl(private val nameGlobs: List<String>) : HeaderInc
 }
 
 class HeaderExclusionPolicyImpl(
-        private val importsImpl: ImportsImpl
+    private val importsImpl: ImportsImpl
 ) : HeaderExclusionPolicy {
 
     override fun excludeAll(headerId: HeaderId): Boolean {
         return headerId in importsImpl.headerIdToPackage
     }
-
 }
 
 private fun String.matchesToGlob(glob: String): Boolean =
-        java.nio.file.FileSystems.getDefault()
-                .getPathMatcher("glob:$glob").matches(java.nio.file.Paths.get(this))
+    java.nio.file.FileSystems.getDefault()
+        .getPathMatcher("glob:$glob").matches(java.nio.file.Paths.get(this))

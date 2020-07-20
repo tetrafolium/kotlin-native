@@ -9,61 +9,62 @@ import org.jetbrains.kotlin.native.interop.indexer.*
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 
 class BridgeBuilderResult(
-        val kotlinFile: KotlinFile,
-        val nativeBridges: NativeBridges,
-        val propertyAccessorBridgeBodies: Map<PropertyAccessor, String>,
-        val functionBridgeBodies: Map<FunctionStub, List<String>>,
-        val excludedStubs: Set<StubIrElement>
+    val kotlinFile: KotlinFile,
+    val nativeBridges: NativeBridges,
+    val propertyAccessorBridgeBodies: Map<PropertyAccessor, String>,
+    val functionBridgeBodies: Map<FunctionStub, List<String>>,
+    val excludedStubs: Set<StubIrElement>
 )
 
 /**
  * Generates [NativeBridges] and corresponding function bodies and property accessors.
  */
 class StubIrBridgeBuilder(
-        private val context: StubIrContext,
-        private val builderResult: StubIrBuilderResult) {
+    private val context: StubIrContext,
+    private val builderResult: StubIrBuilderResult
+) {
 
     private val globalAddressExpressions = mutableMapOf<Pair<String, PropertyAccessor>, KotlinExpression>()
 
     private val wrapperGenerator = CWrappersGenerator(context)
 
     private fun getGlobalAddressExpression(cGlobalName: String, accessor: PropertyAccessor) =
-            globalAddressExpressions.getOrPut(Pair(cGlobalName, accessor)) {
-                simpleBridgeGenerator.kotlinToNative(
-                        nativeBacked = accessor,
-                        returnType = BridgedType.NATIVE_PTR,
-                        kotlinValues = emptyList(),
-                        independent = false
-                ) {
-                    "&$cGlobalName"
-                }
+        globalAddressExpressions.getOrPut(Pair(cGlobalName, accessor)) {
+            simpleBridgeGenerator.kotlinToNative(
+                nativeBacked = accessor,
+                returnType = BridgedType.NATIVE_PTR,
+                kotlinValues = emptyList(),
+                independent = false
+            ) {
+                "&$cGlobalName"
             }
+        }
 
     private val declarationMapper = builderResult.declarationMapper
 
     private val kotlinFile = object : KotlinFile(
-            context.configuration.pkgName,
-            namesToBeDeclared = builderResult.stubs.computeNamesToBeDeclared(context.configuration.pkgName)
+        context.configuration.pkgName,
+        namesToBeDeclared = builderResult.stubs.computeNamesToBeDeclared(context.configuration.pkgName)
     ) {
         override val mappingBridgeGenerator: MappingBridgeGenerator
             get() = this@StubIrBridgeBuilder.mappingBridgeGenerator
     }
 
     private val simpleBridgeGenerator: SimpleBridgeGenerator =
-            SimpleBridgeGeneratorImpl(
-                    context.platform,
-                    context.configuration.pkgName,
-                    context.jvmFileClassName,
-                    context.libraryForCStubs,
-                    topLevelNativeScope = object : NativeScope {
-                        override val mappingBridgeGenerator: MappingBridgeGenerator
-                            get() = this@StubIrBridgeBuilder.mappingBridgeGenerator
-                    },
-                    topLevelKotlinScope = kotlinFile
-            )
+        SimpleBridgeGeneratorImpl(
+            context.platform,
+            context.configuration.pkgName,
+            context.jvmFileClassName,
+            context.libraryForCStubs,
+            topLevelNativeScope = object : NativeScope {
+                override val mappingBridgeGenerator: MappingBridgeGenerator
+                    get() = this@StubIrBridgeBuilder.mappingBridgeGenerator
+            },
+            topLevelKotlinScope = kotlinFile
+        )
 
     private val mappingBridgeGenerator: MappingBridgeGenerator =
-            MappingBridgeGeneratorImpl(declarationMapper, simpleBridgeGenerator)
+        MappingBridgeGeneratorImpl(declarationMapper, simpleBridgeGenerator)
 
     private val propertyAccessorBridgeBodies = mutableMapOf<PropertyAccessor, String>()
     private val functionBridgeBodies = mutableMapOf<FunctionStub, List<String>>()
@@ -105,9 +106,9 @@ class StubIrBridgeBuilder(
 
         private fun tryProcessCCallAnnotation(function: FunctionStub) {
             val origin = function.origin as? StubOrigin.Function
-                    ?: return
+                ?: return
             val cCallAnnotation = function.annotations.firstIsInstanceOrNull<AnnotationStub.CCall.Symbol>()
-                    ?: return
+                ?: return
             val wrapper = wrapperGenerator.generateCCalleeWrapper(origin.function, cCallAnnotation.symbolName)
             simpleBridgeGenerator.insertNativeBridge(function, emptyList(), wrapper.lines)
         }
@@ -141,14 +142,17 @@ class StubIrBridgeBuilder(
                         in builderResult.bridgeGenerationComponents.getterToBridgeInfo -> {
                             val extra = builderResult.bridgeGenerationComponents.getterToBridgeInfo.getValue(propertyAccessor)
                             val typeInfo = extra.typeInfo
-                            propertyAccessorBridgeBodies[propertyAccessor] = typeInfo.argFromBridged(simpleBridgeGenerator.kotlinToNative(
+                            propertyAccessorBridgeBodies[propertyAccessor] = typeInfo.argFromBridged(
+                                simpleBridgeGenerator.kotlinToNative(
                                     nativeBacked = propertyAccessor,
                                     returnType = typeInfo.bridgedType,
                                     kotlinValues = emptyList(),
                                     independent = false
-                            ) {
-                                typeInfo.cToBridged(expr = extra.cGlobalName)
-                            }, kotlinFile, nativeBacked = propertyAccessor)
+                                ) {
+                                    typeInfo.cToBridged(expr = extra.cGlobalName)
+                                },
+                                kotlinFile, nativeBacked = propertyAccessor
+                            )
                         }
                         in builderResult.bridgeGenerationComponents.arrayGetterInfo -> {
                             val extra = builderResult.bridgeGenerationComponents.arrayGetterInfo.getValue(propertyAccessor)
@@ -173,16 +177,18 @@ class StubIrBridgeBuilder(
                         val typeInfo = extra.typeInfo
                         val bridgedValue = BridgeTypedKotlinValue(typeInfo.bridgedType, typeInfo.argToBridged("value"))
                         val setter = simpleBridgeGenerator.kotlinToNative(
-                                nativeBacked = propertyAccessor,
-                                returnType = BridgedType.VOID,
-                                kotlinValues = listOf(bridgedValue),
-                                independent = false
+                            nativeBacked = propertyAccessor,
+                            returnType = BridgedType.VOID,
+                            kotlinValues = listOf(bridgedValue),
+                            independent = false
                         ) { nativeValues ->
-                            out("${extra.cGlobalName} = ${typeInfo.cFromBridged(
+                            out(
+                                "${extra.cGlobalName} = ${typeInfo.cFromBridged(
                                     nativeValues.single(),
                                     scope,
                                     nativeBacked = propertyAccessor
-                            )};")
+                                )};"
+                            )
                             ""
                         }
                         propertyAccessorBridgeBodies[propertyAccessor] = setter
@@ -204,7 +210,7 @@ class StubIrBridgeBuilder(
                     if (propertyAccessor in builderResult.wrapperGenerationComponents.getterToWrapperInfo) {
                         val extra = builderResult.wrapperGenerationComponents.getterToWrapperInfo.getValue(propertyAccessor)
                         val cCallAnnotation = propertyAccessor.annotations.firstIsInstanceOrNull<AnnotationStub.CCall.Symbol>()
-                                ?: error("external getter for ${extra.global.name} wasn't marked with @CCall")
+                            ?: error("external getter for ${extra.global.name} wasn't marked with @CCall")
                         val wrapper = if (extra.passViaPointer) {
                             wrapperGenerator.generateCGlobalByPointerGetter(extra.global, cCallAnnotation.symbolName)
                         } else {
@@ -218,7 +224,7 @@ class StubIrBridgeBuilder(
                     if (propertyAccessor in builderResult.wrapperGenerationComponents.setterToWrapperInfo) {
                         val extra = builderResult.wrapperGenerationComponents.setterToWrapperInfo.getValue(propertyAccessor)
                         val cCallAnnotation = propertyAccessor.annotations.firstIsInstanceOrNull<AnnotationStub.CCall.Symbol>()
-                                ?: error("external setter for ${extra.global.name} wasn't marked with @CCall")
+                            ?: error("external setter for ${extra.global.name} wasn't marked with @CCall")
                         val wrapper = wrapperGenerator.generateCGlobalSetter(extra.global, cCallAnnotation.symbolName)
                         simpleBridgeGenerator.insertNativeBridge(propertyAccessor, emptyList(), wrapper.lines)
                     }
@@ -246,8 +252,8 @@ class StubIrBridgeBuilder(
     }
 
     private fun isCValuesRef(type: StubType): Boolean =
-            (type as? ClassifierStubType)?.let { it.classifier == KotlinTypes.cValuesRef }
-                    ?: false
+        (type as? ClassifierStubType)?.let { it.classifier == KotlinTypes.cValuesRef }
+            ?: false
 
     private fun generateBridgeBody(function: FunctionStub) {
         assert(context.platform == KotlinPlatform.JVM) { "Function ${function.name} was not marked as external." }
@@ -283,11 +289,11 @@ class StubIrBridgeBuilder(
             "Function ${function.name} was processed incorrectly."
         }
         val result = mappingBridgeGenerator.kotlinToNative(
-                bodyGenerator,
-                function,
-                origin.function.returnType,
-                bridgeArguments,
-                independent = false
+            bodyGenerator,
+            function,
+            origin.function.returnType,
+            bridgeArguments,
+            independent = false
         ) { nativeValues ->
             "${origin.function.name}(${nativeValues.joinToString()})"
         }
@@ -309,11 +315,11 @@ class StubIrBridgeBuilder(
     fun build(): BridgeBuilderResult {
         bridgeGeneratingVisitor.visitSimpleStubContainer(builderResult.stubs, null)
         return BridgeBuilderResult(
-                kotlinFile,
-                simpleBridgeGenerator.prepare(),
-                propertyAccessorBridgeBodies.toMap(),
-                functionBridgeBodies.toMap(),
-                excludedStubs.toSet()
+            kotlinFile,
+            simpleBridgeGenerator.prepare(),
+            propertyAccessorBridgeBodies.toMap(),
+            functionBridgeBodies.toMap(),
+            excludedStubs.toSet()
         )
     }
 }

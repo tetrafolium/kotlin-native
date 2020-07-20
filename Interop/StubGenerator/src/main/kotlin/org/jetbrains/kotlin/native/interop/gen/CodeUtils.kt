@@ -17,11 +17,11 @@
 package org.jetbrains.kotlin.native.interop.gen
 
 val kotlinKeywords = setOf(
-        "as", "break", "class", "continue", "do", "dynamic", "else", "false", "for", "fun", "if", "in",
-        "interface", "is", "null", "object", "package", "return", "super", "this", "throw",
-        "true", "try", "typealias", "val", "var", "when", "while",
-        // While not technically keywords, those shall be escaped as well.
-        "_", "__", "___"
+    "as", "break", "class", "continue", "do", "dynamic", "else", "false", "for", "fun", "if", "in",
+    "interface", "is", "null", "object", "package", "return", "super", "this", "throw",
+    "true", "try", "typealias", "val", "var", "when", "while",
+    // While not technically keywords, those shall be escaped as well.
+    "_", "__", "___"
 )
 
 /**
@@ -81,9 +81,9 @@ fun String.quoteAsKotlinLiteral(): KotlinExpression = buildString {
 // TODO: improve literal readability by preserving more characters.
 
 private val charactersAllowedInKotlinStringLiterals: Set<Char> = mutableSetOf<Char>().apply {
-    addAll('a' .. 'z')
-    addAll('A' .. 'Z')
-    addAll('0' .. '9')
+    addAll('a'..'z')
+    addAll('A'..'Z')
+    addAll('0'..'9')
     addAll(listOf('_', '@', ':', ';', '.', ',', '{', '}', '=', '[', ']', '^', '#', '*', ' ', '(', ')'))
 }
 

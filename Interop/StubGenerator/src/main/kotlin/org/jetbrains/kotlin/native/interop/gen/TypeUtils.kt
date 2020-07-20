@@ -44,11 +44,12 @@ fun Type.getStringRepresentation(): String = when (this) {
 
     is RecordType -> this.decl.spelling
 
-    is EnumType -> if (this.def.isAnonymous) {
-        this.def.baseType.getStringRepresentation()
-    } else {
-        this.def.spelling
-    }
+    is EnumType ->
+        if (this.def.isAnonymous) {
+            this.def.baseType.getStringRepresentation()
+        } else {
+            this.def.spelling
+        }
 
     is Typedef -> this.def.aliased.getStringRepresentation()
 
@@ -64,7 +65,7 @@ fun Type.getStringRepresentation(): String = when (this) {
 }
 
 fun getPointerTypeStringRepresentation(pointee: Type): String =
-        (getStringRepresentationOfPointee(pointee) ?: "void") + "*"
+    (getStringRepresentationOfPointee(pointee) ?: "void") + "*"
 
 private fun getStringRepresentationOfPointee(type: Type): String? {
     val unwrapped = type.unwrapTypedefs()
@@ -72,11 +73,12 @@ private fun getStringRepresentationOfPointee(type: Type): String? {
     return when (unwrapped) {
         is PrimitiveType -> unwrapped.getStringRepresentation()
         is PointerType -> getStringRepresentationOfPointee(unwrapped.pointeeType)?.plus("*")
-        is RecordType -> if (unwrapped.decl.isAnonymous || unwrapped.decl.spelling == "struct __va_list_tag") {
-            null
-        } else {
-            unwrapped.decl.spelling
-        }
+        is RecordType ->
+            if (unwrapped.decl.isAnonymous || unwrapped.decl.spelling == "struct __va_list_tag") {
+                null
+            } else {
+                unwrapped.decl.spelling
+            }
         else -> null
     }
 }

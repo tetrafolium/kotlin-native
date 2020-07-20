@@ -16,12 +16,11 @@
 
 package kotlinx.cinterop
 
+import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
+import kotlin.native.internal.VolatileLambda
 import kotlin.native.internal.getNativeNullPtr
 import kotlin.native.internal.reinterpret
-import kotlin.native.internal.Intrinsic
-import kotlin.native.internal.VolatileLambda
-import kotlin.native.internal.TypedIntrinsic
-import kotlin.native.internal.IntrinsicType
 
 typealias NativePtr = kotlin.native.internal.NativePtr
 internal typealias NonNullNativePtr = kotlin.native.internal.NonNullNativePtr
