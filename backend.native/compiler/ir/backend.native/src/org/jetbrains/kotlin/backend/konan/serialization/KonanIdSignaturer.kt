@@ -10,10 +10,10 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.module
 class KonanIdSignaturer(private val mangler: KotlinMangler.DescriptorMangler) : IdSignatureDescriptor(mangler) {
 
     override fun createSignatureBuilder(): DescriptorBasedSignatureBuilder =
-            KonanDescriptorBasedSignatureBuilder(mangler)
+        KonanDescriptorBasedSignatureBuilder(mangler)
 
     private class KonanDescriptorBasedSignatureBuilder(
-            mangler: KotlinMangler.DescriptorMangler
+        mangler: KotlinMangler.DescriptorMangler
     ) : DescriptorBasedSignatureBuilder(mangler) {
 
         /**

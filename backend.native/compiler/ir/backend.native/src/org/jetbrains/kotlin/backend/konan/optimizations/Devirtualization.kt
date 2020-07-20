@@ -8,10 +8,10 @@ package org.jetbrains.kotlin.backend.konan.optimizations
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.descriptors.explicitParameters
 import org.jetbrains.kotlin.backend.common.ir.ir2stringWhole
-import org.jetbrains.kotlin.backend.common.pop
-import org.jetbrains.kotlin.backend.common.push
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlock
+import org.jetbrains.kotlin.backend.common.pop
+import org.jetbrains.kotlin.backend.common.push
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.backend.konan.util.IntArrayList
 import org.jetbrains.kotlin.backend.konan.util.LongArrayList
@@ -30,9 +30,9 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.impl.originalKotlinType
 import org.jetbrains.kotlin.ir.types.toKotlinType
-import org.jetbrains.kotlin.ir.util.irCall
-import org.jetbrains.kotlin.ir.util.explicitParameters
 import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.ir.util.explicitParameters
+import org.jetbrains.kotlin.ir.util.irCall
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
@@ -64,60 +64,60 @@ internal object Devirtualization {
 
     private inline fun takeName(block: () -> String) = if (TAKE_NAMES) block() else null
 
-    fun computeRootSet(context: Context, moduleDFG: ModuleDFG, externalModulesDFG: ExternalModulesDFG)
-            : List<DataFlowIR.FunctionSymbol> {
+    fun computeRootSet(context: Context, moduleDFG: ModuleDFG, externalModulesDFG: ExternalModulesDFG):
+        List<DataFlowIR.FunctionSymbol> {
 
-        fun DataFlowIR.FunctionSymbol.resolved(): DataFlowIR.FunctionSymbol {
-            if (this is DataFlowIR.FunctionSymbol.External)
-                return externalModulesDFG.publicFunctions[this.hash] ?: this
-            return this
-        }
+            fun DataFlowIR.FunctionSymbol.resolved(): DataFlowIR.FunctionSymbol {
+                if (this is DataFlowIR.FunctionSymbol.External)
+                    return externalModulesDFG.publicFunctions[this.hash] ?: this
+                return this
+            }
 
-        val entryPoint = context.ir.symbols.entryPoint?.owner
-        val exportedFunctions =
+            val entryPoint = context.ir.symbols.entryPoint?.owner
+            val exportedFunctions =
                 if (entryPoint != null)
                     listOf(moduleDFG.symbolTable.mapFunction(entryPoint).resolved())
                 else {
                     // In a library every public function and every function accessible via virtual call belongs to the rootset.
                     moduleDFG.symbolTable.functionMap.values.filter {
-                        it is DataFlowIR.FunctionSymbol.Public
-                                || (it as? DataFlowIR.FunctionSymbol.External)?.isExported == true
+                        it is DataFlowIR.FunctionSymbol.Public ||
+                            (it as? DataFlowIR.FunctionSymbol.External)?.isExported == true
                     } +
-                            moduleDFG.symbolTable.classMap.values
-                                    .filterIsInstance<DataFlowIR.Type.Declared>()
-                                    .flatMap { it.vtable + it.itable.values }
-                                    .filterIsInstance<DataFlowIR.FunctionSymbol.Declared>()
-                                    .filter { moduleDFG.functions.containsKey(it) }
+                        moduleDFG.symbolTable.classMap.values
+                            .filterIsInstance<DataFlowIR.Type.Declared>()
+                            .flatMap { it.vtable + it.itable.values }
+                            .filterIsInstance<DataFlowIR.FunctionSymbol.Declared>()
+                            .filter { moduleDFG.functions.containsKey(it) }
                 }
-        // TODO: Are globals initializers always called whether they are actually reachable from roots or not?
-        val globalInitializers =
+            // TODO: Are globals initializers always called whether they are actually reachable from roots or not?
+            val globalInitializers =
                 moduleDFG.symbolTable.functionMap.values.filter { it.isGlobalInitializer } +
-                externalModulesDFG.functionDFGs.keys.filter { it.isGlobalInitializer }
+                    externalModulesDFG.functionDFGs.keys.filter { it.isGlobalInitializer }
 
-        val explicitlyExportedFunctions =
+            val explicitlyExportedFunctions =
                 moduleDFG.symbolTable.functionMap.values.filter { it.explicitlyExported } +
-                externalModulesDFG.functionDFGs.keys.filter { it.explicitlyExported }
+                    externalModulesDFG.functionDFGs.keys.filter { it.explicitlyExported }
 
-        // Conservatively assume each associated object could be called.
-        // Note: for constructors there is additional parameter (<this>) and its type will be added
-        // to instantiating classes since all objects are final types.
-        val associatedObjects = mutableListOf<DataFlowIR.FunctionSymbol>()
-        context.irModule!!.acceptChildrenVoid(object: IrElementVisitorVoid {
-            override fun visitElement(element: IrElement) {
-                element.acceptChildrenVoid(this)
-            }
-
-            override fun visitClass(declaration: IrClass) {
-                context.getLayoutBuilder(declaration).associatedObjects.values.forEach {
-                    assert (it.kind == ClassKind.OBJECT) { "An object expected but was ${it.dump()}" }
-                    associatedObjects += moduleDFG.symbolTable.mapFunction(it.constructors.single())
+            // Conservatively assume each associated object could be called.
+            // Note: for constructors there is additional parameter (<this>) and its type will be added
+            // to instantiating classes since all objects are final types.
+            val associatedObjects = mutableListOf<DataFlowIR.FunctionSymbol>()
+            context.irModule!!.acceptChildrenVoid(object : IrElementVisitorVoid {
+                override fun visitElement(element: IrElement) {
+                    element.acceptChildrenVoid(this)
                 }
-                super.visitClass(declaration)
-            }
-        })
 
-        return (exportedFunctions + globalInitializers + explicitlyExportedFunctions + associatedObjects).distinct()
-    }
+                override fun visitClass(declaration: IrClass) {
+                    context.getLayoutBuilder(declaration).associatedObjects.values.forEach {
+                        assert(it.kind == ClassKind.OBJECT) { "An object expected but was ${it.dump()}" }
+                        associatedObjects += moduleDFG.symbolTable.mapFunction(it.constructors.single())
+                    }
+                    super.visitClass(declaration)
+                }
+            })
+
+            return (exportedFunctions + globalInitializers + explicitlyExportedFunctions + associatedObjects).distinct()
+        }
 
     fun BitSet.format(allTypes: Array<DataFlowIR.Type.Declared>): String {
         return allTypes.withIndex().filter { this[it.index] }.joinToString { it.value.toString() }
@@ -125,9 +125,11 @@ internal object Devirtualization {
 
     private val VIRTUAL_TYPE_ID = 0 // Id of [DataFlowIR.Type.Virtual].
 
-    internal class DevirtualizationAnalysis(val context: Context,
-                                            val moduleDFG: ModuleDFG,
-                                            val externalModulesDFG: ExternalModulesDFG) {
+    internal class DevirtualizationAnalysis(
+        val context: Context,
+        val moduleDFG: ModuleDFG,
+        val externalModulesDFG: ExternalModulesDFG
+    ) {
 
         private val entryPoint = context.ir.symbols.entryPoint?.owner
 
@@ -155,7 +157,7 @@ internal object Devirtualization {
 
             abstract fun toString(allTypes: Array<DataFlowIR.Type.Declared>): String
 
-            class Source(id: Int, typeId: Int, nameBuilder: () -> String): Node(id) {
+            class Source(id: Int, typeId: Int, nameBuilder: () -> String) : Node(id) {
                 val name = takeName(nameBuilder)
 
                 init {
@@ -188,8 +190,10 @@ internal object Devirtualization {
 
             val voidNode = addNode { Node.Ordinary(it, { "Void" }) }
             val virtualNode = addNode { Node.Source(it, VIRTUAL_TYPE_ID, { "Virtual" }) }
-            val arrayItemField = DataFlowIR.Field(null,
-                    symbolTable.mapClassReferenceType(context.irBuiltIns.anyClass.owner), 1, "Array\$Item")
+            val arrayItemField = DataFlowIR.Field(
+                null,
+                symbolTable.mapClassReferenceType(context.irBuiltIns.anyClass.owner), 1, "Array\$Item"
+            )
             val functions = mutableMapOf<DataFlowIR.FunctionSymbol, Function>()
             val externalFunctions = mutableMapOf<Pair<DataFlowIR.FunctionSymbol, DataFlowIR.Type>, Node>()
             val fields = mutableMapOf<DataFlowIR.Field, Node>() // Do not distinguish receivers.
@@ -242,12 +246,12 @@ internal object Devirtualization {
                     if (visited[type.index]) return
                     visited.set(type.index)
                     type.superTypes
-                            .map { it.resolved() }
-                            .forEach { superType ->
-                                val subTypes = typesSubTypes[superType.index]
-                                subTypes += type
-                                processType(superType)
-                            }
+                        .map { it.resolved() }
+                        .forEach { superType ->
+                            val subTypes = typesSubTypes[superType.index]
+                            subTypes += type
+                            processType(superType)
+                        }
                 }
 
                 allTypes.forEach { processType(it) }
@@ -418,9 +422,9 @@ internal object Devirtualization {
                 "DataFlowIR.Type.Virtual cannot be in symbolTable.classMap"
             }
             val allDeclaredTypes = listOf(DataFlowIR.Type.Virtual) +
-                    symbolTable.classMap.values.filterIsInstance<DataFlowIR.Type.Declared>() +
-                    symbolTable.primitiveMap.values.filterIsInstance<DataFlowIR.Type.Declared>() +
-                    externalModulesDFG.allTypes
+                symbolTable.classMap.values.filterIsInstance<DataFlowIR.Type.Declared>() +
+                symbolTable.primitiveMap.values.filterIsInstance<DataFlowIR.Type.Declared>() +
+                externalModulesDFG.allTypes
             val allTypes = Array<DataFlowIR.Type.Declared>(allDeclaredTypes.size) { DataFlowIR.Type.Virtual }
             for (type in allDeclaredTypes)
                 allTypes[type.index] = type
@@ -456,8 +460,10 @@ internal object Devirtualization {
             }
 
             DEBUG_OUTPUT(0) {
-                println("CONSTRAINT GRAPH: ${constraintGraph.nodes.size} nodes, " +
-                    "${constraintGraph.nodes.sumBy { (directEdges[it.id + 1] - directEdges[it.id]) + (it.directCastEdges?.size ?: 0) } } edges")
+                println(
+                    "CONSTRAINT GRAPH: ${constraintGraph.nodes.size} nodes, " +
+                        "${constraintGraph.nodes.sumBy { (directEdges[it.id + 1] - directEdges[it.id]) + (it.directCastEdges?.size ?: 0) } } edges"
+                )
             }
 
             val condensation = CondensationBuilder(directEdges, reversedEdges).build()
@@ -480,8 +486,8 @@ internal object Devirtualization {
             val badEdges = mutableListOf<Pair<Node, Node.CastEdge>>()
             for (node in constraintGraph.nodes) {
                 node.directCastEdges
-                        ?.filter { it.node.priority < node.priority } // Contradicts topological order.
-                        ?.forEach { badEdges += node to it }
+                    ?.filter { it.node.priority < node.priority } // Contradicts topological order.
+                    ?.forEach { badEdges += node to it }
             }
             badEdges.sortBy { it.second.node.priority } // Heuristic.
 
@@ -501,12 +507,12 @@ internal object Devirtualization {
                             types.or(constraintGraph.nodes[it].types)
                         }
                         node.reversedCastEdges
-                                ?.filter { it.node.priority < node.priority } // Doesn't contradict topological order.
-                                ?.forEach {
-                                    val sourceTypes = it.node.types.copy()
-                                    sourceTypes.and(it.suitableTypes)
-                                    types.or(sourceTypes)
-                                }
+                            ?.filter { it.node.priority < node.priority } // Doesn't contradict topological order.
+                            ?.forEach {
+                                val sourceTypes = it.node.types.copy()
+                                sourceTypes.and(it.suitableTypes)
+                                types.or(sourceTypes)
+                            }
                     }
                     condensation.forEachNode(multiNode) { node -> node.types.or(types) }
                 }
@@ -589,9 +595,9 @@ internal object Devirtualization {
                     condensation.forEachNode(multiNode) { node ->
                         println("    Node #${node.id}")
                         allTypes.asSequence()
-                                .withIndex()
-                                .filter { node.types[it.index] }.toList()
-                                .forEach { println("        ${it.value}") }
+                            .withIndex()
+                            .filter { node.types[it.index] }.toList()
+                            .forEach { println("        ${it.value}") }
                     }
                 }
             }
@@ -604,13 +610,17 @@ internal object Devirtualization {
                     val virtualCall = node as? DataFlowIR.Node.VirtualCall ?: continue
                     assert(nodesMap[virtualCall] != null) { "Node for virtual call $virtualCall has not been built" }
                     val receiverNode = constraintGraph.virtualCallSiteReceivers[virtualCall]
-                            ?: error("virtualCallSiteReceivers were not built for virtual call $virtualCall")
+                        ?: error("virtualCallSiteReceivers were not built for virtual call $virtualCall")
                     if (receiverNode.types[VIRTUAL_TYPE_ID]) {
 
                         DEBUG_OUTPUT(0) {
-                            println("Unable to devirtualize callsite " +
-                                    (virtualCall.irCallSite?.let { ir2stringWhole(it) }
-                                            ?: virtualCall.callee.toString()))
+                            println(
+                                "Unable to devirtualize callsite " +
+                                    (
+                                        virtualCall.irCallSite?.let { ir2stringWhole(it) }
+                                            ?: virtualCall.callee.toString()
+                                        )
+                            )
                             println("    receiver is Virtual")
                             printPathToType(reversedEdges, receiverNode, VIRTUAL_TYPE_ID)
                         }
@@ -619,8 +629,10 @@ internal object Devirtualization {
                     }
 
                     DEBUG_OUTPUT(0) {
-                        println("Devirtualized callsite " +
-                                (virtualCall.irCallSite?.let { ir2stringWhole(it) } ?: virtualCall.callee.toString()))
+                        println(
+                            "Devirtualized callsite " +
+                                (virtualCall.irCallSite?.let { ir2stringWhole(it) } ?: virtualCall.callee.toString())
+                        )
                     }
 
                     val receiverType = virtualCall.receiverType.resolved()
@@ -639,17 +651,22 @@ internal object Devirtualization {
                         }
                     }
 
-                    result[virtualCall] = DevirtualizedCallSite(virtualCall.callee.resolved(),
-                            possibleReceivers.map { possibleReceiverType ->
-                                val callee = possibleReceiverType.calleeAt(virtualCall)
-                                if (callee is DataFlowIR.FunctionSymbol.Declared && callee.symbolTableIndex < 0)
-                                    error("Function ${possibleReceiverType}.$callee cannot be called virtually," +
-                                            " but actually is at call site: " +
-                                            (virtualCall.irCallSite?.let { ir2stringWhole(it) }
-                                                    ?: virtualCall.toString()))
-                                DevirtualizedCallee(possibleReceiverType, callee)
-                            }) to function.symbol
-
+                    result[virtualCall] = DevirtualizedCallSite(
+                        virtualCall.callee.resolved(),
+                        possibleReceivers.map { possibleReceiverType ->
+                            val callee = possibleReceiverType.calleeAt(virtualCall)
+                            if (callee is DataFlowIR.FunctionSymbol.Declared && callee.symbolTableIndex < 0)
+                                error(
+                                    "Function $possibleReceiverType.$callee cannot be called virtually," +
+                                        " but actually is at call site: " +
+                                        (
+                                            virtualCall.irCallSite?.let { ir2stringWhole(it) }
+                                                ?: virtualCall.toString()
+                                            )
+                                )
+                            DevirtualizedCallee(possibleReceiverType, callee)
+                        }
+                    ) to function.symbol
                 }
             }
 
@@ -685,26 +702,35 @@ internal object Devirtualization {
 
         // Both [directEdges] and [reversedEdges] are the array representation of a graph:
         // for each node v the edges of that node are stored in edges[edges[v] until edges[v + 1]].
-        private data class ConstraintGraphBuildResult(val instantiatingClasses: BitSet,
-                                                      val directEdges: IntArray, val reversedEdges: IntArray)
+        private data class ConstraintGraphBuildResult(
+            val instantiatingClasses: BitSet,
+            val directEdges: IntArray,
+            val reversedEdges: IntArray
+        )
 
         // Here we're dividing the build process onto two phases:
         // 1. build bag of edges and direct edges array;
         // 2. build reversed edges array from the direct edges array.
         // This is to lower memory usage (all of these edges structures are more or less equal by size),
         // and by that we're only holding references to two out of three of them.
-        private fun buildConstraintGraph(nodesMap: MutableMap<DataFlowIR.Node, Node>,
-                                         functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
-                                         typeHierarchy: TypeHierarchy,
-                                         rootSet: List<DataFlowIR.FunctionSymbol>
+        private fun buildConstraintGraph(
+            nodesMap: MutableMap<DataFlowIR.Node, Node>,
+            functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
+            typeHierarchy: TypeHierarchy,
+            rootSet: List<DataFlowIR.FunctionSymbol>
         ): ConstraintGraphBuildResult {
             val precursor = buildConstraintGraphPrecursor(nodesMap, functions, typeHierarchy, rootSet)
-            return ConstraintGraphBuildResult(precursor.instantiatingClasses, precursor.directEdges,
-                    buildReversedEdges(precursor.directEdges, precursor.reversedEdgesCount))
+            return ConstraintGraphBuildResult(
+                precursor.instantiatingClasses, precursor.directEdges,
+                buildReversedEdges(precursor.directEdges, precursor.reversedEdgesCount)
+            )
         }
 
-        private class ConstraintGraphPrecursor(val instantiatingClasses: BitSet,
-                                               val directEdges: IntArray, val reversedEdgesCount: IntArrayList)
+        private class ConstraintGraphPrecursor(
+            val instantiatingClasses: BitSet,
+            val directEdges: IntArray,
+            val reversedEdgesCount: IntArrayList
+        )
 
         private fun buildReversedEdges(directEdges: IntArray, reversedEdgesCount: IntArrayList): IntArray {
             val numberOfNodes = constraintGraph.nodes.size
@@ -726,10 +752,11 @@ internal object Devirtualization {
             return reversedEdges
         }
 
-        private fun buildConstraintGraphPrecursor(nodesMap: MutableMap<DataFlowIR.Node, Node>,
-                                                  functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
-                                                  typeHierarchy: TypeHierarchy,
-                                                  rootSet: List<DataFlowIR.FunctionSymbol>
+        private fun buildConstraintGraphPrecursor(
+            nodesMap: MutableMap<DataFlowIR.Node, Node>,
+            functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
+            typeHierarchy: TypeHierarchy,
+            rootSet: List<DataFlowIR.FunctionSymbol>
         ): ConstraintGraphPrecursor {
             val constraintGraphBuilder = ConstraintGraphBuilder(nodesMap, functions, typeHierarchy, rootSet, true)
             constraintGraphBuilder.build()
@@ -760,14 +787,20 @@ internal object Devirtualization {
             return ConstraintGraphPrecursor(constraintGraphBuilder.instantiatingClasses, directEdges, reversedEdgesCount)
         }
 
-        private class ConstraintGraphVirtualCall(val caller: Function, val virtualCall: DataFlowIR.Node.VirtualCall,
-                                                 val arguments: List<Node>, val returnsNode: Node)
+        private class ConstraintGraphVirtualCall(
+            val caller: Function,
+            val virtualCall: DataFlowIR.Node.VirtualCall,
+            val arguments: List<Node>,
+            val returnsNode: Node
+        )
 
-        private inner class ConstraintGraphBuilder(val functionNodesMap: MutableMap<DataFlowIR.Node, Node>,
-                                                   val functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
-                                                   val typeHierarchy: TypeHierarchy,
-                                                   val rootSet: List<DataFlowIR.FunctionSymbol>,
-                                                   val useTypes: Boolean) {
+        private inner class ConstraintGraphBuilder(
+            val functionNodesMap: MutableMap<DataFlowIR.Node, Node>,
+            val functions: Map<DataFlowIR.FunctionSymbol, DataFlowIR.Function>,
+            val typeHierarchy: TypeHierarchy,
+            val rootSet: List<DataFlowIR.FunctionSymbol>,
+            val useTypes: Boolean
+        ) {
 
             private val allTypes = typeHierarchy.allTypes
             private val variables = mutableMapOf<DataFlowIR.Node.Variable, Node>()
@@ -778,17 +811,17 @@ internal object Devirtualization {
             val instantiatingClasses = BitSet()
 
             private val preliminaryNumberOfNodes =
-                    allTypes.size + // A possible source node for each type.
-                            functions.size * 2 + // <returns> and <throws> nodes for each function.
-                            functions.values.sumBy { it.body.nodes.size } + // A node for each DataFlowIR.Node.
-                            functions.values
-                                    .sumBy { function ->
-                                        function.body.nodes.count { node ->
-                                            // A cast if types are different.
-                                            node is DataFlowIR.Node.Call
-                                                    && node.returnType.resolved() != node.callee.returnParameter.type.resolved()
-                                        }
-                                    }
+                allTypes.size + // A possible source node for each type.
+                    functions.size * 2 + // <returns> and <throws> nodes for each function.
+                    functions.values.sumBy { it.body.nodes.size } + // A node for each DataFlowIR.Node.
+                    functions.values
+                        .sumBy { function ->
+                            function.body.nodes.count { node ->
+                                // A cast if types are different.
+                                node is DataFlowIR.Node.Call &&
+                                    node.returnType.resolved() != node.callee.returnParameter.type.resolved()
+                            }
+                        }
 
             private fun isPrime(x: Int): Boolean {
                 if (x <= 3) return true
@@ -846,29 +879,29 @@ internal object Devirtualization {
             }
 
             private fun ordinaryNode(nameBuilder: () -> String) =
-                    constraintGraph.addNode { Node.Ordinary(it, nameBuilder) }
+                constraintGraph.addNode { Node.Ordinary(it, nameBuilder) }
 
             private fun sourceNode(typeId: Int, nameBuilder: () -> String) =
-                    constraintGraph.addNode { Node.Source(it, typeId, nameBuilder) }
+                constraintGraph.addNode { Node.Source(it, typeId, nameBuilder) }
 
             private fun concreteClass(type: DataFlowIR.Type.Declared) =
-                    concreteClasses[type.index]
-                            ?: sourceNode(concreteType(type)) { "Class\$$type" }.also { concreteClasses[type.index] = it}
+                concreteClasses[type.index]
+                    ?: sourceNode(concreteType(type)) { "Class\$$type" }.also { concreteClasses[type.index] = it }
 
             private fun fieldNode(field: DataFlowIR.Field) =
-                    constraintGraph.fields.getOrPut(field) {
-                        val fieldNode = ordinaryNode { "Field\$$field" }
-                        if (entryPoint == null) {
-                            // TODO: This is conservative.
-                            val fieldType = field.type.resolved()
-                            // Some user of our library might place some value into the field.
-                            if (fieldType.isFinal)
-                                addEdge(concreteClass(fieldType), fieldNode)
-                            else
-                                addEdge(constraintGraph.virtualNode, fieldNode)
-                        }
-                        fieldNode
+                constraintGraph.fields.getOrPut(field) {
+                    val fieldNode = ordinaryNode { "Field\$$field" }
+                    if (entryPoint == null) {
+                        // TODO: This is conservative.
+                        val fieldType = field.type.resolved()
+                        // Some user of our library might place some value into the field.
+                        if (fieldType.isFinal)
+                            addEdge(concreteClass(fieldType), fieldNode)
+                        else
+                            addEdge(constraintGraph.virtualNode, fieldNode)
                     }
+                    fieldNode
+                }
 
             private var stack = mutableListOf<DataFlowIR.FunctionSymbol>()
 
@@ -878,23 +911,25 @@ internal object Devirtualization {
                 // Add all final parameters of the roots.
                 for (root in rootSet) {
                     root.parameters
-                            .map { it.type.resolved() }
-                            .filter { it.isFinal }
-                            .forEach { addInstantiatingClass(it) }
+                        .map { it.type.resolved() }
+                        .filter { it.isFinal }
+                        .forEach { addInstantiatingClass(it) }
                 }
                 if (entryPoint == null) {
                     // For library assume all public non-abstract classes could be instantiated.
                     // Note: for constructors there is additional parameter (<this>) and for associated objects
                     // its type will be added to instantiating classes since all objects are final types.
                     symbolTable.classMap.values
-                            .filterIsInstance<DataFlowIR.Type.Public>()
-                            .filter { !it.isAbstract }
-                            .forEach { addInstantiatingClass(it) }
+                        .filterIsInstance<DataFlowIR.Type.Public>()
+                        .filter { !it.isAbstract }
+                        .forEach { addInstantiatingClass(it) }
                 } else {
                     // String arguments are implicitly put into the <args> array parameter of <main>.
                     addInstantiatingClass(symbolTable.mapType(context.irBuiltIns.stringType).resolved())
-                    addEdge(concreteClass(symbolTable.mapType(context.irBuiltIns.stringType).resolved()),
-                            fieldNode(constraintGraph.arrayItemField))
+                    addEdge(
+                        concreteClass(symbolTable.mapType(context.irBuiltIns.stringType).resolved()),
+                        fieldNode(constraintGraph.arrayItemField)
+                    )
                 }
                 rootSet.forEach { createFunctionConstraintGraph(it, true) }
                 while (stack.isNotEmpty()) {
@@ -932,9 +967,9 @@ internal object Devirtualization {
                         for (virtualCall in list) {
                             val returnType = virtualCall.virtualCall.returnType.resolved()
                             val totalIncomingEdgesToReturnsNode =
-                                    if (virtualCall.returnsNode.id >= reversedEdgesCount.size)
-                                        0
-                                    else reversedEdgesCount[virtualCall.returnsNode.id]
+                                if (virtualCall.returnsNode.id >= reversedEdgesCount.size)
+                                    0
+                                else reversedEdgesCount[virtualCall.returnsNode.id]
                             if (returnType.isFinal && totalIncomingEdgesToReturnsNode == 0) {
                                 // If we are in a library and facing final return type with no possible callees -
                                 // this type still can be returned by some user of this library, so propagate it explicitly.
@@ -954,9 +989,9 @@ internal object Devirtualization {
                     symbol.parameters.forEachIndexed { index, type ->
                         val resolvedType = type.type.resolved()
                         val node = if (!resolvedType.isFinal)
-                                       constraintGraph.virtualNode // TODO: OBJC-INTEROP-GENERATED-CLASSES
-                                   else
-                                       concreteClass(resolvedType)
+                            constraintGraph.virtualNode // TODO: OBJC-INTEROP-GENERATED-CLASSES
+                        else
+                            concreteClass(resolvedType)
                         addEdge(node, parameters[index])
                     }
                 }
@@ -980,8 +1015,10 @@ internal object Devirtualization {
                 checkSupertypes(type, type, BitSet())
             }
 
-            private fun processVirtualCall(virtualCall: ConstraintGraphVirtualCall,
-                                           receiverType: DataFlowIR.Type.Declared) {
+            private fun processVirtualCall(
+                virtualCall: ConstraintGraphVirtualCall,
+                receiverType: DataFlowIR.Type.Declared
+            ) {
                 DEBUG_OUTPUT(1) {
                     println("Processing virtual call: ${virtualCall.virtualCall.callee}")
                     println("Receiver type: $receiverType")
@@ -989,13 +1026,20 @@ internal object Devirtualization {
 
                 val callee = receiverType.calleeAt(virtualCall.virtualCall)
 
-                addEdge(doCall(virtualCall.caller, callee, virtualCall.arguments,
-                        callee.returnParameter.type.resolved()), virtualCall.returnsNode)
+                addEdge(
+                    doCall(
+                        virtualCall.caller, callee, virtualCall.arguments,
+                        callee.returnParameter.type.resolved()
+                    ),
+                    virtualCall.returnsNode
+                )
             }
 
-            private fun checkSupertypes(type: DataFlowIR.Type.Declared,
-                                        inheritor: DataFlowIR.Type.Declared,
-                                        seenTypes: BitSet) {
+            private fun checkSupertypes(
+                type: DataFlowIR.Type.Declared,
+                inheritor: DataFlowIR.Type.Declared,
+                seenTypes: BitSet
+            ) {
                 seenTypes.set(type.index)
 
                 DEBUG_OUTPUT(1) {
@@ -1039,14 +1083,20 @@ internal object Devirtualization {
                 return castNode
             }
 
-            private fun castIfNeeded(function: Function, node: Node,
-                                     nodeType: DataFlowIR.Type.Declared, type: DataFlowIR.Type.Declared) =
-                    if (!useTypes || type == nodeType)
-                        node
-                    else doCast(function, node, type)
+            private fun castIfNeeded(
+                function: Function,
+                node: Node,
+                nodeType: DataFlowIR.Type.Declared,
+                type: DataFlowIR.Type.Declared
+            ) =
+                if (!useTypes || type == nodeType)
+                    node
+                else doCast(function, node, type)
 
-            private fun edgeToConstraintNode(function: Function,
-                                             edge: DataFlowIR.Edge): Node {
+            private fun edgeToConstraintNode(
+                function: Function,
+                edge: DataFlowIR.Edge
+            ): Node {
                 val result = dfgNodeToConstraintNode(function, edge.node)
                 val castToType = edge.castToType?.resolved() ?: return result
                 return doCast(function, result, castToType)
@@ -1055,7 +1105,7 @@ internal object Devirtualization {
             fun doCall(caller: Function, callee: Function, arguments: List<Node>, returnType: DataFlowIR.Type.Declared): Node {
                 assert(callee.parameters.size == arguments.size) {
                     "Function ${callee.symbol} takes ${callee.parameters.size} but caller ${caller.symbol}" +
-                            " provided ${arguments.size}"
+                        " provided ${arguments.size}"
                 }
                 callee.parameters.forEachIndexed { index, parameter ->
                     addEdge(arguments[index], parameter)
@@ -1063,8 +1113,12 @@ internal object Devirtualization {
                 return castIfNeeded(caller, callee.returns, callee.symbol.returnParameter.type.resolved(), returnType)
             }
 
-            fun doCall(caller: Function, callee: DataFlowIR.FunctionSymbol,
-                       arguments: List<Node>, returnType: DataFlowIR.Type.Declared): Node {
+            fun doCall(
+                caller: Function,
+                callee: DataFlowIR.FunctionSymbol,
+                arguments: List<Node>,
+                returnType: DataFlowIR.Type.Declared
+            ): Node {
                 val resolvedCallee = callee.resolved()
                 val calleeConstraintGraph = createFunctionConstraintGraph(resolvedCallee, false)
                 return if (calleeConstraintGraph == null) {
@@ -1097,11 +1151,14 @@ internal object Devirtualization {
             private fun dfgNodeToConstraintNode(function: Function, node: DataFlowIR.Node): Node {
 
                 fun edgeToConstraintNode(edge: DataFlowIR.Edge): Node =
-                        edgeToConstraintNode(function, edge)
+                    edgeToConstraintNode(function, edge)
 
-                fun doCall(callee: DataFlowIR.FunctionSymbol, arguments: List<Node>,
-                           returnType: DataFlowIR.Type.Declared) =
-                        doCall(function, callee, arguments, returnType)
+                fun doCall(
+                    callee: DataFlowIR.FunctionSymbol,
+                    arguments: List<Node>,
+                    returnType: DataFlowIR.Type.Declared
+                ) =
+                    doCall(function, callee, arguments, returnType)
 
                 fun readField(field: DataFlowIR.Field, actualType: DataFlowIR.Type.Declared): Node {
                     val fieldNode = fieldNode(field)
@@ -1197,7 +1254,8 @@ internal object Devirtualization {
                             val returnsNode = ordinaryNode { "VirtualCallReturns\$${function.symbol}" }
                             if (receiverType != DataFlowIR.Type.Virtual)
                                 typesVirtualCallSites[receiverType.index].add(
-                                        ConstraintGraphVirtualCall(function, node, arguments, returnsNode))
+                                    ConstraintGraphVirtualCall(function, node, arguments, returnsNode)
+                                )
                             forEachBitInBoth(typeHierarchy.inheritorsOf(receiverType), instantiatingClasses) {
                                 val actualCallee = allTypes[it].calleeAt(node)
                                 addEdge(doCall(actualCallee, arguments, actualCallee.returnParameter.type.resolved()), returnsNode)
@@ -1267,28 +1325,29 @@ internal object Devirtualization {
                 }
             }
         }
-
     }
 
     class DevirtualizedCallee(val receiverType: DataFlowIR.Type, val callee: DataFlowIR.FunctionSymbol)
 
     class DevirtualizedCallSite(val callee: DataFlowIR.FunctionSymbol, val possibleCallees: List<DevirtualizedCallee>)
 
-    class AnalysisResult(val devirtualizedCallSites: Map<DataFlowIR.Node.VirtualCall, DevirtualizedCallSite>,
-                         val typeHierarchy: DevirtualizationAnalysis.TypeHierarchy)
+    class AnalysisResult(
+        val devirtualizedCallSites: Map<DataFlowIR.Node.VirtualCall, DevirtualizedCallSite>,
+        val typeHierarchy: DevirtualizationAnalysis.TypeHierarchy
+    )
 
-    fun run(irModule: IrModuleFragment, context: Context, moduleDFG: ModuleDFG, externalModulesDFG: ExternalModulesDFG)
-            : AnalysisResult {
-        val devirtualizationAnalysisResult = DevirtualizationAnalysis(context, moduleDFG, externalModulesDFG).analyze()
-        val devirtualizedCallSites =
+    fun run(irModule: IrModuleFragment, context: Context, moduleDFG: ModuleDFG, externalModulesDFG: ExternalModulesDFG):
+        AnalysisResult {
+            val devirtualizationAnalysisResult = DevirtualizationAnalysis(context, moduleDFG, externalModulesDFG).analyze()
+            val devirtualizedCallSites =
                 devirtualizationAnalysisResult.devirtualizedCallSites
-                        .asSequence()
-                        .filter { it.key.irCallSite != null }
-                        .associate { it.key.irCallSite!! to it.value }
-        devirtualize(irModule, context, externalModulesDFG, devirtualizedCallSites)
-        removeRedundantCoercions(irModule, context)
-        return devirtualizationAnalysisResult
-    }
+                    .asSequence()
+                    .filter { it.key.irCallSite != null }
+                    .associate { it.key.irCallSite!! to it.value }
+            devirtualize(irModule, context, externalModulesDFG, devirtualizedCallSites)
+            removeRedundantCoercions(irModule, context)
+            return devirtualizationAnalysisResult
+        }
 
     /**
      * TODO: JVM inliner crashed on attempt inline this function from transform.kt with:
@@ -1302,10 +1361,14 @@ internal object Devirtualization {
     }
 
     private fun IrExpression.isBoxOrUnboxCall() =
-            (this is IrCall && symbol.owner.origin == DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION)
+        (this is IrCall && symbol.owner.origin == DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION)
 
-    private fun devirtualize(irModule: IrModuleFragment, context: Context, externalModulesDFG: ExternalModulesDFG,
-                             devirtualizedCallSites: Map<IrCall, DevirtualizedCallSite>) {
+    private fun devirtualize(
+        irModule: IrModuleFragment,
+        context: Context,
+        externalModulesDFG: ExternalModulesDFG,
+        devirtualizedCallSites: Map<IrCall, DevirtualizedCallSite>
+    ) {
         val symbols = context.ir.symbols
         val nativePtrEqualityOperatorSymbol = symbols.areEqualByValue[PrimitiveBinaryType.POINTER]!!
         val optimize = context.shouldOptimize()
@@ -1323,18 +1386,18 @@ internal object Devirtualization {
         }
 
         fun IrBuilderWithScope.irCoerce(value: IrExpression, coercion: IrFunctionSymbol?) =
-                if (coercion == null)
-                    value
-                else irCall(coercion).apply {
-                    addArguments(listOf(coercion.descriptor.explicitParameters.single() to value))
-                }
+            if (coercion == null)
+                value
+            else irCall(coercion).apply {
+                addArguments(listOf(coercion.descriptor.explicitParameters.single() to value))
+            }
 
         fun IrBuilderWithScope.irCoerce(value: IrExpression, coercion: DataFlowIR.FunctionSymbol.Declared?) =
-                if (coercion == null)
-                    value
-                else irCall(coercion.irFunction!!).apply {
-                    putValueArgument(0, value)
-                }
+            if (coercion == null)
+                value
+            else irCall(coercion.irFunction!!).apply {
+                putValueArgument(0, value)
+            }
 
         class PossiblyCoercedValue(val value: IrVariable, val coercion: IrFunctionSymbol?) {
             fun getFullValue(irBuilder: IrBuilderWithScope) = irBuilder.run {
@@ -1358,22 +1421,26 @@ internal object Devirtualization {
         }
 
         fun <T : IrElement> IrStatementsBuilder<T>.irSplitCoercion(expression: IrExpression, tempName: String, actualType: IrType) =
-                if (!expression.isBoxOrUnboxCall())
-                    PossiblyCoercedValue(irTemporary(expression, tempName, actualType), null)
-                else {
-                    val coercion = expression as IrCall
-                    PossiblyCoercedValue(
-                            irTemporary(coercion.getValueArgument(0)!!, tempName,
-                                    coercion.symbol.owner.explicitParameters.single().type)
-                            , coercion.symbol)
-                }
+            if (!expression.isBoxOrUnboxCall())
+                PossiblyCoercedValue(irTemporary(expression, tempName, actualType), null)
+            else {
+                val coercion = expression as IrCall
+                PossiblyCoercedValue(
+                    irTemporary(
+                        coercion.getValueArgument(0)!!, tempName,
+                        coercion.symbol.owner.explicitParameters.single().type
+                    ),
+                    coercion.symbol
+                )
+            }
 
-        fun getTypeConversion(actualType: DataFlowIR.FunctionParameter,
-                              targetType: DataFlowIR.FunctionParameter): DataFlowIR.FunctionSymbol.Declared? {
+        fun getTypeConversion(
+            actualType: DataFlowIR.FunctionParameter,
+            targetType: DataFlowIR.FunctionParameter
+        ): DataFlowIR.FunctionSymbol.Declared? {
             if (actualType.boxFunction == null && targetType.boxFunction == null) return null
             if (actualType.boxFunction != null && targetType.boxFunction != null) {
-                assert (actualType.type.resolved() == targetType.type.resolved())
-                        { "Inconsistent types: ${actualType.type} and ${targetType.type}" }
+                assert(actualType.type.resolved() == targetType.type.resolved()) { "Inconsistent types: ${actualType.type} and ${targetType.type}" }
                 return null
             }
             if (actualType.boxFunction == null)
@@ -1398,19 +1465,21 @@ internal object Devirtualization {
             }
         }
 
-        fun IrBuilderWithScope.irDevirtualizedCall(callSite: IrCall,
-                                                   actualType: IrType,
-                                                   devirtualizedCallee: DevirtualizedCallee,
-                                                   arguments: List<IrExpression>): IrCall {
+        fun IrBuilderWithScope.irDevirtualizedCall(
+            callSite: IrCall,
+            actualType: IrType,
+            devirtualizedCallee: DevirtualizedCallee,
+            arguments: List<IrExpression>
+        ): IrCall {
             val actualCallee = devirtualizedCallee.callee.irFunction!!
             val call = IrCallImpl(
-                    callSite.startOffset, callSite.endOffset,
-                    actualType,
-                    actualCallee.symbol,
-                    actualCallee.typeParameters.size,
-                    actualCallee.valueParameters.size,
-                    callSite.origin,
-                    actualCallee.parentAsClass.symbol
+                callSite.startOffset, callSite.endOffset,
+                actualType,
+                actualCallee.symbol,
+                actualCallee.typeParameters.size,
+                actualCallee.valueParameters.size,
+                callSite.origin,
+                actualCallee.parentAsClass.symbol
             )
             if (actualCallee.explicitParameters.size == arguments.size) {
                 arguments.forEachIndexed { index, argument -> call.putArgument(index, argument) }
@@ -1418,7 +1487,7 @@ internal object Devirtualization {
             }
             assert(actualCallee.isSuspend && actualCallee.explicitParameters.size == arguments.size - 1) {
                 "Incorrect number of arguments: expected [${actualCallee.explicitParameters.size}] but was [${arguments.size - 1}]\n" +
-                        actualCallee.dump()
+                    actualCallee.dump()
             }
             val continuation = arguments.last()
             for (index in 0..arguments.size - 2)
@@ -1429,38 +1498,46 @@ internal object Devirtualization {
             }
         }
 
-        fun IrBuilderWithScope.irDevirtualizedCall(callee: IrCall, actualType: IrType,
-                                                   devirtualizedCallee: DevirtualizedCallee,
-                                                   arguments: List<PossiblyCoercedValue>): IrExpression {
+        fun IrBuilderWithScope.irDevirtualizedCall(
+            callee: IrCall,
+            actualType: IrType,
+            devirtualizedCallee: DevirtualizedCallee,
+            arguments: List<PossiblyCoercedValue>
+        ): IrExpression {
             val actualCallee = devirtualizedCallee.callee as DataFlowIR.FunctionSymbol.Declared
             return actualCallee.bridgeTarget.let { bridgeTarget ->
                 if (bridgeTarget == null)
-                    irDevirtualizedCall(callee, actualType,
-                            devirtualizedCallee,
-                            arguments.map { it.getFullValue(this@irDevirtualizedCall) })
+                    irDevirtualizedCall(
+                        callee, actualType,
+                        devirtualizedCallee,
+                        arguments.map { it.getFullValue(this@irDevirtualizedCall) }
+                    )
                 else {
-                    val callResult = irDevirtualizedCall(callee, actualType,
-                            DevirtualizedCallee(devirtualizedCallee.receiverType, bridgeTarget),
-                            arguments.mapIndexed { index, value ->
-                                val coercion = getTypeConversion(actualCallee.parameters[index], bridgeTarget.parameters[index])
-                                val fullValue = value.getFullValue(this@irDevirtualizedCall)
-                                coercion?.let { irCoerce(fullValue, coercion) } ?: fullValue
-                            })
+                    val callResult = irDevirtualizedCall(
+                        callee, actualType,
+                        DevirtualizedCallee(devirtualizedCallee.receiverType, bridgeTarget),
+                        arguments.mapIndexed { index, value ->
+                            val coercion = getTypeConversion(actualCallee.parameters[index], bridgeTarget.parameters[index])
+                            val fullValue = value.getFullValue(this@irDevirtualizedCall)
+                            coercion?.let { irCoerce(fullValue, coercion) } ?: fullValue
+                        }
+                    )
                     val returnCoercion = getTypeConversion(bridgeTarget.returnParameter, actualCallee.returnParameter)
                     irCoerce(callResult, returnCoercion)
                 }
             }
         }
 
-        irModule.transformChildrenVoid(object: IrElementTransformerVoidWithContext() {
+        irModule.transformChildrenVoid(object : IrElementTransformerVoidWithContext() {
             override fun visitCall(expression: IrCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
                 val devirtualizedCallSite = devirtualizedCallSites[expression]
                 val possibleCallees = devirtualizedCallSite?.possibleCallees
-                if (possibleCallees == null
-                        || possibleCallees.any { it.callee is DataFlowIR.FunctionSymbol.External }
-                        || possibleCallees.any { it.receiverType is DataFlowIR.Type.External })
+                if (possibleCallees == null ||
+                    possibleCallees.any { it.callee is DataFlowIR.FunctionSymbol.External } ||
+                    possibleCallees.any { it.receiverType is DataFlowIR.Type.External }
+                )
                     return expression
 
                 val callee = expression.symbol.owner
@@ -1478,21 +1555,25 @@ internal object Devirtualization {
                 val endOffset = expression.endOffset
                 val function = expression.symbol.owner
                 val type = if (callee.isSuspend)
-                               context.irBuiltIns.anyNType
-                           else function.returnType
+                    context.irBuiltIns.anyNType
+                else function.returnType
                 val irBuilder = context.createIrBuilder(currentScope!!.scope.scopeOwnerSymbol, startOffset, endOffset)
                 irBuilder.run {
                     val dispatchReceiver = expression.dispatchReceiver!!
                     return when {
                         possibleCallees.isEmpty() -> irBlock(expression) {
                             val throwExpr = irCall(symbols.throwInvalidReceiverTypeException.owner).apply {
-                                putValueArgument(0,
-                                        irCall(symbols.kClassImplConstructor.owner, listOf(dispatchReceiver.type)).apply {
-                                            putValueArgument(0,
-                                                    irCall(symbols.getObjectTypeInfo.owner).apply {
-                                                        putValueArgument(0, dispatchReceiver)
-                                                    })
-                                        })
+                                putValueArgument(
+                                    0,
+                                    irCall(symbols.kClassImplConstructor.owner, listOf(dispatchReceiver.type)).apply {
+                                        putValueArgument(
+                                            0,
+                                            irCall(symbols.getObjectTypeInfo.owner).apply {
+                                                putValueArgument(0, dispatchReceiver)
+                                            }
+                                        )
+                                    }
+                                )
                             }
                             // Insert proper unboxing (unreachable code):
                             +irCoerce(throwExpr, symbols.getTypeConversion(throwExpr.type, type))
@@ -1511,57 +1592,63 @@ internal object Devirtualization {
                             val arguments = expression.getArgumentsWithSymbols().mapIndexed { index, arg ->
                                 irSplitCoercion(arg.second, "arg$index", arg.first.owner.type)
                             }
-                            val typeInfo = irTemporary(irCall(symbols.getObjectTypeInfo).apply {
-                                putValueArgument(0, arguments[0].getFullValue(this@irBlock))
-                            })
+                            val typeInfo = irTemporary(
+                                irCall(symbols.getObjectTypeInfo).apply {
+                                    putValueArgument(0, arguments[0].getFullValue(this@irBlock))
+                                }
+                            )
 
                             val branches = mutableListOf<IrBranchImpl>()
                             possibleCallees.mapIndexedTo(branches) { index, devirtualizedCallee ->
                                 val actualReceiverType = devirtualizedCallee.receiverType as DataFlowIR.Type.Declared
                                 val expectedTypeInfo = IrClassReferenceImpl(
-                                        startOffset, endOffset,
-                                        symbols.nativePtrType,
-                                        actualReceiverType.irClass!!.symbol,
-                                        actualReceiverType.irClass.defaultType
+                                    startOffset, endOffset,
+                                    symbols.nativePtrType,
+                                    actualReceiverType.irClass!!.symbol,
+                                    actualReceiverType.irClass.defaultType
                                 )
                                 val condition =
-                                        if (optimize && index == possibleCallees.size - 1)
-                                            irTrue() // Don't check last type in optimize mode.
-                                        else
-                                            irCall(nativePtrEqualityOperatorSymbol).apply {
-                                                putValueArgument(0, irGet(typeInfo))
-                                                putValueArgument(1, expectedTypeInfo)
-                                            }
+                                    if (optimize && index == possibleCallees.size - 1)
+                                        irTrue() // Don't check last type in optimize mode.
+                                    else
+                                        irCall(nativePtrEqualityOperatorSymbol).apply {
+                                            putValueArgument(0, irGet(typeInfo))
+                                            putValueArgument(1, expectedTypeInfo)
+                                        }
                                 IrBranchImpl(
-                                        startOffset = startOffset,
-                                        endOffset   = endOffset,
-                                        condition   = condition,
-                                        result      = irDevirtualizedCall(expression, type, devirtualizedCallee, arguments)
+                                    startOffset = startOffset,
+                                    endOffset = endOffset,
+                                    condition = condition,
+                                    result = irDevirtualizedCall(expression, type, devirtualizedCallee, arguments)
                                 )
                             }
                             if (!optimize) { // Add else branch throwing exception for debug purposes.
-                                branches.add(IrBranchImpl(
+                                branches.add(
+                                    IrBranchImpl(
                                         startOffset = startOffset,
-                                        endOffset   = endOffset,
-                                        condition   = irTrue(),
-                                        result      = irCall(symbols.throwInvalidReceiverTypeException).apply {
-                                            putValueArgument(0,
-                                                    irCall(symbols.kClassImplConstructor,
-                                                            listOf(dispatchReceiver.type)
-                                                    ).apply {
-                                                        putValueArgument(0, irGet(typeInfo))
-                                                    }
+                                        endOffset = endOffset,
+                                        condition = irTrue(),
+                                        result = irCall(symbols.throwInvalidReceiverTypeException).apply {
+                                            putValueArgument(
+                                                0,
+                                                irCall(
+                                                    symbols.kClassImplConstructor,
+                                                    listOf(dispatchReceiver.type)
+                                                ).apply {
+                                                    putValueArgument(0, irGet(typeInfo))
+                                                }
                                             )
-                                        })
+                                        }
+                                    )
                                 )
                             }
 
                             +IrWhenImpl(
-                                    startOffset = startOffset,
-                                    endOffset   = endOffset,
-                                    type        = type,
-                                    origin      = expression.origin,
-                                    branches    = branches
+                                startOffset = startOffset,
+                                endOffset = endOffset,
+                                type = type,
+                                origin = expression.origin,
+                                branches = branches
                             )
                         }
                     }
@@ -1575,17 +1662,19 @@ internal object Devirtualization {
         class PossiblyFoldedExpression(val expression: IrExpression, val folded: Boolean) {
             fun getFullExpression(coercion: IrCall, cast: IrTypeOperatorCall?): IrExpression {
                 if (folded) return expression
-                assert (coercion.dispatchReceiver == null && coercion.extensionReceiver == null) {
+                assert(coercion.dispatchReceiver == null && coercion.extensionReceiver == null) {
                     "Expected either <box> or <unbox> function without any receivers"
                 }
                 val castedExpression =
-                        if (cast == null)
-                            expression
-                        else with (cast) {
-                            IrTypeOperatorCallImpl(startOffset, endOffset, type, operator,
-                                    typeOperand, expression)
-                        }
-                with (coercion) {
+                    if (cast == null)
+                        expression
+                    else with(cast) {
+                        IrTypeOperatorCallImpl(
+                            startOffset, endOffset, type, operator,
+                            typeOperand, expression
+                        )
+                    }
+                with(coercion) {
                     return IrCallImpl(startOffset, endOffset, type, symbol, typeArgumentsCount, origin).apply {
                         putValueArgument(0, castedExpression)
                     }
@@ -1596,7 +1685,7 @@ internal object Devirtualization {
         // Possible values of a returnable block.
         val returnableBlockValues = mutableMapOf<IrReturnableBlock, MutableList<IrExpression>>()
 
-        irModule.acceptChildrenVoid(object: IrElementVisitorVoid {
+        irModule.acceptChildrenVoid(object : IrElementVisitorVoid {
             override fun visitElement(element: IrElement) {
                 element.acceptChildrenVoid(this)
             }
@@ -1615,10 +1704,9 @@ internal object Devirtualization {
 
                 super.visitReturn(expression)
             }
-
         })
 
-        irModule.transformChildrenVoid(object: IrElementTransformerVoid() {
+        irModule.transformChildrenVoid(object : IrElementTransformerVoid() {
 
             fun IrFunction.getCoercedClass(): IrClass {
                 if (name.asString().endsWith("-box>"))
@@ -1628,24 +1716,28 @@ internal object Devirtualization {
                 error("Unexpected coercion: ${this.dump()}")
             }
 
-            fun fold(expression: IrExpression, coercion: IrCall, cast: IrTypeOperatorCall?,
-                     transformRecursively: Boolean): PossiblyFoldedExpression {
+            fun fold(
+                expression: IrExpression,
+                coercion: IrCall,
+                cast: IrTypeOperatorCall?,
+                transformRecursively: Boolean
+            ): PossiblyFoldedExpression {
 
                 val transformer = this
 
                 fun IrExpression.transformIfAsked() =
-                        if (transformRecursively) this.transform(transformer, data = null) else this
+                    if (transformRecursively) this.transform(transformer, data = null) else this
 
                 fun IrElement.transformIfAsked() =
-                        if (transformRecursively) this.transform(transformer, data = null) else this
+                    if (transformRecursively) this.transform(transformer, data = null) else this
 
                 val coercionDeclaringClass = coercion.symbol.owner.getCoercedClass()
                 if (expression.isBoxOrUnboxCall()) {
                     expression as IrCall
                     val result =
-                            if (coercionDeclaringClass == expression.symbol.owner.getCoercedClass())
-                                expression.getArguments().single().second
-                            else expression
+                        if (coercionDeclaringClass == expression.symbol.owner.getCoercedClass())
+                            expression.getArguments().single().second
+                        else expression
 
                     return PossiblyFoldedExpression(result.transformIfAsked(), result != expression)
                 }
@@ -1656,45 +1748,47 @@ internal object Devirtualization {
                         }
                         val someoneFolded = foldedReturnableBlockValues.any { it.value.folded }
                         val transformedReturnableBlock =
-                                if (!someoneFolded)
-                                    expression
-                                else {
-                                    val oldSymbol = expression.symbol
-                                    val newSymbol = IrReturnableBlockSymbolImpl(expression.descriptor)
-                                    val transformedReturnableBlock = with(expression) {
-                                        IrReturnableBlockImpl(
-                                                startOffset          = startOffset,
-                                                endOffset            = endOffset,
-                                                type                 = coercion.type,
-                                                symbol               = newSymbol,
-                                                origin               = origin,
-                                                statements           = statements,
-                                                inlineFunctionSymbol = inlineFunctionSymbol)
-                                    }
-                                    transformedReturnableBlock.transformChildrenVoid(object: IrElementTransformerVoid() {
-                                        override fun visitExpression(expression: IrExpression): IrExpression {
-                                            foldedReturnableBlockValues[expression]?.let {
-                                                return it.getFullExpression(coercion, cast)
-                                            }
-                                            return super.visitExpression(expression)
-                                        }
-
-                                        override fun visitReturn(expression: IrReturn): IrExpression {
-                                            expression.transformChildrenVoid(this)
-                                            return if (expression.returnTargetSymbol != oldSymbol)
-                                                expression
-                                            else with(expression) {
-                                                IrReturnImpl(
-                                                        startOffset        = startOffset,
-                                                        endOffset          = endOffset,
-                                                        type               = context.irBuiltIns.nothingType,
-                                                        returnTargetSymbol = newSymbol,
-                                                        value              = value)
-                                            }
-                                        }
-                                    })
-                                    transformedReturnableBlock
+                            if (!someoneFolded)
+                                expression
+                            else {
+                                val oldSymbol = expression.symbol
+                                val newSymbol = IrReturnableBlockSymbolImpl(expression.descriptor)
+                                val transformedReturnableBlock = with(expression) {
+                                    IrReturnableBlockImpl(
+                                        startOffset = startOffset,
+                                        endOffset = endOffset,
+                                        type = coercion.type,
+                                        symbol = newSymbol,
+                                        origin = origin,
+                                        statements = statements,
+                                        inlineFunctionSymbol = inlineFunctionSymbol
+                                    )
                                 }
+                                transformedReturnableBlock.transformChildrenVoid(object : IrElementTransformerVoid() {
+                                    override fun visitExpression(expression: IrExpression): IrExpression {
+                                        foldedReturnableBlockValues[expression]?.let {
+                                            return it.getFullExpression(coercion, cast)
+                                        }
+                                        return super.visitExpression(expression)
+                                    }
+
+                                    override fun visitReturn(expression: IrReturn): IrExpression {
+                                        expression.transformChildrenVoid(this)
+                                        return if (expression.returnTargetSymbol != oldSymbol)
+                                            expression
+                                        else with(expression) {
+                                            IrReturnImpl(
+                                                startOffset = startOffset,
+                                                endOffset = endOffset,
+                                                type = context.irBuiltIns.nothingType,
+                                                returnTargetSymbol = newSymbol,
+                                                value = value
+                                            )
+                                        }
+                                    }
+                                })
+                                transformedReturnableBlock
+                            }
                         if (transformRecursively)
                             transformedReturnableBlock.transformChildrenVoid(this)
                         PossiblyFoldedExpression(transformedReturnableBlock, someoneFolded)
@@ -1714,16 +1808,17 @@ internal object Devirtualization {
                                     it.transformIfAsked()
                             }
                             val transformedBlock =
-                                    if (!foldedLastStatement.folded)
-                                        expression
-                                    else with(expression) {
-                                        IrBlockImpl(
-                                                startOffset = startOffset,
-                                                endOffset = endOffset,
-                                                type = coercion.type,
-                                                origin = origin,
-                                                statements = statements)
-                                    }
+                                if (!foldedLastStatement.folded)
+                                    expression
+                                else with(expression) {
+                                    IrBlockImpl(
+                                        startOffset = startOffset,
+                                        endOffset = endOffset,
+                                        type = coercion.type,
+                                        origin = origin,
+                                        statements = statements
+                                    )
+                                }
                             PossiblyFoldedExpression(transformedBlock, foldedLastStatement.folded)
                         }
                     }
@@ -1732,24 +1827,28 @@ internal object Devirtualization {
                         val foldedBranches = expression.branches.map { fold(it.result, coercion, cast, transformRecursively) }
                         val someoneFolded = foldedBranches.any { it.folded }
                         val transformedWhen = with(expression) {
-                            IrWhenImpl(startOffset, endOffset, if (someoneFolded) coercion.type else type, origin,
-                                    branches.asSequence().withIndex().map { (index, branch) ->
-                                        IrBranchImpl(
-                                                startOffset = branch.startOffset,
-                                                endOffset   = branch.endOffset,
-                                                condition   = branch.condition.transformIfAsked(),
-                                                result      = if (someoneFolded)
-                                                                  foldedBranches[index].getFullExpression(coercion, cast)
-                                                              else foldedBranches[index].expression)
-                                    }.toList())
+                            IrWhenImpl(
+                                startOffset, endOffset, if (someoneFolded) coercion.type else type, origin,
+                                branches.asSequence().withIndex().map { (index, branch) ->
+                                    IrBranchImpl(
+                                        startOffset = branch.startOffset,
+                                        endOffset = branch.endOffset,
+                                        condition = branch.condition.transformIfAsked(),
+                                        result = if (someoneFolded)
+                                            foldedBranches[index].getFullExpression(coercion, cast)
+                                        else foldedBranches[index].expression
+                                    )
+                                }.toList()
+                            )
                         }
                         return PossiblyFoldedExpression(transformedWhen, someoneFolded)
                     }
 
                     is IrTypeOperatorCall ->
-                        if (expression.operator != IrTypeOperator.CAST
-                                && expression.operator != IrTypeOperator.IMPLICIT_CAST
-                                && expression.operator != IrTypeOperator.SAFE_CAST)
+                        if (expression.operator != IrTypeOperator.CAST &&
+                            expression.operator != IrTypeOperator.IMPLICIT_CAST &&
+                            expression.operator != IrTypeOperator.SAFE_CAST
+                        )
                             PossiblyFoldedExpression(expression.transformIfAsked(), false)
                         else {
                             if (expression.typeOperand.getInlinedClassNative() != coercionDeclaringClass)
@@ -1773,10 +1872,11 @@ internal object Devirtualization {
 
                 val argument = expression.getArguments().single().second
                 val foldedArgument = fold(
-                        expression           = argument,
-                        coercion             = expression,
-                        cast                 = null,
-                        transformRecursively = true)
+                    expression = argument,
+                    coercion = expression,
+                    cast = null,
+                    transformRecursively = true
+                )
                 return foldedArgument.getFullExpression(expression, null)
             }
         })

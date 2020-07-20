@@ -5,11 +5,10 @@
 
 package org.jetbrains.kotlin.backend.konan.optimizations
 
-import org.jetbrains.kotlin.backend.konan.llvm.Lifetime
-import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.descriptors.isArrayWithFixedSizeItems
-import org.jetbrains.kotlin.backend.konan.descriptors.isBuiltInOperator
+import org.jetbrains.kotlin.backend.konan.llvm.Lifetime
+import org.jetbrains.kotlin.ir.IrElement
 
 internal object LocalEscapeAnalysis {
     private val DEBUG = 0
@@ -19,9 +18,9 @@ internal object LocalEscapeAnalysis {
     }
 
     private enum class EscapeState {
-        GLOBAL_ESCAPE,       // escape through global reference
-        ARG_ESCAPE,          // escapes through function arguments, return or throw
-        NO_ESCAPE            // object does not escape
+        GLOBAL_ESCAPE, // escape through global reference
+        ARG_ESCAPE, // escapes through function arguments, return or throw
+        NO_ESCAPE // object does not escape
     }
 
     class FunctionAnalyzer(val function: DataFlowIR.Function, val context: Context) {
@@ -68,7 +67,7 @@ internal object LocalEscapeAnalysis {
             when (node) {
                 is DataFlowIR.Node.Call -> {
                     val pointsToMasks = (0..node.callee.parameters.size)
-                            .map { node.callee.pointsTo?.elementAtOrNull(it) ?: 0 }
+                        .map { node.callee.pointsTo?.elementAtOrNull(it) ?: 0 }
                     val returnPointsToMask = pointsToMasks[node.callee.parameters.size]
                     node.arguments.forEachIndexed { index, arg ->
                         // Check information about arguments escaping.
@@ -188,7 +187,7 @@ internal object LocalEscapeAnalysis {
                 }
                 ir?.let {
                     lifetimes.put(it, Lifetime.LOCAL)
-                    DEBUG_OUTPUT(3) { println("${ir} does not escape") }
+                    DEBUG_OUTPUT(3) { println("$ir does not escape") }
                 }
             }
         }

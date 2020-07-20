@@ -63,16 +63,16 @@ object KonanFakeOverrideClassFilter : PlatformFakeOverrideClassFilter {
 }
 
 internal class KonanIrLinker(
-        private val currentModule: ModuleDescriptor,
-        override val functionalInterfaceFactory: IrAbstractFunctionFactory,
-        logger: LoggingContext,
-        builtIns: IrBuiltIns,
-        symbolTable: SymbolTable,
-        private val forwardModuleDescriptor: ModuleDescriptor?,
-        private val stubGenerator: DeclarationStubGenerator,
-        private val cenumsProvider: IrProviderForCEnumAndCStructStubs,
-        exportedDependencies: List<ModuleDescriptor>,
-        deserializeFakeOverrides: Boolean
+    private val currentModule: ModuleDescriptor,
+    override val functionalInterfaceFactory: IrAbstractFunctionFactory,
+    logger: LoggingContext,
+    builtIns: IrBuiltIns,
+    symbolTable: SymbolTable,
+    private val forwardModuleDescriptor: ModuleDescriptor?,
+    private val stubGenerator: DeclarationStubGenerator,
+    private val cenumsProvider: IrProviderForCEnumAndCStructStubs,
+    exportedDependencies: List<ModuleDescriptor>,
+    deserializeFakeOverrides: Boolean
 ) : KotlinIrLinker(currentModule, logger, builtIns, symbolTable, exportedDependencies, deserializeFakeOverrides) {
 
     companion object {
@@ -102,7 +102,7 @@ internal class KonanIrLinker(
         return KonanModuleDeserializer(moduleDescriptor, klib ?: error("Expecting kotlin library"), strategy)
     }
 
-    private inner class KonanModuleDeserializer(moduleDescriptor: ModuleDescriptor, klib: IrLibrary, strategy: DeserializationStrategy):
+    private inner class KonanModuleDeserializer(moduleDescriptor: ModuleDescriptor, klib: IrLibrary, strategy: DeserializationStrategy) :
         KotlinIrLinker.BasicIrModuleDeserializer(moduleDescriptor, klib, strategy)
 
     private inner class KonanInteropModuleDeserializer(moduleDescriptor: ModuleDescriptor) : IrModuleDeserializer(moduleDescriptor) {
@@ -111,8 +111,8 @@ internal class KonanIrLinker(
         }
 
         private val descriptorByIdSignatureFinder = DescriptorByIdSignatureFinder(
-                moduleDescriptor, KonanManglerDesc,
-                DescriptorByIdSignatureFinder.LookupMode.MODULE_ONLY
+            moduleDescriptor, KonanManglerDesc,
+            DescriptorByIdSignatureFinder.LookupMode.MODULE_ONLY
         )
         private fun IdSignature.isInteropSignature(): Boolean = IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.test()
 
@@ -227,7 +227,7 @@ internal class KonanIrLinker(
     val modules: Map<String, IrModuleFragment>
         get() = mutableMapOf<String, IrModuleFragment>().apply {
             deserializersForModules
-                    .filter { !it.key.isForwardDeclarationModule && it.value.moduleDescriptor !== currentModule }
-                    .forEach { this.put(it.key.konanLibrary!!.libraryName, it.value.moduleFragment) }
+                .filter { !it.key.isForwardDeclarationModule && it.value.moduleDescriptor !== currentModule }
+                .forEach { this.put(it.key.konanLibrary!!.libraryName, it.value.moduleFragment) }
         }
 }

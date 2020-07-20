@@ -5,11 +5,11 @@
 
 package org.jetbrains.kotlin.backend.konan.optimizations
 
+import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.DirectedGraphCondensationBuilder
 import org.jetbrains.kotlin.backend.konan.DirectedGraphMultiNode
 import org.jetbrains.kotlin.backend.konan.llvm.Lifetime
 import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.backend.konan.Context
 
 internal object EscapeAnalysis {
 
@@ -76,17 +76,22 @@ internal object EscapeAnalysis {
         fun escapes() = has(Role.WRITTEN_TO_GLOBAL) || has(Role.THROW_VALUE)
 
         override fun toString() =
-                data.keys.joinToString(separator = "; ", prefix = "Roles: ") { it.toString() }
+            data.keys.joinToString(separator = "; ", prefix = "Roles: ") { it.toString() }
     }
 
-    private class FunctionAnalysisResult(val function: DataFlowIR.Function,
-                                         val nodesRoles: Map<DataFlowIR.Node, Roles>)
+    private class FunctionAnalysisResult(
+        val function: DataFlowIR.Function,
+        val nodesRoles: Map<DataFlowIR.Node, Roles>
+    )
 
-    private class IntraproceduralAnalysis(val context: Context,
-                                          val moduleDFG: ModuleDFG, val externalModulesDFG: ExternalModulesDFG,
-                                          val callGraph: CallGraph) {
+    private class IntraproceduralAnalysis(
+        val context: Context,
+        val moduleDFG: ModuleDFG,
+        val externalModulesDFG: ExternalModulesDFG,
+        val callGraph: CallGraph
+    ) {
 
-        val functions = moduleDFG.functions// TODO: use for cross-module analysis: + externalModulesDFG.functionDFGs
+        val functions = moduleDFG.functions // TODO: use for cross-module analysis: + externalModulesDFG.functionDFGs
 
         private fun DataFlowIR.Type.resolved(): DataFlowIR.Type.Declared {
             if (this is DataFlowIR.Type.Declared) return this
@@ -106,7 +111,7 @@ internal object EscapeAnalysis {
                 }
 
                 body.returns.values.forEach { assignRole(it.node, Role.RETURN_VALUE, null /* TODO */) }
-                body.throws.values.forEach  { assignRole(it.node, Role.THROW_VALUE,  null /* TODO */) }
+                body.throws.values.forEach { assignRole(it.node, Role.THROW_VALUE, null /* TODO */) }
                 for (node in body.nodes) {
                     when (node) {
                         is DataFlowIR.Node.FieldWrite -> {
@@ -227,20 +232,22 @@ internal object EscapeAnalysis {
 
         companion object {
             fun fromBits(escapesMask: Int, pointsToMasks: List<Int>) = FunctionEscapeAnalysisResult(
-                    pointsToMasks.indices.map { parameterIndex ->
-                        val escapes = escapesMask and (1 shl parameterIndex) != 0
-                        val curPointsToMask = pointsToMasks[parameterIndex]
-                        val pointsTo = (0..31).filter { curPointsToMask and (1 shl it) != 0 }.toIntArray()
-                        ParameterEscapeAnalysisResult(escapes, pointsTo)
-                    }.toTypedArray()
+                pointsToMasks.indices.map { parameterIndex ->
+                    val escapes = escapesMask and (1 shl parameterIndex) != 0
+                    val curPointsToMask = pointsToMasks[parameterIndex]
+                    val pointsTo = (0..31).filter { curPointsToMask and (1 shl it) != 0 }.toIntArray()
+                    ParameterEscapeAnalysisResult(escapes, pointsTo)
+                }.toTypedArray()
             )
         }
     }
 
-    private class InterproceduralAnalysis(val callGraph: CallGraph,
-                                          val intraproceduralAnalysisResult: Map<DataFlowIR.FunctionSymbol, FunctionAnalysisResult>,
-                                          val externalModulesDFG: ExternalModulesDFG,
-                                          val lifetimes: MutableMap<IrElement, Lifetime>) {
+    private class InterproceduralAnalysis(
+        val callGraph: CallGraph,
+        val intraproceduralAnalysisResult: Map<DataFlowIR.FunctionSymbol, FunctionAnalysisResult>,
+        val externalModulesDFG: ExternalModulesDFG,
+        val lifetimes: MutableMap<IrElement, Lifetime>
+    ) {
 
         val escapeAnalysisResults = mutableMapOf<DataFlowIR.FunctionSymbol, FunctionEscapeAnalysisResult>()
 
@@ -272,8 +279,8 @@ internal object EscapeAnalysis {
                     multiNode.nodes.forEach {
                         println("        $it")
                         callGraph.directEdges[it]!!.callSites
-                                .filter { callGraph.directEdges.containsKey(it.actualCallee) }
-                                .forEach { println("            CALLS ${it.actualCallee}") }
+                            .filter { callGraph.directEdges.containsKey(it.actualCallee) }
+                            .forEach { println("            CALLS ${it.actualCallee}") }
                         callGraph.reversedEdges[it]!!.forEach {
                             println("            CALLED BY $it")
                         }
@@ -284,9 +291,9 @@ internal object EscapeAnalysis {
             for (functionSymbol in callGraph.directEdges.keys) {
                 val numberOfParameters = functionSymbol.parameters.size
                 escapeAnalysisResults[functionSymbol] = FunctionEscapeAnalysisResult(
-                        // Assume no edges at the beginning.
-                        // Then iteratively add needed.
-                        Array(numberOfParameters + 1) { ParameterEscapeAnalysisResult(false, IntArray(0)) }
+                    // Assume no edges at the beginning.
+                    // Then iteratively add needed.
+                    Array(numberOfParameters + 1) { ParameterEscapeAnalysisResult(false, IntArray(0)) }
                 )
             }
 
@@ -371,10 +378,10 @@ internal object EscapeAnalysis {
             callGraph.directEdges[function]!!.callSites.forEach {
                 val callee = it.actualCallee
                 val calleeEAResult = if (it.isVirtual)
-                                         getExternalFunctionEAResult(it)
-                                     else
-                                         callGraph.directEdges[callee]?.let { escapeAnalysisResults[it.symbol]!! }
-                                             ?: getExternalFunctionEAResult(it)
+                    getExternalFunctionEAResult(it)
+                else
+                    callGraph.directEdges[callee]?.let { escapeAnalysisResults[it.symbol]!! }
+                        ?: getExternalFunctionEAResult(it)
                 pointsToGraph.processCall(it, calleeEAResult)
             }
 
@@ -396,12 +403,14 @@ internal object EscapeAnalysis {
 
         private fun getConservativeFunctionEAResult(symbol: DataFlowIR.FunctionSymbol): FunctionEscapeAnalysisResult {
             val numberOfParameters = symbol.parameters.size
-            return FunctionEscapeAnalysisResult((0..numberOfParameters).map {
-                ParameterEscapeAnalysisResult(
-                        escapes  = true,
+            return FunctionEscapeAnalysisResult(
+                (0..numberOfParameters).map {
+                    ParameterEscapeAnalysisResult(
+                        escapes = true,
                         pointsTo = IntArray(0)
-                )
-            }.toTypedArray())
+                    )
+                }.toTypedArray()
+            )
         }
 
         private fun DataFlowIR.FunctionSymbol.resolved(): DataFlowIR.FunctionSymbol {
@@ -423,8 +432,8 @@ internal object EscapeAnalysis {
                 DEBUG_OUTPUT(0) { println("An external call: $callee") }
 
                 FunctionEscapeAnalysisResult.fromBits(
-                        callee.escapes ?: 0,
-                        (0..callee.parameters.size).map { callee.pointsTo?.elementAtOrNull(it) ?: 0 }
+                    callee.escapes ?: 0,
+                    (0..callee.parameters.size).map { callee.pointsTo?.elementAtOrNull(it) ?: 0 }
                 )
             }
 
@@ -521,12 +530,12 @@ internal object EscapeAnalysis {
             }
 
             private val returnValues = nodes.filter { it.value.beingReturned }
-                                            .map { it.key }
-                                            .toSet()
+                .map { it.key }
+                .toSet()
 
             private fun addEdges(from: DataFlowIR.Node, roles: Roles) {
                 val pointsToEdge = roles.data[Role.FIELD_WRITTEN]
-                        ?: return
+                    ?: return
                 pointsToEdge.entries.forEach {
                     val to = it.data!!
                     if (nodes.containsKey(to)) {
@@ -583,14 +592,14 @@ internal object EscapeAnalysis {
                 }
 
                 val arguments = if (call is DataFlowIR.Node.NewObject) {
-                                    (0..call.arguments.size).map {
-                                        if (it == 0) call else call.arguments[it - 1].node
-                                    }
-                                } else {
-                                    (0..call.arguments.size).map {
-                                        if (it < call.arguments.size) call.arguments[it].node else call
-                                    }
-                                }
+                    (0..call.arguments.size).map {
+                        if (it == 0) call else call.arguments[it - 1].node
+                    }
+                } else {
+                    (0..call.arguments.size).map {
+                        if (it < call.arguments.size) call.arguments[it].node else call
+                    }
+                }
 
                 for (index in 0..call.arguments.size) {
                     val parameterEAResult = calleeEscapeAnalysisResult.parameters[index]
@@ -674,23 +683,25 @@ internal object EscapeAnalysis {
                     }
                 }
                 reachabilities.add(
-                        parameters.filter { visitedFromReturnValues.contains(it) }
-                                .map { it.index }.toIntArray()
+                    parameters.filter { visitedFromReturnValues.contains(it) }
+                        .map { it.index }.toIntArray()
                 )
 
                 propagate(PointsToGraphNodeKind.ESCAPES)
                 propagate(PointsToGraphNodeKind.RETURN_VALUE)
 
-                return FunctionEscapeAnalysisResult(reachabilities.withIndex().map { (index, reachability) ->
-                    val escapes =
+                return FunctionEscapeAnalysisResult(
+                    reachabilities.withIndex().map { (index, reachability) ->
+                        val escapes =
                             if (index == parameters.size) // Return value.
                                 returnValues.any { nodes[it]!!.kind == PointsToGraphNodeKind.ESCAPES }
                             else {
                                 /*runtimeAware.isInteresting(parameters[index].value.type) TODO: is it really needed?
                                         && */nodes[parameters[index]]!!.kind == PointsToGraphNodeKind.ESCAPES
                             }
-                    ParameterEscapeAnalysisResult(escapes, reachability)
-                }.toTypedArray())
+                        ParameterEscapeAnalysisResult(escapes, reachability)
+                    }.toTypedArray()
+                )
             }
 
             private fun findReachable(node: DataFlowIR.Node, visited: MutableSet<DataFlowIR.Node>) {
@@ -705,7 +716,7 @@ internal object EscapeAnalysis {
             private fun propagate(kind: PointsToGraphNodeKind) {
                 val visited = mutableSetOf<DataFlowIR.Node>()
                 nodes.filter { it.value.kind == kind }
-                        .forEach { node, _ -> propagate(node, kind, visited) }
+                    .forEach { node, _ -> propagate(node, kind, visited) }
             }
 
             private fun propagate(node: DataFlowIR.Node, kind: PointsToGraphNodeKind, visited: MutableSet<DataFlowIR.Node>) {
@@ -719,12 +730,17 @@ internal object EscapeAnalysis {
         }
     }
 
-    fun computeLifetimes(context: Context, moduleDFG: ModuleDFG, externalModulesDFG: ExternalModulesDFG,
-                         callGraph: CallGraph, lifetimes: MutableMap<IrElement, Lifetime>) {
+    fun computeLifetimes(
+        context: Context,
+        moduleDFG: ModuleDFG,
+        externalModulesDFG: ExternalModulesDFG,
+        callGraph: CallGraph,
+        lifetimes: MutableMap<IrElement, Lifetime>
+    ) {
         assert(lifetimes.isEmpty())
 
         val intraproceduralAnalysisResult =
-                IntraproceduralAnalysis(context, moduleDFG, externalModulesDFG, callGraph).analyze()
+            IntraproceduralAnalysis(context, moduleDFG, externalModulesDFG, callGraph).analyze()
         InterproceduralAnalysis(callGraph, intraproceduralAnalysisResult, externalModulesDFG, lifetimes).analyze()
     }
 }

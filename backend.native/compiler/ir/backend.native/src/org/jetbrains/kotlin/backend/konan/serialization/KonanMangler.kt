@@ -17,7 +17,7 @@ abstract class AbstractKonanIrMangler(private val withReturnType: Boolean) : IrB
     override fun getExportChecker(): IrExportCheckerVisitor = KonanIrExportChecker()
 
     override fun getMangleComputer(mode: MangleMode): IrMangleComputer =
-            KonanIrManglerComputer(StringBuilder(256), mode, withReturnType)
+        KonanIrManglerComputer(StringBuilder(256), mode, withReturnType)
 
     private class KonanIrExportChecker : IrExportCheckerVisitor() {
         override fun IrDeclaration.isPlatformSpecificExported(): Boolean {
@@ -51,22 +51,22 @@ abstract class AbstractKonanIrMangler(private val withReturnType: Boolean) : IrB
 
         override fun IrFunction.platformSpecificFunctionName(): String? {
             (if (this is IrConstructor && this.isObjCConstructor) this.getObjCInitMethod() else this)?.getObjCMethodInfo()
-                    ?.let {
-                        return buildString {
-                            if (extensionReceiverParameter != null) {
-                                append(extensionReceiverParameter!!.type.getClass()!!.name)
-                                append(".")
-                            }
+                ?.let {
+                    return buildString {
+                        if (extensionReceiverParameter != null) {
+                            append(extensionReceiverParameter!!.type.getClass()!!.name)
+                            append(".")
+                        }
 
-                            append("objc:")
-                            append(it.selector)
-                            if (this@platformSpecificFunctionName is IrConstructor && this@platformSpecificFunctionName.isObjCConstructor) append("#Constructor")
+                        append("objc:")
+                        append(it.selector)
+                        if (this@platformSpecificFunctionName is IrConstructor && this@platformSpecificFunctionName.isObjCConstructor) append("#Constructor")
 
-                            if ((this@platformSpecificFunctionName as? IrSimpleFunction)?.correspondingPropertySymbol != null) {
-                                append("#Accessor")
-                            }
+                        if ((this@platformSpecificFunctionName as? IrSimpleFunction)?.correspondingPropertySymbol != null) {
+                            append("#Accessor")
                         }
                     }
+                }
             return null
         }
 
@@ -87,7 +87,7 @@ abstract class AbstractKonanDescriptorMangler : DescriptorBasedKotlinManglerImpl
     override fun getExportChecker(): DescriptorExportCheckerVisitor = KonanDescriptorExportChecker()
 
     override fun getMangleComputer(mode: MangleMode): DescriptorMangleComputer =
-            KonanDescriptorMangleComputer(StringBuilder(256), mode)
+        KonanDescriptorMangleComputer(StringBuilder(256), mode)
 
     private class KonanDescriptorExportChecker : DescriptorExportCheckerVisitor() {
         override fun DeclarationDescriptor.isPlatformSpecificExported(): Boolean {
@@ -120,22 +120,22 @@ abstract class AbstractKonanDescriptorMangler : DescriptorBasedKotlinManglerImpl
 
         override fun FunctionDescriptor.platformSpecificFunctionName(): String? {
             (if (this is ConstructorDescriptor && this.isObjCConstructor) this.getObjCInitMethod() else this)?.getObjCMethodInfo()
-                    ?.let {
-                        return buildString {
-                            if (extensionReceiverParameter != null) {
-                                append(extensionReceiverParameter!!.type.constructor.declarationDescriptor!!.name)
-                                append(".")
-                            }
+                ?.let {
+                    return buildString {
+                        if (extensionReceiverParameter != null) {
+                            append(extensionReceiverParameter!!.type.constructor.declarationDescriptor!!.name)
+                            append(".")
+                        }
 
-                            append("objc:")
-                            append(it.selector)
-                            if (this@platformSpecificFunctionName is ConstructorDescriptor && this@platformSpecificFunctionName.isObjCConstructor) append("#Constructor")
+                        append("objc:")
+                        append(it.selector)
+                        if (this@platformSpecificFunctionName is ConstructorDescriptor && this@platformSpecificFunctionName.isObjCConstructor) append("#Constructor")
 
-                            if (this@platformSpecificFunctionName is PropertyAccessorDescriptor) {
-                                append("#Accessor")
-                            }
+                        if (this@platformSpecificFunctionName is PropertyAccessorDescriptor) {
+                            append("#Accessor")
                         }
                     }
+                }
             return null
         }
 

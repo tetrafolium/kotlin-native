@@ -16,13 +16,13 @@ class KonanIrFileSerializer(
     expectDescriptorToSymbol: MutableMap<DeclarationDescriptor, IrSymbol>,
     skipExpects: Boolean,
     bodiesOnlyForInlines: Boolean = false
-): IrFileSerializer(logger, declarationTable, expectDescriptorToSymbol, skipExpects = skipExpects, bodiesOnlyForInlines = bodiesOnlyForInlines) {
+) : IrFileSerializer(logger, declarationTable, expectDescriptorToSymbol, skipExpects = skipExpects, bodiesOnlyForInlines = bodiesOnlyForInlines) {
 
     override fun backendSpecificExplicitRoot(declaration: IrFunction) =
-            declaration.annotations.hasAnnotation(RuntimeNames.exportForCppRuntime)
+        declaration.annotations.hasAnnotation(RuntimeNames.exportForCppRuntime)
 
     override fun backendSpecificExplicitRoot(declaration: IrClass) =
-            declaration.annotations.hasAnnotation(RuntimeNames.exportTypeInfoAnnotation)
+        declaration.annotations.hasAnnotation(RuntimeNames.exportTypeInfoAnnotation)
 
     override fun backendSpecificSerializeAllMembers(irClass: IrClass) = !KonanFakeOverrideClassFilter.constructFakeOverrides(irClass)
 }

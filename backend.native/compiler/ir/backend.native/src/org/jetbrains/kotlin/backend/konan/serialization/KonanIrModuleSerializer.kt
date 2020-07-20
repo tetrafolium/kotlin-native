@@ -26,8 +26,8 @@ class KonanIrModuleSerializer(
     // We may switch from IR generation to LazyIR later (at least for structs; enums are tricky)
     // without changing kotlin libraries that depend on interop libraries.
     override fun backendSpecificFileFilter(file: IrFile): Boolean =
-            file.fileEntry.name != IrProviderForCEnumAndCStructStubs.cTypeDefinitionsFileName
+        file.fileEntry.name != IrProviderForCEnumAndCStructStubs.cTypeDefinitionsFileName
 
     override fun createSerializerForFile(file: IrFile): KonanIrFileSerializer =
-            KonanIrFileSerializer(logger, KonanDeclarationTable(globalDeclarationTable), expectDescriptorToSymbol, skipExpects = skipExpects)
+        KonanIrFileSerializer(logger, KonanDeclarationTable(globalDeclarationTable), expectDescriptorToSymbol, skipExpects = skipExpects)
 }

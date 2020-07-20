@@ -7,21 +7,21 @@ package org.jetbrains.kotlin.backend.konan.optimizations
 
 import org.jetbrains.kotlin.backend.common.pop
 import org.jetbrains.kotlin.backend.common.push
+import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.DirectedGraph
 import org.jetbrains.kotlin.backend.konan.DirectedGraphNode
-import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.isObjCClass
 import org.jetbrains.kotlin.ir.util.parentAsClass
 
-internal class CallGraphNode(val graph: CallGraph, val symbol: DataFlowIR.FunctionSymbol)
-    : DirectedGraphNode<DataFlowIR.FunctionSymbol> {
+internal class CallGraphNode(val graph: CallGraph, val symbol: DataFlowIR.FunctionSymbol) :
+    DirectedGraphNode<DataFlowIR.FunctionSymbol> {
 
     override val key get() = symbol
 
     override val directEdges: List<DataFlowIR.FunctionSymbol> by lazy {
         graph.directEdges[symbol]!!.callSites
-                .map { it.actualCallee }
-                .filter { graph.reversedEdges.containsKey(it) }
+            .map { it.actualCallee }
+            .filter { graph.reversedEdges.containsKey(it) }
     }
 
     override val reversedEdges: List<DataFlowIR.FunctionSymbol> by lazy {
@@ -33,9 +33,11 @@ internal class CallGraphNode(val graph: CallGraph, val symbol: DataFlowIR.Functi
     val callSites = mutableListOf<CallSite>()
 }
 
-internal class CallGraph(val directEdges: Map<DataFlowIR.FunctionSymbol, CallGraphNode>,
-                         val reversedEdges: Map<DataFlowIR.FunctionSymbol, MutableList<DataFlowIR.FunctionSymbol>>)
-    : DirectedGraph<DataFlowIR.FunctionSymbol, CallGraphNode> {
+internal class CallGraph(
+    val directEdges: Map<DataFlowIR.FunctionSymbol, CallGraphNode>,
+    val reversedEdges: Map<DataFlowIR.FunctionSymbol, MutableList<DataFlowIR.FunctionSymbol>>
+) :
+    DirectedGraph<DataFlowIR.FunctionSymbol, CallGraphNode> {
 
     override val nodes get() = directEdges.values
 
@@ -45,14 +47,15 @@ internal class CallGraph(val directEdges: Map<DataFlowIR.FunctionSymbol, CallGra
         directEdges[caller]!!.callSites += callSite
         reversedEdges[callSite.actualCallee]?.add(caller)
     }
-
 }
 
-internal class CallGraphBuilder(val context: Context,
-                                val moduleDFG: ModuleDFG,
-                                val externalModulesDFG: ExternalModulesDFG,
-                                val devirtualizationAnalysisResult: Devirtualization.AnalysisResult,
-                                val gotoExternal: Boolean) {
+internal class CallGraphBuilder(
+    val context: Context,
+    val moduleDFG: ModuleDFG,
+    val externalModulesDFG: ExternalModulesDFG,
+    val devirtualizationAnalysisResult: Devirtualization.AnalysisResult,
+    val gotoExternal: Boolean
+) {
 
     private val DEBUG = 0
 
@@ -109,68 +112,81 @@ internal class CallGraphBuilder(val context: Context,
     private val arraySet = symbols.arraySet[symbols.array]!!.owner
 
     private inline fun DataFlowIR.FunctionBody.forEachCallSite(block: (DataFlowIR.Node.Call) -> Unit) =
-            nodes.forEach { node ->
-                when (node) {
-                    // TODO: OBJC-CONSTRUCTOR-CALL
-                    is DataFlowIR.Node.NewObject -> {
-                        block(node)
-                        if (node.irCallSite?.symbol?.owner?.parentAsClass?.isObjCClass() == true) {
-                            block(DataFlowIR.Node.Call(
-                                    callee = moduleDFG.symbolTable.mapFunction(symbols.interopAllocObjCObject.owner),
-                                    arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
-                                    returnType = moduleDFG.symbolTable.mapType(symbols.interopAllocObjCObject.owner.returnType),
-                                    irCallSite = null)
-                            )
-                            block(DataFlowIR.Node.Call(
-                                    callee = moduleDFG.symbolTable.mapFunction(symbols.interopInterpretObjCPointer.owner),
-                                    arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
-                                    returnType = moduleDFG.symbolTable.mapType(symbols.interopInterpretObjCPointer.owner.returnType),
-                                    irCallSite = null)
-                            )
-                            block(DataFlowIR.Node.Call(
-                                    callee = moduleDFG.symbolTable.mapFunction(symbols.interopObjCRelease.owner),
-                                    arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
-                                    returnType = moduleDFG.symbolTable.mapType(symbols.interopObjCRelease.owner.returnType),
-                                    irCallSite = null)
-                            )
-                        }
-                    }
-
-                    is DataFlowIR.Node.Call -> block(node)
-
-                    is DataFlowIR.Node.Singleton ->
-                        node.constructor?.let { block(DataFlowIR.Node.Call(it, emptyList(), node.type, null)) }
-
-                    is DataFlowIR.Node.ArrayRead ->
-                        block(DataFlowIR.Node.Call(
-                                callee = node.callee,
-                                arguments = listOf(node.array, node.index),
-                                returnType = node.type,
-                                irCallSite = null)
-                        )
-
-                    is DataFlowIR.Node.ArrayWrite ->
-                        block(DataFlowIR.Node.Call(
-                                callee = node.callee,
-                                arguments = listOf(node.array, node.index, node.value),
-                                returnType = moduleDFG.symbolTable.mapType(context.irBuiltIns.unitType),
-                                irCallSite = null)
-                        )
-
-                    is DataFlowIR.Node.FunctionReference ->
-                        block(DataFlowIR.Node.Call(
-                                callee = node.symbol,
-                                arguments = emptyList(),
-                                returnType = node.symbol.returnParameter.type,
+        nodes.forEach { node ->
+            when (node) {
+                // TODO: OBJC-CONSTRUCTOR-CALL
+                is DataFlowIR.Node.NewObject -> {
+                    block(node)
+                    if (node.irCallSite?.symbol?.owner?.parentAsClass?.isObjCClass() == true) {
+                        block(
+                            DataFlowIR.Node.Call(
+                                callee = moduleDFG.symbolTable.mapFunction(symbols.interopAllocObjCObject.owner),
+                                arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
+                                returnType = moduleDFG.symbolTable.mapType(symbols.interopAllocObjCObject.owner.returnType),
                                 irCallSite = null
-                        ))
+                            )
+                        )
+                        block(
+                            DataFlowIR.Node.Call(
+                                callee = moduleDFG.symbolTable.mapFunction(symbols.interopInterpretObjCPointer.owner),
+                                arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
+                                returnType = moduleDFG.symbolTable.mapType(symbols.interopInterpretObjCPointer.owner.returnType),
+                                irCallSite = null
+                            )
+                        )
+                        block(
+                            DataFlowIR.Node.Call(
+                                callee = moduleDFG.symbolTable.mapFunction(symbols.interopObjCRelease.owner),
+                                arguments = listOf(DataFlowIR.Edge(DataFlowIR.Node.Null, null)),
+                                returnType = moduleDFG.symbolTable.mapType(symbols.interopObjCRelease.owner.returnType),
+                                irCallSite = null
+                            )
+                        )
+                    }
                 }
+
+                is DataFlowIR.Node.Call -> block(node)
+
+                is DataFlowIR.Node.Singleton ->
+                    node.constructor?.let { block(DataFlowIR.Node.Call(it, emptyList(), node.type, null)) }
+
+                is DataFlowIR.Node.ArrayRead ->
+                    block(
+                        DataFlowIR.Node.Call(
+                            callee = node.callee,
+                            arguments = listOf(node.array, node.index),
+                            returnType = node.type,
+                            irCallSite = null
+                        )
+                    )
+
+                is DataFlowIR.Node.ArrayWrite ->
+                    block(
+                        DataFlowIR.Node.Call(
+                            callee = node.callee,
+                            arguments = listOf(node.array, node.index, node.value),
+                            returnType = moduleDFG.symbolTable.mapType(context.irBuiltIns.unitType),
+                            irCallSite = null
+                        )
+                    )
+
+                is DataFlowIR.Node.FunctionReference ->
+                    block(
+                        DataFlowIR.Node.Call(
+                            callee = node.symbol,
+                            arguments = emptyList(),
+                            returnType = node.symbol.returnParameter.type,
+                            irCallSite = null
+                        )
+                    )
             }
+        }
 
     private fun staticCall(caller: DataFlowIR.FunctionSymbol, call: DataFlowIR.Node.Call, callee: DataFlowIR.FunctionSymbol) {
         callGraph.addEdge(caller, CallGraphNode.CallSite(call, false, callee))
-        if (callee is DataFlowIR.FunctionSymbol.Declared
-                && !directEdges.containsKey(callee))
+        if (callee is DataFlowIR.FunctionSymbol.Declared &&
+            !directEdges.containsKey(callee)
+        )
             functionStack.push(callee)
     }
 
@@ -203,7 +219,7 @@ internal class CallGraphBuilder(val context: Context,
                             val receiverType = typeHierarchy.allTypes[it]
                             if (receiverType.isAbstract) return@forEachBit
                             // TODO: Unconservative way - when we can use it?
-                            //.filter { devirtualizationAnalysisResult.instantiatingClasses.contains(it) }
+                            // .filter { devirtualizationAnalysisResult.instantiatingClasses.contains(it) }
                             val actualCallee = when (call) {
                                 is DataFlowIR.Node.VtableCall ->
                                     receiverType.vtable[call.calleeVtableIndex]
@@ -236,9 +252,10 @@ internal class CallGraphBuilder(val context: Context,
                         addNode(callee)
                     if (local)
                         callGraph.addEdge(symbol, CallGraphNode.CallSite(call, call is DataFlowIR.Node.VirtualCall, callee))
-                    if (callee is DataFlowIR.FunctionSymbol.Declared
-                            && call !is DataFlowIR.Node.VirtualCall
-                            && !visitedFunctions.contains(callee))
+                    if (callee is DataFlowIR.FunctionSymbol.Declared &&
+                        call !is DataFlowIR.Node.VirtualCall &&
+                        !visitedFunctions.contains(callee)
+                    )
                         functionStack.push(callee)
                 } else {
                     devirtualizedCallSite.possibleCallees.forEach {
@@ -247,8 +264,9 @@ internal class CallGraphBuilder(val context: Context,
                             addNode(callee)
                         if (local)
                             callGraph.addEdge(symbol, CallGraphNode.CallSite(call, false, callee))
-                        if (callee is DataFlowIR.FunctionSymbol.Declared
-                                && !visitedFunctions.contains(callee))
+                        if (callee is DataFlowIR.FunctionSymbol.Declared &&
+                            !visitedFunctions.contains(callee)
+                        )
                             functionStack.push(callee)
                     }
                 }
