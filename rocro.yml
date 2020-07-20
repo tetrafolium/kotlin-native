@@ -15,11 +15,9 @@ inspecode:
     thresholds:
       num-issues: 14
 
-  #### Failed ... Error in `cppcheck': double free or corruption
-  ####    reported: tractrix/codelift#1397
-  #cppcheck:     # supports: C C++
-  #  thresholds:
-  #    num-issues: 1000
+  cppcheck:     # supports: C C++
+    thresholds:
+      num-issues: 26
 
   cpplint:      # supports: C++
     options:
