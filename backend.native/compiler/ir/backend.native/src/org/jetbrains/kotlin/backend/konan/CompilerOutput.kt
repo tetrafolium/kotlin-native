@@ -11,13 +11,12 @@ import org.jetbrains.kotlin.backend.konan.llvm.*
 import org.jetbrains.kotlin.backend.konan.llvm.Llvm
 import org.jetbrains.kotlin.backend.konan.llvm.objc.linkObjC
 import org.jetbrains.kotlin.konan.CURRENT
-import org.jetbrains.kotlin.library.KotlinAbiVersion
 import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.file.isBitcode
-import org.jetbrains.kotlin.library.*
-import org.jetbrains.kotlin.konan.target.CompilerOutputKind
-import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.library.impl.buildLibrary
+import org.jetbrains.kotlin.konan.target.CompilerOutputKind
+import org.jetbrains.kotlin.library.*
+import org.jetbrains.kotlin.library.KotlinAbiVersion
 
 /**
  * Supposed to be true for a single LLVM module within final binary.
@@ -57,10 +56,10 @@ private fun linkAllDependencies(context: Context, generatedBitcodeFiles: List<St
     val config = context.config
 
     val runtimeNativeLibraries = config.runtimeNativeLibraries
-            .takeIf { context.producedLlvmModuleContainsStdlib }.orEmpty()
+        .takeIf { context.producedLlvmModuleContainsStdlib }.orEmpty()
 
     val launcherNativeLibraries = config.launcherNativeLibraries
-            .takeIf { config.produce == CompilerOutputKind.PROGRAM }.orEmpty()
+        .takeIf { config.produce == CompilerOutputKind.PROGRAM }.orEmpty()
 
     linkObjC(context)
 
@@ -85,7 +84,7 @@ private fun insertAliasToEntryPoint(context: Context) {
         return
     val module = context.llvmModule
     val entryPoint = LLVMGetNamedFunction(module, "Konan_main")
-            ?: error("Module doesn't contain `Konan_main`")
+        ?: error("Module doesn't contain `Konan_main`")
     LLVMAddAlias(module, LLVMTypeOf(entryPoint)!!, entryPoint, "main")
 }
 
@@ -95,13 +94,14 @@ internal fun linkBitcodeDependencies(context: Context) {
     val produce = config.get(KonanConfigKeys.PRODUCE)
 
     val generatedBitcodeFiles =
-            if (produce == CompilerOutputKind.DYNAMIC || produce == CompilerOutputKind.STATIC) {
-                produceCAdapterBitcode(
-                        context.config.clang,
-                        tempFiles.cAdapterCppName,
-                        tempFiles.cAdapterBitcodeName)
-                listOf(tempFiles.cAdapterBitcodeName)
-            } else emptyList()
+        if (produce == CompilerOutputKind.DYNAMIC || produce == CompilerOutputKind.STATIC) {
+            produceCAdapterBitcode(
+                context.config.clang,
+                tempFiles.cAdapterCppName,
+                tempFiles.cAdapterBitcodeName
+            )
+            listOf(tempFiles.cAdapterBitcodeName)
+        } else emptyList()
     if (produce == CompilerOutputKind.FRAMEWORK && context.config.produceStaticFramework) {
         embedAppleLinkerOptionsToBitcode(context.llvm, context.config)
     }
@@ -150,19 +150,20 @@ internal fun produceOutput(context: Context) {
             val manifestProperties = context.config.manifestProperties
 
             val library = buildLibrary(
-                    context.config.nativeLibraries,
-                    context.config.includeBinaries,
-                    neededLibraries,
-                    context.serializedMetadata!!,
-                    context.serializedIr,
-                    versions,
-                    target,
-                    output,
-                    libraryName,
-                    nopack,
-                    shortLibraryName,
-                    manifestProperties,
-                    context.dataFlowGraph)
+                context.config.nativeLibraries,
+                context.config.includeBinaries,
+                neededLibraries,
+                context.serializedMetadata!!,
+                context.serializedIr,
+                versions,
+                target,
+                output,
+                libraryName,
+                nopack,
+                shortLibraryName,
+                manifestProperties,
+                context.dataFlowGraph
+            )
 
             context.bitcodeFileName = library.mainBitcodeFileName
         }
@@ -198,7 +199,7 @@ private fun embedAppleLinkerOptionsToBitcode(llvm: Llvm, config: KonanConfig) {
     }
 
     val optionsToEmbed = findEmbeddableOptions(config.platform.configurables.linkerKonanFlags) +
-            llvm.allNativeDependencies.flatMap { findEmbeddableOptions(it.linkerOpts) }
+        llvm.allNativeDependencies.flatMap { findEmbeddableOptions(it.linkerOpts) }
 
     embedLlvmLinkOptions(llvm.llvmModule, optionsToEmbed)
 }

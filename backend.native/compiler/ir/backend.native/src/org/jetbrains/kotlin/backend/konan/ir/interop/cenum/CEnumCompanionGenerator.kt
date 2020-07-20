@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 private val cEnumEntryAliasAnnonation = FqName("kotlinx.cinterop.internal.CEnumEntryAlias")
 
 internal class CEnumCompanionGenerator(
-        context: GeneratorContext,
-        private val cEnumByValueFunctionGenerator: CEnumByValueFunctionGenerator
+    context: GeneratorContext,
+    private val cEnumByValueFunctionGenerator: CEnumByValueFunctionGenerator
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -35,17 +35,17 @@ internal class CEnumCompanionGenerator(
 
     // Depends on already generated `.values()` irFunction.
     fun generate(enumClass: IrClass): IrClass =
-            createClass(enumClass.descriptor.companionObjectDescriptor!!) { companionIrClass ->
-                companionIrClass.superTypes += irBuiltIns.anyType
-                companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor))
-                val valuesFunction = enumClass.functions.single { it.name.identifier == "values" }.symbol
-                val byValueIrFunction = cEnumByValueFunctionGenerator
-                        .generateByValueFunction(companionIrClass, valuesFunction)
-                companionIrClass.addMember(byValueIrFunction)
-                findEntryAliases(companionIrClass.descriptor)
-                        .map { declareEntryAliasProperty(it, enumClass) }
-                        .forEach(companionIrClass::addMember)
-            }
+        createClass(enumClass.descriptor.companionObjectDescriptor!!) { companionIrClass ->
+            companionIrClass.superTypes += irBuiltIns.anyType
+            companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor))
+            val valuesFunction = enumClass.functions.single { it.name.identifier == "values" }.symbol
+            val byValueIrFunction = cEnumByValueFunctionGenerator
+                .generateByValueFunction(companionIrClass, valuesFunction)
+            companionIrClass.addMember(byValueIrFunction)
+            findEntryAliases(companionIrClass.descriptor)
+                .map { declareEntryAliasProperty(it, enumClass) }
+                .forEach(companionIrClass::addMember)
+        }
 
     private fun createCompanionConstructor(companionObjectDescriptor: ClassDescriptor): IrConstructor {
         val anyPrimaryConstructor = companionObjectDescriptor.builtIns.any.unsubstitutedPrimaryConstructor!!
@@ -53,8 +53,8 @@ internal class CEnumCompanionGenerator(
         return createConstructor(companionObjectDescriptor.unsubstitutedPrimaryConstructor!!).also {
             it.body = irBuilder(irBuiltIns, it.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
                 +IrDelegatingConstructorCallImpl(
-                        startOffset, endOffset, context.irBuiltIns.unitType,
-                        superConstructorSymbol
+                    startOffset, endOffset, context.irBuiltIns.unitType,
+                    superConstructorSymbol
                 )
                 +irInstanceInitializer(symbolTable.referenceClass(companionObjectDescriptor))
             }
@@ -66,24 +66,24 @@ internal class CEnumCompanionGenerator(
      * enum entries.
      */
     private fun findEntryAliases(companionDescriptor: ClassDescriptor) =
-            companionDescriptor.defaultType.memberScope.getContributedDescriptors()
-                    .filterIsInstance<PropertyDescriptor>()
-                    .filter { it.annotations.hasAnnotation(cEnumEntryAliasAnnonation) }
+        companionDescriptor.defaultType.memberScope.getContributedDescriptors()
+            .filterIsInstance<PropertyDescriptor>()
+            .filter { it.annotations.hasAnnotation(cEnumEntryAliasAnnonation) }
 
     private fun fundCorrespondingEnumEntrySymbol(aliasDescriptor: PropertyDescriptor, irClass: IrClass): IrEnumEntrySymbol {
         val enumEntryName = aliasDescriptor.annotations
-                .findAnnotation(cEnumEntryAliasAnnonation)!!
-                .getArgumentValueOrNull<String>("entryName")
+            .findAnnotation(cEnumEntryAliasAnnonation)!!
+            .getArgumentValueOrNull<String>("entryName")
         return irClass.declarations.filterIsInstance<IrEnumEntry>()
-                .single { it.name.identifier == enumEntryName }.symbol
+            .single { it.name.identifier == enumEntryName }.symbol
     }
 
     private fun generateAliasGetterBody(getter: IrSimpleFunction, entrySymbol: IrEnumEntrySymbol): IrBody =
-            irBuilder(irBuiltIns, getter.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
-                +irReturn(
-                        IrGetEnumValueImpl(startOffset, endOffset, entrySymbol.owner.parentAsClass.defaultType, entrySymbol)
-                )
-            }
+        irBuilder(irBuiltIns, getter.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
+            +irReturn(
+                IrGetEnumValueImpl(startOffset, endOffset, entrySymbol.owner.parentAsClass.defaultType, entrySymbol)
+            )
+        }
 
     private fun declareEntryAliasProperty(propertyDescriptor: PropertyDescriptor, enumClass: IrClass): IrProperty {
         val entrySymbol = fundCorrespondingEnumEntrySymbol(propertyDescriptor, enumClass)

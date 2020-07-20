@@ -13,10 +13,10 @@ import org.jetbrains.kotlin.library.uniqueName
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 
 class CachedLibraries(
-        private val target: KonanTarget,
-        allLibraries: List<KotlinLibrary>,
-        explicitCaches: Map<KotlinLibrary, String>,
-        implicitCacheDirectories: List<File>
+    private val target: KonanTarget,
+    allLibraries: List<KotlinLibrary>,
+    explicitCaches: Map<KotlinLibrary, String>,
+    implicitCacheDirectories: List<File>
 ) {
 
     class Cache(val kind: Kind, val path: String) {
@@ -36,8 +36,10 @@ class CachedLibraries(
         val staticFile = cacheDir.child(getArtifactName(baseName, CompilerOutputKind.STATIC_CACHE))
 
         if (dynamicFile.exists && staticFile.exists)
-            error("Both dynamic and static caches files cannot be in the same directory." +
-                    " Library: ${library.libraryName}, path to cache: ${cacheDir.absolutePath}")
+            error(
+                "Both dynamic and static caches files cannot be in the same directory." +
+                    " Library: ${library.libraryName}, path to cache: ${cacheDir.absolutePath}"
+            )
         return when {
             dynamicFile.exists -> Cache(Cache.Kind.DYNAMIC, dynamicFile.absolutePath)
             staticFile.exists -> Cache(Cache.Kind.STATIC, staticFile.absolutePath)
@@ -50,7 +52,7 @@ class CachedLibraries(
 
         val cache = if (explicitPath != null) {
             selectCache(library, File(explicitPath))
-                    ?: error("No cache found for library ${library.libraryName} at $explicitPath")
+                ?: error("No cache found for library ${library.libraryName} at $explicitPath")
         } else {
             implicitCacheDirectories.firstNotNullResult { dir ->
                 selectCache(library, dir.child(getCachedLibraryName(library)))
@@ -61,13 +63,13 @@ class CachedLibraries(
     }.toMap()
 
     private fun getArtifactName(baseName: String, kind: CompilerOutputKind) =
-            "${kind.prefix(target)}$baseName${kind.suffix(target)}"
+        "${kind.prefix(target)}$baseName${kind.suffix(target)}"
 
     fun isLibraryCached(library: KotlinLibrary): Boolean =
-            getLibraryCache(library) != null
+        getLibraryCache(library) != null
 
     fun getLibraryCache(library: KotlinLibrary): Cache? =
-            allCaches[library]
+        allCaches[library]
 
     val hasStaticCaches = allCaches.values.any {
         when (it.kind) {

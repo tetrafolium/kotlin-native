@@ -26,12 +26,12 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.isSubpackageOf
 
 internal class ObjCExportedInterface(
-        val generatedClasses: Set<ClassDescriptor>,
-        val categoryMembers: Map<ClassDescriptor, List<CallableMemberDescriptor>>,
-        val topLevel: Map<SourceFile, List<CallableMemberDescriptor>>,
-        val headerLines: List<String>,
-        val namer: ObjCExportNamer,
-        val mapper: ObjCExportMapper
+    val generatedClasses: Set<ClassDescriptor>,
+    val categoryMembers: Map<ClassDescriptor, List<CallableMemberDescriptor>>,
+    val topLevel: Map<SourceFile, List<CallableMemberDescriptor>>,
+    val headerLines: List<String>,
+    val namer: ObjCExportNamer,
+    val mapper: ObjCExportMapper
 )
 
 internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
@@ -56,12 +56,12 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
             val moduleDescriptors = listOf(context.moduleDescriptor) + context.getExportedDependencies()
             val objcGenerics = context.configuration.getBoolean(KonanConfigKeys.OBJC_GENERICS)
             val namer = ObjCExportNamerImpl(
-                    moduleDescriptors.toSet(),
-                    context.moduleDescriptor.builtIns,
-                    mapper,
-                    context.moduleDescriptor.namePrefix,
-                    local = false,
-                    objcGenerics = objcGenerics
+                moduleDescriptors.toSet(),
+                context.moduleDescriptor.builtIns,
+                mapper,
+                context.moduleDescriptor.namePrefix,
+                local = false,
+                objcGenerics = objcGenerics
             )
             val headerGenerator = ObjCExportHeaderGeneratorImpl(context, moduleDescriptors, mapper, namer, objcGenerics)
             headerGenerator.translateModule()
@@ -84,11 +84,11 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
 
         val mapper = exportedInterface?.mapper ?: ObjCExportMapper()
         namer = exportedInterface?.namer ?: ObjCExportNamerImpl(
-                setOf(codegen.context.moduleDescriptor),
-                context.moduleDescriptor.builtIns,
-                mapper,
-                context.moduleDescriptor.namePrefix,
-                local = false
+            setOf(codegen.context.moduleDescriptor),
+            context.moduleDescriptor.builtIns,
+            mapper,
+            context.moduleDescriptor.namePrefix,
+            local = false
         )
 
         val objCCodeGenerator = ObjCExportCodeGenerator(codegen, namer, mapper)
@@ -107,7 +107,7 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
 
     private fun produceFrameworkSpecific(headerLines: List<String>) {
         val framework = File(context.config.outputFile)
-        val frameworkContents = when(target.family) {
+        val frameworkContents = when (target.family) {
             Family.IOS,
             Family.WATCHOS,
             Family.TVOS -> framework
@@ -126,7 +126,8 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         val modules = frameworkContents.child("Modules")
         modules.mkdirs()
 
-        val moduleMap = """
+        val moduleMap =
+            """
             |framework module $frameworkName {
             |    umbrella header "$headerName"
             |
@@ -174,7 +175,8 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         val minimumOsVersion = properties.osVersionMin
 
         val contents = StringBuilder()
-        contents.append("""
+        contents.append(
+            """
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0">
@@ -198,13 +200,15 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
                 <key>CFBundleVersion</key>
                 <string>1</string>
 
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         fun addUiDeviceFamilies(vararg values: Int) {
             val xmlValues = values.joinToString(separator = "\n") {
                 "        <integer>$it</integer>"
             }
-            contents.append("""
+            contents.append(
+                """
                 |    <key>MinimumOSVersion</key>
                 |    <string>$minimumOsVersion</string>
                 |    <key>UIDeviceFamily</key>
@@ -212,7 +216,8 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
                 |$xmlValues       
                 |    </array>
 
-                """.trimMargin())
+                """.trimMargin()
+            )
         }
 
         // UIDeviceFamily mapping:
@@ -228,7 +233,8 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         }
 
         if (target == KonanTarget.IOS_ARM64) {
-            contents.append("""
+            contents.append(
+                """
                 |    <key>UIRequiredDeviceCapabilities</key>
                 |    <array>
                 |        <string>arm64</string>
@@ -239,7 +245,8 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         }
 
         if (target == KonanTarget.IOS_ARM32) {
-            contents.append("""
+            contents.append(
+                """
                 |    <key>UIRequiredDeviceCapabilities</key>
                 |    <array>
                 |        <string>armv7</string>
@@ -249,10 +256,12 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
             )
         }
 
-        contents.append("""
+        contents.append(
+            """
             </dict>
             </plist>
-        """.trimIndent())
+            """.trimIndent()
+        )
 
         // TODO: Xcode also add some number of DT* keys.
 
@@ -266,17 +275,17 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         // so the easiest way to achieve this (quickly) is to compile a stub by clang.
 
         val protocolsStub = listOf(
-                "__attribute__((used)) static void __workaroundSwiftSR10177() {",
-                buildString {
-                    append("    ")
-                    generatedClasses.forEach {
-                        if (it.isInterface) {
-                            val protocolName = namer.getClassOrProtocolName(it).objCName
-                            append("@protocol($protocolName); ")
-                        }
+            "__attribute__((used)) static void __workaroundSwiftSR10177() {",
+            buildString {
+                append("    ")
+                generatedClasses.forEach {
+                    if (it.isInterface) {
+                        val protocolName = namer.getClassOrProtocolName(it).objCName
+                        append("@protocol($protocolName); ")
                     }
-                },
-                "}"
+                }
+            },
+            "}"
         )
 
         val source = createTempFile("protocols", ".m").deleteOnExit()
@@ -285,10 +294,10 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
         val bitcode = createTempFile("protocols", ".bc").deleteOnExit()
 
         val clangCommand = context.config.clang.clangC(
-                source.absolutePath,
-                "-O2",
-                "-emit-llvm",
-                "-c", "-o", bitcode.absolutePath
+            source.absolutePath,
+            "-O2",
+            "-emit-llvm",
+            "-c", "-o", bitcode.absolutePath
         )
 
         val result = Command(clangCommand).getResult(withErrors = true)

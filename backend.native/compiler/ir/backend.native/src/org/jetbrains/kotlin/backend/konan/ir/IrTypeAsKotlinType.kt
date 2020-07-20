@@ -28,18 +28,18 @@ val IrClassifierSymbol.typeWithoutArguments: IrType
 val IrClassifierSymbol.typeWithStarProjections
     get() = when (this) {
         is IrClassSymbol -> createType(
-                hasQuestionMark = false,
-                arguments = this.descriptor.declaredTypeParameters.map { IrStarProjectionImpl }
+            hasQuestionMark = false,
+            arguments = this.descriptor.declaredTypeParameters.map { IrStarProjectionImpl }
         )
         is IrTypeParameterSymbol -> this.defaultType
         else -> error(this)
     }
 
-val IrTypeParameterSymbol.defaultType: IrType get() =  IrSimpleTypeImpl(
-        this,
-        false,
-        emptyList(),
-        emptyList()
+val IrTypeParameterSymbol.defaultType: IrType get() = IrSimpleTypeImpl(
+    this,
+    false,
+    emptyList(),
+    emptyList()
 )
 
 fun IrClass.typeWith(arguments: List<IrType>) = this.symbol.typeWith(arguments)

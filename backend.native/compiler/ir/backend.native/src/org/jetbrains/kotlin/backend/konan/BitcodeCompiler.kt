@@ -19,19 +19,19 @@ internal class BitcodeCompiler(val context: Context) {
     private val debug = context.config.debug
 
     private val overrideClangOptions =
-            context.configuration.getList(KonanConfigKeys.OVERRIDE_CLANG_OPTIONS)
+        context.configuration.getList(KonanConfigKeys.OVERRIDE_CLANG_OPTIONS)
 
     private fun MutableList<String>.addNonEmpty(elements: List<String>) {
         addAll(elements.filter { it.isNotEmpty() })
     }
 
     private fun runTool(vararg command: String) =
-            Command(*command)
-                    .logWith(context::log)
-                    .execute()
+        Command(*command)
+            .logWith(context::log)
+            .execute()
 
     private fun temporary(name: String, suffix: String): String =
-            context.config.tempFiles.create(name, suffix).absolutePath
+        context.config.tempFiles.create(name, suffix).absolutePath
 
     private fun targetTool(tool: String, vararg arg: String) {
         val absoluteToolName = if (platform.configurables is AppleConfigurables) {
@@ -62,23 +62,25 @@ internal class BitcodeCompiler(val context: Context) {
             else -> context.llvm.targetTriple
         }
         val flags = overrideClangOptions.takeIf(List<String>::isNotEmpty)
-                ?: mutableListOf<String>().apply {
-            addNonEmpty(configurables.clangFlags)
-            addNonEmpty(listOf("-triple", targetTriple))
-            if (configurables is ZephyrConfigurables) {
-                addNonEmpty(configurables.constructClangCC1Args())
+            ?: mutableListOf<String>().apply {
+                addNonEmpty(configurables.clangFlags)
+                addNonEmpty(listOf("-triple", targetTriple))
+                if (configurables is ZephyrConfigurables) {
+                    addNonEmpty(configurables.constructClangCC1Args())
+                }
+                addNonEmpty(
+                    when {
+                        optimize -> configurables.clangOptFlags
+                        debug -> configurables.clangDebugFlags
+                        else -> configurables.clangNooptFlags
+                    }
+                )
+                addNonEmpty(BitcodeEmbedding.getClangOptions(context.config))
+                if (determineLinkerOutput(context) == LinkerOutputKind.DYNAMIC_LIBRARY) {
+                    addNonEmpty(configurables.clangDynamicFlags)
+                }
+                addNonEmpty(profilingFlags)
             }
-            addNonEmpty(when {
-                optimize -> configurables.clangOptFlags
-                debug -> configurables.clangDebugFlags
-                else -> configurables.clangNooptFlags
-            })
-            addNonEmpty(BitcodeEmbedding.getClangOptions(context.config))
-            if (determineLinkerOutput(context) == LinkerOutputKind.DYNAMIC_LIBRARY) {
-                addNonEmpty(configurables.clangDynamicFlags)
-            }
-            addNonEmpty(profilingFlags)
-        }
         if (configurables is AppleConfigurables) {
             targetTool("clang++", *flags.toTypedArray(), file, "-o", objectFile)
         } else {
@@ -99,8 +101,10 @@ internal class BitcodeCompiler(val context: Context) {
     }
 
     fun makeObjectFiles(bitcodeFile: BitcodeFile): List<ObjectFile> =
-            listOf(when (val configurables = platform.configurables) {
+        listOf(
+            when (val configurables = platform.configurables) {
                 is ClangFlags -> clang(configurables, bitcodeFile)
                 else -> error("Unsupported configurables kind: ${configurables::class.simpleName}!")
-            })
+            }
+        )
 }

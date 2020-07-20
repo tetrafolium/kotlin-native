@@ -22,8 +22,8 @@ import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.psi2ir.generators.GeneratorContext
 
 internal class CStructVarClassGenerator(
-        context: GeneratorContext,
-        private val interopBuiltIns: InteropBuiltIns
+    context: GeneratorContext,
+    private val interopBuiltIns: InteropBuiltIns
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -45,26 +45,26 @@ internal class CStructVarClassGenerator(
     }
 
     private fun provideIrClassForCStruct(descriptor: ClassDescriptor): IrClass =
-            createClass(descriptor) { irClass ->
-                irClass.addMember(createPrimaryConstructor(irClass))
-                irClass.addMember(companionGenerator.generate(descriptor))
-                descriptor.unsubstitutedMemberScope
-                        .getContributedDescriptors()
-                        .filterIsInstance<PropertyDescriptor>()
-                        .filter { it.kind != CallableMemberDescriptor.Kind.FAKE_OVERRIDE }
-                        .map(this::createProperty)
-                        .forEach(irClass::addMember)
-            }
+        createClass(descriptor) { irClass ->
+            irClass.addMember(createPrimaryConstructor(irClass))
+            irClass.addMember(companionGenerator.generate(descriptor))
+            descriptor.unsubstitutedMemberScope
+                .getContributedDescriptors()
+                .filterIsInstance<PropertyDescriptor>()
+                .filter { it.kind != CallableMemberDescriptor.Kind.FAKE_OVERRIDE }
+                .map(this::createProperty)
+                .forEach(irClass::addMember)
+        }
 
     private fun createPrimaryConstructor(irClass: IrClass): IrConstructor {
         val enumVarConstructorSymbol = symbolTable.referenceConstructor(
-                interopBuiltIns.cStructVar.unsubstitutedPrimaryConstructor!!
+            interopBuiltIns.cStructVar.unsubstitutedPrimaryConstructor!!
         )
         return createConstructor(irClass.descriptor.unsubstitutedPrimaryConstructor!!).also { irConstructor ->
             irConstructor.body = irBuilder(irBuiltIns, irConstructor.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
                 +IrDelegatingConstructorCallImpl(
-                        startOffset, endOffset,
-                        context.irBuiltIns.unitType, enumVarConstructorSymbol
+                    startOffset, endOffset,
+                    context.irBuiltIns.unitType, enumVarConstructorSymbol
                 ).also {
                     it.putValueArgument(0, irGet(irConstructor.valueParameters[0]))
                 }

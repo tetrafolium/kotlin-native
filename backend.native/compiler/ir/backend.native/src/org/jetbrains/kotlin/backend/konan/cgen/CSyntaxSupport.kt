@@ -12,7 +12,7 @@ internal object CTypes {
     fun simple(type: String): CType = SimpleCType(type)
     fun pointer(pointee: CType): CType = PointerCType(pointee)
     fun function(returnType: CType, parameterTypes: List<CType>, variadic: Boolean): CType =
-            FunctionCType(returnType, parameterTypes, variadic)
+        FunctionCType(returnType, parameterTypes, variadic)
 
     fun blockPointer(pointee: CType): CType = object : CType {
         override fun render(name: String): String = pointee.render("^$name")
@@ -47,20 +47,22 @@ private class PointerCType(private val pointee: CType) : CType {
 }
 
 private class FunctionCType(
-        private val returnType: CType,
-        private val parameterTypes: List<CType>,
-        private val variadic: Boolean
+    private val returnType: CType,
+    private val parameterTypes: List<CType>,
+    private val variadic: Boolean
 ) : CType {
-    override fun render(name: String): String = returnType.render(buildString {
-        append("(")
-        append(name)
-        append(")(")
-        parameterTypes.joinTo(this) { it.render("") }
-        if (parameterTypes.isEmpty()) {
-            if (!variadic) append("void")
-        } else {
-            if (variadic) append(", ...")
+    override fun render(name: String): String = returnType.render(
+        buildString {
+            append("(")
+            append(name)
+            append(")(")
+            parameterTypes.joinTo(this) { it.render("") }
+            if (parameterTypes.isEmpty()) {
+                if (!variadic) append("void")
+            } else {
+                if (variadic) append(", ...")
+            }
+            append(')')
         }
-        append(')')
-    })
+    )
 }

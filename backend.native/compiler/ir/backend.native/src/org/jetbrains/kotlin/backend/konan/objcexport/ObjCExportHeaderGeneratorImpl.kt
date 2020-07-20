@@ -17,11 +17,11 @@ import org.jetbrains.kotlin.renderer.DescriptorRenderer
 import org.jetbrains.kotlin.resolve.source.getPsi
 
 internal class ObjCExportHeaderGeneratorImpl(
-        val context: Context,
-        moduleDescriptors: List<ModuleDescriptor>,
-        mapper: ObjCExportMapper,
-        namer: ObjCExportNamer,
-        objcGenerics: Boolean
+    val context: Context,
+    moduleDescriptors: List<ModuleDescriptor>,
+    mapper: ObjCExportMapper,
+    namer: ObjCExportNamer,
+    objcGenerics: Boolean
 ) : ObjCExportHeaderGenerator(moduleDescriptors, mapper, namer, objcGenerics) {
 
     override fun reportWarning(text: String) {
@@ -30,9 +30,9 @@ internal class ObjCExportHeaderGeneratorImpl(
 
     override fun reportWarning(method: FunctionDescriptor, text: String) {
         val psi = (method as? DeclarationDescriptorWithSource)?.source?.getPsi()
-                ?: return reportWarning(
-                        "$text\n    (at ${DescriptorRenderer.COMPACT_WITH_SHORT_TYPES.render(method)})"
-                )
+            ?: return reportWarning(
+                "$text\n    (at ${DescriptorRenderer.COMPACT_WITH_SHORT_TYPES.render(method)})"
+            )
 
         val location = MessageUtil.psiElementToMessageLocation(psi)
 
@@ -40,5 +40,5 @@ internal class ObjCExportHeaderGeneratorImpl(
     }
 
     override fun getAdditionalImports(): List<String> =
-            context.config.configuration.getNotNull(KonanConfigKeys.FRAMEWORK_IMPORT_HEADERS)
+        context.config.configuration.getNotNull(KonanConfigKeys.FRAMEWORK_IMPORT_HEADERS)
 }

@@ -34,37 +34,39 @@ internal val IrClass.implementedInterfaces: List<IrClass>
         val superClassImplementedInterfaces = this.getSuperClassNotAny()?.implementedInterfaces ?: emptyList()
         val superInterfaces = this.getSuperInterfaces()
         val superInterfacesImplementedInterfaces = superInterfaces.flatMap { it.implementedInterfaces }
-        return (superClassImplementedInterfaces +
+        return (
+            superClassImplementedInterfaces +
                 superInterfacesImplementedInterfaces +
-                superInterfaces).distinct()
+                superInterfaces
+            ).distinct()
     }
 
 internal val IrFunction.isTypedIntrinsic: Boolean
     get() = annotations.hasAnnotation(KonanFqNames.typedIntrinsic)
 
 internal val arrayTypes = setOf(
-        "kotlin.Array",
-        "kotlin.ByteArray",
-        "kotlin.CharArray",
-        "kotlin.ShortArray",
-        "kotlin.IntArray",
-        "kotlin.LongArray",
-        "kotlin.FloatArray",
-        "kotlin.DoubleArray",
-        "kotlin.BooleanArray",
-        "kotlin.native.ImmutableBlob",
-        "kotlin.native.internal.NativePtrArray"
+    "kotlin.Array",
+    "kotlin.ByteArray",
+    "kotlin.CharArray",
+    "kotlin.ShortArray",
+    "kotlin.IntArray",
+    "kotlin.LongArray",
+    "kotlin.FloatArray",
+    "kotlin.DoubleArray",
+    "kotlin.BooleanArray",
+    "kotlin.native.ImmutableBlob",
+    "kotlin.native.internal.NativePtrArray"
 )
 
 internal val arraysWithFixedSizeItems = setOf(
-        "kotlin.ByteArray",
-        "kotlin.CharArray",
-        "kotlin.ShortArray",
-        "kotlin.IntArray",
-        "kotlin.LongArray",
-        "kotlin.FloatArray",
-        "kotlin.DoubleArray",
-        "kotlin.BooleanArray"
+    "kotlin.ByteArray",
+    "kotlin.CharArray",
+    "kotlin.ShortArray",
+    "kotlin.IntArray",
+    "kotlin.LongArray",
+    "kotlin.FloatArray",
+    "kotlin.DoubleArray",
+    "kotlin.BooleanArray"
 )
 
 internal val IrClass.isArray: Boolean
@@ -93,11 +95,11 @@ internal fun IrFunction.hasReferenceAt(index: Int): Boolean {
     }
 }
 
-private fun IrFunction.needBridgeToAt(target: IrFunction, index: Int)
-        = hasValueTypeAt(index) xor target.hasValueTypeAt(index)
+private fun IrFunction.needBridgeToAt(target: IrFunction, index: Int) =
+    hasValueTypeAt(index) xor target.hasValueTypeAt(index)
 
-internal fun IrFunction.needBridgeTo(target: IrFunction)
-        = (0..this.valueParameters.size + 2).any { needBridgeToAt(target, it) }
+internal fun IrFunction.needBridgeTo(target: IrFunction) =
+    (0..this.valueParameters.size + 2).any { needBridgeToAt(target, it) }
 
 internal enum class BridgeDirection {
     NOT_NEEDED,
@@ -105,26 +107,28 @@ internal enum class BridgeDirection {
     TO_VALUE_TYPE
 }
 
-private fun IrFunction.bridgeDirectionToAt(target: IrFunction, index: Int)
-       = when {
-            hasValueTypeAt(index) && target.hasReferenceAt(index) -> BridgeDirection.FROM_VALUE_TYPE
-            hasReferenceAt(index) && target.hasValueTypeAt(index) -> BridgeDirection.TO_VALUE_TYPE
-            else -> BridgeDirection.NOT_NEEDED
-        }
+private fun IrFunction.bridgeDirectionToAt(target: IrFunction, index: Int) =
+    when {
+        hasValueTypeAt(index) && target.hasReferenceAt(index) -> BridgeDirection.FROM_VALUE_TYPE
+        hasReferenceAt(index) && target.hasValueTypeAt(index) -> BridgeDirection.TO_VALUE_TYPE
+        else -> BridgeDirection.NOT_NEEDED
+    }
 
 internal class BridgeDirections(val array: Array<BridgeDirection>) {
-    constructor(parametersCount: Int): this(Array<BridgeDirection>(parametersCount + 3, { BridgeDirection.NOT_NEEDED }))
+    constructor(parametersCount: Int) : this(Array<BridgeDirection>(parametersCount + 3, { BridgeDirection.NOT_NEEDED }))
 
     fun allNotNeeded(): Boolean = array.all { it == BridgeDirection.NOT_NEEDED }
 
     override fun toString(): String {
         val result = StringBuilder()
         array.forEach {
-            result.append(when (it) {
-                BridgeDirection.FROM_VALUE_TYPE -> 'U' // unbox
-                BridgeDirection.TO_VALUE_TYPE   -> 'B' // box
-                BridgeDirection.NOT_NEEDED      -> 'N' // none
-            })
+            result.append(
+                when (it) {
+                    BridgeDirection.FROM_VALUE_TYPE -> 'U' // unbox
+                    BridgeDirection.TO_VALUE_TYPE -> 'B' // box
+                    BridgeDirection.NOT_NEEDED -> 'N' // none
+                }
+            )
         }
         return result.toString()
     }
@@ -133,8 +137,8 @@ internal class BridgeDirections(val array: Array<BridgeDirection>) {
         if (this === other) return true
         if (other !is BridgeDirections) return false
 
-        return array.size == other.array.size
-                && array.indices.all { array[it] == other.array[it] }
+        return array.size == other.array.size &&
+            array.indices.all { array[it] == other.array[it] }
     }
 
     override fun hashCode(): Int {
@@ -160,16 +164,17 @@ val IrSimpleFunction.allOverriddenFunctions: Set<IrSimpleFunction>
     }
 
 internal fun IrSimpleFunction.bridgeDirectionsTo(
-        overriddenDescriptor: IrSimpleFunction
+    overriddenDescriptor: IrSimpleFunction
 ): BridgeDirections {
     val ourDirections = BridgeDirections(this.valueParameters.size)
     for (index in ourDirections.array.indices)
         ourDirections.array[index] = this.bridgeDirectionToAt(overriddenDescriptor, index)
 
     val target = this.target
-    if (!this.isReal && modality != Modality.ABSTRACT
-            && target.overrides(overriddenDescriptor)
-            && ourDirections == target.bridgeDirectionsTo(overriddenDescriptor)) {
+    if (!this.isReal && modality != Modality.ABSTRACT &&
+        target.overrides(overriddenDescriptor) &&
+        ourDirections == target.bridgeDirectionsTo(overriddenDescriptor)
+    ) {
         // Bridge is inherited from superclass.
         return BridgeDirections(this.valueParameters.size)
     }
@@ -180,11 +185,11 @@ internal fun IrSimpleFunction.bridgeDirectionsTo(
 internal tailrec fun IrDeclaration.findPackage(): IrPackageFragment {
     val parent = this.parent
     return parent as? IrPackageFragment
-            ?: (parent as IrDeclaration).findPackage()
+        ?: (parent as IrDeclaration).findPackage()
 }
 
 fun IrFunctionSymbol.isComparisonFunction(map: Map<IrClassifierSymbol, IrSimpleFunctionSymbol>): Boolean =
-        this in map.values
+    this in map.values
 
 val IrDeclaration.isPropertyAccessor get() =
     this is IrSimpleFunction && this.correspondingPropertySymbol != null
@@ -208,8 +213,8 @@ fun IrDeclaration.findTopLevelDeclaration(): IrDeclaration = when {
 
 internal val IrClass.isFrozen: Boolean
     get() = annotations.hasAnnotation(KonanFqNames.frozen) ||
-            // RTTI is used for non-reference type box:
-            !this.defaultType.binaryTypeIsReference()
+        // RTTI is used for non-reference type box:
+        !this.defaultType.binaryTypeIsReference()
 
 fun IrConstructorCall.getAnnotationStringValue() = getValueArgument(0).safeAs<IrConst<String>>()?.value
 
@@ -242,4 +247,4 @@ fun IrFunction.externalSymbolOrThrow(): String? {
 val IrFunction.isBuiltInOperator get() = origin == IrBuiltIns.BUILTIN_OPERATOR
 
 fun IrDeclaration.isFromMetadataInteropLibrary() =
-        descriptor.module.isFromInteropLibrary()
+    descriptor.module.isFromInteropLibrary()

@@ -2,27 +2,27 @@ package org.jetbrains.kotlin.backend.konan
 
 import org.jetbrains.kotlin.konan.KonanExternalToolFailure
 import org.jetbrains.kotlin.konan.file.File
+import org.jetbrains.kotlin.konan.library.KonanLibrary
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.LinkerOutputKind
-import org.jetbrains.kotlin.konan.library.KonanLibrary
 import org.jetbrains.kotlin.library.resolver.TopologicalLibraryOrder
 import org.jetbrains.kotlin.library.uniqueName
 import org.jetbrains.kotlin.utils.addToStdlib.cast
 
 internal fun determineLinkerOutput(context: Context): LinkerOutputKind =
-        when (context.config.produce) {
-            CompilerOutputKind.FRAMEWORK -> {
-                val staticFramework = context.config.produceStaticFramework
-                if (staticFramework) LinkerOutputKind.STATIC_LIBRARY else LinkerOutputKind.DYNAMIC_LIBRARY
-            }
-            CompilerOutputKind.DYNAMIC_CACHE,
-            CompilerOutputKind.DYNAMIC -> LinkerOutputKind.DYNAMIC_LIBRARY
-            CompilerOutputKind.STATIC_CACHE,
-            CompilerOutputKind.STATIC -> LinkerOutputKind.STATIC_LIBRARY
-            CompilerOutputKind.PROGRAM -> LinkerOutputKind.EXECUTABLE
-            else -> TODO("${context.config.produce} should not reach native linker stage")
+    when (context.config.produce) {
+        CompilerOutputKind.FRAMEWORK -> {
+            val staticFramework = context.config.produceStaticFramework
+            if (staticFramework) LinkerOutputKind.STATIC_LIBRARY else LinkerOutputKind.DYNAMIC_LIBRARY
         }
+        CompilerOutputKind.DYNAMIC_CACHE,
+        CompilerOutputKind.DYNAMIC -> LinkerOutputKind.DYNAMIC_LIBRARY
+        CompilerOutputKind.STATIC_CACHE,
+        CompilerOutputKind.STATIC -> LinkerOutputKind.STATIC_LIBRARY
+        CompilerOutputKind.PROGRAM -> LinkerOutputKind.EXECUTABLE
+        else -> TODO("${context.config.produce} should not reach native linker stage")
+    }
 
 // TODO: We have a Linker.kt file in the shared module.
 internal class Linker(val context: Context) {
@@ -65,12 +65,12 @@ internal class Linker(val context: Context) {
         val outputFiles = context.config.outputFiles
         val bitcodeDependenciesFile = File(outputFiles.bitcodeDependenciesFile!!)
         val bitcodeDependencies = context.config.resolvedLibraries
-                .getFullList(TopologicalLibraryOrder)
-                .filter {
-                    require(it is KonanLibrary)
-                    context.llvmImports.bitcodeIsUsed(it)
-                            && it !in context.config.cacheSupport.librariesToCache // Skip loops.
-                }.cast<List<KonanLibrary>>()
+            .getFullList(TopologicalLibraryOrder)
+            .filter {
+                require(it is KonanLibrary)
+                context.llvmImports.bitcodeIsUsed(it) &&
+                    it !in context.config.cacheSupport.librariesToCache // Skip loops.
+            }.cast<List<KonanLibrary>>()
         bitcodeDependenciesFile.writeLines(bitcodeDependencies.map { it.uniqueName })
     }
 
@@ -102,9 +102,11 @@ internal class Linker(val context: Context) {
         return result
     }
 
-    private fun runLinker(objectFiles: List<ObjectFile>,
-                          includedBinaries: List<String>,
-                          libraryProvidedLinkerFlags: List<String>): ExecutableFile? {
+    private fun runLinker(
+        objectFiles: List<ObjectFile>,
+        includedBinaries: List<String>,
+        libraryProvidedLinkerFlags: List<String>
+    ): ExecutableFile? {
         val additionalLinkerArgs: List<String>
         val executable: String
 
@@ -141,35 +143,36 @@ internal class Linker(val context: Context) {
 
         try {
             File(executable).delete()
-            linker.linkCommands(objectFiles = objectFiles, executable = executable,
-                    libraries = linker.linkStaticLibraries(includedBinaries) + context.config.defaultSystemLibraries +
-                            caches.static.takeIf { context.config.produce != CompilerOutputKind.STATIC_CACHE }.orEmpty(),
-                    linkerArgs = asLinkerArgs(config.getNotNull(KonanConfigKeys.LINKER_ARGS)) +
-                            BitcodeEmbedding.getLinkerOptions(context.config) +
-                            caches.dynamic +
-                            libraryProvidedLinkerFlags + additionalLinkerArgs,
-                    optimize = optimize, debug = debug, kind = linkerOutput,
-                    outputDsymBundle = context.config.outputFiles.symbolicInfoFile,
-                    needsProfileLibrary = needsProfileLibrary).forEach {
+            linker.linkCommands(
+                objectFiles = objectFiles, executable = executable,
+                libraries = linker.linkStaticLibraries(includedBinaries) + context.config.defaultSystemLibraries +
+                    caches.static.takeIf { context.config.produce != CompilerOutputKind.STATIC_CACHE }.orEmpty(),
+                linkerArgs = asLinkerArgs(config.getNotNull(KonanConfigKeys.LINKER_ARGS)) +
+                    BitcodeEmbedding.getLinkerOptions(context.config) +
+                    caches.dynamic +
+                    libraryProvidedLinkerFlags + additionalLinkerArgs,
+                optimize = optimize, debug = debug, kind = linkerOutput,
+                outputDsymBundle = context.config.outputFiles.symbolicInfoFile,
+                needsProfileLibrary = needsProfileLibrary
+            ).forEach {
                 it.logWith(context::log)
                 it.execute()
             }
         } catch (e: KonanExternalToolFailure) {
             val extraUserInfo =
-                    if (caches.static.isNotEmpty() || caches.dynamic.isNotEmpty())
-                        """
+                if (caches.static.isNotEmpty() || caches.dynamic.isNotEmpty())
+                    """
                         Please try to disable compiler caches and rerun the build. To disable compiler caches, add the following line to the gradle.properties file in the project's root directory:
                             
                             kotlin.native.cacheKind=none
                             
                         Also, consider filing an issue with full Gradle log here: https://kotl.in/issue
-                        """.trimIndent()
-                    else ""
+                    """.trimIndent()
+                else ""
             context.reportCompilationError("${e.toolName} invocation reported errors\n$extraUserInfo\n${e.message}")
         }
         return executable
     }
-
 }
 
 private class CachesToLink(val static: List<String>, val dynamic: List<String>)
@@ -181,7 +184,7 @@ private fun determineCachesToLink(context: Context): CachesToLink {
     context.llvm.allCachedBitcodeDependencies.forEach { library ->
         val currentBinaryContainsLibrary = context.llvmModuleSpecification.containsLibrary(library)
         val cache = context.config.cachedLibraries.getLibraryCache(library)
-                ?: error("Library $library is expected to be cached")
+            ?: error("Library $library is expected to be cached")
 
         // Consistency check. Generally guaranteed by implementation.
         if (currentBinaryContainsLibrary)

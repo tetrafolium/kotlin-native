@@ -27,14 +27,15 @@ import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.name.Name
 
-
 internal object DECLARATION_ORIGIN_ENUM : IrDeclarationOriginImpl("ENUM")
 
-internal data class LoweredEnum(val implObject: IrClass,
-                                val valuesField: IrField,
-                                val valuesGetter: IrSimpleFunction,
-                                val itemGetterSymbol: IrSimpleFunctionSymbol,
-                                val entriesMap: Map<Name, Int>)
+internal data class LoweredEnum(
+    val implObject: IrClass,
+    val valuesField: IrField,
+    val valuesGetter: IrSimpleFunction,
+    val itemGetterSymbol: IrSimpleFunctionSymbol,
+    val entriesMap: Map<Name, Int>
+)
 
 internal class EnumSpecialDeclarationsFactory(val context: Context) {
     private val symbols = context.ir.symbols
@@ -45,20 +46,20 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
 
         val implObject = WrappedClassDescriptor().let {
             IrClassImpl(
-                    startOffset, endOffset,
-                    DECLARATION_ORIGIN_ENUM,
-                    IrClassSymbolImpl(it),
-                    "OBJECT".synthesizedName,
-                    ClassKind.OBJECT,
-                    Visibilities.PUBLIC,
-                    Modality.FINAL,
-                    isCompanion = false,
-                    isInner = false,
-                    isData = false,
-                    isExternal = false,
-                    isInline = false,
-                    isExpect = false,
-                    isFun = false
+                startOffset, endOffset,
+                DECLARATION_ORIGIN_ENUM,
+                IrClassSymbolImpl(it),
+                "OBJECT".synthesizedName,
+                ClassKind.OBJECT,
+                Visibilities.PUBLIC,
+                Modality.FINAL,
+                isCompanion = false,
+                isInner = false,
+                isData = false,
+                isExternal = false,
+                isInline = false,
+                isExpect = false,
+                isFun = false
             ).apply {
                 it.bind(this)
                 parent = enumClass
@@ -69,15 +70,15 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
         val valuesType = symbols.array.typeWith(enumClass.defaultType)
         val valuesField = WrappedFieldDescriptor().let {
             IrFieldImpl(
-                    startOffset, endOffset,
-                    DECLARATION_ORIGIN_ENUM,
-                    IrFieldSymbolImpl(it),
-                    "VALUES".synthesizedName,
-                    valuesType,
-                    Visibilities.PRIVATE,
-                    isFinal = true,
-                    isExternal = false,
-                    isStatic = false,
+                startOffset, endOffset,
+                DECLARATION_ORIGIN_ENUM,
+                IrFieldSymbolImpl(it),
+                "VALUES".synthesizedName,
+                valuesType,
+                Visibilities.PRIVATE,
+                isFinal = true,
+                isExternal = false,
+                isStatic = false,
             ).apply {
                 it.bind(this)
                 parent = implObject
@@ -86,20 +87,20 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
 
         val valuesGetter = WrappedSimpleFunctionDescriptor().let {
             IrFunctionImpl(
-                    startOffset, endOffset,
-                    DECLARATION_ORIGIN_ENUM,
-                    IrSimpleFunctionSymbolImpl(it),
-                    "get-VALUES".synthesizedName,
-                    Visibilities.PUBLIC,
-                    Modality.FINAL,
-                    valuesType,
-                    isInline = false,
-                    isExternal = false,
-                    isTailrec = false,
-                    isSuspend = false,
-                    isExpect = false,
-                    isFakeOverride = false,
-                    isOperator = false
+                startOffset, endOffset,
+                DECLARATION_ORIGIN_ENUM,
+                IrSimpleFunctionSymbolImpl(it),
+                "get-VALUES".synthesizedName,
+                Visibilities.PUBLIC,
+                Modality.FINAL,
+                valuesType,
+                isInline = false,
+                isExternal = false,
+                isTailrec = false,
+                isSuspend = false,
+                isExpect = false,
+                isFakeOverride = false,
+                isOperator = false
             ).apply {
                 it.bind(this)
                 parent = implObject
@@ -108,9 +109,9 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
 
         val constructorOfAny = context.irBuiltIns.anyClass.owner.constructors.first()
         implObject.addSimpleDelegatingConstructor(
-                constructorOfAny,
-                context.irBuiltIns,
-                true // TODO: why primary?
+            constructorOfAny,
+            context.irBuiltIns,
+            true // TODO: why primary?
         )
 
         implObject.superTypes += context.irBuiltIns.anyType
@@ -118,17 +119,18 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
 
         val itemGetterSymbol = symbols.array.functions.single { it.descriptor.name == Name.identifier("get") }
         val enumEntriesMap = enumClass.declarations
-                .filterIsInstance<IrEnumEntry>()
-                .sortedBy { it.name }
-                .withIndex()
-                .associate { it.value.name to it.index }
-                .toMap()
+            .filterIsInstance<IrEnumEntry>()
+            .sortedBy { it.name }
+            .withIndex()
+            .associate { it.value.name to it.index }
+            .toMap()
 
         return LoweredEnum(
-                implObject,
-                valuesField,
-                valuesGetter,
-                itemGetterSymbol,
-                enumEntriesMap)
+            implObject,
+            valuesField,
+            valuesGetter,
+            itemGetterSymbol,
+            enumEntriesMap
+        )
     }
 }

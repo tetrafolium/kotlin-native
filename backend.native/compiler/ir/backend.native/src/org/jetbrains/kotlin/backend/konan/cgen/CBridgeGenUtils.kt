@@ -52,26 +52,27 @@ internal class CFunctionBuilder {
 
     fun getType(): CType = CTypes.function(returnType, parameters.map { it.type }, variadic)
 
-    fun buildSignature(name: String): String = returnType.render(buildString {
-        append(name)
-        append('(')
-        parameters.joinTo(this)
-        if (parameters.isEmpty()) {
-            if (!variadic) append("void")
-        } else {
-            if (variadic) append(", ...")
+    fun buildSignature(name: String): String = returnType.render(
+        buildString {
+            append(name)
+            append('(')
+            parameters.joinTo(this)
+            if (parameters.isEmpty()) {
+                if (!variadic) append("void")
+            } else {
+                if (variadic) append(", ...")
+            }
+            append(')')
         }
-        append(')')
-    })
-
+    )
 }
 
 internal class KotlinBridgeBuilder(
-        startOffset: Int,
-        endOffset: Int,
-        cName: String,
-        stubs: KotlinStubs,
-        isExternal: Boolean
+    startOffset: Int,
+    endOffset: Int,
+    cName: String,
+    stubs: KotlinStubs,
+    isExternal: Boolean
 ) {
     private var counter = 0
     private val bridge: IrFunction = createKotlinBridge(startOffset, endOffset, cName, stubs, isExternal)
@@ -82,10 +83,10 @@ internal class KotlinBridgeBuilder(
         val descriptor = WrappedValueParameterDescriptor()
 
         return IrValueParameterImpl(
-                bridge.startOffset, bridge.endOffset, bridge.origin,
-                IrValueParameterSymbolImpl(descriptor),
-                Name.identifier("p$index"), index, type,
-                null, false, false
+            bridge.startOffset, bridge.endOffset, bridge.origin,
+            IrValueParameterSymbolImpl(descriptor),
+            Name.identifier("p$index"), index, type,
+            null, false, false
         ).apply {
             descriptor.bind(this)
             parent = bridge
@@ -101,49 +102,55 @@ internal class KotlinBridgeBuilder(
 }
 
 private fun createKotlinBridge(
-        startOffset: Int,
-        endOffset: Int,
-        cBridgeName: String,
-        stubs: KotlinStubs,
-        isExternal: Boolean
+    startOffset: Int,
+    endOffset: Int,
+    cBridgeName: String,
+    stubs: KotlinStubs,
+    isExternal: Boolean
 ): IrFunction {
     val bridgeDescriptor = WrappedSimpleFunctionDescriptor()
     @Suppress("DEPRECATION") val bridge = IrFunctionImpl(
-            startOffset,
-            endOffset,
-            IrDeclarationOrigin.DEFINED,
-            IrSimpleFunctionSymbolImpl(bridgeDescriptor),
-            Name.identifier(cBridgeName),
-            Visibilities.PRIVATE,
-            Modality.FINAL,
-            IrUninitializedType,
-            isInline = false,
-            isExternal = isExternal,
-            isTailrec = false,
-            isSuspend = false,
-            isExpect = false,
-            isFakeOverride = false,
-            isOperator = false
+        startOffset,
+        endOffset,
+        IrDeclarationOrigin.DEFINED,
+        IrSimpleFunctionSymbolImpl(bridgeDescriptor),
+        Name.identifier(cBridgeName),
+        Visibilities.PRIVATE,
+        Modality.FINAL,
+        IrUninitializedType,
+        isInline = false,
+        isExternal = isExternal,
+        isTailrec = false,
+        isSuspend = false,
+        isExpect = false,
+        isFakeOverride = false,
+        isOperator = false
     )
     bridgeDescriptor.bind(bridge)
     if (isExternal) {
-        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
-                stubs.symbols.symbolName.owner, cBridgeName)
-        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
-                stubs.symbols.filterExceptions.owner)
+        bridge.annotations += buildSimpleAnnotation(
+            stubs.irBuiltIns, startOffset, endOffset,
+            stubs.symbols.symbolName.owner, cBridgeName
+        )
+        bridge.annotations += buildSimpleAnnotation(
+            stubs.irBuiltIns, startOffset, endOffset,
+            stubs.symbols.filterExceptions.owner
+        )
     } else {
-        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
-                stubs.symbols.exportForCppRuntime.owner, cBridgeName)
+        bridge.annotations += buildSimpleAnnotation(
+            stubs.irBuiltIns, startOffset, endOffset,
+            stubs.symbols.exportForCppRuntime.owner, cBridgeName
+        )
     }
     return bridge
 }
 
 internal class KotlinCBridgeBuilder(
-        startOffset: Int,
-        endOffset: Int,
-        cName: String,
-        stubs: KotlinStubs,
-        isKotlinToC: Boolean
+    startOffset: Int,
+    endOffset: Int,
+    cName: String,
+    stubs: KotlinStubs,
+    isKotlinToC: Boolean
 ) {
     private val kotlinBridgeBuilder = KotlinBridgeBuilder(startOffset, endOffset, cName, stubs, isExternal = isKotlinToC)
     private val cBridgeBuilder = CFunctionBuilder()
@@ -190,8 +197,8 @@ internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, priv
     }
 
     fun build(
-            function: IrFunction,
-            transformCall: (IrMemberAccessExpression<*>) -> IrExpression = { it }
+        function: IrFunction,
+        transformCall: (IrMemberAccessExpression<*>) -> IrExpression = { it }
     ): IrExpression {
         val arguments = this.arguments.toMutableList()
 
@@ -217,15 +224,17 @@ internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, priv
                     +kotlinCall
                 } else {
                     // Note: generating try-catch as finally blocks are already lowered.
-                    val result = irTemporary(IrTryImpl(startOffset, endOffset, kotlinCall.type).apply {
-                        tryResult = kotlinCall
-                        catches += irCatch(context.irBuiltIns.throwableType).apply {
-                            result = irBlock(kotlinCall) {
-                                cleanup.forEach { +it() }
-                                +irThrow(irGet(catchParameter))
+                    val result = irTemporary(
+                        IrTryImpl(startOffset, endOffset, kotlinCall.type).apply {
+                            tryResult = kotlinCall
+                            catches += irCatch(context.irBuiltIns.throwableType).apply {
+                                result = irBlock(kotlinCall) {
+                                    cleanup.forEach { +it() }
+                                    +irThrow(irGet(catchParameter))
+                                }
                             }
                         }
-                    })
+                    )
                     // TODO: consider handling a cleanup failure properly.
                     cleanup.forEach { +it() }
                     +irGet(result)

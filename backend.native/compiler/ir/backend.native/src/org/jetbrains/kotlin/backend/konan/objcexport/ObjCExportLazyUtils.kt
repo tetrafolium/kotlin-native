@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.psi.KtFile
 
 internal fun ObjCExportLazy.dumpObjCHeader(files: Collection<KtFile>, outputFile: String) {
     val lines = (this.generateBase() + files.flatMap { this.translate(it) })
-            .flatMap { StubRenderer.render(it) + listOf("") }
+        .flatMap { StubRenderer.render(it) + listOf("") }
 
     File(outputFile).writeLines(lines)
 }

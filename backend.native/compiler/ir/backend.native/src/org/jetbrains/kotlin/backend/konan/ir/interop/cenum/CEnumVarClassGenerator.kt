@@ -27,8 +27,8 @@ import org.jetbrains.kotlin.psi2ir.generators.GeneratorContext
 private val typeSizeAnnotation = FqName("kotlinx.cinterop.internal.CEnumVarTypeSize")
 
 internal class CEnumVarClassGenerator(
-        context: GeneratorContext,
-        private val interopBuiltIns: InteropBuiltIns
+    context: GeneratorContext,
+    private val interopBuiltIns: InteropBuiltIns
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -37,7 +37,7 @@ internal class CEnumVarClassGenerator(
 
     fun generate(enumIrClass: IrClass): IrClass {
         val enumVarClassDescriptor = enumIrClass.descriptor.unsubstitutedMemberScope
-                .getContributedClassifier(Name.identifier("Var"), NoLookupLocation.FROM_BACKEND)!! as ClassDescriptor
+            .getContributedClassifier(Name.identifier("Var"), NoLookupLocation.FROM_BACKEND)!! as ClassDescriptor
         return createClass(enumVarClassDescriptor) { enumVarClass ->
             enumVarClass.addMember(createPrimaryConstructor(enumVarClass))
             enumVarClass.addMember(createCompanionObject(enumVarClass))
@@ -47,18 +47,18 @@ internal class CEnumVarClassGenerator(
 
     private fun createValueProperty(enumVarClass: IrClass): IrProperty {
         val valuePropertyDescriptor = enumVarClass.descriptor.unsubstitutedMemberScope
-                .getContributedVariables(Name.identifier("value"), NoLookupLocation.FROM_BACKEND).single()
+            .getContributedVariables(Name.identifier("value"), NoLookupLocation.FROM_BACKEND).single()
         return createProperty(valuePropertyDescriptor)
     }
 
     private fun createPrimaryConstructor(enumVarClass: IrClass): IrConstructor {
         val irConstructor = createConstructor(enumVarClass.descriptor.unsubstitutedPrimaryConstructor!!)
         val enumVarConstructorSymbol = symbolTable.referenceConstructor(
-                interopBuiltIns.cEnumVar.unsubstitutedPrimaryConstructor!!
+            interopBuiltIns.cEnumVar.unsubstitutedPrimaryConstructor!!
         )
         irConstructor.body = irBuilder(irBuiltIns, irConstructor.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
             +IrDelegatingConstructorCallImpl(
-                    startOffset, endOffset, context.irBuiltIns.unitType, enumVarConstructorSymbol
+                startOffset, endOffset, context.irBuiltIns.unitType, enumVarConstructorSymbol
             ).also {
                 it.putValueArgument(0, irGet(irConstructor.valueParameters[0]))
             }
@@ -68,20 +68,20 @@ internal class CEnumVarClassGenerator(
     }
 
     private fun createCompanionObject(enumVarClass: IrClass): IrClass =
-            createClass(enumVarClass.descriptor.companionObjectDescriptor!!) { companionIrClass ->
-                val typeSize = companionIrClass.descriptor.annotations
-                        .findAnnotation(typeSizeAnnotation)!!
-                        .getArgumentValueOrNull<Int>("size")!!
-                companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor, typeSize))
-            }
+        createClass(enumVarClass.descriptor.companionObjectDescriptor!!) { companionIrClass ->
+            val typeSize = companionIrClass.descriptor.annotations
+                .findAnnotation(typeSizeAnnotation)!!
+                .getArgumentValueOrNull<Int>("size")!!
+            companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor, typeSize))
+        }
 
     private fun createCompanionConstructor(companionObjectDescriptor: ClassDescriptor, typeSize: Int): IrConstructor {
         val superConstructorSymbol = symbolTable.referenceConstructor(interopBuiltIns.cPrimitiveVarType.unsubstitutedPrimaryConstructor!!)
         return createConstructor(companionObjectDescriptor.unsubstitutedPrimaryConstructor!!).also {
             it.body = irBuilder(irBuiltIns, it.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
                 +IrDelegatingConstructorCallImpl(
-                        startOffset, endOffset, context.irBuiltIns.unitType,
-                        superConstructorSymbol
+                    startOffset, endOffset, context.irBuiltIns.unitType,
+                    superConstructorSymbol
                 ).also {
                     it.putValueArgument(0, irInt(typeSize))
                 }

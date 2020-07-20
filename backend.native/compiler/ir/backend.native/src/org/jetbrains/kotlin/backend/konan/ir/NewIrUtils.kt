@@ -30,7 +30,8 @@ val IrField.fqNameForIrSerialization: FqName get() = this.parent.fqNameForIrSeri
  */
 val IrFunction.allParameters: List<IrValueParameter>
     get() = if (this is IrConstructor) {
-        listOf(this.constructedClass.thisReceiver
+        listOf(
+            this.constructedClass.thisReceiver
                 ?: error(this.descriptor)
         ) + explicitParameters
     } else {
@@ -54,9 +55,9 @@ val IrProperty.isReal: Boolean get() = this.descriptor.kind.isReal
 val IrField.isReal: Boolean get() = this.descriptor.kind.isReal
 
 val IrSimpleFunction.isOverridable: Boolean
-    get() = visibility != Visibilities.PRIVATE
-            && modality != Modality.FINAL
-            && (parent as? IrClass)?.isFinalClass != true
+    get() = visibility != Visibilities.PRIVATE &&
+        modality != Modality.FINAL &&
+        (parent as? IrClass)?.isFinalClass != true
 
 val IrFunction.isOverridable get() = this is IrSimpleFunction && this.isOverridable
 
@@ -88,8 +89,13 @@ val IrDeclaration.parentDeclarationsWithSelf: Sequence<IrDeclaration>
 
 fun IrClass.companionObject() = this.declarations.filterIsInstance<IrClass>().atMostOne { it.isCompanion }
 
-fun buildSimpleAnnotation(irBuiltIns: IrBuiltIns, startOffset: Int, endOffset: Int,
-                          annotationClass: IrClass, vararg args: String): IrConstructorCall {
+fun buildSimpleAnnotation(
+    irBuiltIns: IrBuiltIns,
+    startOffset: Int,
+    endOffset: Int,
+    annotationClass: IrClass,
+    vararg args: String
+): IrConstructorCall {
     val constructor = annotationClass.constructors.let {
         it.singleOrNull() ?: it.single { ctor -> ctor.valueParameters.size == args.size }
     }

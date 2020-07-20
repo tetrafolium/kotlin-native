@@ -41,7 +41,6 @@ internal fun <T : CallableMemberDescriptor> T.resolveFakeOverride(allowAbstract:
 internal val ClassDescriptor.isArray: Boolean
     get() = this.fqNameSafe.asString() in arrayTypes
 
-
 internal val ClassDescriptor.isInterface: Boolean
     get() = (this.kind == ClassKind.INTERFACE)
 
@@ -54,7 +53,6 @@ internal val KonanBuiltIns.kotlinNativeInternal: MemberScope
 internal fun ClassDescriptor.isUnit() = this.defaultType.isUnit()
 
 internal fun ClassDescriptor.isNothing() = this.defaultType.isNothing()
-
 
 internal val <T : CallableMemberDescriptor> T.allOverriddenDescriptors: List<T>
     get() {
@@ -69,10 +67,10 @@ internal val <T : CallableMemberDescriptor> T.allOverriddenDescriptors: List<T>
     }
 
 internal val ClassDescriptor.contributedMethods: List<FunctionDescriptor>
-    get () = unsubstitutedMemberScope.contributedMethods
+    get() = unsubstitutedMemberScope.contributedMethods
 
 internal val MemberScope.contributedMethods: List<FunctionDescriptor>
-    get () {
+    get() {
         val contributedDescriptors = this.getContributedDescriptors()
 
         val functions = contributedDescriptors.filterIsInstance<FunctionDescriptor>()
@@ -89,7 +87,7 @@ fun ClassDescriptor.isAbstract() = this.modality == Modality.SEALED || this.moda
 internal val FunctionDescriptor.target: FunctionDescriptor
     get() = (if (modality == Modality.ABSTRACT) this else resolveFakeOverride()).original
 
-tailrec internal fun DeclarationDescriptor.findPackage(): PackageFragmentDescriptor {
+internal tailrec fun DeclarationDescriptor.findPackage(): PackageFragmentDescriptor {
     return if (this is PackageFragmentDescriptor) this
     else this.containingDeclaration!!.findPackage()
 }
@@ -123,7 +121,6 @@ inline fun <reified T> AnnotationDescriptor.getArgumentValueOrNull(name: String)
     return constantValue?.value as T?
 }
 
-
 fun AnnotationDescriptor.getStringValue(name: String): String = this.getStringValueOrNull(name)!!
 
 private fun getPackagesFqNames(module: ModuleDescriptor): Set<FqName> {
@@ -139,16 +136,16 @@ private fun getPackagesFqNames(module: ModuleDescriptor): Set<FqName> {
 }
 
 fun ModuleDescriptor.getPackageFragments(): List<PackageFragmentDescriptor> =
-        getPackagesFqNames(this).flatMap {
-            getPackage(it).fragments.filter { it.module == this }
-        }
+    getPackagesFqNames(this).flatMap {
+        getPackage(it).fragments.filter { it.module == this }
+    }
 
 val ClassDescriptor.enumEntries: List<ClassDescriptor>
     get() {
         assert(this.kind == ClassKind.ENUM_CLASS)
         return this.unsubstitutedMemberScope.getContributedDescriptors()
-                .filterIsInstance<ClassDescriptor>()
-                .filter { it.kind == ClassKind.ENUM_ENTRY }
+            .filterIsInstance<ClassDescriptor>()
+            .filter { it.kind == ClassKind.ENUM_ENTRY }
     }
 
 internal val DeclarationDescriptor.isExpectMember: Boolean

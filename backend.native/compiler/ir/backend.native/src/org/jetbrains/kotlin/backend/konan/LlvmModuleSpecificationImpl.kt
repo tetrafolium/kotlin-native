@@ -14,18 +14,18 @@ import org.jetbrains.kotlin.library.KotlinLibrary
 
 // TODO: consider making two implementations: for producing cache and anything else.
 internal class LlvmModuleSpecificationImpl(
-        private val cachedLibraries: CachedLibraries,
-        private val producingCache: Boolean,
-        private val librariesToCache: Set<KotlinLibrary>
+    private val cachedLibraries: CachedLibraries,
+    private val producingCache: Boolean,
+    private val librariesToCache: Set<KotlinLibrary>
 ) : LlvmModuleSpecification {
     override val isFinal: Boolean
         get() = !producingCache
 
     override fun importsKotlinDeclarationsFromOtherObjectFiles(): Boolean =
-            cachedLibraries.hasStaticCaches // A bit conservative but still valid.
+        cachedLibraries.hasStaticCaches // A bit conservative but still valid.
 
     override fun importsKotlinDeclarationsFromOtherSharedLibraries(): Boolean =
-            cachedLibraries.hasDynamicCaches // A bit conservative but still valid.
+        cachedLibraries.hasDynamicCaches // A bit conservative but still valid.
 
     override fun containsLibrary(library: KotlinLibrary): Boolean = if (producingCache) {
         library in librariesToCache
@@ -34,11 +34,11 @@ internal class LlvmModuleSpecificationImpl(
     }
 
     override fun containsModule(module: IrModuleFragment): Boolean =
-            containsModule(module.descriptor)
+        containsModule(module.descriptor)
 
     override fun containsModule(module: ModuleDescriptor): Boolean =
-            module.konanLibrary.let { it == null || containsLibrary(it) }
+        module.konanLibrary.let { it == null || containsLibrary(it) }
 
     override fun containsDeclaration(declaration: IrDeclaration): Boolean =
-            declaration.module.konanLibrary.let { it == null || containsLibrary(it) }
+        declaration.module.konanLibrary.let { it == null || containsLibrary(it) }
 }

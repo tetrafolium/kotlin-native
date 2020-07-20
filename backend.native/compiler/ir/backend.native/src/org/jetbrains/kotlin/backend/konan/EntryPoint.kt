@@ -28,24 +28,25 @@ internal fun makeEntryPoint(context: Context): IrFunction {
     val entryPointDescriptor = WrappedSimpleFunctionDescriptor()
     val actualMain = context.ir.symbols.entryPoint!!.owner
     val entryPoint = IrFunctionImpl(
-            actualMain.startOffset,
-            actualMain.startOffset,
-            IrDeclarationOrigin.DEFINED,
-            IrSimpleFunctionSymbolImpl(entryPointDescriptor),
-            Name.identifier("Konan_start"),
-            Visibilities.PRIVATE,
-            Modality.FINAL,
-            context.irBuiltIns.intType,
-            isInline = false,
-            isExternal = false,
-            isTailrec = false,
-            isSuspend = false,
-            isExpect = false,
-            isFakeOverride = false,
-            isOperator = false
+        actualMain.startOffset,
+        actualMain.startOffset,
+        IrDeclarationOrigin.DEFINED,
+        IrSimpleFunctionSymbolImpl(entryPointDescriptor),
+        Name.identifier("Konan_start"),
+        Visibilities.PRIVATE,
+        Modality.FINAL,
+        context.irBuiltIns.intType,
+        isInline = false,
+        isExternal = false,
+        isTailrec = false,
+        isSuspend = false,
+        isExpect = false,
+        isFakeOverride = false,
+        isOperator = false
     ).also { function ->
-        function.valueParameters = listOf(WrappedValueParameterDescriptor().let {
-            IrValueParameterImpl(
+        function.valueParameters = listOf(
+            WrappedValueParameterDescriptor().let {
+                IrValueParameterImpl(
                     actualMain.startOffset, actualMain.startOffset,
                     IrDeclarationOrigin.DEFINED,
                     IrValueParameterSymbolImpl(it),
@@ -55,23 +56,26 @@ internal fun makeEntryPoint(context: Context): IrFunction {
                     isCrossinline = false,
                     type = context.irBuiltIns.arrayClass.typeWith(context.irBuiltIns.stringType),
                     isNoinline = false
-            ).apply {
-                it.bind(this)
-                parent = function
+                ).apply {
+                    it.bind(this)
+                    parent = function
+                }
             }
-        })
+        )
     }
     entryPointDescriptor.bind(entryPoint)
-    entryPoint.annotations += buildSimpleAnnotation(context.irBuiltIns,
-            actualMain.startOffset, actualMain.startOffset,
-            context.ir.symbols.exportForCppRuntime.owner, "Konan_start")
+    entryPoint.annotations += buildSimpleAnnotation(
+        context.irBuiltIns,
+        actualMain.startOffset, actualMain.startOffset,
+        context.ir.symbols.exportForCppRuntime.owner, "Konan_start"
+    )
 
     val builder = context.createIrBuilder(entryPoint.symbol)
     entryPoint.body = builder.irBlockBody(entryPoint) {
         +IrTryImpl(
-                startOffset = actualMain.startOffset,
-                endOffset   = actualMain.startOffset,
-                type        = context.irBuiltIns.nothingType
+            startOffset = actualMain.startOffset,
+            endOffset = actualMain.startOffset,
+            type = context.irBuiltIns.nothingType
         ).apply {
             tryResult = irBlock {
                 +irCall(actualMain).apply {

@@ -25,11 +25,11 @@ import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.name.Name
 
 internal fun KonanSymbols.getTypeConversion(actualType: IrType, expectedType: IrType): IrSimpleFunctionSymbol? =
-        getTypeConversionImpl(actualType.getInlinedClassNative(), expectedType.getInlinedClassNative())
+    getTypeConversionImpl(actualType.getInlinedClassNative(), expectedType.getInlinedClassNative())
 
 private fun KonanSymbols.getTypeConversionImpl(
-        actualInlinedClass: IrClass?,
-        expectedInlinedClass: IrClass?
+    actualInlinedClass: IrClass?,
+    expectedInlinedClass: IrClass?
 ): IrSimpleFunctionSymbol? {
     if (actualInlinedClass == expectedInlinedClass) return null
 
@@ -61,23 +61,24 @@ internal val Context.getBoxFunction: (IrClass) -> IrSimpleFunction by Context.la
 
     val descriptor = WrappedSimpleFunctionDescriptor()
     IrFunctionImpl(
-            startOffset, endOffset,
-            DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
-            IrSimpleFunctionSymbolImpl(descriptor),
-            Name.special("<${inlinedClass.name}-box>"),
-            Visibilities.PUBLIC,
-            Modality.FINAL,
-            returnType,
-            isInline = false,
-            isExternal = false,
-            isTailrec = false,
-            isSuspend = false,
-            isExpect = false,
-            isFakeOverride = false,
-            isOperator = false
+        startOffset, endOffset,
+        DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
+        IrSimpleFunctionSymbolImpl(descriptor),
+        Name.special("<${inlinedClass.name}-box>"),
+        Visibilities.PUBLIC,
+        Modality.FINAL,
+        returnType,
+        isInline = false,
+        isExternal = false,
+        isTailrec = false,
+        isSuspend = false,
+        isExpect = false,
+        isFakeOverride = false,
+        isOperator = false
     ).also { function ->
-        function.valueParameters = listOf(WrappedValueParameterDescriptor().let {
-            IrValueParameterImpl(
+        function.valueParameters = listOf(
+            WrappedValueParameterDescriptor().let {
+                IrValueParameterImpl(
                     startOffset, endOffset,
                     IrDeclarationOrigin.DEFINED,
                     IrValueParameterSymbolImpl(it),
@@ -87,11 +88,12 @@ internal val Context.getBoxFunction: (IrClass) -> IrSimpleFunction by Context.la
                     isCrossinline = false,
                     type = parameterType,
                     isNoinline = false
-            ).apply {
-                it.bind(this)
-                parent = function
+                ).apply {
+                    it.bind(this)
+                    parent = function
+                }
             }
-        })
+        )
         descriptor.bind(function)
         function.parent = inlinedClass.getContainingFile()!!
     }
@@ -115,23 +117,24 @@ internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.
 
     val descriptor = WrappedSimpleFunctionDescriptor()
     IrFunctionImpl(
-            startOffset, endOffset,
-            DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
-            IrSimpleFunctionSymbolImpl(descriptor),
-            Name.special("<${inlinedClass.name}-unbox>"),
-            Visibilities.PUBLIC,
-            Modality.FINAL,
-            returnType,
-            isInline = false,
-            isExternal = false,
-            isTailrec = false,
-            isSuspend = false,
-            isExpect = false,
-            isFakeOverride = false,
-            isOperator = false
+        startOffset, endOffset,
+        DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
+        IrSimpleFunctionSymbolImpl(descriptor),
+        Name.special("<${inlinedClass.name}-unbox>"),
+        Visibilities.PUBLIC,
+        Modality.FINAL,
+        returnType,
+        isInline = false,
+        isExternal = false,
+        isTailrec = false,
+        isSuspend = false,
+        isExpect = false,
+        isFakeOverride = false,
+        isOperator = false
     ).also { function ->
-        function.valueParameters = listOf(WrappedValueParameterDescriptor().let {
-            IrValueParameterImpl(
+        function.valueParameters = listOf(
+            WrappedValueParameterDescriptor().let {
+                IrValueParameterImpl(
                     startOffset, endOffset,
                     IrDeclarationOrigin.DEFINED,
                     IrValueParameterSymbolImpl(it),
@@ -141,11 +144,12 @@ internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.
                     isCrossinline = false,
                     type = parameterType,
                     isNoinline = false
-            ).apply {
-                it.bind(this)
-                parent = function
+                ).apply {
+                    it.bind(this)
+                    parent = function
+                }
             }
-        })
+        )
         descriptor.bind(function)
         function.parent = inlinedClass.getContainingFile()!!
     }
@@ -169,8 +173,13 @@ internal fun initializeCachedBoxes(context: Context) {
 /**
  * Adds global that refers to the cache.
  */
-private fun initCache(cache: BoxCache, context: Context, cacheName: String,
-                      rangeStartName: String, rangeEndName: String) {
+private fun initCache(
+    cache: BoxCache,
+    context: Context,
+    cacheName: String,
+    rangeStartName: String,
+    rangeEndName: String
+) {
 
     val kotlinType = context.irBuiltIns.getKotlinClass(cache)
     val staticData = context.llvm.staticData
@@ -180,16 +189,16 @@ private fun initCache(cache: BoxCache, context: Context, cacheName: String,
     // Constancy of these globals allows LLVM's constant propagation and DCE
     // to remove fast path of boxing function in case of empty range.
     staticData.placeGlobal(rangeStartName, createConstant(llvmType, start), true)
-            .setConstant(true)
+        .setConstant(true)
     staticData.placeGlobal(rangeEndName, createConstant(llvmType, end), true)
-            .setConstant(true)
+        .setConstant(true)
     val values = (start..end).map { staticData.createInitializer(kotlinType, createConstant(llvmType, it)) }
     val llvmBoxType = structType(context.llvm.runtime.objHeaderType, llvmType)
     staticData.placeGlobalConstArray(cacheName, llvmBoxType, values, true).llvm
 }
 
 private fun createConstant(llvmType: LLVMTypeRef, value: Int): ConstValue =
-        constValue(LLVMConstInt(llvmType, value.toLong(), 1)!!)
+    constValue(LLVMConstInt(llvmType, value.toLong(), 1)!!)
 
 // When start is greater than end then `inRange` check is always false
 // and can be eliminated by LLVM.
@@ -206,8 +215,8 @@ private val BoxCache.defaultRange get() = when (this) {
 }
 
 private fun KonanTarget.getBoxCacheRange(cache: BoxCache): Pair<Int, Int> = when (this) {
-    is KonanTarget.ZEPHYR   -> emptyRange
-    else                    -> cache.defaultRange
+    is KonanTarget.ZEPHYR -> emptyRange
+    else -> cache.defaultRange
 }
 
 internal fun IrBuiltIns.getKotlinClass(cache: BoxCache): IrClass = when (cache) {

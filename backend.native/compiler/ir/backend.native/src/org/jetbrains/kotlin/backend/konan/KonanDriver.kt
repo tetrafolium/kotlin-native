@@ -31,4 +31,3 @@ fun runTopLevelPhases(konanConfig: KonanConfig, environment: KotlinCoreEnvironme
         context.disposeLlvm()
     }
 }
-

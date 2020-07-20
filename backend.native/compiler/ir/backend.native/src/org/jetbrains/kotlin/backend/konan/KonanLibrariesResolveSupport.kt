@@ -22,18 +22,18 @@ import org.jetbrains.kotlin.util.Logger
 import kotlin.system.exitProcess
 
 class KonanLibrariesResolveSupport(
-        configuration: CompilerConfiguration,
-        target: KonanTarget,
-        distribution: Distribution
+    configuration: CompilerConfiguration,
+    target: KonanTarget,
+    distribution: Distribution
 ) {
     private val includedLibraryFiles =
-            configuration.getList(KonanConfigKeys.INCLUDED_LIBRARIES).map { File(it) }
+        configuration.getList(KonanConfigKeys.INCLUDED_LIBRARIES).map { File(it) }
 
     private val librariesToCacheFiles =
-            configuration.getList(KonanConfigKeys.LIBRARIES_TO_CACHE).map { File(it) } +
-                    configuration.get(KonanConfigKeys.LIBRARY_TO_ADD_TO_CACHE).let {
-                        if (it.isNullOrEmpty()) emptyList() else listOf(File(it))
-                    }
+        configuration.getList(KonanConfigKeys.LIBRARIES_TO_CACHE).map { File(it) } +
+            configuration.get(KonanConfigKeys.LIBRARY_TO_ADD_TO_CACHE).let {
+                if (it.isNullOrEmpty()) emptyList() else listOf(File(it))
+            }
 
     private val libraryNames = configuration.getList(KonanConfigKeys.LIBRARY_FILES)
 
@@ -41,28 +41,28 @@ class KonanLibrariesResolveSupport(
 
     private val repositories = configuration.getList(KonanConfigKeys.REPOSITORIES)
     private val resolverLogger =
-            object : Logger {
-                private val collector = configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY)
-                override fun warning(message: String)= collector.report(CompilerMessageSeverity.STRONG_WARNING, message)
-                override fun error(message: String) = collector.report(CompilerMessageSeverity.ERROR, message)
-                override fun log(message: String) = collector.report(CompilerMessageSeverity.LOGGING, message)
-                override fun fatal(message: String): Nothing {
-                    collector.report(CompilerMessageSeverity.ERROR, message)
-                    (collector as? GroupingMessageCollector)?.flush()
-                    exitProcess(1)
-                }
+        object : Logger {
+            private val collector = configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY)
+            override fun warning(message: String) = collector.report(CompilerMessageSeverity.STRONG_WARNING, message)
+            override fun error(message: String) = collector.report(CompilerMessageSeverity.ERROR, message)
+            override fun log(message: String) = collector.report(CompilerMessageSeverity.LOGGING, message)
+            override fun fatal(message: String): Nothing {
+                collector.report(CompilerMessageSeverity.ERROR, message)
+                (collector as? GroupingMessageCollector)?.flush()
+                exitProcess(1)
             }
+        }
 
     private val compatibleCompilerVersions: List<CompilerVersion> =
-            configuration.getList(KonanConfigKeys.COMPATIBLE_COMPILER_VERSIONS).map { it.parseCompilerVersion() }
+        configuration.getList(KonanConfigKeys.COMPATIBLE_COMPILER_VERSIONS).map { it.parseCompilerVersion() }
 
     private val resolver = defaultResolver(
-            repositories,
-            libraryNames.filter { it.contains(File.separator) },
-            target,
-            distribution,
-            compatibleCompilerVersions,
-            resolverLogger
+        repositories,
+        libraryNames.filter { it.contains(File.separator) },
+        target,
+        distribution,
+        compatibleCompilerVersions,
+        resolverLogger
     ).libraryResolver()
 
     // We pass included libraries by absolute paths to avoid repository-based resolution for them.
@@ -72,19 +72,19 @@ class KonanLibrariesResolveSupport(
     internal val resolvedLibraries = run {
         val additionalLibraryFiles = includedLibraryFiles + librariesToCacheFiles
         resolver.resolveWithDependencies(
-                unresolvedLibraries + additionalLibraryFiles.map { UnresolvedLibrary(it.absolutePath, null) },
-                noStdLib = configuration.getBoolean(KonanConfigKeys.NOSTDLIB),
-                noDefaultLibs = configuration.getBoolean(KonanConfigKeys.NODEFAULTLIBS),
-                noEndorsedLibs = configuration.getBoolean(KonanConfigKeys.NOENDORSEDLIBS)
+            unresolvedLibraries + additionalLibraryFiles.map { UnresolvedLibrary(it.absolutePath, null) },
+            noStdLib = configuration.getBoolean(KonanConfigKeys.NOSTDLIB),
+            noDefaultLibs = configuration.getBoolean(KonanConfigKeys.NODEFAULTLIBS),
+            noEndorsedLibs = configuration.getBoolean(KonanConfigKeys.NOENDORSEDLIBS)
         )
     }
 
     internal val exportedLibraries =
-            getExportedLibraries(configuration, resolvedLibraries, resolver.searchPathResolver, report = true)
+        getExportedLibraries(configuration, resolvedLibraries, resolver.searchPathResolver, report = true)
 
     internal val coveredLibraries =
-            getCoveredLibraries(configuration, resolvedLibraries, resolver.searchPathResolver)
+        getCoveredLibraries(configuration, resolvedLibraries, resolver.searchPathResolver)
 
     internal val includedLibraries =
-            getIncludedLibraries(includedLibraryFiles, configuration, resolvedLibraries)
+        getIncludedLibraries(includedLibraryFiles, configuration, resolvedLibraries)
 }

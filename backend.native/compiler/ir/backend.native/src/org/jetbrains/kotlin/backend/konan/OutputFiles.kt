@@ -4,15 +4,14 @@
  */
 package org.jetbrains.kotlin.backend.konan
 
-import org.jetbrains.kotlin.util.prefixBaseNameIfNot
-import org.jetbrains.kotlin.util.removeSuffixIfPresent
-import org.jetbrains.kotlin.util.suffixIfNot
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.util.visibleName
+import org.jetbrains.kotlin.util.prefixBaseNameIfNot
+import org.jetbrains.kotlin.util.removeSuffixIfPresent
+import org.jetbrains.kotlin.util.suffixIfNot
 import kotlin.random.Random
-
 
 /**
  * Creates and stores terminal compiler outputs.
@@ -28,45 +27,45 @@ class OutputFiles(outputPath: String?, target: KonanTarget, val produce: Compile
      * Header file for dynamic library.
      */
     val cAdapterHeader by lazy { File("${outputName}_api.h") }
-    val cAdapterDef    by lazy { File("${outputName}.def") }
+    val cAdapterDef by lazy { File("$outputName.def") }
 
     /**
      * Main compiler's output file.
      */
     val mainFile =
-            if (produce.isCache)
-                outputName
-            else
-                outputName.fullOutputName()
+        if (produce.isCache)
+            outputName
+        else
+            outputName.fullOutputName()
 
     val tempCacheDirectory =
-            if (produce.isCache)
-                File(outputName + Random.nextLong().toString())
-            else null
+        if (produce.isCache)
+            File(outputName + Random.nextLong().toString())
+        else null
 
     val nativeBinaryFile =
-            if (produce.isCache)
-                tempCacheDirectory!!.child(File(outputName.fullOutputName()).absoluteFile.name).absolutePath
-            else mainFile
+        if (produce.isCache)
+            tempCacheDirectory!!.child(File(outputName.fullOutputName()).absoluteFile.name).absolutePath
+        else mainFile
 
     val symbolicInfoFile = "$nativeBinaryFile.dSYM"
 
     val bitcodeDependenciesFile =
-            if (produce.isCache)
-                tempCacheDirectory!!.child(CachedLibraries.BITCODE_DEPENDENCIES_FILE_NAME).absolutePath
-            else null
+        if (produce.isCache)
+            tempCacheDirectory!!.child(CachedLibraries.BITCODE_DEPENDENCIES_FILE_NAME).absolutePath
+        else null
 
     private fun String.fullOutputName() = prefixBaseNameIfNeeded(prefix).suffixIfNeeded(suffix)
 
     private fun String.prefixBaseNameIfNeeded(prefix: String) =
-            if (produce.isCache)
-                prefixBaseNameAlways(prefix)
-            else prefixBaseNameIfNot(prefix)
+        if (produce.isCache)
+            prefixBaseNameAlways(prefix)
+        else prefixBaseNameIfNot(prefix)
 
     private fun String.suffixIfNeeded(prefix: String) =
-            if (produce.isCache)
-                suffixAlways(prefix)
-            else suffixIfNot(prefix)
+        if (produce.isCache)
+            suffixAlways(prefix)
+        else suffixIfNot(prefix)
 
     private fun String.prefixBaseNameAlways(prefix: String): String {
         val file = File(this).absoluteFile

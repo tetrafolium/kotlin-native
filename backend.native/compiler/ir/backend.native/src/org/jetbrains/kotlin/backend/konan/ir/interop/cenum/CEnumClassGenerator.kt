@@ -28,22 +28,22 @@ import org.jetbrains.kotlin.resolve.constants.ConstantValue
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 
 private fun extractConstantValue(descriptor: DeclarationDescriptor, type: String): ConstantValue<*>? =
-        descriptor.annotations
-                .findAnnotation(cEnumEntryValueAnnotationName.child(Name.identifier(type)))
-                ?.allValueArguments
-                ?.getValue(Name.identifier("value"))
+    descriptor.annotations
+        .findAnnotation(cEnumEntryValueAnnotationName.child(Name.identifier(type)))
+        ?.allValueArguments
+        ?.getValue(Name.identifier("value"))
 
 private val cEnumEntryValueAnnotationName = FqName("kotlinx.cinterop.internal.ConstantValue")
 
 private val cEnumEntryValueTypes = setOf(
-        "Byte", "Short", "Int", "Long",
-        "UByte", "UShort", "UInt", "ULong"
+    "Byte", "Short", "Int", "Long",
+    "UByte", "UShort", "UInt", "ULong"
 )
 
 internal class CEnumClassGenerator(
-        val context: GeneratorContext,
-        private val cEnumCompanionGenerator: CEnumCompanionGenerator,
-        private val cEnumVarClassGenerator: CEnumVarClassGenerator
+    val context: GeneratorContext,
+    private val cEnumCompanionGenerator: CEnumCompanionGenerator,
+    private val cEnumVarClassGenerator: CEnumVarClassGenerator
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -73,29 +73,29 @@ internal class CEnumClassGenerator(
      * IR tree including entries, CEnumVar class, and companion objects.
      */
     private fun provideIrClassForCEnum(descriptor: ClassDescriptor): IrClass =
-            createClass(descriptor) { enumIrClass ->
-                enumIrClass.addMember(createEnumPrimaryConstructor(descriptor))
-                enumIrClass.addMember(createValueProperty(enumIrClass))
-                descriptor.enumEntries.mapTo(enumIrClass.declarations) { entryDescriptor ->
-                    createEnumEntry(descriptor, entryDescriptor)
-                }
-                enumClassMembersGenerator.generateSpecialMembers(enumIrClass)
-                enumIrClass.addChild(cEnumCompanionGenerator.generate(enumIrClass))
-                enumIrClass.addChild(cEnumVarClassGenerator.generate(enumIrClass))
+        createClass(descriptor) { enumIrClass ->
+            enumIrClass.addMember(createEnumPrimaryConstructor(descriptor))
+            enumIrClass.addMember(createValueProperty(enumIrClass))
+            descriptor.enumEntries.mapTo(enumIrClass.declarations) { entryDescriptor ->
+                createEnumEntry(descriptor, entryDescriptor)
             }
+            enumClassMembersGenerator.generateSpecialMembers(enumIrClass)
+            enumIrClass.addChild(cEnumCompanionGenerator.generate(enumIrClass))
+            enumIrClass.addChild(cEnumVarClassGenerator.generate(enumIrClass))
+        }
 
     /**
      * Creates `value` property that stores integral value of the enum.
      */
     private fun createValueProperty(irClass: IrClass): IrProperty {
         val propertyDescriptor = irClass.descriptor
-                .findDeclarationByName<PropertyDescriptor>("value")
-                ?: error("No `value` property in ${irClass.name}")
+            .findDeclarationByName<PropertyDescriptor>("value")
+            ?: error("No `value` property in ${irClass.name}")
         val irProperty = createProperty(propertyDescriptor)
         symbolTable.withScope(propertyDescriptor) {
             irProperty.backingField = symbolTable.declareField(
-                    SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, IrDeclarationOrigin.PROPERTY_BACKING_FIELD,
-                    propertyDescriptor, propertyDescriptor.type.toIrType(), Visibilities.PRIVATE
+                SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, IrDeclarationOrigin.PROPERTY_BACKING_FIELD,
+                propertyDescriptor, propertyDescriptor.type.toIrType(), Visibilities.PRIVATE
             ).also {
                 it.initializer = irBuilder(irBuiltIns, it.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).run {
                     irExprBody(irGet(irClass.primaryConstructor!!.valueParameters[0]))
@@ -106,10 +106,10 @@ internal class CEnumClassGenerator(
         getter.correspondingPropertySymbol = irProperty.symbol
         getter.body = irBuilder(irBuiltIns, getter.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
             +irReturn(
-                    irGetField(
-                            irGet(getter.dispatchReceiverParameter!!),
-                            irProperty.backingField!!
-                    )
+                irGetField(
+                    irGet(getter.dispatchReceiverParameter!!),
+                    irProperty.backingField!!
+                )
             )
         }
         return irProperty
@@ -117,17 +117,19 @@ internal class CEnumClassGenerator(
 
     private fun createEnumEntry(enumDescriptor: ClassDescriptor, entryDescriptor: ClassDescriptor): IrEnumEntry {
         return symbolTable.declareEnumEntry(
-                SYNTHETIC_OFFSET, SYNTHETIC_OFFSET,
-                IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, entryDescriptor
+            SYNTHETIC_OFFSET, SYNTHETIC_OFFSET,
+            IrDeclarationOrigin.IR_EXTERNAL_DECLARATION_STUB, entryDescriptor
         ).also { enumEntry ->
-            enumEntry.initializerExpression = IrExpressionBodyImpl(IrEnumConstructorCallImpl(
+            enumEntry.initializerExpression = IrExpressionBodyImpl(
+                IrEnumConstructorCallImpl(
                     SYNTHETIC_OFFSET, SYNTHETIC_OFFSET,
                     type = irBuiltIns.unitType,
                     symbol = symbolTable.referenceConstructor(enumDescriptor.unsubstitutedPrimaryConstructor!!),
                     typeArgumentsCount = 0 // enums can't be generic
-            ).also {
-                it.putValueArgument(0, extractEnumEntryValue(entryDescriptor))
-            })
+                ).also {
+                    it.putValueArgument(0, extractEnumEntryValue(entryDescriptor))
+                }
+            )
         }
     }
 
@@ -139,19 +141,19 @@ internal class CEnumClassGenerator(
      * This function extracts value from the annotation.
      */
     private fun extractEnumEntryValue(entryDescriptor: ClassDescriptor): IrExpression =
-            cEnumEntryValueTypes.firstNotNullResult { extractConstantValue(entryDescriptor, it) } ?.let {
-                context.constantValueGenerator.generateConstantValueAsExpression(SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, it)
-            } ?: error("Enum entry $entryDescriptor has no appropriate @$cEnumEntryValueAnnotationName annotation!")
+        cEnumEntryValueTypes.firstNotNullResult { extractConstantValue(entryDescriptor, it) }?.let {
+            context.constantValueGenerator.generateConstantValueAsExpression(SYNTHETIC_OFFSET, SYNTHETIC_OFFSET, it)
+        } ?: error("Enum entry $entryDescriptor has no appropriate @$cEnumEntryValueAnnotationName annotation!")
 
     private fun createEnumPrimaryConstructor(descriptor: ClassDescriptor): IrConstructor {
         val irConstructor = createConstructor(descriptor.unsubstitutedPrimaryConstructor!!)
         val enumConstructor = context.builtIns.enum.constructors.single()
         irConstructor.body = irBuilder(irBuiltIns, irConstructor.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
             +IrEnumConstructorCallImpl(
-                    startOffset, endOffset,
-                    context.irBuiltIns.unitType,
-                    symbolTable.referenceConstructor(enumConstructor),
-                    typeArgumentsCount = 1 // kotlin.Enum<T> has a single type parameter.
+                startOffset, endOffset,
+                context.irBuiltIns.unitType,
+                symbolTable.referenceConstructor(enumConstructor),
+                typeArgumentsCount = 1 // kotlin.Enum<T> has a single type parameter.
             ).apply {
                 putTypeArgument(0, descriptor.defaultType.toIrType())
             }

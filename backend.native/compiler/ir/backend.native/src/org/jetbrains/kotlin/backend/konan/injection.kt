@@ -18,14 +18,13 @@ import org.jetbrains.kotlin.resolve.lazy.KotlinCodeAnalyzer
 import org.jetbrains.kotlin.resolve.lazy.ResolveSession
 import org.jetbrains.kotlin.resolve.lazy.declarations.DeclarationProviderFactory
 
-
 fun createTopDownAnalyzerProviderForKonan(
-        moduleContext: ModuleContext,
-        bindingTrace: BindingTrace,
-        declarationProviderFactory: DeclarationProviderFactory,
-        languageVersionSettings: LanguageVersionSettings,
-        additionalPackages: List<PackageFragmentProvider>,
-        initContainer: StorageComponentContainer.() -> Unit
+    moduleContext: ModuleContext,
+    bindingTrace: BindingTrace,
+    declarationProviderFactory: DeclarationProviderFactory,
+    languageVersionSettings: LanguageVersionSettings,
+    additionalPackages: List<PackageFragmentProvider>,
+    initContainer: StorageComponentContainer.() -> Unit
 ): ComponentProvider {
     return createContainer("TopDownAnalyzerForKonan", NativePlatformAnalyzerServices) {
         configureModule(moduleContext, NativePlatforms.unspecifiedNativePlatform, NativePlatformAnalyzerServices, bindingTrace, languageVersionSettings)

@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.backend.konan
 
-import org.jetbrains.kotlin.library.resolver.KotlinLibraryResolveResult
 import org.jetbrains.kotlin.analyzer.AnalysisResult
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.builtins.functions.functionInterfacePackageFragmentProvider
@@ -25,6 +24,7 @@ import org.jetbrains.kotlin.konan.util.KlibMetadataFactories
 import org.jetbrains.kotlin.library.KotlinLibrary
 import org.jetbrains.kotlin.library.metadata.NativeTypeTransformer
 import org.jetbrains.kotlin.library.metadata.NullFlexibleTypeDeserializer
+import org.jetbrains.kotlin.library.resolver.KotlinLibraryResolveResult
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.*
@@ -36,21 +36,22 @@ internal object TopDownAnalyzerFacadeForKonan {
 
     fun analyzeFiles(files: Collection<KtFile>, context: Context): AnalysisResult {
         val config = context.config
-        val moduleName = Name.special("<${config.moduleId}>") 
+        val moduleName = Name.special("<${config.moduleId}>")
 
         val projectContext = ProjectContext(config.project, "TopDownAnalyzer for Konan")
 
         val module = NativeFactories.DefaultDescriptorFactory.createDescriptorAndNewBuiltIns(
-                moduleName, projectContext.storageManager, origin = CurrentKlibModuleOrigin)
+            moduleName, projectContext.storageManager, origin = CurrentKlibModuleOrigin
+        )
         val moduleContext = MutableModuleContextImpl(module, projectContext)
 
         val resolvedDependencies = ResolvedDependencies(
-                config.resolvedLibraries,
-                projectContext.storageManager,
-                module.builtIns,
-                config.languageVersionSettings,
-                config.friendModuleFiles,
-                module
+            config.resolvedLibraries,
+            projectContext.storageManager,
+            module.builtIns,
+            config.languageVersionSettings,
+            config.friendModuleFiles,
+            module
         )
 
         val additionalPackages = mutableListOf<PackageFragmentProvider>()
@@ -58,7 +59,7 @@ internal object TopDownAnalyzerFacadeForKonan {
             val dependencies = listOf(module) + resolvedDependencies.moduleDescriptors.resolvedDescriptors + resolvedDependencies.moduleDescriptors.forwardDeclarationsModule
             module.setDependencies(dependencies, resolvedDependencies.friends)
         } else {
-            assert (resolvedDependencies.moduleDescriptors.resolvedDescriptors.isEmpty())
+            assert(resolvedDependencies.moduleDescriptors.resolvedDescriptors.isEmpty())
             moduleContext.setDependencies(module)
             // [K][Suspend]FunctionN belong to stdlib.
             additionalPackages += functionInterfacePackageFragmentProvider(projectContext.storageManager, module)
@@ -68,23 +69,23 @@ internal object TopDownAnalyzerFacadeForKonan {
     }
 
     fun analyzeFilesWithGivenTrace(
-            files: Collection<KtFile>,
-            trace: BindingTrace,
-            moduleContext: ModuleContext,
-            context: Context,
-            additionalPackages: List<PackageFragmentProvider> = emptyList()
+        files: Collection<KtFile>,
+        trace: BindingTrace,
+        moduleContext: ModuleContext,
+        context: Context,
+        additionalPackages: List<PackageFragmentProvider> = emptyList()
     ): AnalysisResult {
 
         // we print out each file we compile if frontend phase is verbose
         files.takeIf {
             frontendPhase in context.phaseConfig.verbose
-        } ?.forEach(::println)
+        }?.forEach(::println)
 
         val analyzerForKonan = createTopDownAnalyzerProviderForKonan(
-                moduleContext, trace,
-                FileBasedDeclarationProviderFactory(moduleContext.storageManager, files),
-                context.config.configuration.get(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS)!!,
-                additionalPackages
+            moduleContext, trace,
+            FileBasedDeclarationProviderFactory(moduleContext.storageManager, files),
+            context.config.configuration.get(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS)!!,
+            additionalPackages
         ) {
             initContainer(context.config)
         }.apply {
@@ -126,7 +127,8 @@ private class ResolvedDependencies(
         }
 
         this.moduleDescriptors = NativeFactories.DefaultResolvedDescriptorsFactory.createResolved(
-                resolvedLibraries, storageManager, builtIns, specifics, customAction, listOf(currentModuleDescriptor))
+            resolvedLibraries, storageManager, builtIns, specifics, customAction, listOf(currentModuleDescriptor)
+        )
 
         this.friends = collectedFriends.toSet()
     }

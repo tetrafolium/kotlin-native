@@ -37,9 +37,9 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val cValue = this.packageScope.getContributedClass("CValue")
     val cOpaque = this.packageScope.getContributedClass("COpaque")
     val cValueWrite = this.packageScope.getContributedFunctions("write")
-            .single { it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == cValue }
+        .single { it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == cValue }
     val cValueRead = this.packageScope.getContributedFunctions("readValue")
-            .single { it.valueParameters.size == 1 }
+        .single { it.valueParameters.size == 1 }
 
     val cEnum = this.packageScope.getContributedClass("CEnum")
     val cEnumVar = this.packageScope.getContributedClass("CEnumVar")
@@ -51,8 +51,10 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val nativeMemUtils = this.packageScope.getContributedClass("nativeMemUtils")
 
     val allocType = this.packageScope.getContributedFunctions("alloc")
-            .single { it.extensionReceiverParameter != null
-                    && it.valueParameters.singleOrNull()?.name?.toString() == "type" }
+        .single {
+            it.extensionReceiverParameter != null &&
+                it.valueParameters.singleOrNull()?.name?.toString() == "type"
+        }
 
     val cPointer = this.packageScope.getContributedClass(InteropFqNames.cPointerName)
 
@@ -61,7 +63,7 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val cPointerGetRawValue = packageScope.getContributedFunctions("getRawValue").single {
         val extensionReceiverParameter = it.extensionReceiverParameter
         extensionReceiverParameter != null &&
-                TypeUtils.getClassDescriptor(extensionReceiverParameter.type) == cPointer
+            TypeUtils.getClassDescriptor(extensionReceiverParameter.type) == cPointer
     }
 
     val cstr = packageScope.getContributedVariables("cstr").single()
@@ -69,18 +71,18 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val memScope = packageScope.getContributedClass("MemScope")
 
     val nativePointedRawPtrGetter =
-            nativePointed.unsubstitutedMemberScope.getContributedVariables("rawPtr").single().getter!!
+        nativePointed.unsubstitutedMemberScope.getContributedVariables("rawPtr").single().getter!!
 
     val nativePointedGetRawPointer = packageScope.getContributedFunctions("getRawPointer").single {
         val extensionReceiverParameter = it.extensionReceiverParameter
         extensionReceiverParameter != null &&
-                TypeUtils.getClassDescriptor(extensionReceiverParameter.type) == nativePointed
+            TypeUtils.getClassDescriptor(extensionReceiverParameter.type) == nativePointed
     }
 
     val typeOf = packageScope.getContributedFunctions("typeOf").single()
 
     private fun KonanBuiltIns.getUnsignedClass(unsignedType: UnsignedType): ClassDescriptor =
-            this.builtInsModule.findClassAcrossModuleDependencies(unsignedType.classId)!!
+        this.builtInsModule.findClassAcrossModuleDependencies(unsignedType.classId)!!
 
     val objCObject = packageScope.getContributedClass("ObjCObject")
 
@@ -111,14 +113,13 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val exportObjCClass = packageScope.getContributedClass("ExportObjCClass")
 
     val CreateNSStringFromKString = packageScope.getContributedFunctions("CreateNSStringFromKString").single()
-
 }
 
 private fun MemberScope.getContributedVariables(name: String) =
-        this.getContributedVariables(Name.identifier(name), NoLookupLocation.FROM_BUILTINS)
+    this.getContributedVariables(Name.identifier(name), NoLookupLocation.FROM_BUILTINS)
 
 private fun MemberScope.getContributedClass(name: String): ClassDescriptor =
-        this.getContributedClassifier(Name.identifier(name), NoLookupLocation.FROM_BUILTINS) as ClassDescriptor
+    this.getContributedClassifier(Name.identifier(name), NoLookupLocation.FROM_BUILTINS) as ClassDescriptor
 
 private fun MemberScope.getContributedFunctions(name: String) =
-        this.getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BUILTINS)
+    this.getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BUILTINS)

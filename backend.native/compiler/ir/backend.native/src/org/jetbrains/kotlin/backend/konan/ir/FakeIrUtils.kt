@@ -22,4 +22,3 @@ internal val IrDeclaration.llvmSymbolOrigin get() = when (this) {
 }
 
 internal fun IrType.isObjCObjectType() = this.toKotlinType().isObjCObjectType()
-

@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.psi2ir.generators.GeneratorContext
 private val varTypeAnnotationFqName = FqName("kotlinx.cinterop.internal.CStruct.VarType")
 
 internal class CStructVarCompanionGenerator(
-        context: GeneratorContext,
-        private val interopBuiltIns: InteropBuiltIns
+    context: GeneratorContext,
+    private val interopBuiltIns: InteropBuiltIns
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -34,21 +34,21 @@ internal class CStructVarCompanionGenerator(
     override val typeTranslator: TypeTranslator = context.typeTranslator
 
     fun generate(structDescriptor: ClassDescriptor): IrClass =
-            createClass(structDescriptor.companionObjectDescriptor!!) { companionIrClass ->
-                val annotation = companionIrClass.descriptor.annotations
-                        .findAnnotation(varTypeAnnotationFqName)!!
-                val size = annotation.getArgumentValueOrNull<Long>("size")!!
-                val align = annotation.getArgumentValueOrNull<Int>("align")!!
-                companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor, size, align))
-            }
+        createClass(structDescriptor.companionObjectDescriptor!!) { companionIrClass ->
+            val annotation = companionIrClass.descriptor.annotations
+                .findAnnotation(varTypeAnnotationFqName)!!
+            val size = annotation.getArgumentValueOrNull<Long>("size")!!
+            val align = annotation.getArgumentValueOrNull<Int>("align")!!
+            companionIrClass.addMember(createCompanionConstructor(companionIrClass.descriptor, size, align))
+        }
 
     private fun createCompanionConstructor(companionObjectDescriptor: ClassDescriptor, size: Long, align: Int): IrConstructor {
         val superConstructorSymbol = symbolTable.referenceConstructor(interopBuiltIns.cStructVarType.unsubstitutedPrimaryConstructor!!)
         return createConstructor(companionObjectDescriptor.unsubstitutedPrimaryConstructor!!).also { irConstructor ->
             irConstructor.body = irBuilder(irBuiltIns, irConstructor.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
                 +IrDelegatingConstructorCallImpl(
-                        startOffset, endOffset, context.irBuiltIns.unitType,
-                        superConstructorSymbol
+                    startOffset, endOffset, context.irBuiltIns.unitType,
+                    superConstructorSymbol
                 ).also {
                     it.putValueArgument(0, irLong(size))
                     it.putValueArgument(1, irInt(align))

@@ -22,28 +22,27 @@ internal val String.synthesizedName get() = Name.identifier(this.synthesizedStri
 
 internal val String.synthesizedString get() = "\$$this"
 
-
 internal val DeclarationDescriptor.propertyIfAccessor
     get() = if (this is PropertyAccessorDescriptor)
-                this.correspondingProperty
-                else this
+        this.correspondingProperty
+    else this
 
 internal val CallableMemberDescriptor.propertyIfAccessor
     get() = if (this is PropertyAccessorDescriptor)
-                this.correspondingProperty
-                else this
+        this.correspondingProperty
+    else this
 
 internal val FunctionDescriptor.deserializedPropertyIfAccessor: DeserializedCallableMemberDescriptor
     get() {
         val member = this.propertyIfAccessor
-        if (member is DeserializedCallableMemberDescriptor) 
+        if (member is DeserializedCallableMemberDescriptor)
             return member
-        else 
+        else
             error("Unexpected deserializable callable descriptor")
     }
 
 internal val CallableMemberDescriptor.isDeserializableCallable
-    get () = (this.propertyIfAccessor is DeserializedCallableMemberDescriptor)
+    get() = (this.propertyIfAccessor is DeserializedCallableMemberDescriptor)
 
 fun DeclarationDescriptor.findTopLevelDescriptor(): DeclarationDescriptor {
     return if (this.containingDeclaration is org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor) this.propertyIfAccessor
@@ -58,8 +57,8 @@ val ModuleDescriptor.isForwardDeclarationModule: Boolean
     }
 
 fun BaseKotlinLibrary.isInteropLibrary() =
-        manifestProperties["ir_provider"] == KLIB_INTEROP_IR_PROVIDER_IDENTIFIER
+    manifestProperties["ir_provider"] == KLIB_INTEROP_IR_PROVIDER_IDENTIFIER
 
 fun ModuleDescriptor.isFromInteropLibrary() =
-        if (klibModuleOrigin !is DeserializedKlibModuleOrigin) false
-        else kotlinLibrary.isInteropLibrary()
+    if (klibModuleOrigin !is DeserializedKlibModuleOrigin) false
+    else kotlinLibrary.isInteropLibrary()

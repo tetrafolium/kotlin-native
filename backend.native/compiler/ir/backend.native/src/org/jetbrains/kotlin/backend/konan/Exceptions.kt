@@ -12,12 +12,11 @@ import org.jetbrains.kotlin.utils.KotlinExceptionWithAttachments
  * Represents a compilation error caused by mistakes in an input file, e.g. undefined reference.
  */
 class KonanCompilationException(
-        message: String = "",
-        cause: Throwable? = null
+    message: String = "",
+    cause: Throwable? = null
 ) : KotlinExceptionWithAttachments(message, cause)
 
 /**
  * Internal compiler error: could not deserialize IR for inline function body.
  */
 class KonanIrDeserializationException(message: String = "", cause: Throwable? = null) : KonanException(message, cause)
-

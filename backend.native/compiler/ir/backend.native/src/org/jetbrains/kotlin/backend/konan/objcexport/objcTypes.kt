@@ -15,11 +15,11 @@ sealed class ObjCType {
     fun render() = render("")
 
     protected fun String.withAttrsAndName(attrsAndName: String) =
-            if (attrsAndName.isEmpty()) this else "$this ${attrsAndName.trimStart()}"
+        if (attrsAndName.isEmpty()) this else "$this ${attrsAndName.trimStart()}"
 }
 
 class ObjCRawType(
-        val rawText: String
+    val rawText: String
 ) : ObjCType() {
     override fun render(attrsAndName: String): String = rawText.withAttrsAndName(attrsAndName)
 }
@@ -29,14 +29,14 @@ sealed class ObjCReferenceType : ObjCType()
 sealed class ObjCNonNullReferenceType : ObjCReferenceType()
 
 data class ObjCNullableReferenceType(
-        val nonNullType: ObjCNonNullReferenceType
+    val nonNullType: ObjCNonNullReferenceType
 ) : ObjCReferenceType() {
     override fun render(attrsAndName: String) = nonNullType.render(" _Nullable".withAttrsAndName(attrsAndName))
 }
 
 class ObjCClassType(
-        val className: String,
-        val typeArguments: List<ObjCNonNullReferenceType> = emptyList()
+    val className: String,
+    val typeArguments: List<ObjCNonNullReferenceType> = emptyList()
 ) : ObjCNonNullReferenceType() {
 
     override fun render(attrsAndName: String) = buildString {
@@ -52,8 +52,8 @@ class ObjCClassType(
 }
 
 class ObjCGenericTypeDeclaration(
-        val typeParameterDescriptor: TypeParameterDescriptor,
-        val namer: ObjCExportNamer
+    val typeParameterDescriptor: TypeParameterDescriptor,
+    val namer: ObjCExportNamer
 ) : ObjCNonNullReferenceType() {
     override fun render(attrsAndName: String): String {
         return namer.getTypeParameterName(typeParameterDescriptor).withAttrsAndName(attrsAndName)
@@ -61,7 +61,7 @@ class ObjCGenericTypeDeclaration(
 }
 
 class ObjCProtocolType(
-        val protocolName: String
+    val protocolName: String
 ) : ObjCNonNullReferenceType() {
     override fun render(attrsAndName: String) = "id<$protocolName>".withAttrsAndName(attrsAndName)
 }
@@ -75,18 +75,20 @@ object ObjCInstanceType : ObjCNonNullReferenceType() {
 }
 
 class ObjCBlockPointerType(
-        val returnType: ObjCType,
-        val parameterTypes: List<ObjCReferenceType>
+    val returnType: ObjCType,
+    val parameterTypes: List<ObjCReferenceType>
 ) : ObjCNonNullReferenceType() {
 
-    override fun render(attrsAndName: String) = returnType.render(buildString {
-        append("(^")
-        append(attrsAndName)
-        append(")(")
-        if (parameterTypes.isEmpty()) append("void")
-        parameterTypes.joinTo(this) { it.render() }
-        append(')')
-    })
+    override fun render(attrsAndName: String) = returnType.render(
+        buildString {
+            append("(^")
+            append(attrsAndName)
+            append(")(")
+            if (parameterTypes.isEmpty()) append("void")
+            parameterTypes.joinTo(this) { it.render() }
+            append(')')
+        }
+    )
 }
 
 object ObjCMetaClassType : ObjCNonNullReferenceType() {
@@ -94,7 +96,7 @@ object ObjCMetaClassType : ObjCNonNullReferenceType() {
 }
 
 sealed class ObjCPrimitiveType(
-        val cName: String
+    val cName: String
 ) : ObjCType() {
     object NSUInteger : ObjCPrimitiveType("NSUInteger")
     object BOOL : ObjCPrimitiveType("BOOL")
@@ -111,29 +113,31 @@ sealed class ObjCPrimitiveType(
     object double : ObjCPrimitiveType("double")
     object NSInteger : ObjCPrimitiveType("NSInteger")
     object char : ObjCPrimitiveType("char")
-    object unsigned_char: ObjCPrimitiveType("unsigned char")
-    object unsigned_short: ObjCPrimitiveType("unsigned short")
-    object int: ObjCPrimitiveType("int")
-    object unsigned_int: ObjCPrimitiveType("unsigned int")
-    object long: ObjCPrimitiveType("long")
-    object unsigned_long: ObjCPrimitiveType("unsigned long")
-    object long_long: ObjCPrimitiveType("long long")
-    object unsigned_long_long: ObjCPrimitiveType("unsigned long long")
-    object short: ObjCPrimitiveType("short")
+    object unsigned_char : ObjCPrimitiveType("unsigned char")
+    object unsigned_short : ObjCPrimitiveType("unsigned short")
+    object int : ObjCPrimitiveType("int")
+    object unsigned_int : ObjCPrimitiveType("unsigned int")
+    object long : ObjCPrimitiveType("long")
+    object unsigned_long : ObjCPrimitiveType("unsigned long")
+    object long_long : ObjCPrimitiveType("long long")
+    object unsigned_long_long : ObjCPrimitiveType("unsigned long long")
+    object short : ObjCPrimitiveType("short")
 
     override fun render(attrsAndName: String) = cName.withAttrsAndName(attrsAndName)
 }
 
 class ObjCPointerType(
-        val pointee: ObjCType,
-        val nullable: Boolean = false
+    val pointee: ObjCType,
+    val nullable: Boolean = false
 ) : ObjCType() {
     override fun render(attrsAndName: String) =
-            pointee.render("*${if (nullable) {
+        pointee.render(
+            "*${if (nullable) {
                 " _Nullable".withAttrsAndName(attrsAndName)
             } else {
                 attrsAndName
-            }}")
+            }}"
+        )
 }
 
 object ObjCVoidType : ObjCType() {

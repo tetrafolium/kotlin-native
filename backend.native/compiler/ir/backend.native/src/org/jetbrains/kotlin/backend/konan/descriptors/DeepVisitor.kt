@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 
-
 open class DeepVisitor<D>(val worker: DeclarationDescriptorVisitor<Boolean, D>) : DeclarationDescriptorVisitor<Boolean, D> {
 
     open fun visitChildren(descriptors: Collection<DeclarationDescriptor>, data: D): Boolean {
@@ -30,10 +29,10 @@ open class DeepVisitor<D>(val worker: DeclarationDescriptorVisitor<Boolean, D>) 
     }
 
     fun processCallable(descriptor: CallableDescriptor, data: D): Boolean {
-        return applyWorker(descriptor, data)
-               && visitChildren(descriptor.getTypeParameters(), data)
-               && visitChildren(descriptor.getExtensionReceiverParameter(), data)
-               && visitChildren(descriptor.getValueParameters(), data)
+        return applyWorker(descriptor, data) &&
+            visitChildren(descriptor.getTypeParameters(), data) &&
+            visitChildren(descriptor.getExtensionReceiverParameter(), data) &&
+            visitChildren(descriptor.getValueParameters(), data)
     }
 
     override fun visitPackageFragmentDescriptor(descriptor: PackageFragmentDescriptor, data: D): Boolean? {
@@ -49,9 +48,9 @@ open class DeepVisitor<D>(val worker: DeclarationDescriptorVisitor<Boolean, D>) 
     }
 
     override fun visitPropertyDescriptor(descriptor: PropertyDescriptor, data: D): Boolean? {
-        return processCallable(descriptor, data)
-               && visitChildren(descriptor.getter, data)
-               && visitChildren(descriptor.setter, data)
+        return processCallable(descriptor, data) &&
+            visitChildren(descriptor.getter, data) &&
+            visitChildren(descriptor.setter, data)
     }
 
     override fun visitFunctionDescriptor(descriptor: FunctionDescriptor, data: D): Boolean? {
@@ -63,11 +62,11 @@ open class DeepVisitor<D>(val worker: DeclarationDescriptorVisitor<Boolean, D>) 
     }
 
     override fun visitClassDescriptor(descriptor: ClassDescriptor, data: D): Boolean? {
-        return applyWorker(descriptor, data)
-               && visitChildren(descriptor.getThisAsReceiverParameter(), data)
-               && visitChildren(descriptor.getConstructors(), data)
-               && visitChildren(descriptor.getTypeConstructor().getParameters(), data)
-               && visitChildren(DescriptorUtils.getAllDescriptors(descriptor.getDefaultType().memberScope), data)
+        return applyWorker(descriptor, data) &&
+            visitChildren(descriptor.getThisAsReceiverParameter(), data) &&
+            visitChildren(descriptor.getConstructors(), data) &&
+            visitChildren(descriptor.getTypeConstructor().getParameters(), data) &&
+            visitChildren(DescriptorUtils.getAllDescriptors(descriptor.getDefaultType().memberScope), data)
     }
 
     override fun visitTypeAliasDescriptor(descriptor: TypeAliasDescriptor, data: D): Boolean? {
@@ -103,7 +102,7 @@ open class DeepVisitor<D>(val worker: DeclarationDescriptorVisitor<Boolean, D>) 
     }
 }
 
-open public class EmptyDescriptorVisitorVoid: DeclarationDescriptorVisitor<Boolean, Unit> {
+public open class EmptyDescriptorVisitorVoid : DeclarationDescriptorVisitor<Boolean, Unit> {
     override fun visitPackageFragmentDescriptor(descriptor: PackageFragmentDescriptor, data: Unit) = true
     override fun visitPackageViewDescriptor(descriptor: PackageViewDescriptor, data: Unit) = true
     override fun visitVariableDescriptor(descriptor: VariableDescriptor, data: Unit) = true
@@ -120,4 +119,3 @@ open public class EmptyDescriptorVisitorVoid: DeclarationDescriptorVisitor<Boole
     override fun visitPropertySetterDescriptor(descriptor: PropertySetterDescriptor, data: Unit) = true
     override fun visitReceiverParameterDescriptor(descriptor: ReceiverParameterDescriptor, data: Unit) = true
 }
-

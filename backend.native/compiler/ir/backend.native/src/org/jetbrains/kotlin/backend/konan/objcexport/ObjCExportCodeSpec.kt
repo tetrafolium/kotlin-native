@@ -23,13 +23,15 @@ internal fun ObjCExportedInterface.createCodeSpec(symbolTable: SymbolTable): Obj
         ObjCMethodForKotlinMethod(symbolTable.referenceSimpleFunction(it))
     }
 
-    fun List<CallableMemberDescriptor>.toObjCMethods() = createObjCMethods(this.flatMap {
-        when (it) {
-            is PropertyDescriptor -> listOfNotNull(it.getter, it.setter)
-            is FunctionDescriptor -> listOf(it)
-            else -> error(it)
+    fun List<CallableMemberDescriptor>.toObjCMethods() = createObjCMethods(
+        this.flatMap {
+            when (it) {
+                is PropertyDescriptor -> listOfNotNull(it.getter, it.setter)
+                is FunctionDescriptor -> listOf(it)
+                else -> error(it)
+            }
         }
-    })
+    )
 
     val files = topLevel.map { (sourceFile, declarations) ->
         val binaryName = namer.getFileClassName(sourceFile).binaryName
@@ -43,7 +45,7 @@ internal fun ObjCExportedInterface.createCodeSpec(symbolTable: SymbolTable): Obj
 
         // Note: contributedMethods includes fake overrides too.
         val allBaseMethods = descriptor.contributedMethods.filter { mapper.shouldBeExposed(it) }
-                .flatMap { mapper.getBaseMethods(it) }.distinct()
+            .flatMap { mapper.getBaseMethods(it) }.distinct()
 
         methods += createObjCMethods(allBaseMethods)
 
@@ -72,7 +74,7 @@ internal fun ObjCExportedInterface.createCodeSpec(symbolTable: SymbolTable): Obj
             val categoryMethods = categoryMembers[descriptor].orEmpty().toObjCMethods()
 
             val superClassNotAny = descriptor.getSuperClassNotAny()
-                    ?.let { getType(it) as ObjCClassForKotlinClass }
+                ?.let { getType(it) as ObjCClassForKotlinClass }
 
             ObjCClassForKotlinClass(binaryName, irClassSymbol, methods, categoryMethods, superClassNotAny)
         }
@@ -84,8 +86,8 @@ internal fun ObjCExportedInterface.createCodeSpec(symbolTable: SymbolTable): Obj
 }
 
 internal class ObjCExportCodeSpec(
-        val files: List<ObjCClassForKotlinFile>,
-        val types: List<ObjCTypeForKotlinType>
+    val files: List<ObjCClassForKotlinFile>,
+    val types: List<ObjCTypeForKotlinType>
 )
 
 internal sealed class ObjCMethodSpec
@@ -95,7 +97,7 @@ internal class ObjCMethodForKotlinMethod(val baseMethod: IrSimpleFunctionSymbol)
 internal class ObjCInitMethodForKotlinConstructor(val irConstructorSymbol: IrConstructorSymbol) : ObjCMethodSpec()
 
 internal class ObjCFactoryMethodForKotlinArrayConstructor(
-        val irConstructorSymbol: IrConstructorSymbol
+    val irConstructorSymbol: IrConstructorSymbol
 ) : ObjCMethodSpec()
 
 internal class ObjCGetterForKotlinEnumEntry(val irEnumEntrySymbol: IrEnumEntrySymbol) : ObjCMethodSpec()
@@ -103,26 +105,26 @@ internal class ObjCGetterForKotlinEnumEntry(val irEnumEntrySymbol: IrEnumEntrySy
 internal sealed class ObjCTypeSpec(val binaryName: String)
 
 internal sealed class ObjCTypeForKotlinType(
-        binaryName: String,
-        val irClassSymbol: IrClassSymbol,
-        val methods: List<ObjCMethodSpec>
+    binaryName: String,
+    val irClassSymbol: IrClassSymbol,
+    val methods: List<ObjCMethodSpec>
 ) : ObjCTypeSpec(binaryName)
 
 internal class ObjCClassForKotlinClass(
-        binaryName: String,
-        irClassSymbol: IrClassSymbol,
-        methods: List<ObjCMethodSpec>,
-        val categoryMethods: List<ObjCMethodForKotlinMethod>,
-        val superClassNotAny: ObjCClassForKotlinClass?
+    binaryName: String,
+    irClassSymbol: IrClassSymbol,
+    methods: List<ObjCMethodSpec>,
+    val categoryMethods: List<ObjCMethodForKotlinMethod>,
+    val superClassNotAny: ObjCClassForKotlinClass?
 ) : ObjCTypeForKotlinType(binaryName, irClassSymbol, methods)
 
 internal class ObjCProtocolForKotlinInterface(
-        binaryName: String,
-        irClassSymbol: IrClassSymbol,
-        methods: List<ObjCMethodSpec>
+    binaryName: String,
+    irClassSymbol: IrClassSymbol,
+    methods: List<ObjCMethodSpec>
 ) : ObjCTypeForKotlinType(binaryName, irClassSymbol, methods)
 
 internal class ObjCClassForKotlinFile(
-        binaryName: String,
-        val methods: List<ObjCMethodForKotlinMethod>
+    binaryName: String,
+    val methods: List<ObjCMethodForKotlinMethod>
 ) : ObjCTypeSpec(binaryName)

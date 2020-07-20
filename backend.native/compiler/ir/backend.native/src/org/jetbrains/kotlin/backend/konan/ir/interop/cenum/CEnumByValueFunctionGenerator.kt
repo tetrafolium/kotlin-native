@@ -23,8 +23,8 @@ import org.jetbrains.kotlin.psi2ir.generators.GeneratorContext
  * Generate IR for function that returns appropriate enum entry for the provided integral value.
  */
 internal class CEnumByValueFunctionGenerator(
-        context: GeneratorContext,
-        private val symbols: KonanSymbols
+    context: GeneratorContext,
+    private val symbols: KonanSymbols
 ) : DescriptorToIrTranslationMixin {
 
     override val irBuiltIns: IrBuiltIns = context.irBuiltIns
@@ -32,8 +32,8 @@ internal class CEnumByValueFunctionGenerator(
     override val typeTranslator: TypeTranslator = context.typeTranslator
 
     fun generateByValueFunction(
-            companionIrClass: IrClass,
-            valuesIrFunctionSymbol: IrSimpleFunctionSymbol
+        companionIrClass: IrClass,
+        valuesIrFunctionSymbol: IrSimpleFunctionSymbol
     ): IrFunction {
         val byValueFunctionDescriptor = companionIrClass.descriptor.findDeclarationByName<FunctionDescriptor>("byValue")!!
         val byValueIrFunction = createFunction(byValueFunctionDescriptor)
@@ -50,44 +50,49 @@ internal class CEnumByValueFunctionGenerator(
         // }
         // throw NPE
         byValueIrFunction.body = irBuilder(irBuiltIns, byValueIrFunction.symbol, SYNTHETIC_OFFSET, SYNTHETIC_OFFSET).irBlockBody {
-            +irReturn(irBlock {
-                val values = irTemporaryVar(irCall(valuesIrFunctionSymbol))
-                val inductionVariable = irTemporaryVar(irInt(0))
-                val arrayClass = values.type.classOrNull!!
-                val valuesSize = irCall(symbols.arraySize.getValue(arrayClass), irBuiltIns.intType).also { irCall ->
-                    irCall.dispatchReceiver = irGet(values)
-                }
-                val getElementFn = symbols.arrayGet.getValue(arrayClass)
-                val plusFun = symbols.intPlusInt
-                val lessFunctionSymbol = irBuiltIns.lessFunByOperandType.getValue(irBuiltIns.intClass)
-                +irWhile().also { loop ->
-                    loop.condition = irCall(lessFunctionSymbol, irBuiltIns.booleanType).also { irCall ->
-                        irCall.putValueArgument(0, irGet(inductionVariable))
-                        irCall.putValueArgument(1, valuesSize)
+            +irReturn(
+                irBlock {
+                    val values = irTemporaryVar(irCall(valuesIrFunctionSymbol))
+                    val inductionVariable = irTemporaryVar(irInt(0))
+                    val arrayClass = values.type.classOrNull!!
+                    val valuesSize = irCall(symbols.arraySize.getValue(arrayClass), irBuiltIns.intType).also { irCall ->
+                        irCall.dispatchReceiver = irGet(values)
                     }
-                    loop.body = irBlock {
-                        val entry = irTemporaryVar(irCall(getElementFn, byValueIrFunction.returnType).also { irCall ->
-                            irCall.dispatchReceiver = irGet(values)
+                    val getElementFn = symbols.arrayGet.getValue(arrayClass)
+                    val plusFun = symbols.intPlusInt
+                    val lessFunctionSymbol = irBuiltIns.lessFunByOperandType.getValue(irBuiltIns.intClass)
+                    +irWhile().also { loop ->
+                        loop.condition = irCall(lessFunctionSymbol, irBuiltIns.booleanType).also { irCall ->
                             irCall.putValueArgument(0, irGet(inductionVariable))
-                        })
-                        val valueGetter = entry.type.getClass()!!.getPropertyGetter("value")!!
-                        val entryValue = irGet(irValueParameter.type, irGet(entry), valueGetter)
-                        +irIfThenElse(
+                            irCall.putValueArgument(1, valuesSize)
+                        }
+                        loop.body = irBlock {
+                            val entry = irTemporaryVar(
+                                irCall(getElementFn, byValueIrFunction.returnType).also { irCall ->
+                                    irCall.dispatchReceiver = irGet(values)
+                                    irCall.putValueArgument(0, irGet(inductionVariable))
+                                }
+                            )
+                            val valueGetter = entry.type.getClass()!!.getPropertyGetter("value")!!
+                            val entryValue = irGet(irValueParameter.type, irGet(entry), valueGetter)
+                            +irIfThenElse(
                                 type = irBuiltIns.unitType,
                                 condition = irEquals(entryValue, irGet(irValueParameter)),
                                 thenPart = irReturn(irGet(entry)),
                                 elsePart = irSetVar(
-                                        inductionVariable,
-                                        irCallOp(plusFun, irBuiltIns.intType,
-                                                irGet(inductionVariable),
-                                                irInt(1)
-                                        )
+                                    inductionVariable,
+                                    irCallOp(
+                                        plusFun, irBuiltIns.intType,
+                                        irGet(inductionVariable),
+                                        irInt(1)
+                                    )
                                 )
-                        )
+                            )
+                        }
                     }
+                    +irCall(symbols.ThrowNullPointerException, irBuiltIns.nothingType)
                 }
-                +irCall(symbols.ThrowNullPointerException, irBuiltIns.nothingType)
-            })
+            )
         }
         return byValueIrFunction
     }

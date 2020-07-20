@@ -93,8 +93,10 @@ object StubRenderer {
         }
 
         fun appendParameters() {
-            assert(method.selectors.size == method.parameters.size ||
-                   method.selectors.size == 1 && method.parameters.size == 0)
+            assert(
+                method.selectors.size == method.parameters.size ||
+                    method.selectors.size == 1 && method.parameters.size == 0
+            )
 
             if (method.selectors.size == 1 && method.parameters.size == 0) {
                 append(method.selectors[0])
@@ -196,9 +198,8 @@ object StubRenderer {
     }
 }
 
-internal fun formatGenerics(buffer: Appendable, generics:List<String>) {
+internal fun formatGenerics(buffer: Appendable, generics: List<String>) {
     if (generics.isNotEmpty()) {
         generics.joinTo(buffer, separator = ", ", prefix = "<", postfix = ">")
     }
 }
-

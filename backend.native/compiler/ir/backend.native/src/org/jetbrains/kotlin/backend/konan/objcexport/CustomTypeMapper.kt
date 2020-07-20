@@ -16,9 +16,9 @@ import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.TypeUtils
 
 internal fun ClassDescriptor.isMappedFunctionClass() =
-        this.getFunctionalClassKind() == FunctionClassDescriptor.Kind.Function &&
-                // Type parameters include return type.
-                declaredTypeParameters.size - 1 < CustomTypeMappers.functionTypeMappersArityLimit
+    this.getFunctionalClassKind() == FunctionClassDescriptor.Kind.Function &&
+        // Type parameters include return type.
+        declaredTypeParameters.size - 1 < CustomTypeMappers.functionTypeMappersArityLimit
 
 internal interface CustomTypeMapper {
     val mappedClassId: ClassId
@@ -47,7 +47,6 @@ internal object CustomTypeMappers {
             if (classId != null) {
                 result += Simple(classId, { namer.numberBoxName(classId).objCName })
             }
-
         }
 
         result += Simple(ClassId.topLevel(string.toSafe()), "NSString")
@@ -86,39 +85,39 @@ internal object CustomTypeMappers {
      * Note: can be generated programmatically, but requires stdlib in this case.
      */
     val hiddenTypes: Set<ClassId> = listOf(
-            "kotlin.Any",
-            "kotlin.CharSequence",
-            "kotlin.Comparable",
-            "kotlin.Function",
-            "kotlin.Number",
-            "kotlin.collections.Collection",
-            "kotlin.collections.Iterable",
-            "kotlin.collections.MutableCollection",
-            "kotlin.collections.MutableIterable"
+        "kotlin.Any",
+        "kotlin.CharSequence",
+        "kotlin.Comparable",
+        "kotlin.Function",
+        "kotlin.Number",
+        "kotlin.collections.Collection",
+        "kotlin.collections.Iterable",
+        "kotlin.collections.MutableCollection",
+        "kotlin.collections.MutableIterable"
     ).map { ClassId.topLevel(FqName(it)) }.toSet()
 
     private class Simple(
-            override val mappedClassId: ClassId,
-            private val getObjCClassName: ObjCExportTranslatorImpl.() -> String
+        override val mappedClassId: ClassId,
+        private val getObjCClassName: ObjCExportTranslatorImpl.() -> String
     ) : CustomTypeMapper {
 
         constructor(
-                mappedClassId: ClassId,
-                objCClassName: String
+            mappedClassId: ClassId,
+            objCClassName: String
         ) : this(mappedClassId, { objCClassName })
 
         override fun mapType(mappedSuperType: KotlinType, translator: ObjCExportTranslatorImpl, objCExportScope: ObjCExportScope): ObjCNonNullReferenceType =
-                ObjCClassType(translator.getObjCClassName())
+            ObjCClassType(translator.getObjCClassName())
     }
 
     private class Collection(
-            mappedClassFqName: FqName,
-            private val getObjCClassName: ObjCExportTranslatorImpl.() -> String
+        mappedClassFqName: FqName,
+        private val getObjCClassName: ObjCExportTranslatorImpl.() -> String
     ) : CustomTypeMapper {
 
         constructor(
-                mappedClassFqName: FqName,
-                objCClassName: String
+            mappedClassFqName: FqName,
+            objCClassName: String
         ) : this(mappedClassFqName, { objCClassName })
 
         override val mappedClassId = ClassId.topLevel(mappedClassFqName)

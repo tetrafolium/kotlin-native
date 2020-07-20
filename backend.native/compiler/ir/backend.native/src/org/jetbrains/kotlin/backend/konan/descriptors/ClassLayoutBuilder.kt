@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.name.FqName
 
 internal class OverriddenFunctionInfo(
-        val function: IrSimpleFunction,
-        val overriddenFunction: IrSimpleFunction
+    val function: IrSimpleFunction,
+    val overriddenFunction: IrSimpleFunction
 ) {
     val needBridge: Boolean
         get() = function.target.needBridgeTo(overriddenFunction)
@@ -44,9 +44,9 @@ internal class OverriddenFunctionInfo(
         }
 
     val inheritsBridge: Boolean
-        get() = !function.isReal
-                && function.target.overrides(overriddenFunction)
-                && function.bridgeDirectionsTo(overriddenFunction).allNotNeeded()
+        get() = !function.isReal &&
+            function.target.overrides(overriddenFunction) &&
+            function.bridgeDirectionsTo(overriddenFunction).allNotNeeded()
 
     fun getImplementation(context: Context): IrSimpleFunction? {
 
@@ -85,8 +85,12 @@ internal class OverriddenFunctionInfo(
     }
 }
 
-internal class ClassGlobalHierarchyInfo(val classIdLo: Int, val classIdHi: Int,
-                                        val interfaceId: Int, val interfaceColor: Int) {
+internal class ClassGlobalHierarchyInfo(
+    val classIdLo: Int,
+    val classIdHi: Int,
+    val interfaceId: Int,
+    val interfaceColor: Int
+) {
     companion object {
         val DUMMY = ClassGlobalHierarchyInfo(0, 0, 0, 0)
 
@@ -146,7 +150,7 @@ internal class GlobalHierarchyAnalysis(val context: Context, val irModule: IrMod
         val root = context.irBuiltIns.anyClass.owner
         val immediateInheritors = mutableMapOf<IrClass, MutableList<IrClass>>()
         val allClasses = mutableListOf<IrClass>()
-        irModule.acceptVoid(object: IrElementVisitorVoid {
+        irModule.acceptVoid(object : IrElementVisitorVoid {
             override fun visitElement(element: IrElement) {
                 element.acceptChildrenVoid(this)
             }
@@ -156,12 +160,14 @@ internal class GlobalHierarchyAnalysis(val context: Context, val irModule: IrMod
                     val color = interfaceColors[declaration]!!
                     // Numerate from 1 (reserve 0 for invalid value).
                     val interfaceId = ++colorCounts[color]
-                    assert (interfaceId <= maxInterfaceId) {
+                    assert(interfaceId <= maxInterfaceId) {
                         "Unable to assign interface id to ${declaration.name}"
                     }
                     context.getLayoutBuilder(declaration).hierarchyInfo =
-                            ClassGlobalHierarchyInfo(0, 0,
-                                    color or (interfaceId shl bitsPerColor), color)
+                        ClassGlobalHierarchyInfo(
+                            0, 0,
+                            color or (interfaceId shl bitsPerColor), color
+                        )
                 } else {
                     allClasses += declaration
                     if (declaration != root) {
@@ -349,19 +355,19 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
 
     val methodTableEntries: List<OverriddenFunctionInfo> by lazy {
         irClass.sortedOverridableOrOverridingMethods
-                .flatMap { method -> method.allOverriddenFunctions.map { OverriddenFunctionInfo(method, it) } }
-                .filter { it.canBeCalledVirtually }
-                .distinctBy { it.overriddenFunction.uniqueId }
-                .sortedBy { it.overriddenFunction.uniqueId }
+            .flatMap { method -> method.allOverriddenFunctions.map { OverriddenFunctionInfo(method, it) } }
+            .filter { it.canBeCalledVirtually }
+            .distinctBy { it.overriddenFunction.uniqueId }
+            .sortedBy { it.overriddenFunction.uniqueId }
         // TODO: probably method table should contain all accessible methods to improve binary compatibility
     }
 
     val interfaceTableEntries: List<IrSimpleFunction> by lazy {
         irClass.sortedOverridableOrOverridingMethods
-                .filter { f ->
-                    f.isReal || f.overriddenSymbols.any { OverriddenFunctionInfo(f, it.owner).needBridge }
-                }
-                .toList()
+            .filter { f ->
+                f.isReal || f.overriddenSymbols.any { OverriddenFunctionInfo(f, it.owner).needBridge }
+            }
+            .toList()
     }
 
     data class InterfaceTablePlace(val interfaceId: Int, val methodIndex: Int) {
@@ -371,7 +377,7 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
     }
 
     fun itablePlace(function: IrSimpleFunction): InterfaceTablePlace {
-        assert (irClass.isInterface) { "An interface expected but was ${irClass.name}" }
+        assert(irClass.isInterface) { "An interface expected but was ${irClass.name}" }
         val itable = interfaceTableEntries
         val index = itable.indexOf(function)
         if (index >= 0)
@@ -398,13 +404,13 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
             val irFile = irClass.getContainingFile()
 
             val annotationClass = (it.symbol.owner as? IrConstructor)?.constructedClass
-                    ?: error(irFile, it, "unexpected annotation")
+                ?: error(irFile, it, "unexpected annotation")
 
             if (annotationClass.hasAnnotation(RuntimeNames.associatedObjectKey)) {
                 val argument = it.getValueArgument(0)
 
                 val irClassReference = argument as? IrClassReference
-                        ?: error(irFile, argument, "unexpected annotation argument")
+                    ?: error(irFile, argument, "unexpected annotation argument")
 
                 val associatedObject = irClassReference.symbol.owner
 
@@ -414,9 +420,9 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
 
                 if (annotationClass in result) {
                     error(
-                            irFile,
-                            it,
-                            "duplicate value for ${annotationClass.name}, previous was ${result[annotationClass]?.name}"
+                        irFile,
+                        it,
+                        "duplicate value for ${annotationClass.name}, previous was ${result[annotationClass]?.name}"
                     )
                 }
 
@@ -436,7 +442,7 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
         val declarations: List<IrDeclaration> = if (irClass.isInner && !isLowered) {
             // Note: copying to avoid mutation of the original class.
             irClass.declarations.toMutableList()
-                    .also { InnerClassLowering.addOuterThisField(it, irClass, context) }
+                .also { InnerClassLowering.addOuterThisField(it, irClass, context) }
         } else {
             irClass.declarations
         }
@@ -452,14 +458,14 @@ internal class ClassLayoutBuilder(val irClass: IrClass, val context: Context, va
         if (irClass.hasAnnotation(FqName.fromSegments(listOf("kotlin", "native", "internal", "NoReorderFields"))))
             return fields
 
-        return fields.sortedByDescending{ LLVMStoreSizeOfType(context.llvm.runtime.targetData, it.type.llvmType(context)) }
+        return fields.sortedByDescending { LLVMStoreSizeOfType(context.llvm.runtime.targetData, it.type.llvmType(context)) }
     }
 
     private val IrClass.sortedOverridableOrOverridingMethods: List<IrSimpleFunction>
         get() =
             this.simpleFunctions()
-                    .filter { it.isOverridableOrOverrides && it.bridgeTarget == null }
-                    .sortedBy { it.uniqueId }
+                .filter { it.isOverridableOrOverrides && it.bridgeTarget == null }
+                .sortedBy { it.uniqueId }
 
     private val functionIds = mutableMapOf<IrFunction, Long>()
 

@@ -16,8 +16,8 @@ internal sealed class TypeBridge
 internal object ReferenceBridge : TypeBridge()
 
 internal data class BlockPointerBridge(
-        val numberOfParameters: Int,
-        val returnsVoid: Boolean
+    val numberOfParameters: Int,
+    val returnsVoid: Boolean
 ) : TypeBridge()
 
 internal data class ValueTypeBridge(val objCValueType: ObjCValueType) : TypeBridge()
@@ -39,9 +39,9 @@ internal sealed class MethodBridgeValueParameter : MethodBridgeParameter() {
 }
 
 internal data class MethodBridge(
-        val returnBridge: ReturnValue,
-        val receiver: MethodBridgeReceiver,
-        val valueParameters: List<MethodBridgeValueParameter>
+    val returnBridge: ReturnValue,
+    val receiver: MethodBridgeReceiver,
+    val valueParameters: List<MethodBridgeValueParameter>
 ) {
 
     sealed class ReturnValue {
@@ -62,7 +62,7 @@ internal data class MethodBridge(
     }
 
     val paramBridges: List<MethodBridgeParameter> =
-            listOf(receiver) + MethodBridgeSelector + valueParameters
+        listOf(receiver) + MethodBridgeSelector + valueParameters
 
     // TODO: it is not exactly true in potential future cases.
     val isInstance: Boolean get() = when (receiver) {
@@ -77,7 +77,7 @@ internal data class MethodBridge(
 }
 
 internal fun MethodBridge.valueParametersAssociated(
-        descriptor: FunctionDescriptor
+    descriptor: FunctionDescriptor
 ): List<Pair<MethodBridgeValueParameter, ParameterDescriptor?>> {
     val kotlinParameters = descriptor.allParameters.iterator()
     val skipFirstKotlinParameter = when (this.receiver) {
@@ -99,7 +99,7 @@ internal fun MethodBridge.valueParametersAssociated(
 }
 
 internal fun MethodBridge.parametersAssociated(
-        irFunction: IrFunction
+    irFunction: IrFunction
 ): List<Pair<MethodBridgeParameter, IrValueParameter?>> {
     val kotlinParameters = irFunction.allParameters.iterator()
 

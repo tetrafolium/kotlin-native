@@ -11,8 +11,8 @@ import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.FqName
 
 internal fun IrClass.isNonGeneratedAnnotation(): Boolean =
-        this.kind == ClassKind.ANNOTATION_CLASS &&
-                !this.annotations.hasAnnotation(serialInfoAnnotationFqName)
+    this.kind == ClassKind.ANNOTATION_CLASS &&
+        !this.annotations.hasAnnotation(serialInfoAnnotationFqName)
 
 private val serialInfoAnnotationFqName = FqName("kotlinx.serialization.SerialInfo")
 
@@ -29,6 +29,6 @@ internal fun IrClass.requiresRtti(): Boolean = when {
 }
 
 internal fun IrClass.requiresCodeGeneration(): Boolean =
-        // For now these two sets (classes that require RTTI and classes that require codegen)
-        // are the same, but they might diverge later.
-        requiresRtti()
+    // For now these two sets (classes that require RTTI and classes that require codegen)
+    // are the same, but they might diverge later.
+    requiresRtti()
