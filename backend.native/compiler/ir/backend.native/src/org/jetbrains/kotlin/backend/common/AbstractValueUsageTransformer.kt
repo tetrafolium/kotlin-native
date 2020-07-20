@@ -17,7 +17,6 @@ import org.jetbrains.kotlin.ir.util.defaultType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 
-
 /**
  * Transforms expressions depending on the context they are used in.
  *
@@ -30,50 +29,51 @@ import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
  * TODO: consider making this visitor non-recursive to make it more general.
  */
 internal abstract class AbstractValueUsageTransformer(
-        val builtIns: KotlinBuiltIns,
-        val symbols: KonanSymbols,
-        val irBuiltIns: IrBuiltIns
-): IrElementTransformerVoid() {
+    val builtIns: KotlinBuiltIns,
+    val symbols: KonanSymbols,
+    val irBuiltIns: IrBuiltIns
+) : IrElementTransformerVoid() {
 
     protected open fun IrExpression.useAs(type: IrType): IrExpression = this
 
     protected open fun IrExpression.useAsStatement(): IrExpression = this
 
     protected open fun IrExpression.useInTypeOperator(operator: IrTypeOperator, typeOperand: IrType): IrExpression =
-            this
+        this
 
     protected open fun IrExpression.useAsValue(value: IrValueDeclaration): IrExpression = this.useAs(value.type)
 
     protected open fun IrExpression.useAsArgument(parameter: IrValueParameter): IrExpression =
-            this.useAsValue(parameter)
+        this.useAsValue(parameter)
 
     protected open fun IrExpression.useAsDispatchReceiver(expression: IrFunctionAccessExpression): IrExpression =
-            this.useAsArgument(expression.symbol.owner.dispatchReceiverParameter!!)
+        this.useAsArgument(expression.symbol.owner.dispatchReceiverParameter!!)
 
     protected open fun IrExpression.useAsExtensionReceiver(expression: IrFunctionAccessExpression): IrExpression =
-            this.useAsArgument(expression.symbol.owner.extensionReceiverParameter!!)
+        this.useAsArgument(expression.symbol.owner.extensionReceiverParameter!!)
 
-    protected open fun IrExpression.useAsValueArgument(expression: IrFunctionAccessExpression,
-                                                       parameter: IrValueParameter
+    protected open fun IrExpression.useAsValueArgument(
+        expression: IrFunctionAccessExpression,
+        parameter: IrValueParameter
     ): IrExpression =
-            this.useAsArgument(parameter)
+        this.useAsArgument(parameter)
 
     private fun IrExpression.useForVariable(variable: IrVariable): IrExpression =
-            this.useAsValue(variable)
+        this.useAsValue(variable)
 
     private fun IrExpression.useForField(field: IrField): IrExpression =
-            this.useAs(field.type)
+        this.useAs(field.type)
 
     protected open fun IrExpression.useAsReturnValue(returnTarget: IrReturnTargetSymbol): IrExpression =
-            when (returnTarget) {
-                is IrSimpleFunctionSymbol -> this.useAs(returnTarget.owner.returnType)
-                is IrConstructorSymbol -> this.useAs(irBuiltIns.unitType)
-                is IrReturnableBlockSymbol -> this.useAs(returnTarget.owner.type)
-                else -> error(returnTarget)
-            }
+        when (returnTarget) {
+            is IrSimpleFunctionSymbol -> this.useAs(returnTarget.owner.returnType)
+            is IrConstructorSymbol -> this.useAs(irBuiltIns.unitType)
+            is IrReturnableBlockSymbol -> this.useAs(returnTarget.owner.type)
+            else -> error(returnTarget)
+        }
 
     protected open fun IrExpression.useAsResult(enclosing: IrExpression): IrExpression =
-            this.useAs(enclosing.type)
+        this.useAs(enclosing.type)
 
     override fun visitPropertyReference(expression: IrPropertyReference): IrExpression {
         TODO()
@@ -126,10 +126,10 @@ internal abstract class AbstractValueUsageTransformer(
         expression.statements.forEachIndexed { i, irStatement ->
             if (irStatement is IrExpression) {
                 expression.statements[i] =
-                        if (i == lastIndex)
-                            irStatement.useAsResult(expression)
-                        else
-                            irStatement.useAsStatement()
+                    if (i == lastIndex)
+                        irStatement.useAsResult(expression)
+                    else
+                        irStatement.useAsStatement()
             }
         }
 
@@ -264,6 +264,4 @@ internal abstract class AbstractValueUsageTransformer(
     }
 
     // TODO: IrStringConcatenation, IrEnumEntry?
-
 }
-

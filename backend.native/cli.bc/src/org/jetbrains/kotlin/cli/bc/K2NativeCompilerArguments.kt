@@ -5,8 +5,8 @@
 
 package org.jetbrains.kotlin.cli.bc
 
-import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
 import org.jetbrains.kotlin.cli.common.arguments.Argument
+import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.config.*
@@ -22,17 +22,23 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-g", description = "Enable emitting debug information")
     var debug: Boolean = false
 
-    @Argument(value = "-generate-test-runner", deprecatedName = "-generate_test_runner",
-            shortName = "-tr", description = "Produce a runner for unit tests")
+    @Argument(
+        value = "-generate-test-runner", deprecatedName = "-generate_test_runner",
+        shortName = "-tr", description = "Produce a runner for unit tests"
+    )
     var generateTestRunner = false
-    @Argument(value = "-generate-worker-test-runner",
-            shortName = "-trw", description = "Produce a worker runner for unit tests")
+    @Argument(
+        value = "-generate-worker-test-runner",
+        shortName = "-trw", description = "Produce a worker runner for unit tests"
+    )
     var generateWorkerTestRunner = false
-    @Argument(value = "-generate-no-exit-test-runner",
-            shortName = "-trn", description = "Produce a runner for unit tests not forcing exit")
+    @Argument(
+        value = "-generate-no-exit-test-runner",
+        shortName = "-trn", description = "Produce a runner for unit tests not forcing exit"
+    )
     var generateNoExitTestRunner = false
 
-    @Argument(value="-include-binary", deprecatedName = "-includeBinary", shortName = "-ib", valueDescription = "<path>", description = "Pack external binary within the klib")
+    @Argument(value = "-include-binary", deprecatedName = "-includeBinary", shortName = "-ib", valueDescription = "<path>", description = "Pack external binary within the klib")
     var includeBinaries: Array<String>? = null
 
     @Argument(value = "-library", shortName = "-l", valueDescription = "<path>", description = "Link with the library", delimiter = "")
@@ -47,14 +53,16 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-manifest", valueDescription = "<path>", description = "Provide a maniferst addend file")
     var manifestFile: String? = null
 
-    @Argument(value="-memory-model", valueDescription = "<model>", description = "Memory model to use, 'strict' and 'relaxed' are currently supported")
+    @Argument(value = "-memory-model", valueDescription = "<model>", description = "Memory model to use, 'strict' and 'relaxed' are currently supported")
     var memoryModel: String? = "strict"
 
-    @Argument(value="-module-name", deprecatedName = "-module_name", valueDescription = "<name>", description = "Specify a name for the compilation module")
+    @Argument(value = "-module-name", deprecatedName = "-module_name", valueDescription = "<name>", description = "Specify a name for the compilation module")
     var moduleName: String? = null
 
-    @Argument(value = "-native-library", deprecatedName = "-nativelibrary", shortName = "-nl",
-            valueDescription = "<path>", description = "Include the native bitcode library", delimiter = "")
+    @Argument(
+        value = "-native-library", deprecatedName = "-nativelibrary", shortName = "-nl",
+        valueDescription = "<path>", description = "Include the native bitcode library", delimiter = ""
+    )
     var nativeLibraries: Array<String>? = null
 
     @Argument(value = "-no-default-libs", deprecatedName = "-nodefaultlibs", description = "Don't link the libraries from dist/klib automatically")
@@ -69,10 +77,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-nopack", description = "Don't pack the library into a klib file")
     var nopack: Boolean = false
 
-    @Argument(value="-linker-options", deprecatedName = "-linkerOpts", valueDescription = "<arg>", description = "Pass arguments to linker", delimiter = " ")
+    @Argument(value = "-linker-options", deprecatedName = "-linkerOpts", valueDescription = "<arg>", description = "Pass arguments to linker", delimiter = " ")
     var linkerArguments: Array<String>? = null
 
-    @Argument(value="-linker-option", valueDescription = "<arg>", description = "Pass argument to linker", delimiter = "")
+    @Argument(value = "-linker-option", valueDescription = "<arg>", description = "Pass argument to linker", delimiter = "")
     var singleLinkerArguments: Array<String>? = null
 
     @Argument(value = "-nostdlib", description = "Don't link with stdlib")
@@ -87,9 +95,11 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-entry", shortName = "-e", valueDescription = "<name>", description = "Qualified entry point name")
     var mainPackage: String? = null
 
-    @Argument(value = "-produce", shortName = "-p",
-            valueDescription = "{program|static|dynamic|framework|library|bitcode}",
-            description = "Specify output file kind")
+    @Argument(
+        value = "-produce", shortName = "-p",
+        valueDescription = "{program|static|dynamic|framework|library|bitcode}",
+        description = "Specify output file kind"
+    )
     var produce: String? = null
 
     @Argument(value = "-repo", shortName = "-r", valueDescription = "<path>", description = "Library search path")
@@ -103,25 +113,25 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     // Keep the list lexically sorted.
 
     @Argument(
-            value = "-Xcache-directory",
-            valueDescription = "<path>",
-            description = "Path to the directory containing caches",
-            delimiter = ""
+        value = "-Xcache-directory",
+        valueDescription = "<path>",
+        description = "Path to the directory containing caches",
+        delimiter = ""
     )
     var cacheDirectories: Array<String>? = null
 
     @Argument(
-            value = CACHED_LIBRARY,
-            valueDescription = "<library path>,<cache path>",
-            description = "Comma-separated paths of a library and its cache",
-            delimiter = ""
+        value = CACHED_LIBRARY,
+        valueDescription = "<library path>,<cache path>",
+        description = "Comma-separated paths of a library and its cache",
+        delimiter = ""
     )
     var cachedLibraries: Array<String>? = null
 
-    @Argument(value="-Xcheck-dependencies", deprecatedName = "--check_dependencies", description = "Check dependencies and download the missing ones")
+    @Argument(value = "-Xcheck-dependencies", deprecatedName = "--check_dependencies", description = "Check dependencies and download the missing ones")
     var checkDependencies: Boolean = false
 
-    @Argument(value="-Xcompatible-compiler-version", valueDescription = "<version>", description = "Assume the given compiler version to be binary compatible")
+    @Argument(value = "-Xcompatible-compiler-version", valueDescription = "<version>", description = "Assume the given compiler version to be binary compatible")
     var compatibleCompilerVersions: Array<String>? = null
 
     @Argument(value = EMBED_BITCODE_FLAG, description = "Embed LLVM IR bitcode as data")
@@ -137,30 +147,30 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     var enablePhases: Array<String>? = null
 
     @Argument(
-            value = "-Xexport-library",
-            valueDescription = "<path>",
-            description = "A library to be included into produced framework API.\n" +
-                    "Must be one of libraries passed with '-library'",
-            delimiter = ""
+        value = "-Xexport-library",
+        valueDescription = "<path>",
+        description = "A library to be included into produced framework API.\n" +
+            "Must be one of libraries passed with '-library'",
+        delimiter = ""
     )
     var exportedLibraries: Array<String>? = null
 
-    @Argument(value="-Xdisable-fake-override-validator", description = "Disable IR fake override validator")
+    @Argument(value = "-Xdisable-fake-override-validator", description = "Disable IR fake override validator")
     var disableFakeOverrideValidator: Boolean = false
 
     @Argument(
-            value = "-Xframework-import-header",
-            valueDescription = "<header>",
-            description = "Add additional header import to framework header"
+        value = "-Xframework-import-header",
+        valueDescription = "<header>",
+        description = "Add additional header import to framework header"
     )
     var frameworkImportHeaders: Array<String>? = null
 
     @Argument(
-            value = "-Xadd-light-debug",
-            valueDescription = "{disable|enable}",
-            description = "Add light debug information for optimized builds. This option is skipped in debug builds.\n" +
-                    "It's enabled by default on Darwin platforms where collected debug information is stored in .dSYM file.\n" +
-                    "Currently option is disabled by default on other platforms."
+        value = "-Xadd-light-debug",
+        valueDescription = "{disable|enable}",
+        description = "Add light debug information for optimized builds. This option is skipped in debug builds.\n" +
+            "It's enabled by default on Darwin platforms where collected debug information is stored in .dSYM file.\n" +
+            "Currently option is disabled by default on other platforms."
     )
     var lightDebugString: String? = null
 
@@ -169,18 +179,18 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     var lightDebugDeprecated: Boolean = false
 
     @Argument(
-            value = MAKE_CACHE,
-            valueDescription = "<path>",
-            description = "Path of the library to be compiled to cache",
-            delimiter = ""
+        value = MAKE_CACHE,
+        valueDescription = "<path>",
+        description = "Path of the library to be compiled to cache",
+        delimiter = ""
     )
     var librariesToCache: Array<String>? = null
 
     @Argument(
-            value = ADD_CACHE,
-            valueDescription = "<path>",
-            description = "Path to the library to be added to cache",
-            delimiter = ""
+        value = ADD_CACHE,
+        valueDescription = "<path>",
+        description = "Path to the library to be added to cache",
+        delimiter = ""
     )
     var libraryToAddToCache: String? = null
 
@@ -199,7 +209,7 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-Xprint-locations", deprecatedName = "--print_locations", description = "Print locations")
     var printLocations: Boolean = false
 
-    @Argument(value="-Xpurge-user-libs", deprecatedName = "--purge_user_libs", description = "Don't link unused libraries even explicitly specified")
+    @Argument(value = "-Xpurge-user-libs", deprecatedName = "--purge_user_libs", description = "Don't link unused libraries even explicitly specified")
     var purgeUserLibs: Boolean = false
 
     @Argument(value = "-Xruntime", deprecatedName = "--runtime", valueDescription = "<path>", description = "Override standard 'runtime.bc' location")
@@ -232,9 +242,9 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     var verifyCompiler: String? = null
 
     @Argument(
-            value = "-friend-modules",
-            valueDescription = "<path>",
-            description = "Paths to friend modules"
+        value = "-friend-modules",
+        valueDescription = "<path>",
+        description = "Paths to friend modules"
     )
     var friendModules: String? = null
 
@@ -245,11 +255,11 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     var coverage: Boolean = false
 
     @Argument(
-            value = "-Xlibrary-to-cover",
-            valueDescription = "<path>",
-            description = "Provide code coverage for the given library.\n" +
-                    "Must be one of libraries passed with '-library'",
-            delimiter = ""
+        value = "-Xlibrary-to-cover",
+        valueDescription = "<path>",
+        description = "Provide code coverage for the given library.\n" +
+            "Must be one of libraries passed with '-library'",
+        delimiter = ""
     )
     var coveredLibraries: Array<String>? = null
 
@@ -259,10 +269,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-Xno-objc-generics", description = "Disable generics support for framework header")
     var noObjcGenerics: Boolean = false
 
-    @Argument(value="-Xoverride-clang-options", valueDescription = "<arg1,arg2,...>", description = "Explicit list of Clang options")
+    @Argument(value = "-Xoverride-clang-options", valueDescription = "<arg1,arg2,...>", description = "Explicit list of Clang options")
     var clangOptions: Array<String>? = null
 
-    @Argument(value="-Xallocator", valueDescription = "std | mimalloc", description = "Allocator used in runtime")
+    @Argument(value = "-Xallocator", valueDescription = "std | mimalloc", description = "Allocator used in runtime")
     var allocator: String = "std"
 
     @Argument(value = "-Xmetadata-klib", description = "Produce a klib that only contains the declarations metadata")
@@ -272,20 +282,20 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     var debugPrefixMap: Array<String>? = null
 
     override fun configureAnalysisFlags(collector: MessageCollector): MutableMap<AnalysisFlag<*>, Any> =
-            super.configureAnalysisFlags(collector).also {
-                val useExperimental = it[AnalysisFlags.useExperimental] as List<*>
-                it[AnalysisFlags.useExperimental] = useExperimental + listOf("kotlin.ExperimentalUnsignedTypes")
-                if (printIr)
-                    phasesToDumpAfter = arrayOf("ALL")
-            }
+        super.configureAnalysisFlags(collector).also {
+            val useExperimental = it[AnalysisFlags.useExperimental] as List<*>
+            it[AnalysisFlags.useExperimental] = useExperimental + listOf("kotlin.ExperimentalUnsignedTypes")
+            if (printIr)
+                phasesToDumpAfter = arrayOf("ALL")
+        }
 
     override fun checkIrSupport(languageVersionSettings: LanguageVersionSettings, collector: MessageCollector) {
-        if (languageVersionSettings.languageVersion < LanguageVersion.KOTLIN_1_4
-                || languageVersionSettings.apiVersion < ApiVersion.KOTLIN_1_4
+        if (languageVersionSettings.languageVersion < LanguageVersion.KOTLIN_1_4 ||
+            languageVersionSettings.apiVersion < ApiVersion.KOTLIN_1_4
         ) {
             collector.report(
-                    severity = CompilerMessageSeverity.ERROR,
-                    message = "Native backend cannot be used with language or API version below 1.4"
+                severity = CompilerMessageSeverity.ERROR,
+                message = "Native backend cannot be used with language or API version below 1.4"
             )
         }
     }
