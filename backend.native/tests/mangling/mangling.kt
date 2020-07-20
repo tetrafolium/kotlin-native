@@ -38,4 +38,3 @@ fun main(args: Array<String>) {
     test_param()
     test_multiple_constructors()
 }
-

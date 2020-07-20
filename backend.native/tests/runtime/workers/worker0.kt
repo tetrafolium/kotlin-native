@@ -5,9 +5,8 @@
 
 package runtime.workers.worker0
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest() {
     val worker = Worker.start()
@@ -18,7 +17,8 @@ import kotlin.native.concurrent.*
         input + " processed"
     }
     future.consume {
-        result -> println("Got $result")
+        result ->
+        println("Got $result")
     }
     worker.requestTermination().result
     println("OK")

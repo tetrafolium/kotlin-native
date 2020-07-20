@@ -14,19 +14,19 @@ fun assertEquals(actual: String, expected: String, msg: String) {
 }
 
 fun testIntToStringWithRadix() {
-    assertEquals(2147483647.toString(8),  "17777777777", "Octal string")
+    assertEquals(2147483647.toString(8), "17777777777", "Octal string")
     assertEquals(2147483647.toString(16), "7fffffff", "Hex string")
-    assertEquals(2147483647.toString(2),  "1111111111111111111111111111111", "Binary string")
+    assertEquals(2147483647.toString(2), "1111111111111111111111111111111", "Binary string")
     assertEquals(2147483647.toString(10), "2147483647", "Decimal string")
 
-    assertEquals((-2147483647).toString(8),  "-17777777777", "Octal string")
+    assertEquals((-2147483647).toString(8), "-17777777777", "Octal string")
     assertEquals((-2147483647).toString(16), "-7fffffff", "Hex string")
-    assertEquals((-2147483647).toString(2),  "-1111111111111111111111111111111", "Binary string")
+    assertEquals((-2147483647).toString(2), "-1111111111111111111111111111111", "Binary string")
     assertEquals((-2147483647).toString(10), "-2147483647", "Decimal string")
 
-    assertEquals((-2147483648).toString(8),  "-20000000000", "Octal string")
+    assertEquals((-2147483648).toString(8), "-20000000000", "Octal string")
     assertEquals((-2147483648).toString(16), "-80000000", "Hex string")
-    assertEquals((-2147483648).toString(2),  "-10000000000000000000000000000000", "Binary string")
+    assertEquals((-2147483648).toString(2), "-10000000000000000000000000000000", "Binary string")
     assertEquals((-2147483648).toString(10), "-2147483648", "Decimal string")
 }
 
@@ -40,7 +40,6 @@ fun testLongToStringWithRadix() {
     assertEquals(0x7fffffffffffffffL.toString(10), "9223372036854775807", "Max decimal string")
     assertEquals((-0x7fffffffffffffffL - 1).toString(16), "-8000000000000000", "Min hex string")
     assertEquals(0x7fffffffffffffffL.toString(16), "7fffffffffffffff", "Max hex string")
-
 }
 
 @Test fun runTest() {

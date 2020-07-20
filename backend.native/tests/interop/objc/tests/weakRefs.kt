@@ -1,7 +1,7 @@
-import kotlin.native.ref.*
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.native.ref.*
+import kotlin.test.*
 
 @Test fun testWeakRefs() {
     testWeakReference({ createNSObject()!! })

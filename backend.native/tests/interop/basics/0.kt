@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-import sysstat.*
 import kotlinx.cinterop.*
+import sysstat.*
 
 fun main(args: Array<String>) {
     val statBuf = nativeHeap.alloc<stat>()

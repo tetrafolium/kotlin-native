@@ -63,12 +63,14 @@ fun lldbTest(@Language("kotlin") programText: String, lldbSession: String) {
     }
 
     if (!isOsxDevToolsEnabled) {
-        println("""Development tools aren't available.
+        println(
+            """Development tools aren't available.
                    |Please consider to execute:
                    |  ${DistProperties.devToolsSecurity} -enable
                    |or
                    |  csrutil disable
-                   |to run lldb tests""".trimMargin())
+                   |to run lldb tests""".trimMargin()
+        )
         return
     }
     val lldbSessionSpec = LldbSessionSpecification.parse(lldbSession)
@@ -86,7 +88,7 @@ fun lldbTest(@Language("kotlin") programText: String, lldbSession: String) {
 }
 
 private val isOsxDevToolsEnabled: Boolean by lazy {
-    //TODO: add OSX checks.
+    // TODO: add OSX checks.
     val rawStatus = subprocess(DistProperties.devToolsSecurity, "-status")
     println("> status: $rawStatus")
 
@@ -94,12 +96,11 @@ private val isOsxDevToolsEnabled: Boolean by lazy {
     r.find(rawStatus.stdout)?.destructured?.component1() == "enabled"
 }
 
-fun dwarfDumpTest(@Language("kotlin") programText: String, flags: List<String>, test:List<DwarfTag>.()->Unit) {
+fun dwarfDumpTest(@Language("kotlin") programText: String, flags: List<String>, test: List<DwarfTag>.() -> Unit) {
     if (!haveDwarfDump) {
         println("Skipping test: no dwarfdump")
         return
     }
-
 
     with(Files.createTempDirectory("dwarfdump_test")) {
         toFile().deleteOnExit()
@@ -116,8 +117,8 @@ fun dwarfDumpTest(@Language("kotlin") programText: String, flags: List<String>, 
 private val haveDwarfDump: Boolean by lazy {
     val version = try {
         subprocess(DistProperties.dwarfDump, "--version")
-                .takeIf { it.process.exitValue() == 0 }
-                ?.stdout
+            .takeIf { it.process.exitValue() == 0 }
+            ?.stdout
     } catch (e: IOException) {
         null
     }
@@ -134,8 +135,8 @@ private val haveDwarfDump: Boolean by lazy {
 private val haveLldb: Boolean by lazy {
     val lldbVersion = try {
         subprocess(DistProperties.lldb, "-version")
-                .takeIf { it.process.exitValue() == 0 }
-                ?.stdout
+            .takeIf { it.process.exitValue() == 0 }
+            ?.stdout
     } catch (e: IOException) {
         null
     }
@@ -150,8 +151,8 @@ private val haveLldb: Boolean by lazy {
 }
 
 private class LldbSessionSpecification private constructor(
-        val commands: List<String>,
-        val patterns: List<List<String>>
+    val commands: List<String>,
+    val patterns: List<List<String>>
 ) {
 
     fun match(output: String) {
@@ -163,11 +164,12 @@ private class LldbSessionSpecification private constructor(
         val responses = blocks.drop(2)
         val executedCommands = responses.map { it.lines().first() }
         val bodies = responses.map { it.lines().drop(1) }
-        val responsesMatch = executedCommands.size == commands.size
-                && commands.zip(executedCommands).all { (cmd, h) -> h == "(lldb) $cmd" }
+        val responsesMatch = executedCommands.size == commands.size &&
+            commands.zip(executedCommands).all { (cmd, h) -> h == "(lldb) $cmd" }
 
         if (!responsesMatch) {
-            val message = """
+            val message =
+                """
                 |Responses do not match commands.
                 |
                 |COMMANDS: |$commands
@@ -183,7 +185,8 @@ private class LldbSessionSpecification private constructor(
             val (pattern, body) = patternBody
             val mismatch = findMismatch(pattern, body)
             if (mismatch != null) {
-                val message = """
+                val message =
+                    """
                     |Wrong LLDB output.
                     |
                     |COMMAND: $command
@@ -214,8 +217,8 @@ private class LldbSessionSpecification private constructor(
 
     private fun match(pattern: String, line: String): Boolean {
         val chunks = pattern.split("""\s*\[\.\.]\s*""".toRegex())
-                .filter { it.isNotBlank() }
-                .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .map { it.trim() }
         check(chunks.isNotEmpty())
         val trimmedLine = line.trim()
 
@@ -229,8 +232,8 @@ private class LldbSessionSpecification private constructor(
     companion object {
         fun parse(spec: String): LldbSessionSpecification {
             val blocks = spec.trimIndent()
-                    .split("(?=^>)".toRegex(RegexOption.MULTILINE))
-                    .filterNot(String::isEmpty)
+                .split("(?=^>)".toRegex(RegexOption.MULTILINE))
+                .filterNot(String::isEmpty)
             for (cmd in blocks) {
                 check(cmd.startsWith(">")) { "Invalid lldb session specification: $cmd" }
             }

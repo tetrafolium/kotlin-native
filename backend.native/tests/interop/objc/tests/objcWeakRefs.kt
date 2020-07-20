@@ -1,7 +1,7 @@
 import kotlinx.cinterop.*
+import objcTests.*
 import kotlin.native.concurrent.*
 import kotlin.test.*
-import objcTests.*
 
 @Test fun testObjCWeakRef() {
     val deallocListener = DeallocListener()

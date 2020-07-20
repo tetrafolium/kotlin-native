@@ -11,4 +11,3 @@ fun bar(vararg x: Int) {
 }
 
 inline fun foo() = bar(17, 19, 23, *intArrayOf(29, 31))
-

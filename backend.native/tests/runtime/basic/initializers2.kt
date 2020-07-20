@@ -19,4 +19,3 @@ fun main(args: Array<String>) {
     println(globalValue2.toString())
     println(globalValue3.toString())
 }
-

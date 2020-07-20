@@ -5,8 +5,8 @@
 
 package kotlin.test.tests
 
-import kotlin.test.*
 import kotlin.native.internal.test.*
+import kotlin.test.*
 
 @Test
 fun test() {

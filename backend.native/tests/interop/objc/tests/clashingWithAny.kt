@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 @Test fun testClashingWithAny() {
     assertEquals("description", TestClashingWithAny1().toString())

@@ -5,8 +5,8 @@
 
 package runtime.workers.lazy1
 
-import kotlin.test.*
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 class Lazy {
     val x = 17
@@ -35,14 +35,13 @@ class Lazy {
 
 @Test fun runTest2() {
     var sum = 0
-    for (i in 1 .. 100) {
+    for (i in 1..100) {
         val self = Lazy().freeze()
         assertEquals(self, self.self)
         sum += self.self.hashCode()
     }
     println("OK")
 }
-
 
 @Test fun runTest3() {
     assertFailsWith<InvalidMutabilityException> {

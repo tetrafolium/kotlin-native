@@ -17,8 +17,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class SplitTest {
 
@@ -152,5 +152,4 @@ class SplitTest {
         assertEquals("b", s[3])
         assertEquals("", s[4])
     }
-
 }

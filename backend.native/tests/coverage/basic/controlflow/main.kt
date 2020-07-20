@@ -18,9 +18,7 @@ fun main() {
 
     if (a < b) {
         println("a < b")
-    }
-    else
-    {
+    } else {
         println("a >= b")
     }
 
@@ -64,9 +62,6 @@ fun main() {
         }
 
         else -> {
-
-
-
         }
     }
 

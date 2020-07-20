@@ -8,15 +8,15 @@ package runtime.basic.initializers0
 import kotlin.test.*
 
 class A {
-    init{
-        println ("A::init")
+    init {
+        println("A::init")
     }
 
     val a = 1
 
-    companion object :B(1) {
+    companion object : B(1) {
         init {
-            println ("A::companion")
+            println("A::companion")
         }
 
         fun foo() {
@@ -24,7 +24,7 @@ class A {
         }
     }
 
-    object AObj : B(){
+    object AObj : B() {
         init {
             println("A::Obj")
         }
@@ -42,12 +42,11 @@ class A {
     A.AObj.foo()
 }
 
-open class B(val a:Int, val b:Int) {
-    constructor(a:Int):this (a, 0) {
-        println("B::constructor(" + a.toString()+ ")")
+open class B(val a: Int, val b: Int) {
+    constructor(a: Int) : this (a, 0) {
+        println("B::constructor(" + a.toString() + ")")
     }
-    constructor():this(0) {
+    constructor() : this(0) {
         println("B::constructor()")
     }
 }
-

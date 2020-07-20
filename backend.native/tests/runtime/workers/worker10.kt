@@ -1,10 +1,9 @@
 package runtime.workers.worker10
 
-import kotlin.test.*
-
+import kotlinx.cinterop.StableRef
 import kotlin.native.concurrent.*
 import kotlin.native.ref.WeakReference
-import kotlinx.cinterop.StableRef
+import kotlin.test.*
 
 class Data(val x: Int)
 
@@ -12,7 +11,7 @@ val topInt = 1
 val topString = "string"
 var topStringVar = "string"
 val topSharedStringWithGetter: String
-        get() = "top"
+    get() = "top"
 val topData = Data(42)
 @SharedImmutable
 val topSharedData = Data(43)
@@ -26,56 +25,86 @@ val topSharedData = Data(43)
     assertEquals(43, topSharedData.x)
     assertEquals("top", topSharedStringWithGetter)
 
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> topInt == 1
-    }).consume {
-        result -> assertEquals(true, result)
-    }
-
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> topString == "string"
-    }).consume {
-        result -> assertEquals(true, result)
-    }
-
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> try {
-        topStringVar == "string"
-    } catch (e: IncorrectDereferenceException) {
-        false
-    }
-    }).consume {
-        result -> assertEquals(Platform.memoryModel == MemoryModel.RELAXED, result)
-    }
-
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> try {
-        topSharedStringWithGetter == "top"
-    } catch (e: IncorrectDereferenceException) {
-        false
-    }
-    }).consume {
-        result -> assertEquals(true, result)
-    }
-
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> try {
-            topData.x == 42
-        } catch (e: IncorrectDereferenceException) {
-            false
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            topInt == 1
         }
-    }).consume {
-        result -> assertEquals(Platform.memoryModel == MemoryModel.RELAXED, result)
+    ).consume {
+        result ->
+        assertEquals(true, result)
     }
 
-    worker.execute(TransferMode.SAFE, { -> }, {
-        it -> try {
-            topSharedData.x == 43
-        } catch (e: Throwable) {
-            false
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            topString == "string"
         }
-    }).consume {
-        result -> assertEquals(true, result)
+    ).consume {
+        result ->
+        assertEquals(true, result)
+    }
+
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            try {
+                topStringVar == "string"
+            } catch (e: IncorrectDereferenceException) {
+                false
+            }
+        }
+    ).consume {
+        result ->
+        assertEquals(Platform.memoryModel == MemoryModel.RELAXED, result)
+    }
+
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            try {
+                topSharedStringWithGetter == "top"
+            } catch (e: IncorrectDereferenceException) {
+                false
+            }
+        }
+    ).consume {
+        result ->
+        assertEquals(true, result)
+    }
+
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            try {
+                topData.x == 42
+            } catch (e: IncorrectDereferenceException) {
+                false
+            }
+        }
+    ).consume {
+        result ->
+        assertEquals(Platform.memoryModel == MemoryModel.RELAXED, result)
+    }
+
+    worker.execute(
+        TransferMode.SAFE, { -> },
+        {
+            it ->
+            try {
+                topSharedData.x == 43
+            } catch (e: Throwable) {
+                false
+            }
+        }
+    ).consume {
+        result ->
+        assertEquals(true, result)
     }
 
     worker.requestTermination().result
@@ -121,7 +150,7 @@ val semaphore = AtomicInt(0)
     worker.requestTermination().result
 }
 
-fun <T: Any> ensureWeakIs(weak: WeakReference<T>, expected: T?) {
+fun <T : Any> ensureWeakIs(weak: WeakReference<T>, expected: T?) {
     assertEquals(expected, weak.get())
 }
 

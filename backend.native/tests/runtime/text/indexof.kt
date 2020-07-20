@@ -8,8 +8,8 @@ package runtime.text.indexof
 import kotlin.test.*
 
 @Test fun runTest() {
-    var str = "Hello World!!"    // for indexOf String
-    var ch = 'a'                 // for indexOf Char
+    var str = "Hello World!!" // for indexOf String
+    var ch = 'a' // for indexOf Char
 
     assertEquals(6, str.indexOf("World", 0))
     assertEquals(6, str.indexOf("World", -1))

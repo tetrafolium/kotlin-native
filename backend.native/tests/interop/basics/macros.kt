@@ -3,9 +3,9 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
 import cmacros.*
 import kotlinx.cinterop.*
+import kotlin.test.*
 
 fun main(args: Array<String>) {
     assertEquals("foo", FOO_STRING)
@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
     val nullPtr: COpaquePointer? = NULL_PTR
     val voidPtr: COpaquePointer? = VOID_PTR
     val intPtr: CPointer<IntVar>? = INT_PTR
-    val ptrSum: CPointer<IntVar>?  = PTR_SUM
+    val ptrSum: CPointer<IntVar>? = PTR_SUM
     val ptrCall: CPointer<IntVar>? = PTR_CALL
 
     assertEquals(null, nullPtr)

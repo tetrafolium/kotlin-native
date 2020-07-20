@@ -1,15 +1,13 @@
 package serialization.fake_overrides
 
-open class X {
-}
+open class X
 
-class Y: X() {
+class Y : X() {
     fun bar() = "Stale"
 }
 
-class B: A() {
-}
+class B : A()
 
-class C: A() {
+class C : A() {
     override fun tic() = "Child"
 }

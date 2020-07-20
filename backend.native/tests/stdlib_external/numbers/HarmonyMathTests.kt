@@ -23,10 +23,10 @@ import kotlin.test.*
 class HarmonyMath {
 
     fun assertEquals(expected: Double, actual: Double, tolerance: Double? = null) =
-            assertEquals(null, expected, actual, tolerance)
+        assertEquals(null, expected, actual, tolerance)
 
     fun assertEquals(expected: Float, actual: Float, tolerance: Float? = null) =
-            assertEquals(null, expected, actual, tolerance)
+        assertEquals(null, expected, actual, tolerance)
 
     fun Double.Companion.isNaN(v: Double) = v.isNaN()
     fun Float.Companion.isNaN(v: Float) = v.isNaN()
@@ -71,10 +71,14 @@ class HarmonyMath {
     @Test fun absD() {
         // Test for abs(Double): Double
 
-        assertTrue("Incorrect Double abs value",
-                abs(-1908.8976) == 1908.8976)
-        assertTrue("Incorrect Double abs value",
-                abs(1908.8976) == 1908.8976)
+        assertTrue(
+            "Incorrect Double abs value",
+            abs(-1908.8976) == 1908.8976
+        )
+        assertTrue(
+            "Incorrect Double abs value",
+            abs(1908.8976) == 1908.8976
+        )
     }
 
     /**
@@ -82,10 +86,14 @@ class HarmonyMath {
      */
     @Test fun absF() {
         // Test for abs(float): float
-        assertTrue("Incorrect float abs value",
-                abs(-1908.8976f) == 1908.8976f)
-        assertTrue("Incorrect float abs value",
-                abs(1908.8976f) == 1908.8976f)
+        assertTrue(
+            "Incorrect float abs value",
+            abs(-1908.8976f) == 1908.8976f
+        )
+        assertTrue(
+            "Incorrect float abs value",
+            abs(1908.8976f) == 1908.8976f
+        )
     }
 
     /**
@@ -102,10 +110,14 @@ class HarmonyMath {
      */
     @Test fun absJ() {
         // Test for abs(long): long
-        assertTrue("Incorrect long abs value",
-                abs(-19088976000089L) == 19088976000089L)
-        assertTrue("Incorrect long abs value",
-                abs(19088976000089L) == 19088976000089L)
+        assertTrue(
+            "Incorrect long abs value",
+            abs(-19088976000089L) == 19088976000089L
+        )
+        assertTrue(
+            "Incorrect long abs value",
+            abs(19088976000089L) == 19088976000089L
+        )
     }
 
     /**
@@ -153,10 +165,14 @@ class HarmonyMath {
      */
     @Test fun ceilD() {
         // Test for ceil(Double): Double
-        assertEquals("Incorrect ceiling for Double",
-                79.0, ceil(78.89), 0.0)
-        assertEquals("Incorrect ceiling for Double",
-                -78.0, ceil(-78.89), 0.0)
+        assertEquals(
+            "Incorrect ceiling for Double",
+            79.0, ceil(78.89), 0.0
+        )
+        assertEquals(
+            "Incorrect ceiling for Double",
+            -78.0, ceil(-78.89), 0.0
+        )
     }
 
     /**
@@ -176,13 +192,15 @@ class HarmonyMath {
 
                 if (sign > 0 || (+0.0).toBits() == sign.toBits() || 0.0.toBits() == sign.toBits()) {
                     assertEquals(
-                            "If the sign is positive, the result should be positive.",
-                            absMagnitudeBits, resultBits)
+                        "If the sign is positive, the result should be positive.",
+                        absMagnitudeBits, resultBits
+                    )
                 }
                 if (sign < 0 || (-0.0).toBits() == sign.toBits()) {
                     assertEquals(
-                            "If the sign is negative, the result should be negative.",
-                            negMagnitudeBits, resultBits)
+                        "If the sign is negative, the result should be negative.",
+                        negMagnitudeBits, resultBits
+                    )
                 }
             }
         }
@@ -206,13 +224,15 @@ class HarmonyMath {
                 val resultBits = magnitude.withSign(sign).toBits()
                 if (sign > 0 || (+0.0f).toBits() == sign.toBits() || 0.0f.toBits() == sign.toBits()) {
                     assertEquals(
-                            "If the sign is positive, the result should be positive.",
-                            absMagnitudeBits, resultBits)
+                        "If the sign is positive, the result should be positive.",
+                        absMagnitudeBits, resultBits
+                    )
                 }
                 if (sign < 0 || (-0.0f).toBits() == sign.toBits()) {
                     assertEquals(
-                            "If the sign is negative, the result should be negative.",
-                            negMagnitudeBits, resultBits)
+                        "If the sign is negative, the result should be negative.",
+                        negMagnitudeBits, resultBits
+                    )
                 }
             }
         }
@@ -235,23 +255,33 @@ class HarmonyMath {
     @Test fun cosh_D() {
         // Test for special situations
         assertTrue(Double.isNaN(cosh(Double.NaN)))
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, cosh(Double.POSITIVE_INFINITY), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, cosh(Double.NEGATIVE_INFINITY), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, cosh(Double.POSITIVE_INFINITY), 0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, cosh(Double.NEGATIVE_INFINITY), 0.0
+        )
         assertEquals("Should return 1.0", 1.0, cosh(+0.0), 0.0)
         assertEquals("Should return 1.0", 1.0, cosh(-0.0), 0.0)
 
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, cosh(1234.56), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, cosh(-1234.56), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, cosh(1234.56), 0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, cosh(-1234.56), 0.0
+        )
         assertEquals("Should return 1.0000000000005", 1.0000000000005, cosh(0.000001), 0.0)
         assertEquals("Should return 1.0000000000005", 1.0000000000005, cosh(-0.000001), 0.0)
         assertEquals("Should return 5.212214351945598", 5.212214351945598, cosh(2.33482), 0.0)
 
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, cosh(Double.MAX_VALUE), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, cosh(Double.MAX_VALUE), 0.0
+        )
         assertEquals("Should return 1.0", 1.0, cosh(Double.MIN_VALUE), 0.0)
     }
 
@@ -270,22 +300,32 @@ class HarmonyMath {
     @Test fun expm1_D() {
         // Test for special cases
         assertTrue("Should return NaN", Double.isNaN(expm1(Double.NaN)))
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, expm1(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, expm1(Double.POSITIVE_INFINITY), 0.0
+        )
         assertEquals("Should return -1.0", -1.0, expm1(Double.NEGATIVE_INFINITY), 0.0)
 
         assertEquals(0.0.toBits(), expm1(0.0).toBits())
         assertEquals(+0.0.toBits(), expm1(+0.0).toBits())
         assertEquals((-0.0).toBits(), expm1(-0.0).toBits())
 
-        assertEquals("Should return -9.999950000166666E-6",
-                -9.999950000166666E-6, expm1(-0.00001), 0.0)
-        assertEquals("Should return 1.0145103074469635E60",
-                1.0145103074469635E60, expm1(138.16951162), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, expm1(123456789123456789123456789.4521584223), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, expm1(Double.MAX_VALUE), 0.0)
+        assertEquals(
+            "Should return -9.999950000166666E-6",
+            -9.999950000166666E-6, expm1(-0.00001), 0.0
+        )
+        assertEquals(
+            "Should return 1.0145103074469635E60",
+            1.0145103074469635E60, expm1(138.16951162), 0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, expm1(123456789123456789123456789.4521584223), 0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, expm1(Double.MAX_VALUE), 0.0
+        )
         assertEquals("Should return MIN_VALUE", Double.MIN_VALUE, expm1(Double.MIN_VALUE), 0.0)
     }
 
@@ -309,10 +349,14 @@ class HarmonyMath {
         assertEquals(Double.NaN.toString(), floor(Double.NaN).toString(), "Floor failed for NaN")
         assertEquals((+0.0).toString(), floor(+0.0).toString(), "Floor failed for +0.0")
         assertEquals((-0.0).toString(), floor(-0.0).toString(), "Floor failed for -0.0")
-        assertEquals(Double.POSITIVE_INFINITY.toString(), floor(Double.POSITIVE_INFINITY).toString(),
-                "Floor failed for +infinity")
-        assertEquals(Double.NEGATIVE_INFINITY.toString(), floor(Double.NEGATIVE_INFINITY).toString(),
-                "Floor failed for -infinity")
+        assertEquals(
+            Double.POSITIVE_INFINITY.toString(), floor(Double.POSITIVE_INFINITY).toString(),
+            "Floor failed for +infinity"
+        )
+        assertEquals(
+            Double.NEGATIVE_INFINITY.toString(), floor(Double.NEGATIVE_INFINITY).toString(),
+            "Floor failed for -infinity"
+        )
     }
 
     /**
@@ -320,36 +364,95 @@ class HarmonyMath {
      */
     @Test fun hypot_DD() {
         // Test for special cases
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(Double.POSITIVE_INFINITY,
-                1.0), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(Double.NEGATIVE_INFINITY,
-                123.324), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(-758.2587,
-                Double.POSITIVE_INFINITY), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(5687.21,
-                Double.NEGATIVE_INFINITY), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(Double.POSITIVE_INFINITY,
-                Double.NEGATIVE_INFINITY), 0.0)
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, hypot(Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY), 0.0)
-        assertTrue("Should be NaN", Double.isNaN(hypot(Double.NaN,
-                2342301.89843)))
-        assertTrue("Should be NaN", Double.isNaN(hypot(-345.2680,
-                Double.NaN)))
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                Double.POSITIVE_INFINITY,
+                1.0
+            ),
+            0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                Double.NEGATIVE_INFINITY,
+                123.324
+            ),
+            0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                -758.2587,
+                Double.POSITIVE_INFINITY
+            ),
+            0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                5687.21,
+                Double.NEGATIVE_INFINITY
+            ),
+            0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY
+            ),
+            0.0
+        )
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY,
+            hypot(
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY
+            ),
+            0.0
+        )
+        assertTrue(
+            "Should be NaN",
+            Double.isNaN(
+                hypot(
+                    Double.NaN,
+                    2342301.89843
+                )
+            )
+        )
+        assertTrue(
+            "Should be NaN",
+            Double.isNaN(
+                hypot(
+                    -345.2680,
+                    Double.NaN
+                )
+            )
+        )
 
         assertEquals("Should return 2396424.905416697", 2396424.905416697, hypot(12322.12, -2396393.2258), 0.0)
-        assertEquals("Should return 138.16958070558556", 138.16958070558556,
-                hypot(-138.16951162, 0.13817035864), 0.0)
-        assertEquals("Should return 1.7976931348623157E308",
-                1.7976931348623157E308, hypot(Double.MAX_VALUE, 211370.35), 0.0)
-        assertEquals("Should return 5413.7185", 5413.7185, hypot(
-                -5413.7185, Double.MIN_VALUE), 0.0)
+        assertEquals(
+            "Should return 138.16958070558556", 138.16958070558556,
+            hypot(-138.16951162, 0.13817035864), 0.0
+        )
+        assertEquals(
+            "Should return 1.7976931348623157E308",
+            1.7976931348623157E308, hypot(Double.MAX_VALUE, 211370.35), 0.0
+        )
+        assertEquals(
+            "Should return 5413.7185", 5413.7185,
+            hypot(
+                -5413.7185, Double.MIN_VALUE
+            ),
+            0.0
+        )
     }
 
     /**
@@ -357,10 +460,14 @@ class HarmonyMath {
      */
     @Test fun IEEEremainderDD() {
         // Test for IEEEremainder(Double, Double): Double
-        assertEquals("Incorrect remainder returned",
-                0.0, 1.0.IEEErem(1.0), 0.0)
-        assertTrue("Incorrect remainder returned",
-                1.32.IEEErem(89.765) >= 1.4705063220631647E-2 || 1.32.IEEErem(89.765) >= 1.4705063220631649E-2)
+        assertEquals(
+            "Incorrect remainder returned",
+            0.0, 1.0.IEEErem(1.0), 0.0
+        )
+        assertTrue(
+            "Incorrect remainder returned",
+            1.32.IEEErem(89.765) >= 1.4705063220631647E-2 || 1.32.IEEErem(89.765) >= 1.4705063220631649E-2
+        )
     }
 
     /**
@@ -371,8 +478,11 @@ class HarmonyMath {
         var d = 10.0
         while (d >= -10) {
             val answer = ln(exp(d))
-            assertTrue("Answer does not equal expected answer for d = " + d
-                    + " answer = " + answer, abs(answer - d) <= abs(d * 0.00000001))
+            assertTrue(
+                "Answer does not equal expected answer for d = " + d +
+                    " answer = " + answer,
+                abs(answer - d) <= abs(d * 0.00000001)
+            )
             d -= 0.5
         }
     }
@@ -406,17 +516,23 @@ class HarmonyMath {
         // Test for special cases
         assertTrue("Should return NaN", Double.isNaN(ln1p(Double.NaN)))
         assertTrue("Should return NaN", Double.isNaN(ln1p(-32.0482175)))
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, ln1p(Double.POSITIVE_INFINITY), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, ln1p(Double.POSITIVE_INFINITY), 0.0
+        )
         assertEquals(0.0.toBits(), ln1p(0.0).toBits())
         assertEquals(+0.0.toBits(), ln1p(+0.0).toBits())
         assertEquals((-0.0).toBits(), ln1p(-0.0).toBits())
 
-        assertEquals("Should return -0.2941782295312541", -0.2941782295312541,
-                ln1p(-0.254856327), 0.0)
+        assertEquals(
+            "Should return -0.2941782295312541", -0.2941782295312541,
+            ln1p(-0.254856327), 0.0
+        )
         assertEquals("Should return 7.368050685564151", 7.368050685564151, ln1p(1583.542), 0.0)
-        assertEquals("Should return 0.4633708685409921", 0.4633708685409921,
-                ln1p(0.5894227), 0.0)
+        assertEquals(
+            "Should return 0.4633708685409921", 0.4633708685409921,
+            ln1p(0.5894227), 0.0
+        )
         assertEquals("Should return 709.782712893384", 709.782712893384, ln1p(Double.MAX_VALUE), 0.0)
         assertEquals("Should return Double.MIN_VALUE", Double.MIN_VALUE, ln1p(Double.MIN_VALUE), 0.0)
     }
@@ -426,12 +542,26 @@ class HarmonyMath {
      */
     @Test fun maxDD() {
         // Test for max(Double, Double): Double
-        assertEquals("Incorrect Double max value", 1908897.6000089, max(-1908897.6000089,
-                1908897.6000089), 0.0)
-        assertEquals("Incorrect Double max value",
-                1908897.6000089, max(2.0, 1908897.6000089), 0.0)
-        assertEquals("Incorrect Double max value", -2.0, max(-2.0,
-                -1908897.6000089), 0.0)
+        assertEquals(
+            "Incorrect Double max value", 1908897.6000089,
+            max(
+                -1908897.6000089,
+                1908897.6000089
+            ),
+            0.0
+        )
+        assertEquals(
+            "Incorrect Double max value",
+            1908897.6000089, max(2.0, 1908897.6000089), 0.0
+        )
+        assertEquals(
+            "Incorrect Double max value", -2.0,
+            max(
+                -2.0,
+                -1908897.6000089
+            ),
+            0.0
+        )
 
         // Compare toString representations here since -0.0 = +0.0, and
         // NaN != NaN and we need to distinguish
@@ -448,12 +578,21 @@ class HarmonyMath {
      */
     @Test fun maxFF() {
         // Test for max(float, float): float
-        assertTrue("Incorrect float max value", max(-1908897.600f,
-                1908897.600f) == 1908897.600f)
-        assertTrue("Incorrect float max value",
-                max(2.0f, 1908897.600f) == 1908897.600f)
-        assertTrue("Incorrect float max value",
-                max(-2.0f, -1908897.600f) == -2.0f)
+        assertTrue(
+            "Incorrect float max value",
+            max(
+                -1908897.600f,
+                1908897.600f
+            ) == 1908897.600f
+        )
+        assertTrue(
+            "Incorrect float max value",
+            max(2.0f, 1908897.600f) == 1908897.600f
+        )
+        assertTrue(
+            "Incorrect float max value",
+            max(-2.0f, -1908897.600f) == -2.0f
+        )
 
         // Compare toString representations here since -0.0 = +0.0, and
         // NaN != NaN and we need to distinguish
@@ -470,10 +609,14 @@ class HarmonyMath {
      */
     @Test fun maxII() {
         // Test for max(int, int): int
-        assertEquals("Incorrect int max value",
-                19088976, max(-19088976, 19088976))
-        assertEquals("Incorrect int max value",
-                19088976, max(20, 19088976))
+        assertEquals(
+            "Incorrect int max value",
+            19088976, max(-19088976, 19088976)
+        )
+        assertEquals(
+            "Incorrect int max value",
+            19088976, max(20, 19088976)
+        )
         assertEquals("Incorrect int max value", -20, max(-20, -19088976))
     }
 
@@ -482,12 +625,21 @@ class HarmonyMath {
      */
     @Test fun maxJJ() {
         // Test for max(long, long): long
-        assertEquals("Incorrect long max value", 19088976000089L, max(-19088976000089L,
-                19088976000089L))
-        assertEquals("Incorrect long max value",
-                19088976000089L, max(20, 19088976000089L))
-        assertEquals("Incorrect long max value",
-                -20, max(-20, -19088976000089L))
+        assertEquals(
+            "Incorrect long max value", 19088976000089L,
+            max(
+                -19088976000089L,
+                19088976000089L
+            )
+        )
+        assertEquals(
+            "Incorrect long max value",
+            19088976000089L, max(20, 19088976000089L)
+        )
+        assertEquals(
+            "Incorrect long max value",
+            -20, max(-20, -19088976000089L)
+        )
     }
 
     /**
@@ -495,12 +647,26 @@ class HarmonyMath {
      */
     @Test fun minDD() {
         // Test for min(Double, Double): Double
-        assertEquals("Incorrect Double min value", -1908897.6000089, min(-1908897.6000089,
-                1908897.6000089), 0.0)
-        assertEquals("Incorrect Double min value",
-                2.0, min(2.0, 1908897.6000089), 0.0)
-        assertEquals("Incorrect Double min value", -1908897.6000089, min(-2.0,
-                -1908897.6000089), 0.0)
+        assertEquals(
+            "Incorrect Double min value", -1908897.6000089,
+            min(
+                -1908897.6000089,
+                1908897.6000089
+            ),
+            0.0
+        )
+        assertEquals(
+            "Incorrect Double min value",
+            2.0, min(2.0, 1908897.6000089), 0.0
+        )
+        assertEquals(
+            "Incorrect Double min value", -1908897.6000089,
+            min(
+                -2.0,
+                -1908897.6000089
+            ),
+            0.0
+        )
         assertEquals("Incorrect Double min value", 1.0, min(1.0, 1.0))
 
         // Compare toString representations here since -0.0 = +0.0, and
@@ -518,12 +684,21 @@ class HarmonyMath {
      */
     @Test fun minFF() {
         // Test for min(float, float): float
-        assertTrue("Incorrect float min value", min(-1908897.600f,
-                1908897.600f) == -1908897.600f)
-        assertTrue("Incorrect float min value",
-                min(2.0f, 1908897.600f) == 2.0f)
-        assertTrue("Incorrect float min value",
-                min(-2.0f, -1908897.600f) == -1908897.600f)
+        assertTrue(
+            "Incorrect float min value",
+            min(
+                -1908897.600f,
+                1908897.600f
+            ) == -1908897.600f
+        )
+        assertTrue(
+            "Incorrect float min value",
+            min(2.0f, 1908897.600f) == 2.0f
+        )
+        assertTrue(
+            "Incorrect float min value",
+            min(-2.0f, -1908897.600f) == -1908897.600f
+        )
         assertEquals("Incorrect float min value", 1.0f, min(1.0f, 1.0f))
 
         // Compare toString representations here since -0.0 = +0.0, and
@@ -541,12 +716,15 @@ class HarmonyMath {
      */
     @Test fun minII() {
         // Test for min(int, int): int
-        assertEquals("Incorrect int min value",
-                -19088976, min(-19088976, 19088976))
+        assertEquals(
+            "Incorrect int min value",
+            -19088976, min(-19088976, 19088976)
+        )
         assertEquals("Incorrect int min value", 20, min(20, 19088976))
-        assertEquals("Incorrect int min value",
-                -19088976, min(-20, -19088976))
-
+        assertEquals(
+            "Incorrect int min value",
+            -19088976, min(-20, -19088976)
+        )
     }
 
     /**
@@ -554,12 +732,18 @@ class HarmonyMath {
      */
     fun test_powDD() {
         // Test for method double java.lang.Math.pow(double, double)
-        assertTrue("pow returned incorrect value",
-                2.0.pow(8.0).toLong() == 256L)
-        assertTrue("pow returned incorrect value",
-                2.0.pow(-8.0) == 0.00390625)
-        assertEquals("Incorrect root returned1",
-                2.0, sqrt(sqrt(2.0).pow(4.0)), 0.0)
+        assertTrue(
+            "pow returned incorrect value",
+            2.0.pow(8.0).toLong() == 256L
+        )
+        assertTrue(
+            "pow returned incorrect value",
+            2.0.pow(-8.0) == 0.00390625
+        )
+        assertEquals(
+            "Incorrect root returned1",
+            2.0, sqrt(sqrt(2.0).pow(4.0)), 0.0
+        )
     }
 
     /**
@@ -567,16 +751,24 @@ class HarmonyMath {
      */
     @Test fun roundD() {
         // Test for round(Double): Double
-        assertEquals("Failed to round properly - up to odd",
-                3.0, round(2.9), 0.0)
+        assertEquals(
+            "Failed to round properly - up to odd",
+            3.0, round(2.9), 0.0
+        )
         assertTrue("Failed to round properly - NaN", Double.isNaN(round(Double.NaN)))
-        assertEquals("Failed to round properly down  to even",
-                2.0, round(2.1), 0.0)
+        assertEquals(
+            "Failed to round properly down  to even",
+            2.0, round(2.1), 0.0
+        )
         assertTrue("Failed to round properly " + 2.5 + " to even", round(2.5) == 2.0)
-        assertTrue("Failed to round properly " + +0.0,
-                round(+0.0) == +0.0)
-        assertTrue("Failed to round properly " + -0.0,
-                round(-0.0) == -0.0)
+        assertTrue(
+            "Failed to round properly " + +0.0,
+            round(+0.0) == +0.0
+        )
+        assertTrue(
+            "Failed to round properly " + -0.0,
+            round(-0.0) == -0.0
+        )
     }
 
     /**
@@ -639,25 +831,39 @@ class HarmonyMath {
     @Test fun sinh_D() {
         // Test for special situations
         assertTrue("Should return NaN", Double.isNaN(sinh(Double.NaN)))
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, sinh(Double.POSITIVE_INFINITY), 0.0)
-        assertEquals("Should return NEGATIVE_INFINITY",
-                Double.NEGATIVE_INFINITY, sinh(Double.NEGATIVE_INFINITY), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, sinh(Double.POSITIVE_INFINITY), 0.0
+        )
+        assertEquals(
+            "Should return NEGATIVE_INFINITY",
+            Double.NEGATIVE_INFINITY, sinh(Double.NEGATIVE_INFINITY), 0.0
+        )
         assertEquals(0.0.toBits(), sinh(0.0).toBits())
         assertEquals(+0.0.toBits(), sinh(+0.0).toBits())
         assertEquals((-0.0).toBits(), sinh(-0.0).toBits())
 
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, sinh(1234.56), 0.0)
-        assertEquals("Should return NEGATIVE_INFINITY",
-                Double.NEGATIVE_INFINITY, sinh(-1234.56), 0.0)
-        assertEquals("Should return 1.0000000000001666E-6",
-                1.0000000000001666E-6, sinh(0.000001), 0.0)
-        assertEquals("Should return -1.0000000000001666E-6",
-                -1.0000000000001666E-6, sinh(-0.000001), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, sinh(1234.56), 0.0
+        )
+        assertEquals(
+            "Should return NEGATIVE_INFINITY",
+            Double.NEGATIVE_INFINITY, sinh(-1234.56), 0.0
+        )
+        assertEquals(
+            "Should return 1.0000000000001666E-6",
+            1.0000000000001666E-6, sinh(0.000001), 0.0
+        )
+        assertEquals(
+            "Should return -1.0000000000001666E-6",
+            -1.0000000000001666E-6, sinh(-0.000001), 0.0
+        )
         assertEquals("Should return 5.115386441963859", 5.115386441963859, sinh(2.33482))
-        assertEquals("Should return POSITIVE_INFINITY",
-                Double.POSITIVE_INFINITY, sinh(Double.MAX_VALUE), 0.0)
+        assertEquals(
+            "Should return POSITIVE_INFINITY",
+            Double.POSITIVE_INFINITY, sinh(Double.MAX_VALUE), 0.0
+        )
         assertEquals("Should return 4.9E-324", 4.9E-324, sinh(Double.MIN_VALUE), 0.0)
     }
 
@@ -676,7 +882,6 @@ class HarmonyMath {
         // Test for tan(Double): Double
         assertEquals("Incorrect answer", 0.0, tan(0.0), 0.0)
         assertEquals("Incorrect answer", 1.5574077246549023, tan(1.0))
-
     }
 
     /**
@@ -693,8 +898,10 @@ class HarmonyMath {
 
         assertEquals("Should return 1.0", 1.0, tanh(1234.56), 0.0)
         assertEquals("Should return -1.0", -1.0, tanh(-1234.56), 0.0)
-        assertEquals("Should return 9.999999999996666E-7",
-                9.999999999996666E-7, tanh(0.000001), 0.0)
+        assertEquals(
+            "Should return 9.999999999996666E-7",
+            9.999999999996666E-7, tanh(0.000001), 0.0
+        )
         assertEquals("Should return 0.981422884124941", 0.981422884124941, tanh(2.33482), 0.0)
         assertEquals("Should return 1.0", 1.0, tanh(Double.MAX_VALUE), 0.0)
         assertEquals("Should return 4.9E-324", 4.9E-324, tanh(Double.MIN_VALUE), 0.0)
@@ -739,10 +946,14 @@ class HarmonyMath {
         assertEquals("Returned incorrect value", 1.4E-45f, ulp(Float.MIN_VALUE), 0f)
         assertEquals("Returned incorrect value", 1.4E-45f, ulp(-Float.MIN_VALUE), 0f)
 
-        assertEquals("Returned incorrect value", 1.1920929E-7f, ulp(1.0f),
-                0f)
-        assertEquals("Returned incorrect value", 1.1920929E-7f,
-                ulp(-1.0f), 0f)
+        assertEquals(
+            "Returned incorrect value", 1.1920929E-7f, ulp(1.0f),
+            0f
+        )
+        assertEquals(
+            "Returned incorrect value", 1.1920929E-7f,
+            ulp(-1.0f), 0f
+        )
         assertEquals("Returned incorrect value", 1.2207031E-4f, ulp(1153.0f), 0f)
         assertEquals("Returned incorrect value", 5.6E-45f, ulp(9.403954E-38f), 0f)
     }
@@ -750,21 +961,25 @@ class HarmonyMath {
     companion object {
 
         const val MIN_NORMAL_D: Double = 2.2250738585072014E-308
-        const val MIN_NORMAL_F: Float  = 1.1754943508222875E-38f
+        const val MIN_NORMAL_F: Float = 1.1754943508222875E-38f
 
         /**
          * cases for test_copySign_DD in est/Strictest
          */
-        internal val COPYSIGN_DD_CASES = doubleArrayOf(Double.POSITIVE_INFINITY, Double.MAX_VALUE, 3.4E302, 2.3,
-                MIN_NORMAL_D, MIN_NORMAL_D / 2, Double.MIN_VALUE, +0.0, 0.0, -0.0, -Double.MIN_VALUE,
-                -MIN_NORMAL_D / 2, -MIN_NORMAL_D, -4.5, -3.4E102, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY)
+        internal val COPYSIGN_DD_CASES = doubleArrayOf(
+            Double.POSITIVE_INFINITY, Double.MAX_VALUE, 3.4E302, 2.3,
+            MIN_NORMAL_D, MIN_NORMAL_D / 2, Double.MIN_VALUE, +0.0, 0.0, -0.0, -Double.MIN_VALUE,
+            -MIN_NORMAL_D / 2, -MIN_NORMAL_D, -4.5, -3.4E102, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY
+        )
 
         /**
          * cases for test_copySign_FF in est/Strictest
          */
-        internal val COPYSIGN_FF_CASES = floatArrayOf(Float.POSITIVE_INFINITY, Float.MAX_VALUE, 3.4E12f, 2.3f,
-                MIN_NORMAL_F, MIN_NORMAL_F / 2, Float.MIN_VALUE, +0.0f, 0.0f, -0.0f, -Float.MIN_VALUE,
-                -MIN_NORMAL_F / 2, -MIN_NORMAL_F, -4.5f, -5.6442E21f, -Float.MAX_VALUE, Float.NEGATIVE_INFINITY)
+        internal val COPYSIGN_FF_CASES = floatArrayOf(
+            Float.POSITIVE_INFINITY, Float.MAX_VALUE, 3.4E12f, 2.3f,
+            MIN_NORMAL_F, MIN_NORMAL_F / 2, Float.MIN_VALUE, +0.0f, 0.0f, -0.0f, -Float.MIN_VALUE,
+            -MIN_NORMAL_F / 2, -MIN_NORMAL_F, -4.5f, -5.6442E21f, -Float.MAX_VALUE, Float.NEGATIVE_INFINITY
+        )
 
         /**
          * start number cases for test_nextTowards_DD in est/Strictest
@@ -773,31 +988,33 @@ class HarmonyMath {
          * NEXTAFTER_DD_START_CASES[i][2] is the nextDown of start number
          */
         internal val NEXTAFTER_DD_START_CASES = arrayOf(
-                doubleArrayOf(3.4, 3.4000000000000004, 3.3999999999999995),
-                doubleArrayOf(-3.4, -3.3999999999999995, -3.4000000000000004),
-                doubleArrayOf(3.4233E109, 3.4233000000000005E109, 3.4232999999999996E109),
-                doubleArrayOf(-3.4233E109, -3.4232999999999996E109, -3.4233000000000005E109),
-                doubleArrayOf(+0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
-                doubleArrayOf(0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
-                doubleArrayOf(-0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
-                doubleArrayOf(Double.MIN_VALUE, 1.0E-323, +0.0),
-                doubleArrayOf(-Double.MIN_VALUE, -0.0, -1.0E-323),
-                doubleArrayOf(MIN_NORMAL_D, 2.225073858507202E-308, 2.225073858507201E-308),
-                doubleArrayOf(-MIN_NORMAL_D, -2.225073858507201E-308, -2.225073858507202E-308),
-                doubleArrayOf(Double.MAX_VALUE, Double.POSITIVE_INFINITY, 1.7976931348623155E308),
-                doubleArrayOf(-Double.MAX_VALUE, -1.7976931348623155E308, Double.NEGATIVE_INFINITY),
-                doubleArrayOf(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.MAX_VALUE),
-                doubleArrayOf(Double.NEGATIVE_INFINITY, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY)
+            doubleArrayOf(3.4, 3.4000000000000004, 3.3999999999999995),
+            doubleArrayOf(-3.4, -3.3999999999999995, -3.4000000000000004),
+            doubleArrayOf(3.4233E109, 3.4233000000000005E109, 3.4232999999999996E109),
+            doubleArrayOf(-3.4233E109, -3.4232999999999996E109, -3.4233000000000005E109),
+            doubleArrayOf(+0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
+            doubleArrayOf(0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
+            doubleArrayOf(-0.0, Double.MIN_VALUE, -Double.MIN_VALUE),
+            doubleArrayOf(Double.MIN_VALUE, 1.0E-323, +0.0),
+            doubleArrayOf(-Double.MIN_VALUE, -0.0, -1.0E-323),
+            doubleArrayOf(MIN_NORMAL_D, 2.225073858507202E-308, 2.225073858507201E-308),
+            doubleArrayOf(-MIN_NORMAL_D, -2.225073858507201E-308, -2.225073858507202E-308),
+            doubleArrayOf(Double.MAX_VALUE, Double.POSITIVE_INFINITY, 1.7976931348623155E308),
+            doubleArrayOf(-Double.MAX_VALUE, -1.7976931348623155E308, Double.NEGATIVE_INFINITY),
+            doubleArrayOf(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.MAX_VALUE),
+            doubleArrayOf(Double.NEGATIVE_INFINITY, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY)
         )
 
         /**
          * direction number cases for test_nextTowards_DD/test_nextTowards_FD in
          * est/Strictest
          */
-        internal val NEXTAFTER_DD_FD_DIRECTION_CASES = doubleArrayOf(Double.POSITIVE_INFINITY,
-                Double.MAX_VALUE, 8.8, 3.4, 1.4, MIN_NORMAL_D, MIN_NORMAL_D / 2,
-                Double.MIN_VALUE, +0.0, 0.0, -0.0, -Double.MIN_VALUE, -MIN_NORMAL_D / 2,
-                -MIN_NORMAL_D, -1.4, -3.4, -8.8, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY)
+        internal val NEXTAFTER_DD_FD_DIRECTION_CASES = doubleArrayOf(
+            Double.POSITIVE_INFINITY,
+            Double.MAX_VALUE, 8.8, 3.4, 1.4, MIN_NORMAL_D, MIN_NORMAL_D / 2,
+            Double.MIN_VALUE, +0.0, 0.0, -0.0, -Double.MIN_VALUE, -MIN_NORMAL_D / 2,
+            -MIN_NORMAL_D, -1.4, -3.4, -8.8, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY
+        )
 
         /**
          * start number cases for test_nextTowards_FD in est/Strictest
@@ -805,7 +1022,8 @@ class HarmonyMath {
          * NEXTAFTER_FD_START_CASES[i][1] is the nextUp of start number
          * NEXTAFTER_FD_START_CASES[i][2] is the nextDown of start number
          */
-        internal val NEXTAFTER_FD_START_CASES = arrayOf(floatArrayOf(3.4f, 3.4000003f, 3.3999999f),
+        internal val NEXTAFTER_FD_START_CASES = arrayOf(
+            floatArrayOf(3.4f, 3.4000003f, 3.3999999f),
             floatArrayOf(-3.4f, -3.3999999f, -3.4000003f),
             floatArrayOf(3.4233E19f, 3.4233002E19f, 3.4232998E19f),
             floatArrayOf(-3.4233E19f, -3.4232998E19f, -3.4233002E19f),
@@ -819,6 +1037,7 @@ class HarmonyMath {
             floatArrayOf(Float.MAX_VALUE, Float.POSITIVE_INFINITY, 3.4028233E38f),
             floatArrayOf(-Float.MAX_VALUE, -3.4028233E38f, Float.NEGATIVE_INFINITY),
             floatArrayOf(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.MAX_VALUE),
-            floatArrayOf(Float.NEGATIVE_INFINITY, -Float.MAX_VALUE, Float.NEGATIVE_INFINITY))
+            floatArrayOf(Float.NEGATIVE_INFINITY, -Float.MAX_VALUE, Float.NEGATIVE_INFINITY)
+        )
     }
 }

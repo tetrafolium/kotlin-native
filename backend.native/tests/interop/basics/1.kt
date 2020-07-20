@@ -13,5 +13,4 @@ fun main(args: Array<String>) {
     val (quot, rem) = divResult.useContents { Pair(quot, rem) }
     println(quot)
     println(rem)
-
 }

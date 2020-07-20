@@ -5,9 +5,8 @@
 
 package runtime.workers.freeze4
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class Data(val x: Int, val s: String, val next: Data? = null)
 

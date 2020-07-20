@@ -11,5 +11,5 @@ fun foo(vararg x: Any?) {}
 fun bar() = foo()
 
 @Test fun runTest() {
-  bar()
+    bar()
 }

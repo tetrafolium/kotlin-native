@@ -13,7 +13,7 @@ class Failed {
     fun bar() {
         try {
             baz()
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             throw Exception("Bar", e)
         }
     }

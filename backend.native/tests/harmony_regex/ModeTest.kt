@@ -16,8 +16,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class ModeTest {
 
@@ -113,5 +113,4 @@ class ModeTest {
         assertEquals("4", result!!.groupValues[1])
         assertNull(result.next())
     }
-
 }

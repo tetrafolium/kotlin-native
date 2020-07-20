@@ -5,9 +5,8 @@
 
 package runtime.basic.initializers6
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 val aWorkerId = AtomicInt(0)
 val bWorkersCount = 3
@@ -48,19 +47,28 @@ fun produceB(): String {
     aWorkerId.value = aWorker.id
     val bWorkers = Array(bWorkersCount, { _ -> Worker.start() })
 
-    val aFuture = aWorker.execute(TransferMode.SAFE, {}, {
-        A.b
-    })
-    val bFutures = Array(bWorkers.size, {
-        bWorkers[it].execute(TransferMode.SAFE, {}, {
-            // Wait until A has started to initialize.
-            while (bWorkerUnlocker.value < 1) {}
-            // Now allow A initialization to continue.
-            aWorkerUnlocker.increment()
-            // And this should not've tried to init A itself.
-            A.a + A.b
-        })
-    })
+    val aFuture = aWorker.execute(
+        TransferMode.SAFE, {},
+        {
+            A.b
+        }
+    )
+    val bFutures = Array(
+        bWorkers.size,
+        {
+            bWorkers[it].execute(
+                TransferMode.SAFE, {},
+                {
+                    // Wait until A has started to initialize.
+                    while (bWorkerUnlocker.value < 1) {}
+                    // Now allow A initialization to continue.
+                    aWorkerUnlocker.increment()
+                    // And this should not've tried to init A itself.
+                    A.a + A.b
+                }
+            )
+        }
+    )
 
     for (future in bFutures) {
         assertEquals("AB+A", future.result)

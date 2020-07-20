@@ -5,8 +5,8 @@
 
 package runtime.collections.typed_array1
 
-import kotlin.test.*
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest() {
     val array = ByteArray(17)
@@ -33,10 +33,10 @@ import kotlin.native.concurrent.*
     assertFailsWith<ArrayIndexOutOfBoundsException> {
         array.setShortAt(16, 2.toShort())
     }
-    assertFailsWith<ArrayIndexOutOfBoundsException>  {
+    assertFailsWith<ArrayIndexOutOfBoundsException> {
         array.setCharAt(22, 'a')
     }
-    assertFailsWith<ArrayIndexOutOfBoundsException>  {
+    assertFailsWith<ArrayIndexOutOfBoundsException> {
         array.setIntAt(15, 1234)
     }
     assertFailsWith<ArrayIndexOutOfBoundsException> {

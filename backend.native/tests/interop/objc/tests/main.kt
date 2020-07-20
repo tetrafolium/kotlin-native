@@ -1,6 +1,6 @@
-import kotlin.system.exitProcess
 import kotlinx.cinterop.autoreleasepool
 import kotlin.native.internal.test.testLauncherEntryPoint
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     autoreleasepool {

@@ -5,9 +5,8 @@
 
 package runtime.workers.lazy0
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class Data(val x: Int, val y: String)
 
@@ -26,7 +25,7 @@ object Immutable2 {
 object Immutable3 {
     val x by lazy {
         var result = 0
-        for (i in 1 .. 1000)
+        for (i in 1..1000)
             result += i
         result
     }
@@ -34,10 +33,13 @@ object Immutable3 {
 
 fun testSingleData(workers: Array<Worker>) {
     val set = mutableSetOf<Any?>()
-    for (attempt in 1 .. 3) {
-        val futures = Array(workers.size, { workerIndex ->
-            workers[workerIndex].execute(TransferMode.SAFE, { "" }) { _  -> Immutable2.y }
-        })
+    for (attempt in 1..3) {
+        val futures = Array(
+            workers.size,
+            { workerIndex ->
+                workers[workerIndex].execute(TransferMode.SAFE, { "" }) { _ -> Immutable2.y }
+            }
+        )
         futures.forEach { set += it.result }
     }
     assertEquals(set.size, 1)
@@ -48,10 +50,13 @@ fun testFrozenLazy(workers: Array<Worker>) {
     // To make sure it is always frozen, and we don't race in relaxed mode.
     Immutable3.freeze()
     val set = mutableSetOf<Int>()
-    for (attempt in 1 .. 3) {
-        val futures = Array(workers.size, { workerIndex ->
-            workers[workerIndex].execute(TransferMode.SAFE, { "" }) { _  -> Immutable3.x }
-        })
+    for (attempt in 1..3) {
+        val futures = Array(
+            workers.size,
+            { workerIndex ->
+                workers[workerIndex].execute(TransferMode.SAFE, { "" }) { _ -> Immutable3.x }
+            }
+        )
         futures.forEach { set += it.result }
     }
     assertEquals(1, set.size)
@@ -66,12 +71,12 @@ fun testLiquidLazy() {
         }
     }
     val l1 = L()
-    for (i in 1 .. 100)
+    for (i in 1..100)
         assertEquals(l1.value, 17)
 
     val l2 = L()
     l2.freeze()
-    for (i in 1 .. 100)
+    for (i in 1..100)
         assertEquals(l2.value, 17)
 }
 
@@ -79,7 +84,7 @@ fun testLiquidLazy() {
     assertEquals(42, Immutable.x)
 
     val COUNT = 5
-    val workers = Array(COUNT, { _ -> Worker.start()})
+    val workers = Array(COUNT, { _ -> Worker.start() })
     testSingleData(workers)
     testFrozenLazy(workers)
     testLiquidLazy()

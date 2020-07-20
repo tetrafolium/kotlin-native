@@ -19,18 +19,18 @@ fun <E> getFirstElement(collection: Collection<E>) = collection.first()
 class GenericExtensionClass<K, out V, out T : Map<K, V>> (private val holder: T?) {
     fun getFirstKey(): K? = holder?.entries?.first()?.key
 
-    fun getFirstValue() : V? {
+    fun getFirstValue(): V? {
         holder?.entries?.forEach { e -> println("KEY: ${e.key}  VALUE: ${e.value}") }
         return holder?.entries?.first()?.value
     }
 }
 
 fun <K, V> createPair():
-        Pair<LinkedHashMap<K, V>, GenericExtensionClass<K, V, Map<K, V>>> {
-    val l = createLinkedMap<K, V>()
-    val g = GenericExtensionClass(l)
-    return Pair(l, g)
-}
+    Pair<LinkedHashMap<K, V>, GenericExtensionClass<K, V, Map<K, V>>> {
+        val l = createLinkedMap<K, V>()
+        val g = GenericExtensionClass(l)
+        return Pair(l, g)
+    }
 
 fun <K, V> createLinkedMap() = linkedMapOf<K, V>()
 
@@ -44,7 +44,7 @@ fun addSomeElementsToMap(map: MutableMap<String, Int>) {
 fun list(vararg elements: Any?): Any = listOf(*elements)
 fun set(vararg elements: Any?): Any = setOf(*elements)
 fun map(vararg keysAndValues: Any?): Any = mutableMapOf<Any?, Any?>().apply {
-    (0 until keysAndValues.size step 2).forEach {index ->
+    (0 until keysAndValues.size step 2).forEach { index ->
         this[keysAndValues[index]] = keysAndValues[index + 1]
     }
 }

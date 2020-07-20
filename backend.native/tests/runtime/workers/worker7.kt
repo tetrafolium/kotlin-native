@@ -5,17 +5,18 @@
 
 package runtime.workers.worker7
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest() {
     val worker = Worker.start(false)
     val future = worker.execute(TransferMode.SAFE, { "Input" }) {
-        input -> println(input)
+        input ->
+        println(input)
     }
     future.consume {
-        result -> println("Got $result")
+        result ->
+        println("Got $result")
     }
 
     assertFailsWith<IllegalStateException> {

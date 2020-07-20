@@ -17,9 +17,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-
 class ToolDriver(
-        private val useInProcessCompiler: Boolean = false
+    private val useInProcessCompiler: Boolean = false
 ) {
     fun compile(source: Path, output: Path, vararg args: String) {
         check(!Files.exists(output))
@@ -37,28 +36,28 @@ class ToolDriver(
 
     fun runLldb(program: Path, commands: List<String>): String {
         val args = listOf("-b", "-o", "command script import \"${DistProperties.lldbPrettyPrinters}\"") +
-                commands.flatMap { listOf("-o", it) }
+            commands.flatMap { listOf("-o", it) }
         return subprocess(DistProperties.lldb, program.toString(), "-b", *args.toTypedArray())
-                .thrownIfFailed()
-                .stdout
+            .thrownIfFailed()
+            .stdout
     }
 
-    fun runDwarfDump(program: Path, processor:List<DwarfTag>.()->Unit) {
-        val out = subprocess(DistProperties.dwarfDump, "${program}.dSYM/Contents/Resources/DWARF/${program.fileName}").takeIf { it.process.exitValue() == 0 }?.stdout ?: error("${program}.dSYM/Contents/Resources/DWARF/${program.fileName}")
+    fun runDwarfDump(program: Path, processor: List<DwarfTag>.() -> Unit) {
+        val out = subprocess(DistProperties.dwarfDump, "$program.dSYM/Contents/Resources/DWARF/${program.fileName}").takeIf { it.process.exitValue() == 0 }?.stdout ?: error("$program.dSYM/Contents/Resources/DWARF/${program.fileName}")
         DwarfUtilParser().parse(StringReader(out)).tags.toList().processor()
     }
 }
 
 data class ProcessOutput(
-        val program: Path,
-        val process: Process,
-        val stdout: String,
-        val stderr: String,
-        val durationMs: Long
+    val program: Path,
+    val process: Process,
+    val stdout: String,
+    val stderr: String,
+    val durationMs: Long
 ) {
     fun thrownIfFailed(): ProcessOutput {
         fun renderStdStream(name: String, text: String): String =
-                if (text.isBlank()) "$name is empty" else "$name:\n$text"
+            if (text.isBlank()) "$name is empty" else "$name:\n$text"
 
         check(process.exitValue() == 0) {
             """$program exited with non-zero value: ${process.exitValue()}
@@ -89,7 +88,7 @@ fun subprocess(program: Path, vararg args: String): ProcessOutput {
                 err.cancel()
                 error("$program timeouted")
             }
-        }catch (e:Exception) {
+        } catch (e: Exception) {
             out.cancel()
             err.cancel()
             error(e)

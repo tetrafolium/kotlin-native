@@ -34,15 +34,15 @@ fun assertEquals(builder: StringBuilder, content: String) = assertEquals(builder
 fun assertException(body: () -> Unit) {
     try {
         body()
-        throw AssertionError ("Test failed: no IndexOutOfBoundsException on wrong indices")
+        throw AssertionError("Test failed: no IndexOutOfBoundsException on wrong indices")
     } catch (e: IndexOutOfBoundsException) {
     } catch (e: IllegalArgumentException) {}
 }
 
 // Insert ===================================================================================================
 fun testInsertString(initial: String, index: Int, toInsert: String, expected: String) {
-    assertEquals(StringBuilder(initial).insert(index, toInsert),                 expected)
-    assertEquals(StringBuilder(initial).insert(index, toInsert.toCharArray()),   expected)
+    assertEquals(StringBuilder(initial).insert(index, toInsert), expected)
+    assertEquals(StringBuilder(initial).insert(index, toInsert.toCharArray()), expected)
     assertEquals(StringBuilder(initial).insert(index, toInsert as CharSequence), expected)
 }
 
@@ -53,59 +53,59 @@ fun testInsertStringException(initial: String, index: Int, toInsert: String) {
 }
 
 fun testInsertSingle(value: Byte) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Short) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Int) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Long) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Float) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Double) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Any?) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsertSingle(value: Char) {
-    assertEquals(StringBuilder("abcd").insert(0, value),  value.toString() + "abcd")
-    assertEquals(StringBuilder("abcd").insert(4, value),  "abcd" + value.toString())
-    assertEquals(StringBuilder("abcd").insert(2, value),  "ab" + value.toString() + "cd")
-    assertEquals(StringBuilder("").insert(0, value),      value.toString())
+    assertEquals(StringBuilder("abcd").insert(0, value), value.toString() + "abcd")
+    assertEquals(StringBuilder("abcd").insert(4, value), "abcd" + value.toString())
+    assertEquals(StringBuilder("abcd").insert(2, value), "ab" + value.toString() + "cd")
+    assertEquals(StringBuilder("").insert(0, value), value.toString())
 }
 
 fun testInsert() {
@@ -125,10 +125,10 @@ fun testInsert() {
 
     // Subsequence of CharSequence.
     // Insert in the beginning.
-    assertEquals(StringBuilder("abcd").insert(0, "1234", 0, 0), "abcd")                    // 0 symbols
-    assertEquals(StringBuilder("abcd").insert(0, "1234", 0, 1), "1abcd")                   // 1 symbol
-    assertEquals(StringBuilder("abcd").insert(0, "1234", 1, 3), "23abcd")                  // 2 symbols
-    assertEquals(StringBuilder("abcd").insert(0, null as CharSequence?, 1, 3), "ulabcd")   // 2 symbols of null
+    assertEquals(StringBuilder("abcd").insert(0, "1234", 0, 0), "abcd") // 0 symbols
+    assertEquals(StringBuilder("abcd").insert(0, "1234", 0, 1), "1abcd") // 1 symbol
+    assertEquals(StringBuilder("abcd").insert(0, "1234", 1, 3), "23abcd") // 2 symbols
+    assertEquals(StringBuilder("abcd").insert(0, null as CharSequence?, 1, 3), "ulabcd") // 2 symbols of null
 
     // Insert in the end.
     assertEquals(StringBuilder("abcd").insert(4, "1234", 0, 0), "abcd")
@@ -210,22 +210,28 @@ fun testReverse() {
     testReverse(str, "\ud800\udc00cba", str)
 
     str = "\ud800\udc00\udc01\ud801\ud802\udc02"
-    testReverse(str, "\ud802\udc02\ud801\udc01\ud800\udc00",
-            "\ud800\udc00\ud801\udc01\ud802\udc02")
+    testReverse(
+        str, "\ud802\udc02\ud801\udc01\ud800\udc00",
+        "\ud800\udc00\ud801\udc01\ud802\udc02"
+    )
 
     str = "\ud800\udc00\ud801\udc01\ud802\udc02"
     testReverse(str, "\ud802\udc02\ud801\udc01\ud800\udc00", str)
 
     str = "\ud800\udc00\udc01\ud801a"
-    testReverse(str, "a\ud801\udc01\ud800\udc00",
-            "\ud800\udc00\ud801\udc01a")
+    testReverse(
+        str, "a\ud801\udc01\ud800\udc00",
+        "\ud800\udc00\ud801\udc01a"
+    )
 
     str = "a\ud800\udc00\ud801\udc01"
     testReverse(str, "\ud801\udc01\ud800\udc00a", str)
 
     str = "\ud800\udc00\udc01\ud801ab"
-    testReverse(str, "ba\ud801\udc01\ud800\udc00",
-            "\ud800\udc00\ud801\udc01ab")
+    testReverse(
+        str, "ba\ud801\udc01\ud800\udc00",
+        "\ud800\udc00\ud801\udc01ab"
+    )
 
     str = "ab\ud800\udc00\ud801\udc01"
     testReverse(str, "\ud801\udc01\ud800\udc00ba", str)

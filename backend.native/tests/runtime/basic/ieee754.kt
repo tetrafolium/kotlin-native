@@ -24,9 +24,13 @@ import kotlin.test.*
     val d2i = d.toInt()
     println("$d2i ${d2i.toShort()}")
 
-    for (f in arrayOf(Float.POSITIVE_INFINITY, Float.MAX_VALUE / 2, Float.MAX_VALUE,
+    for (
+        f in arrayOf(
+            Float.POSITIVE_INFINITY, Float.MAX_VALUE / 2, Float.MAX_VALUE,
             3.14f, Float.NaN, -33333.12312f, Float.MIN_VALUE, Float.NEGATIVE_INFINITY,
-            -1.2f, -12.6f, 2.3f)) {
+            -1.2f, -12.6f, 2.3f
+        )
+    ) {
         println("FLOAT:: $f   INT:: ${f.toInt()}")
     }
 

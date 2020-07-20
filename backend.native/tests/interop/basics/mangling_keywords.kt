@@ -1,5 +1,5 @@
-import kotlin.test.*
 import mangling_keywords.*
+import kotlin.test.*
 
 fun main() {
     // Check that all Kotlin keywords are imported and mangled.
@@ -24,4 +24,3 @@ fun main() {
     assertEquals("var", `var`)
     assertEquals("when", `when`)
 }
-

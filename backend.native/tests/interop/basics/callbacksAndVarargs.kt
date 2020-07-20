@@ -3,9 +3,9 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
-import kotlinx.cinterop.*
 import ccallbacksAndVarargs.*
+import kotlinx.cinterop.*
+import kotlin.test.*
 
 fun main() {
     testStructCallbacks()
@@ -15,9 +15,12 @@ fun main() {
 
 fun testStructCallbacks() {
     assertEquals(42, getX(staticCFunction { -> cValue<S> { x = 42 } }))
-    applyCallback(cValue { x = 17 }, staticCFunction { it: CValue<S> ->
-        assertEquals(17, it.useContents { x })
-    })
+    applyCallback(
+        cValue { x = 17 },
+        staticCFunction { it: CValue<S> ->
+            assertEquals(17, it.useContents { x })
+        }
+    )
 
     assertEquals(66, makeS(66, 111).useContents { x })
 }
@@ -26,22 +29,22 @@ fun testVarargs() {
     assertEquals(E.ONE, makeE(1))
 
     getVarargs(
-            0,
-            true,
-            2.toByte(),
-            Short.MIN_VALUE,
-            42,
-            Long.MAX_VALUE,
-            3.14f,
-            2.71,
-            0x1234ABCDL.toCPointer<COpaque>(),
-            UByte.MAX_VALUE,
-            22.toUShort(),
-            111u,
-            ULong.MAX_VALUE,
-            E.TWO,
-            cValue<S> { x = 15 },
-            null
+        0,
+        true,
+        2.toByte(),
+        Short.MIN_VALUE,
+        42,
+        Long.MAX_VALUE,
+        3.14f,
+        2.71,
+        0x1234ABCDL.toCPointer<COpaque>(),
+        UByte.MAX_VALUE,
+        22.toUShort(),
+        111u,
+        ULong.MAX_VALUE,
+        E.TWO,
+        cValue<S> { x = 15 },
+        null
     ).useContents {
         assertEquals(1, a1)
         assertEquals(2.toByte(), a2)

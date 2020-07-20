@@ -25,9 +25,9 @@ fun run() {
     assertEquals(2, ForwardDeclaredEnum.TWO.value)
 
     println(
-            getSupplier(
-                    invoke1(42) { it * 2 }
-            )!!()
+        getSupplier(
+            invoke1(42) { it * 2 }
+        )!!()
     )
 
     val foo = Foo()
@@ -76,7 +76,7 @@ fun run() {
         if (Platform.memoryModel == MemoryModel.STRICT)
             println(map.keys.map { it.toString() }.min() == foo.description())
         else
-            // TODO: hack until proper cycle collection in maps.
+        // TODO: hack until proper cycle collection in maps.
             println(true)
     }
     println(globalString)
@@ -101,14 +101,13 @@ fun run() {
     createObjectWithFactory(object : NSObject(), ObjectFactoryProtocol {
         override fun create() = autoreleasepool { NSObject() }
     })
-
 }
 
 fun MutablePairProtocol.swap() {
     update(0, add = second)
     update(1, sub = first)
     update(0, add = second)
-    update(1, sub = second*2)
+    update(1, sub = second * 2)
 }
 
 class Bar : Foo() {
@@ -222,8 +221,10 @@ fun testExportObjCClass() {
     assertEquals(TestExportObjCClass1Name, TestExportObjCClass1().objCClassName)
     assertEquals("TestExportObjCClass2", TestExportObjCClass2().objCClassName)
 
-    assertTrue((TestExportObjCClass3().objCClassName == TestExportObjCClass34Name)
-            xor (TestExportObjCClass4().objCClassName == TestExportObjCClass34Name))
+    assertTrue(
+        (TestExportObjCClass3().objCClassName == TestExportObjCClass34Name)
+            xor (TestExportObjCClass4().objCClassName == TestExportObjCClass34Name)
+    )
 }
 
 fun testLocalizedStrings() {

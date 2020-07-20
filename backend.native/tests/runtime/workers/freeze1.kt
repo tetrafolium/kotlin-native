@@ -5,16 +5,15 @@
 
 package runtime.workers.freeze1
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class Node(var previous: Node?, var data: Int)
 
 fun makeCycle(count: Int): Node {
     val first = Node(null, 0)
     var current = first
-    for (index in 1 .. count - 1) {
+    for (index in 1..count - 1) {
         current = Node(current, index)
     }
     first.previous = current

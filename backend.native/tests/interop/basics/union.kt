@@ -8,7 +8,7 @@ fun main() {
         val basicUnion = alloc<BasicUnion>()
         for (value in Short.MIN_VALUE..Short.MAX_VALUE) {
             basicUnion.ll = value.toLong()
-            val expected =  if (Platform.isLittleEndian) {
+            val expected = if (Platform.isLittleEndian) {
                 value
             } else {
                 value.toLong() ushr (Long.SIZE_BITS - Short.SIZE_BITS)

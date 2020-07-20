@@ -5,9 +5,8 @@
 
 package runtime.workers.freeze2
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class Data(var int: Int)
 
@@ -16,7 +15,7 @@ data class Data(var int: Int)
     val a0 = Data(2)
     a0.int++
     a0.freeze()
-    assertFailsWith<InvalidMutabilityException> {a0.int++ }
+    assertFailsWith<InvalidMutabilityException> { a0.int++ }
 
     val a1 = ByteArray(2)
     a1[1]++
@@ -62,26 +61,30 @@ data class Data(var int: Int)
     val worker = Worker.start()
     var data: Any = "Hello" + " " + "world"
     assert(data.isFrozen)
-    worker.execute(TransferMode.SAFE, { data } ) {
-        input -> println("Worker 1: $input")
+    worker.execute(TransferMode.SAFE, { data }) {
+        input ->
+        println("Worker 1: $input")
     }.result
 
     data = 42
     assert(data.isFrozen)
-    worker.execute(TransferMode.SAFE, { data } ) {
-        input -> println("Worker2: $input")
+    worker.execute(TransferMode.SAFE, { data }) {
+        input ->
+        println("Worker2: $input")
     }.result
 
     data = 239.0
     assert(data.isFrozen)
-    worker.execute(TransferMode.SAFE, { data } ) {
-        input -> println("Worker3: $input")
+    worker.execute(TransferMode.SAFE, { data }) {
+        input ->
+        println("Worker3: $input")
     }.result
 
     data = 'a'
     assert(data.isFrozen)
-    worker.execute(TransferMode.SAFE, { data } ) {
-        input -> println("Worker4: $input")
+    worker.execute(TransferMode.SAFE, { data }) {
+        input ->
+        println("Worker4: $input")
     }.result
 
     worker.requestTermination().result

@@ -9,7 +9,7 @@ interface I {
     val data: String
 }
 
-class A(override val data: String): I
+class A(override val data: String) : I
 
 enum class E(val data: String) {
     A("Enum entry A"),

@@ -5,9 +5,8 @@
 
 package runtime.workers.worker3
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class DataParam(var int: Int)
 data class WorkerArgument(val intParam: Int, val dataParam: DataParam)
@@ -21,9 +20,12 @@ fun main(args: Array<String>) {
     val worker = Worker.start()
     val dataParam = DataParam(17)
     val future = try {
-        worker.execute(TransferMode.SAFE,
-                { WorkerArgument(42, dataParam) }) {
-            input -> WorkerResult(input.intParam, input.dataParam.toString() + " result")
+        worker.execute(
+            TransferMode.SAFE,
+            { WorkerArgument(42, dataParam) }
+        ) {
+            input ->
+            WorkerResult(input.intParam, input.dataParam.toString() + " result")
         }
     } catch (e: IllegalStateException) {
         null

@@ -1,5 +1,5 @@
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 class KT38234_Impl : KT38234_P1Protocol, KT38234_Base() {
     override fun foo(): Int = 566

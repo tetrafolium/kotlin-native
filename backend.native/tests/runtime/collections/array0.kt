@@ -33,6 +33,6 @@ import kotlin.test.*
     val booleanArray = BooleanArray(12)
     println(booleanArray.size.toString())
 
-    val stringArray = Array<String>(13, { i -> ""})
+    val stringArray = Array<String>(13, { i -> "" })
     println(stringArray.size.toString())
 }

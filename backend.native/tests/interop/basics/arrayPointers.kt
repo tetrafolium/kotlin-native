@@ -1,6 +1,6 @@
 import carrayPointers.*
-import kotlin.test.*
 import kotlinx.cinterop.*
+import kotlin.test.*
 
 fun main() {
     arrayPointer = globalArray

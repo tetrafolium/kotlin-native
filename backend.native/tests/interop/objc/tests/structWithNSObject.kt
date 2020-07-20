@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 private class NSObjectSubClass : NSObject() {
     val x = 111

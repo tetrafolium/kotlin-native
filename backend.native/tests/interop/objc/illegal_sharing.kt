@@ -1,7 +1,7 @@
-import kotlin.native.concurrent.*
-import kotlin.test.*
 import platform.Foundation.*
 import platform.darwin.NSObject
+import kotlin.native.concurrent.*
+import kotlin.test.*
 
 fun Worker.runInWorker(block: () -> Unit) {
     this.execute(TransferMode.SAFE, { block.freeze() }) {

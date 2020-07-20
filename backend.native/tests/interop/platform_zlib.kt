@@ -4,7 +4,6 @@
  */
 
 import kotlinx.cinterop.*
-
 import platform.zlib.*
 
 val source = immutableBlobOf(0xF3, 0x48, 0xCD, 0xC9, 0xC9, 0x57, 0x04, 0x00).asCPointer().reinterpret<UByteVar>()

@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
 import kotlin.math.*
+import kotlin.test.*
 
 fun main() {
     val hf = hypot(Float.NEGATIVE_INFINITY, Float.NaN)

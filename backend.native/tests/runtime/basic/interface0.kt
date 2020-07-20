@@ -12,14 +12,13 @@ interface A {
     fun c()
 }
 
-class B(): A {
+class B() : A {
     override fun c() {
         println("PASSED")
     }
 }
 
 @Test fun runTest() {
-    val a:A = B()
+    val a: A = B()
     a.b()
 }
-

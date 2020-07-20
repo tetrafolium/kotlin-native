@@ -31,14 +31,12 @@ fun test3() {
     current.freeze()
 }
 
-
 fun makeIt(): Holder {
     val atomic = AtomicReference<Holder?>(null)
     val holder = Holder(atomic).freeze()
     atomic.value = holder
     return holder
 }
-
 
 fun test4() {
     val holder = makeIt()
@@ -83,9 +81,12 @@ fun test5() {
     kotlin.native.internal.GC.collect()
     Worker.current.park(100 * 1000)
     withWorker {
-        executeAfter(0L, {
-            kotlin.native.internal.GC.collect()
-        }.freeze())
+        executeAfter(
+            0L,
+            {
+                kotlin.native.internal.GC.collect()
+            }.freeze()
+        )
     }
     Worker.current.park(1000)
     assertTrue(holder.value.value != null)

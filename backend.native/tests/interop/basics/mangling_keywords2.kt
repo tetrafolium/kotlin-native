@@ -1,6 +1,6 @@
-import kotlin.test.*
-import mangling_keywords2.*
 import kotlinx.cinterop.useContents
+import mangling_keywords2.*
+import kotlin.test.*
 
 fun main() {
     // Check that all Kotlin keywords are imported and mangled.

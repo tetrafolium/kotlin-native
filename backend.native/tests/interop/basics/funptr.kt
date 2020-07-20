@@ -3,13 +3,33 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlinx.cinterop.*
 import cfunptr.*
+import kotlinx.cinterop.*
 import kotlin.test.*
 
 typealias NotSoLongSignatureFunction = (
-    Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int,
-    Int, Int, Int, Int, Int, Int, Int, Int, Int, Int, Int
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int,
+    Int
 ) -> Int
 
 fun main(args: Array<String>) {
@@ -25,9 +45,9 @@ fun main(args: Array<String>) {
     printIntPtr(fortyTwo)
 
     printIntPtr(
-            getDoubleToIntPtr()!!(
-                    getAddPtr()!!(5.1, 12.2)
-            )
+        getDoubleToIntPtr()!!(
+            getAddPtr()!!(5.1, 12.2)
+        )
     )
 
     val isIntPositivePtr = getIsIntPositivePtr()!!

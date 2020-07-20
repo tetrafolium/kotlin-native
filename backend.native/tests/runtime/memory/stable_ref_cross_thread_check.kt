@@ -5,10 +5,9 @@
 
 package runtime.memory.stable_ref_cross_thread_check
 
-import kotlin.test.*
-
-import kotlin.native.concurrent.*
 import kotlinx.cinterop.*
+import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test
 fun runTest1() {

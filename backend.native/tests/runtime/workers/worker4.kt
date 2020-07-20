@@ -5,9 +5,8 @@
 
 package runtime.workers.worker4
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest1() {
     withWorker {
@@ -25,28 +24,37 @@ import kotlin.native.concurrent.*
     withWorker {
         val counter = AtomicInt(0)
 
-        executeAfter(0, {
-            assertTrue(Worker.current.park(10_000_000, false))
-            assertEquals(counter.value, 0)
-            assertTrue(Worker.current.processQueue())
-            assertEquals(1, counter.value)
-            // Let main proceed.
-            counter.increment()  // counter becomes 2 here.
-            assertTrue(Worker.current.park(10_000_000, true))
-            assertEquals(3, counter.value)
-        }.freeze())
+        executeAfter(
+            0,
+            {
+                assertTrue(Worker.current.park(10_000_000, false))
+                assertEquals(counter.value, 0)
+                assertTrue(Worker.current.processQueue())
+                assertEquals(1, counter.value)
+                // Let main proceed.
+                counter.increment() // counter becomes 2 here.
+                assertTrue(Worker.current.park(10_000_000, true))
+                assertEquals(3, counter.value)
+            }.freeze()
+        )
 
-        executeAfter(0, {
-            counter.increment()
-        }.freeze())
+        executeAfter(
+            0,
+            {
+                counter.increment()
+            }.freeze()
+        )
 
         while (counter.value < 2) {
             Worker.current.park(1_000)
         }
 
-        executeAfter(0, {
-            counter.increment()
-        }.freeze())
+        executeAfter(
+            0,
+            {
+                counter.increment()
+            }.freeze()
+        )
 
         while (counter.value == 2) {
             Worker.current.park(1_000)
@@ -57,10 +65,13 @@ import kotlin.native.concurrent.*
 @Test fun runTest3() {
     val worker = Worker.start(name = "Lumberjack")
     val counter = AtomicInt(0)
-    worker.executeAfter(0, {
-        assertEquals("Lumberjack", Worker.current.name)
-        counter.increment()
-    }.freeze())
+    worker.executeAfter(
+        0,
+        {
+            assertEquals("Lumberjack", Worker.current.name)
+            counter.increment()
+        }.freeze()
+    )
 
     while (counter.value == 0) {
         Worker.current.park(1_000)
@@ -74,9 +85,12 @@ import kotlin.native.concurrent.*
 
 @Test fun runTest4() {
     val counter = AtomicInt(0)
-    Worker.current.executeAfter(10_000, {
-        counter.increment()
-    }.freeze())
+    Worker.current.executeAfter(
+        10_000,
+        {
+            counter.increment()
+        }.freeze()
+    )
     assertTrue(Worker.current.park(1_000_000, process = true))
     assertEquals(1, counter.value)
 }
@@ -85,11 +99,17 @@ import kotlin.native.concurrent.*
     val main = Worker.current
     val counter = AtomicInt(0)
     withWorker {
-        executeAfter(1000, {
-            main.executeAfter(1, {
-                counter.increment()
-            }.freeze())
-        }.freeze())
+        executeAfter(
+            1000,
+            {
+                main.executeAfter(
+                    1,
+                    {
+                        counter.increment()
+                    }.freeze()
+                )
+            }.freeze()
+        )
         assertTrue(main.park(1000L * 1000 * 1000, process = true))
         assertEquals(1, counter.value)
     }

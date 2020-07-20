@@ -3,7 +3,6 @@
  * that can be found in the LICENSE file.
  */
 
-
 fun main(args: Array<String>) {
     foo()
 }

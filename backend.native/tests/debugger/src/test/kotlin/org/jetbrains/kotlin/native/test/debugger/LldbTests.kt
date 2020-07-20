@@ -8,14 +8,16 @@ import org.junit.Test
 
 class LldbTests {
     @Test
-    fun `can step through code`() = lldbTest("""
+    fun `can step through code`() = lldbTest(
+        """
         fun main(args: Array<String>) {
             var x = 1
             var y = 2
             var z = x + y
             println(z)
         }
-    """, """
+    """,
+        """
         > b main.kt:2
         Breakpoint 1: [..]
 
@@ -38,10 +40,12 @@ class LldbTests {
         Process [..] stopped
         [..] stop reason = step over
         [..] at main.kt:5[..]
-    """)
+    """
+    )
 
     @Test
-    fun `can inspect values of primitive types`() = lldbTest("""
+    fun `can inspect values of primitive types`() = lldbTest(
+        """
         fun main(args: Array<String>) {
             var a: Byte =  1
             var b: Int  =  2
@@ -50,7 +54,8 @@ class LldbTests {
             var e: Boolean = true
             return
         }
-    """, """
+    """,
+        """
             > b main.kt:7
             > r
             > fr var
@@ -59,10 +64,12 @@ class LldbTests {
             (long) c = -3
             (short) d = 99
             (bool) e = true
-    """)
+    """
+    )
 
     @Test
-    fun `can inspect classes`() = lldbTest("""
+    fun `can inspect classes`() = lldbTest(
+        """
         fun main(args: Array<String>) {
             val point = Point(1, 2)
             val person = Person()
@@ -73,17 +80,20 @@ class LldbTests {
         class Person {
             override fun toString() = "John Doe"
         }
-    """, """
+    """,
+        """
         > b main.kt:4
         > r
         > fr var
         (ObjHeader *) args = []
         (ObjHeader *) point = {'x': 1, 'y': 2}
         (ObjHeader *) person = {}
-    """)
+    """
+    )
 
     @Test
-    fun `can inspect arrays`() = lldbTest("""
+    fun `can inspect arrays`() = lldbTest(
+        """
         fun main(args: Array<String>) {
             val xs = IntArray(3)
             xs[0] = 1
@@ -95,27 +105,32 @@ class LldbTests {
         }
 
         data class Point(val x: Int, val y: Int)
-    """, """
+    """,
+        """
         > b main.kt:8
         > r
         > fr var
         (ObjHeader *) args = []
         (ObjHeader *) xs = [1, 2, 3]
         (ObjHeader *) ys = [{'x': 1, 'y': 2}, 'null']
-    """)
+    """
+    )
 
     @Test
-    fun `can inspect array children`() = lldbTest("""
+    fun `can inspect array children`() = lldbTest(
+        """
         fun main(args: Array<String>) {
             val xs = intArrayOf(3, 5, 8)
             return
         }
 
         data class Point(val x: Int, val y: Int)
-    """, """
+    """,
+        """
         > b main.kt:3
         > r
         > fr var xs
         (ObjHeader *) xs = [3, 5, 8]
-    """)
+    """
+    )
 }

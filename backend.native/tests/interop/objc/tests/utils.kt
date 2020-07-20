@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.native.concurrent.*
 import objcTests.*
+import kotlin.native.concurrent.*
 
 fun Worker.runInWorker(block: () -> Unit) {
     block.freeze()

@@ -9,8 +9,10 @@ import kotlin.test.*
 
 public actual fun assertTypeEquals(expected: Any?, actual: Any?) {
     if (expected != null && actual != null) {
-        assertTrue(expected::class.isInstance(actual) || actual::class.isInstance(expected),
-                "Expected: $expected,  Actual: $actual")
+        assertTrue(
+            expected::class.isInstance(actual) || actual::class.isInstance(expected),
+            "Expected: $expected,  Actual: $actual"
+        )
     } else {
         assertTrue(expected == null && actual == null)
     }
@@ -24,7 +26,6 @@ internal actual inline fun testOnNonJvm6And7(f: () -> Unit) {
 
 actual fun testOnJvm(action: () -> Unit) {}
 actual fun testOnJs(action: () -> Unit) {}
-
 
 public actual val isFloat32RangeEnforced: Boolean get() = true
 

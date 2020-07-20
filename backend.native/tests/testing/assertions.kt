@@ -24,27 +24,25 @@ class BasicAssertionsTest {
         assertFailsWith<AssertionError> { throw AssertionError() }
     }
 
-   @Test
-   fun testAssertFailsWithFails() {
-       withDefaultAsserter run@ {
-           try {
-               assertFailsWith<IllegalStateException> { throw IllegalArgumentException() }
-           }
-           catch (e: AssertionError) {
-               return@run
-           }
-           throw AssertionError("Expected to fail")
-       }
-       withDefaultAsserter run@ {
-           try {
-               assertFailsWith<IllegalStateException> {  }
-           }
-           catch (e: AssertionError) {
-               return@run
-           }
-           throw AssertionError("Expected to fail")
-       }
-   }
+    @Test
+    fun testAssertFailsWithFails() {
+        withDefaultAsserter run@{
+            try {
+                assertFailsWith<IllegalStateException> { throw IllegalArgumentException() }
+            } catch (e: AssertionError) {
+                return@run
+            }
+            throw AssertionError("Expected to fail")
+        }
+        withDefaultAsserter run@{
+            try {
+                assertFailsWith<IllegalStateException> { }
+            } catch (e: AssertionError) {
+                return@run
+            }
+            throw AssertionError("Expected to fail")
+        }
+    }
 
     @Test
     fun testAssertFailsWithClass() {
@@ -90,7 +88,7 @@ class BasicAssertionsTest {
     @Test
     fun testAssertFalseFails() {
         checkFailedAssertion { assertFalse(true) }
-        checkFailedAssertion{ assertFalse { true } }
+        checkFailedAssertion { assertFalse { true } }
     }
 
     @Test
@@ -100,9 +98,8 @@ class BasicAssertionsTest {
 
     @Test()
     fun testAssertFailsFails() {
-        checkFailedAssertion { assertFails {  } }
+        checkFailedAssertion { assertFails { } }
     }
-
 
     @Test
     fun testAssertNotEquals() {
@@ -182,7 +179,6 @@ class BasicAssertionsTest {
         assertEquals("N", nullableT.str)
     }
 }
-
 
 private fun checkFailedAssertion(assertion: () -> Unit) {
     assertFailsWith<AssertionError> { withDefaultAsserter(assertion) }

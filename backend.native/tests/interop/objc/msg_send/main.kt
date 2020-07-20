@@ -1,5 +1,5 @@
-import messaging.*
 import kotlinx.cinterop.*
+import messaging.*
 import kotlin.test.*
 
 fun main(args: Array<String>) {
@@ -55,4 +55,3 @@ private fun aggregates() {
         assertEquals(4, i4)
     }
 }
-

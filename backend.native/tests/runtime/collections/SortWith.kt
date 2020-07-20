@@ -7,7 +7,7 @@ package runtime.collections.SortWith
 
 import kotlin.test.*
 
-val correctIncreasing = Comparator<Int> { a, b ->  // correct one.
+val correctIncreasing = Comparator<Int> { a, b -> // correct one.
     when {
         a > b -> 1
         a < b -> -1
@@ -15,7 +15,7 @@ val correctIncreasing = Comparator<Int> { a, b ->  // correct one.
     }
 }
 
-val correctDecreasing = Comparator<Int> { a, b ->  // correct one.
+val correctDecreasing = Comparator<Int> { a, b -> // correct one.
     when {
         a < b -> 1
         a > b -> -1
@@ -37,19 +37,19 @@ fun Array<MyComparable>.assertSorted(message: String = "") {
 
 data class ComparatorInfo(val name: String, val comparator: Comparator<Int>, val isCorrect: Boolean)
 
-class MyComparable (val value: Int, val comparator: Comparator<Int>): Comparable<MyComparable> {
+class MyComparable(val value: Int, val comparator: Comparator<Int>) : Comparable<MyComparable> {
     override fun compareTo(other: MyComparable): Int = comparator.compare(value, other.value)
 }
 
 // Assert that the array is sorted in terms of a comparator only for correct/partially correct cases
 val comparators = listOf<ComparatorInfo>(
-    ComparatorInfo("Correct increasing", correctIncreasing ,  true),
-    ComparatorInfo("Correct decreasing", correctDecreasing ,  true),
-    ComparatorInfo("Incorrect increasing", Comparator { a ,b -> if (a > b) 1 else -1 },  false),
-    ComparatorInfo("Incorrect decreasing", Comparator { a ,b -> if (a < b) 1 else -1 },  false),
-    ComparatorInfo("Always 1",  Comparator { a ,b ->  1  },  false),
-    ComparatorInfo("Always -1", Comparator { a ,b ->  -1 },  false),
-    ComparatorInfo("Always 0",  Comparator { a ,b ->  0  },  false)
+    ComparatorInfo("Correct increasing", correctIncreasing, true),
+    ComparatorInfo("Correct decreasing", correctDecreasing, true),
+    ComparatorInfo("Incorrect increasing", Comparator { a, b -> if (a > b) 1 else -1 }, false),
+    ComparatorInfo("Incorrect decreasing", Comparator { a, b -> if (a < b) 1 else -1 }, false),
+    ComparatorInfo("Always 1", Comparator { a, b -> 1 }, false),
+    ComparatorInfo("Always -1", Comparator { a, b -> -1 }, false),
+    ComparatorInfo("Always 0", Comparator { a, b -> 0 }, false)
 )
 
 val arrays = listOf<Array<Int>>(
@@ -79,7 +79,6 @@ val arrays = listOf<Array<Int>>(
     )
 )
 
-
 @Test fun runTest() {
     arrays.forEach { array ->
         comparators.forEach {
@@ -87,11 +86,14 @@ val arrays = listOf<Array<Int>>(
             val arrayUnderTest = array.copyOf()
             arrayUnderTest.sortWith(it.comparator)
             if (it.isCorrect) {
-                arrayUnderTest.assertSorted(it.comparator, """
+                arrayUnderTest.assertSorted(
+                    it.comparator,
+                    """
                     Assert sorted failed for comparator: "${it.name}"
                     Array: ${array.joinToString()}
                     Array after sorting: ${arrayUnderTest.joinToString()}
-                """.trimIndent())
+                    """.trimIndent()
+                )
             }
 
             // Test of a custom comparable
@@ -101,11 +103,13 @@ val arrays = listOf<Array<Int>>(
             comparableArrayUnderTest.sort()
 
             if (it.isCorrect) {
-                comparableArrayUnderTest.assertSorted("""
+                comparableArrayUnderTest.assertSorted(
+                    """
                     Assert sorted failed for Comparable: "${it.name}"
                     Array: ${array.joinToString()}
                     Array after sorting: ${comparableArrayUnderTest.joinToString()}
-                """.trimIndent())
+                    """.trimIndent()
+                )
             }
         }
     }

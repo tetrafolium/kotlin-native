@@ -16,8 +16,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class PatternSyntaxExceptionTest {
 
@@ -29,7 +29,6 @@ class PatternSyntaxExceptionTest {
         } catch (e: IllegalArgumentException) {
             // TODO: Check the exception's properties.
         }
-
     }
 
     @Test fun testCase2() {
@@ -39,6 +38,5 @@ class PatternSyntaxExceptionTest {
             fail("IllegalArgumentException expected")
         } catch (e: IllegalArgumentException) {
         }
-
     }
 }

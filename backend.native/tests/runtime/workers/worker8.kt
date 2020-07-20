@@ -5,9 +5,8 @@
 
 package runtime.workers.worker8
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class SharedDataMember(val double: Double)
 
@@ -17,15 +16,19 @@ data class SharedData(val string: String, val int: Int, val member: SharedDataMe
     val worker = Worker.start()
     // Here we do rather strange thing. To test object detach API we detach object graph,
     // pass detached graph to a worker, where we manually reattached passed value.
-    val future = worker.execute(TransferMode.SAFE, {
-        DetachedObjectGraph { SharedData("Hello", 10, SharedDataMember(0.1)) }.asCPointer()
-    }) {
+    val future = worker.execute(
+        TransferMode.SAFE,
+        {
+            DetachedObjectGraph { SharedData("Hello", 10, SharedDataMember(0.1)) }.asCPointer()
+        }
+    ) {
         inputDetached ->
         val input = DetachedObjectGraph<SharedData>(inputDetached).attach()
         println(input)
     }
     future.consume {
-        result -> println("Got $result")
+        result ->
+        println("Got $result")
     }
     worker.requestTermination().result
     println("OK")

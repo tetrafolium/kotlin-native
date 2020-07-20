@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
 import cunsupported.*
+import kotlin.test.*
 
 fun main(args: Array<String>) {
     noAttr()

@@ -5,9 +5,8 @@
 
 package runtime.workers.freeze0
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 data class SharedDataMember(val double: Double)
 
@@ -19,13 +18,14 @@ data class SharedData(val string: String, val int: Int, val member: SharedDataMe
     val immutable = SharedData("Hello", 10, SharedDataMember(0.1)).freeze()
     println("frozen bit is ${immutable.isFrozen}")
 
-    val future = worker.execute(TransferMode.SAFE, { immutable } ) {
+    val future = worker.execute(TransferMode.SAFE, { immutable }) {
         input ->
         println("Worker: $input")
         input
     }
     future.consume {
-        result -> println("Main: $result")
+        result ->
+        println("Main: $result")
     }
     worker.requestTermination().result
     println("OK")

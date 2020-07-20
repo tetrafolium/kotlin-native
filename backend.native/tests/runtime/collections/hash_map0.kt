@@ -150,7 +150,7 @@ fun testEquals() {
     val expected = mapOf("a" to "1", "b" to "2", "c" to "3")
     val m = HashMap(expected)
     assertTrue(m == expected)
-    assertTrue(m == mapOf("b" to "2", "c" to "3", "a" to "1"))  // order does not matter
+    assertTrue(m == mapOf("b" to "2", "c" to "3", "a" to "1")) // order does not matter
     assertFalse(m == mapOf("a" to "1", "b" to "2", "c" to "4"))
     assertFalse(m == mapOf("a" to "1", "b" to "2", "c" to "5"))
     assertFalse(m == mapOf("a" to "1", "b" to "2"))
@@ -270,6 +270,6 @@ fun testEntriesIteratorSet() {
     testRemoveAllValues()
     testRetainAllValues()
     testEntriesIteratorSet()
-    //testDegenerateKeys()
+    // testDegenerateKeys()
     println("OK")
 }

@@ -83,7 +83,7 @@ fun main(args: Array<String>) {
                 for (x3 in 0..7)
                     for (x4 in uintArrayOf(0u, 6u, 15u))
                         for (x5 in intArrayOf(-16, -2, -1, 0, 5, 15))
-                            for (x6 in longArrayOf(Long.MIN_VALUE/2, -1L shl 36, -325L, 0, 1L shl 48, Long.MAX_VALUE/2))
+                            for (x6 in longArrayOf(Long.MIN_VALUE / 2, -1L shl 36, -325L, 0, 1L shl 48, Long.MAX_VALUE / 2))
                                 for (x7 in E.values())
                                     for (x8 in arrayOf(false, true))
                                         test(s, x1, x2, x3.toUShort(), x4, x5, x6, x7, x8)

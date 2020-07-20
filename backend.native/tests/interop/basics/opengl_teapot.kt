@@ -37,11 +37,9 @@ fun display() {
     glutSolidTeapot(1.0)
     glPopMatrix()
 
-
     rotation += rotationSpeed
     glutSwapBuffers()
 }
-
 
 fun initialize() {
     // select projection matrix

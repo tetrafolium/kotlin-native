@@ -10,4 +10,3 @@ fun fail() {
 fun foo(args: Array<String>) {
     println("Hello.")
 }
-

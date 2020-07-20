@@ -7,7 +7,7 @@ package runtime.collections.AbstractMutableCollection
 
 import kotlin.test.*
 
-class TestCollection(): AbstractMutableCollection<Int>() {
+class TestCollection() : AbstractMutableCollection<Int>() {
     companion object {
         const val SIZE = 7
     }
@@ -24,7 +24,7 @@ class TestCollection(): AbstractMutableCollection<Int>() {
         return true
     }
 
-    override fun iterator(): MutableIterator<Int> = object: MutableIterator<Int> {
+    override fun iterator(): MutableIterator<Int> = object : MutableIterator<Int> {
         var nextIndex = 0
 
         override fun hasNext() = nextIndex < len
@@ -43,7 +43,6 @@ class TestCollection(): AbstractMutableCollection<Int>() {
     override fun clear() {
         len = 0
     }
-
 }
 
 fun assertEquals(a: TestCollection, b: List<Int>) {

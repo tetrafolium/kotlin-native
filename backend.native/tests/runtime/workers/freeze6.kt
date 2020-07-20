@@ -5,15 +5,15 @@
 
 package runtime.workers.freeze6
 
-import kotlin.test.*
 import kotlin.native.concurrent.*
 import kotlin.native.ref.*
+import kotlin.test.*
 
 data class Hi(val s: String)
 data class Nested(val hi: Hi)
 
 @Test
-fun ensureNeverFrozenNoFreezeChild(){
+fun ensureNeverFrozenNoFreezeChild() {
     val noFreeze = Hi("qwert")
     noFreeze.ensureNeverFrozen()
 
@@ -24,7 +24,7 @@ fun ensureNeverFrozenNoFreezeChild(){
 }
 
 @Test
-fun ensureNeverFrozenFailsTarget(){
+fun ensureNeverFrozenFailsTarget() {
     val noFreeze = Hi("qwert")
     noFreeze.ensureNeverFrozen()
 

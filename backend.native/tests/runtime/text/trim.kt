@@ -29,10 +29,14 @@ private fun convertToFloatingPoint() {
 
 private fun convertWithWhitespaces() {
     val s = "\u0009 \u000A 2.71 \u000D"
-    assertEquals(expected = 2.71F, actual = s.toFloat(),
-            message = "String should be cleared of LF, CR, TAB and converted to Float")
-    assertEquals(expected = 2.71, actual = s.toDouble(),
-            message = "String should be cleared of LF, CR, TAB and converted to Double")
+    assertEquals(
+        expected = 2.71F, actual = s.toFloat(),
+        message = "String should be cleared of LF, CR, TAB and converted to Float"
+    )
+    assertEquals(
+        expected = 2.71, actual = s.toDouble(),
+        message = "String should be cleared of LF, CR, TAB and converted to Double"
+    )
 
     // Special symbols should not be trimmed during String to Float/Double conversion
     assertFailsWith<NumberFormatException> { "\u202F3.14".toFloat() }
@@ -46,9 +50,13 @@ private fun trimWhitespaces() {
     assertEquals(expected = "String  ", actual = "    String  ".trimStart(), message = "Trim start")
     assertEquals(expected = "  String", actual = "  String \t ".trimEnd(), message = "Trim end")
 
-    assertEquals(expected = "String", actual = "\u0020 \u202FString\u2028\u2029".trim(),
-            message = "Trim special whitespaces")
-    assertEquals(expected = "\u1FFFString", actual = "\u0085  \u1FFFString".trim(),
-            message = "Trim special whitespace but should left a unicode symbol")
+    assertEquals(
+        expected = "String", actual = "\u0020 \u202FString\u2028\u2029".trim(),
+        message = "Trim special whitespaces"
+    )
+    assertEquals(
+        expected = "\u1FFFString", actual = "\u0085  \u1FFFString".trim(),
+        message = "Trim special whitespace but should left a unicode symbol"
+    )
     assertEquals(expected = "String\tSTR", actual = " \nString\tSTR  ".trim(), message = "Trim newline")
 }

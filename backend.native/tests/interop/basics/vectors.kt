@@ -1,7 +1,7 @@
+import cvectors.*
 import kotlinx.cinterop.*
 import kotlin.native.*
 import kotlin.test.*
-import cvectors.*
 
 fun isWin32() = Platform.osFamily == OsFamily.WINDOWS && Platform.cpuArchitecture == CpuArchitecture.X86
 
@@ -32,4 +32,3 @@ fun main(args: Array<String>) {
         }
     }
 }
-

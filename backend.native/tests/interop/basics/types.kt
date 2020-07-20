@@ -1,7 +1,7 @@
+import ctypes.*
 import kotlinx.cinterop.*
 import kotlin.native.*
 import kotlin.test.*
-import ctypes.*
 
 fun main() {
     getStructWithConstFields().useContents {
@@ -28,4 +28,3 @@ fun main() {
     assertEquals('b'.toByte(), EnumExplicitCharB)
     assertEquals(EnumExplicitCharA, EnumExplicitCharDup)
 }
-

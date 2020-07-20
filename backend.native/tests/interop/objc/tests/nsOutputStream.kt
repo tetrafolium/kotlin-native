@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 @Test fun testNSOutputStreamToMemoryConstructor() {
     val stream: Any = NSOutputStream(toMemory = Unit)

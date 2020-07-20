@@ -5,8 +5,8 @@
 
 package runtime.workers.enum_identity
 
-import kotlin.test.*
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 enum class A {
     A, B
@@ -17,8 +17,11 @@ data class Foo(val kind: A)
 // Enums are shared between threads so identity should be kept.
 @Test
 fun runTest() {
-    val result = Worker.start().execute(TransferMode.SAFE, { Foo(A.B) }, { input ->
-        input.kind == A.B
-    }).result
+    val result = Worker.start().execute(
+        TransferMode.SAFE, { Foo(A.B) },
+        { input ->
+            input.kind == A.B
+        }
+    ).result
     println(result)
 }

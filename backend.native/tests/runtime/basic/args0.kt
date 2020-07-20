@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-fun main(args : Array<String>) {
-  for (s in args) {
-      println(s)
-  }
+fun main(args: Array<String>) {
+    for (s in args) {
+        println(s)
+    }
 }

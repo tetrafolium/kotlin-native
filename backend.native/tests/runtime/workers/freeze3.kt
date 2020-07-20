@@ -5,9 +5,8 @@
 
 package runtime.workers.freeze3
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 object AnObject {
     var x = 1
@@ -40,11 +39,13 @@ val topLevelInline: ULong = 0xc3a5c85c97cb3127U
 @Test fun runTest2() {
     val ok = AtomicInt(0)
     withWorker() {
-     executeAfter(0, {
-      assertEquals(0xc3a5c85c97cb3127U, topLevelInline) 
-      ok.increment()
-     }.freeze())
-   }
-   assertEquals(1, ok.value)
+        executeAfter(
+            0,
+            {
+                assertEquals(0xc3a5c85c97cb3127U, topLevelInline)
+                ok.increment()
+            }.freeze()
+        )
+    }
+    assertEquals(1, ok.value)
 }
-

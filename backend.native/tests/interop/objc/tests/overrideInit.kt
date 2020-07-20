@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 @Test fun testOverrideInit() {
     assertEquals(42, (TestOverrideInitImpl.createWithValue(42) as TestOverrideInitImpl).value)

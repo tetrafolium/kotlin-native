@@ -1,5 +1,5 @@
-import kotlin.test.*
 import embedStaticLibraries.*
+import kotlin.test.*
 
 fun main() {
     assertEquals(1, get1())

@@ -21,8 +21,11 @@ private inline fun <reified T> testReproducibility(seed: Long, generator: Random
     // Reset seed and try again
     val r2 = Random(seed)
     val second = Array<T>(50, { i -> r2.generator() }).toList()
-    assertTrue(first == second, "FAIL: got different sequences of generated values " +
-            "first: $first, second: $second")
+    assertTrue(
+        first == second,
+        "FAIL: got different sequences of generated values " +
+            "first: $first, second: $second"
+    )
 }
 
 /**
@@ -34,8 +37,11 @@ private inline fun <reified T> testDifference(generator: Random.() -> T) {
 
     val r2 = Random(87654321L)
     val second = Array<T>(100, { i -> r2.generator() }).toList()
-    assertTrue(first != second, "FAIL: got the same sequence of generated values " +
-            "first: $first, second: $second")
+    assertTrue(
+        first != second,
+        "FAIL: got the same sequence of generated values " +
+            "first: $first, second: $second"
+    )
 }
 
 @Test

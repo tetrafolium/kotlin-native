@@ -34,4 +34,3 @@ fun test_arrayList3() {
     test_arrayList2<String>("a", "b", "c")
     test_arrayList3()
 }
-

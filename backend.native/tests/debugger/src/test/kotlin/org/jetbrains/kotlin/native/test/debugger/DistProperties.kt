@@ -19,6 +19,6 @@ object DistProperties {
     val dwarfDump: Path = Paths.get("dwarfdump")
     val lldbPrettyPrinters: Path = dist.resolve("tools/konan_lldb.py")
 
-    private fun requireProp(name: String): String
-            = System.getProperty(name) ?: error("Property `$name` is not defined")
+    private fun requireProp(name: String): String =
+        System.getProperty(name) ?: error("Property `$name` is not defined")
 }

@@ -5,19 +5,20 @@
 
 package runtime.workers.worker1
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest() {
     val COUNT = 5
-    val workers = Array(COUNT, { _ -> Worker.start()})
+    val workers = Array(COUNT, { _ -> Worker.start() })
 
-    for (attempt in 1 .. 3) {
-        val futures = Array(workers.size,
-                { i -> workers[i].execute(TransferMode.SAFE, { "$attempt: Input $i" })
-                { input -> input + " processed" }
-        })
+    for (attempt in 1..3) {
+        val futures = Array(
+            workers.size,
+            { i ->
+                workers[i].execute(TransferMode.SAFE, { "$attempt: Input $i" }) { input -> input + " processed" }
+            }
+        )
         futures.forEachIndexed { index, future ->
             future.consume {
                 result ->

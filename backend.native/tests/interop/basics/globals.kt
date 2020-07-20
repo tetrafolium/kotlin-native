@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlinx.cinterop.*
 import cglobals.*
+import kotlinx.cinterop.*
 
 fun main(args: Array<String>) {
     assert(g1__ == 42)

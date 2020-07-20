@@ -17,4 +17,3 @@ import kotlin.test.*
 
     println(sum)
 }
-

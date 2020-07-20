@@ -5,17 +5,20 @@
 
 package runtime.workers.atomic0
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 fun test1(workers: Array<Worker>) {
     val atomic = AtomicInt(15)
-    val futures = Array(workers.size, { workerIndex ->
-        workers[workerIndex].execute(TransferMode.SAFE, { atomic }) {
-            input -> input.addAndGet(1)
+    val futures = Array(
+        workers.size,
+        { workerIndex ->
+            workers[workerIndex].execute(TransferMode.SAFE, { atomic }) {
+                input ->
+                input.addAndGet(1)
+            }
         }
-    })
+    )
     futures.forEach {
         it.result
     }
@@ -25,19 +28,22 @@ fun test1(workers: Array<Worker>) {
 fun test2(workers: Array<Worker>) {
     val atomic = AtomicInt(1)
     val counter = AtomicInt(0)
-    val futures = Array(workers.size, { workerIndex ->
-        workers[workerIndex].execute(TransferMode.SAFE, { Triple(atomic, workerIndex, counter) }) {
-            (place, index, result) ->
-            // Here we simulate mutex using [place] location to store tag of the current worker.
-            // When it is negative - worker executes exclusively.
-            val tag = index + 1
-            while (place.compareAndSwap(tag, -tag) != tag) {}
-            val ok1 = result.addAndGet(1) == index + 1
-            // Now, let the next worker run.
-            val ok2 = place.compareAndSwap(-tag, tag + 1) == -tag
-            ok1 && ok2
+    val futures = Array(
+        workers.size,
+        { workerIndex ->
+            workers[workerIndex].execute(TransferMode.SAFE, { Triple(atomic, workerIndex, counter) }) {
+                (place, index, result) ->
+                // Here we simulate mutex using [place] location to store tag of the current worker.
+                // When it is negative - worker executes exclusively.
+                val tag = index + 1
+                while (place.compareAndSwap(tag, -tag) != tag) {}
+                val ok1 = result.addAndGet(1) == index + 1
+                // Now, let the next worker run.
+                val ok2 = place.compareAndSwap(-tag, tag + 1) == -tag
+                ok1 && ok2
+            }
         }
-    })
+    )
     futures.forEach {
         assertEquals(it.result, true)
     }
@@ -48,14 +54,17 @@ data class Data(val value: Int)
 
 fun test3(workers: Array<Worker>) {
     val common = AtomicReference<Data?>(null)
-    val futures = Array(workers.size, { workerIndex ->
-        workers[workerIndex].execute(TransferMode.SAFE, { Pair(common, workerIndex) }) {
-            (place, index) ->
-            val mine = Data(index).freeze()
-            // Try to publish our own data, until successful, in a tight loop.
-            while (!place.compareAndSet(null, mine)) {}
+    val futures = Array(
+        workers.size,
+        { workerIndex ->
+            workers[workerIndex].execute(TransferMode.SAFE, { Pair(common, workerIndex) }) {
+                (place, index) ->
+                val mine = Data(index).freeze()
+                // Try to publish our own data, until successful, in a tight loop.
+                while (!place.compareAndSet(null, mine)) {}
+            }
         }
-    })
+    )
     val seen = mutableSetOf<Data>()
     for (i in 0 until workers.size) {
         do {
@@ -103,7 +112,6 @@ fun test6() {
     assertEquals(239L, long.value)
 }
 
-
 fun test7() {
     val ref = FreezableAtomicReference(Array(1) { "hey" })
     ref.value[0] = "ho"
@@ -123,7 +131,7 @@ fun test7() {
 
 @Test fun runTest() {
     val COUNT = 20
-    val workers = Array(COUNT, { _ -> Worker.start()})
+    val workers = Array(COUNT, { _ -> Worker.start() })
 
     test1(workers)
     test2(workers)
@@ -138,4 +146,3 @@ fun test7() {
     }
     println("OK")
 }
-

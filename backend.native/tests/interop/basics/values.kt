@@ -1,6 +1,6 @@
+import cvalues.*
 import kotlinx.cinterop.*
 import kotlin.test.*
-import cvalues.*
 
 fun main() {
     assertTrue(isNullString(null))

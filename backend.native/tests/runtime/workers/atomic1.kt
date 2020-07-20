@@ -5,10 +5,9 @@
 
 // Note: This test reproduces a race, so it'll start flaking if problem is reintroduced.
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
 import kotlin.native.internal.*
+import kotlin.test.*
 
 val thrashGC = AtomicInt(1)
 val canStartCreating = AtomicInt(0)
@@ -19,27 +18,33 @@ const val workersCount = 10
 
 fun main() {
     val gcWorker = Worker.start()
-    val future = gcWorker.execute(TransferMode.SAFE, {}, {
-        canStartCreating.value = 1
-        while (thrashGC.value != 0) {
-            GC.collectCyclic()
+    val future = gcWorker.execute(
+        TransferMode.SAFE, {},
+        {
+            canStartCreating.value = 1
+            while (thrashGC.value != 0) {
+                GC.collectCyclic()
+            }
+            GC.collect()
         }
-        GC.collect()
-    })
+    )
 
     while (canStartCreating.value == 0) {}
 
     val workers = Array(workersCount) { Worker.start() }
     val futures = workers.map {
-        it.execute(TransferMode.SAFE, {}, {
-            val atomics = Array(atomicsCount) {
-                AtomicReference<Any?>(Any().freeze())
+        it.execute(
+            TransferMode.SAFE, {},
+            {
+                val atomics = Array(atomicsCount) {
+                    AtomicReference<Any?>(Any().freeze())
+                }
+                createdCount.increment()
+                while (canStartReading.value == 0) {}
+                GC.collect()
+                atomics.all { it.value != null }
             }
-            createdCount.increment()
-            while (canStartReading.value == 0) {}
-            GC.collect()
-            atomics.all { it.value != null }
-        })
+        )
     }
 
     while (createdCount.value != workersCount) {}

@@ -5,8 +5,8 @@
 
 package runtime.memory.weak1
 
-import kotlin.test.*
 import kotlin.native.ref.*
+import kotlin.test.*
 
 class Node(var next: Node?)
 

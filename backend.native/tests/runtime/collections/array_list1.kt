@@ -9,7 +9,7 @@ import kotlin.test.*
 
 fun assertTrue(cond: Boolean) {
     if (!cond)
-       println("FAIL")
+        println("FAIL")
 }
 
 fun assertFalse(cond: Boolean) {
@@ -126,7 +126,6 @@ fun testToString() {
     val a = ArrayList(listOf("1", "2", "3"))
     assertTrue(a.toString() == listOf("1", "2", "3").toString())
 }
-
 
 fun testSubList() {
     val a0 = ArrayList(listOf("0", "1", "2", "3", "4"))

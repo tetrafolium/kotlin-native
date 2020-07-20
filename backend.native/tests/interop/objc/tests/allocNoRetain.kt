@@ -1,6 +1,6 @@
 import kotlinx.cinterop.*
-import kotlin.test.*
 import objcTests.*
+import kotlin.test.*
 
 @Test fun testAllocNoRetain() {
     // Ensure that calling Kotlin constructor generated for Objective-C initializer doesn't result in

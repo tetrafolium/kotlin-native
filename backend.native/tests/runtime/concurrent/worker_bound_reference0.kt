@@ -5,11 +5,10 @@
 
 package runtime.concurrent.worker_bound_reference0
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
 import kotlin.native.internal.GC
 import kotlin.native.ref.WeakReference
+import kotlin.test.*
 import kotlin.text.Regex
 
 class A(var a: Int)
@@ -250,7 +249,6 @@ fun testLocalAccessOnWorkerFrozenBeforeAccess() {
     worker.requestTermination().result
 }
 
-
 @Test
 fun testLocalDenyAccessOnMainThread() {
     val worker = Worker.start()
@@ -449,7 +447,7 @@ fun doesNotCollectCyclicGarbage() {
 }
 
 fun createCrossThreadCyclicGarbage(
-        worker: Worker
+    worker: Worker
 ): Triple<AtomicReference<WorkerBoundReference<B1>?>, WeakReference<B1>, WeakReference<B2>> {
     val ref1 = WorkerBoundReference(B1())
     val ref1Owner: AtomicReference<WorkerBoundReference<B1>?> = AtomicReference(ref1)
@@ -534,7 +532,7 @@ fun collectCyclicGarbageWithAtomics() {
 }
 
 fun createCrossThreadCyclicGarbageWithAtomics(
-        worker: Worker
+    worker: Worker
 ): Triple<AtomicReference<WorkerBoundReference<C1>?>, WeakReference<C1>, WeakReference<C2>> {
     val ref1 = WorkerBoundReference(C1())
     val ref1Weak = WeakReference(ref1.value)

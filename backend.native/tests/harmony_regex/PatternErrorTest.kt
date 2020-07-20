@@ -16,8 +16,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class PatternErrorTest {
 
@@ -32,13 +32,13 @@ class PatternErrorTest {
 
         // check that all valid flags accepted without exception
         val options = setOf(
-                RegexOption.UNIX_LINES,
-                RegexOption.IGNORE_CASE,
-                RegexOption.MULTILINE,
-                RegexOption.CANON_EQ,
-                RegexOption.COMMENTS,
-                RegexOption.DOT_MATCHES_ALL)
+            RegexOption.UNIX_LINES,
+            RegexOption.IGNORE_CASE,
+            RegexOption.MULTILINE,
+            RegexOption.CANON_EQ,
+            RegexOption.COMMENTS,
+            RegexOption.DOT_MATCHES_ALL
+        )
         Regex("foo", options)
     }
-
 }

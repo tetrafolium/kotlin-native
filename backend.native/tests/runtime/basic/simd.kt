@@ -7,7 +7,6 @@ package runtime.basic.simd
 
 import kotlin.test.*
 
-
 @Test fun runTest() {
     testBoxingSimple()
     testBoxing()
@@ -18,7 +17,6 @@ import kotlin.test.*
     testHash()
     testDefaultValue()
 }
-
 
 class Box<T>(t: T) {
     var value = t
@@ -93,7 +91,7 @@ fun testHash() {
     assertEquals(false, h1 == h2)
 
     val i = 654687
-    assertEquals(true, vectorOf(0, 0, i, 0).hashCode() == i.hashCode())  // exploit little endianness
+    assertEquals(true, vectorOf(0, 0, i, 0).hashCode() == i.hashCode()) // exploit little endianness
     assertEquals(true, vectorOf(1, 0, 0, 0).hashCode() == vectorOf(0, 0, 31, 0).hashCode())
 }
 

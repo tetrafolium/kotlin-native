@@ -16,8 +16,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class MatchResultTest2 {
 
@@ -113,5 +113,4 @@ class MatchResultTest2 {
         } catch (e: IllegalArgumentException) {
         }
     }
-
 }

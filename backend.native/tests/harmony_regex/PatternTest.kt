@@ -17,8 +17,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class PatternTest {
 
@@ -280,7 +280,6 @@ class PatternTest {
         Regex(pattern)
     }
 
-
     @Test fun testQuantCompileNeg() {
         val patterns = arrayOf("5{,2}", "{5asd", "{hgdhg", "{5,hjkh", "{,5hdsh", "{5,3shdfkjh}")
         for (element in patterns) {
@@ -290,7 +289,6 @@ class PatternTest {
             } catch (pse: IllegalArgumentException) {
                 continue
             }
-
         }
     }
 
@@ -321,26 +319,36 @@ class PatternTest {
     }
 
     @Test fun testCompileRanges() {
-        val correctTestPatterns = arrayOf("[^]*abb]*", "[^a-d[^m-p]]*abb", "[a-d\\d]*abb", "[abc]*abb",
-                "[a-e&&[de]]*abb", "[^abc]*abb", "[a-e&&[^de]]*abb", "[a-z&&[^m-p]]*abb", "[a-d[m-p]]*abb",
-                "[a-zA-Z]*abb", "[+*?]*abb", "[^+*?]*abb")
+        val correctTestPatterns = arrayOf(
+            "[^]*abb]*", "[^a-d[^m-p]]*abb", "[a-d\\d]*abb", "[abc]*abb",
+            "[a-e&&[de]]*abb", "[^abc]*abb", "[a-e&&[^de]]*abb", "[a-z&&[^m-p]]*abb", "[a-d[m-p]]*abb",
+            "[a-zA-Z]*abb", "[+*?]*abb", "[^+*?]*abb"
+        )
 
-        val inputSecuence = arrayOf("kkkk", "admpabb", "abcabcd124654abb", "abcabccbacababb",
-                "dededededededeedabb", "gfdhfghgdfghabb", "accabacbcbaabb", "acbvfgtyabb", "adbcacdbmopabcoabb",
-                "jhfkjhaSDFGHJkdfhHNJMjkhfabb", "+*??+*abb", "sdfghjkabb")
+        val inputSecuence = arrayOf(
+            "kkkk", "admpabb", "abcabcd124654abb", "abcabccbacababb",
+            "dededededededeedabb", "gfdhfghgdfghabb", "accabacbcbaabb", "acbvfgtyabb", "adbcacdbmopabcoabb",
+            "jhfkjhaSDFGHJkdfhHNJMjkhfabb", "+*??+*abb", "sdfghjkabb"
+        )
 
         for (i in correctTestPatterns.indices) {
-            assertTrue("pattern: " + correctTestPatterns[i] + " input: " + inputSecuence[i],
-                    Regex(correctTestPatterns[i]).matches(inputSecuence[i]))
+            assertTrue(
+                "pattern: " + correctTestPatterns[i] + " input: " + inputSecuence[i],
+                Regex(correctTestPatterns[i]).matches(inputSecuence[i])
+            )
         }
 
-        val wrongInputSecuence = arrayOf("]", "admpkk", "abcabcd124k654abb", "abwcabccbacababb",
-                "abababdeababdeabb", "abcabcacbacbabb", "acdcbecbaabb", "acbotyabb", "adbcaecdbmopabcoabb",
-                "jhfkjhaSDFGHJk;dfhHNJMjkhfabb", "+*?a?+*abb", "sdf+ghjkabb")
+        val wrongInputSecuence = arrayOf(
+            "]", "admpkk", "abcabcd124k654abb", "abwcabccbacababb",
+            "abababdeababdeabb", "abcabcacbacbabb", "acdcbecbaabb", "acbotyabb", "adbcaecdbmopabcoabb",
+            "jhfkjhaSDFGHJk;dfhHNJMjkhfabb", "+*?a?+*abb", "sdf+ghjkabb"
+        )
 
         for (i in correctTestPatterns.indices) {
-            assertFalse("pattern: " + correctTestPatterns[i] + " input: " + wrongInputSecuence[i],
-                    Regex(correctTestPatterns[i]).matches(wrongInputSecuence[i]))
+            assertFalse(
+                "pattern: " + correctTestPatterns[i] + " input: " + wrongInputSecuence[i],
+                Regex(correctTestPatterns[i]).matches(wrongInputSecuence[i])
+            )
         }
     }
 
@@ -353,7 +361,6 @@ class PatternTest {
                 fail("IllegalArgumentException was expected: " + element)
             } catch (pse: IllegalArgumentException) {
             }
-
         }
 
         val pos_patterns = arrayOf("[-]+", "----", "[a-]+", "a-a-a-a-aa--", "[\\w-a]+", "123-2312--aaa-213", "[a-]]+", "-]]]]]]]]]]]]]]]")
@@ -396,7 +403,6 @@ class PatternTest {
             fail("IllegalArgumentException expected")
         } catch (pse: IllegalArgumentException) {
         }
-
     }
 
     @Test fun testOrphanQuantifiers2() {
@@ -405,18 +411,18 @@ class PatternTest {
             fail("IllegalArgumentException expected")
         } catch (pse: IllegalArgumentException) {
         }
-
     }
 
     @Test fun testBug197() {
-        val vals = arrayOf<Any>(":", 2, arrayOf("boo", "and:foo"),
-                ":", 5, arrayOf("boo", "and", "foo"),
-                ":", 0, arrayOf("boo", "and", "foo"),
-                ":", 3, arrayOf("boo", "and", "foo"),
-                ":", 1, arrayOf("boo:and:foo"),
-                "o", 5, arrayOf("b", "", ":and:f", "", ""),
-                "o", 4, arrayOf("b", "", ":and:f", "o"),
-                "o", 0, arrayOf("b", "", ":and:f", "", "")
+        val vals = arrayOf<Any>(
+            ":", 2, arrayOf("boo", "and:foo"),
+            ":", 5, arrayOf("boo", "and", "foo"),
+            ":", 0, arrayOf("boo", "and", "foo"),
+            ":", 3, arrayOf("boo", "and", "foo"),
+            ":", 1, arrayOf("boo:and:foo"),
+            "o", 5, arrayOf("b", "", ":and:f", "", ""),
+            "o", 4, arrayOf("b", "", ":and:f", "o"),
+            "o", 0, arrayOf("b", "", ":and:f", "", "")
         )
 
         var i = 0
@@ -433,13 +439,13 @@ class PatternTest {
     }
 
     @Test fun testURIPatterns() {
-        val URI_REGEXP_STR = "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
-        val SCHEME_REGEXP_STR = "^[a-zA-Z]{1}[\\w+-.]+$";
-        val REL_URI_REGEXP_STR = "^(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
-        val IPV6_REGEXP_STR = "^[0-9a-fA-F\\:\\.]+(\\%\\w+)?$";
-        val IPV6_REGEXP_STR2 = "^\\[[0-9a-fA-F\\:\\.]+(\\%\\w+)?\\]$";
-        val IPV4_REGEXP_STR = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$";
-        val HOSTNAME_REGEXP_STR = "\\w+[\\w\\-\\.]*";
+        val URI_REGEXP_STR = "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+        val SCHEME_REGEXP_STR = "^[a-zA-Z]{1}[\\w+-.]+$"
+        val REL_URI_REGEXP_STR = "^(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+        val IPV6_REGEXP_STR = "^[0-9a-fA-F\\:\\.]+(\\%\\w+)?$"
+        val IPV6_REGEXP_STR2 = "^\\[[0-9a-fA-F\\:\\.]+(\\%\\w+)?\\]$"
+        val IPV4_REGEXP_STR = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$"
+        val HOSTNAME_REGEXP_STR = "\\w+[\\w\\-\\.]*"
 
         Regex(URI_REGEXP_STR)
         Regex(REL_URI_REGEXP_STR)
@@ -464,7 +470,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("aA", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases3() {
@@ -473,7 +478,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("aA", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases4() {
@@ -482,7 +486,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("A", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases5() {

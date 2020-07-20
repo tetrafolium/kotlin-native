@@ -17,8 +17,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class MatchResultTest {
 
@@ -73,12 +73,12 @@ class MatchResultTest {
         }
 
         val groupResults = arrayOf(
-                arrayOf("a"),
-                arrayOf("a", "a"),
-                arrayOf("ababababba", "a", "abb"),
-                arrayOf("ababababba", "a", "a", "b"),
-                arrayOf("ababababba", "a", "a", "b", "b"),
-                arrayOf("ababababba", "a", "a", "b", "abb", "b")
+            arrayOf("a"),
+            arrayOf("a", "a"),
+            arrayOf("ababababba", "a", "abb"),
+            arrayOf("ababababba", "a", "a", "b"),
+            arrayOf("ababababba", "a", "a", "b", "b"),
+            arrayOf("ababababba", "a", "a", "b", "abb", "b")
         )
 
         for (i in groupPatterns.indices) {
@@ -88,7 +88,6 @@ class MatchResultTest {
                 assertEquals(groupResults[i][j], result.groupValues[j + 1], "i: $i j: $j")
             }
         }
-
     }
 
     @Test fun testGroup() {
@@ -116,14 +115,17 @@ class MatchResultTest {
 
     @Test fun testMatchesMisc() {
         val posSeq = arrayOf(
-                arrayOf("abb", "ababb", "abababbababb", "abababbababbabababbbbbabb"),
-                arrayOf("213567", "12324567", "1234567", "213213567", "21312312312567", "444444567"),
-                arrayOf("abcdaab", "aab", "abaab", "cdaab", "acbdadcbaab"),
-                arrayOf("213234567", "3458", "0987654", "7689546432", "0398576", "98432", "5"),
-                arrayOf("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-                arrayOf("ababbaAabababblice", "ababbaAliceababab", "ababbAabliceaaa", "abbbAbbbliceaaa", "Alice"),
-                arrayOf("a123", "bnxnvgds156", "for", "while", "if", "struct"))
+            arrayOf("abb", "ababb", "abababbababb", "abababbababbabababbbbbabb"),
+            arrayOf("213567", "12324567", "1234567", "213213567", "21312312312567", "444444567"),
+            arrayOf("abcdaab", "aab", "abaab", "cdaab", "acbdadcbaab"),
+            arrayOf("213234567", "3458", "0987654", "7689546432", "0398576", "98432", "5"),
+            arrayOf(
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            ),
+            arrayOf("ababbaAabababblice", "ababbaAliceababab", "ababbAabliceaaa", "abbbAbbbliceaaa", "Alice"),
+            arrayOf("a123", "bnxnvgds156", "for", "while", "if", "struct")
+        )
 
         for (i in testPatterns.indices) {
             val regex = Regex(testPatterns[i])
@@ -138,25 +140,27 @@ class MatchResultTest {
         val testPatternsMultiple = arrayOf("((a)|(b)){1,2}abb", "((a)|(b)){2,4}", "((a)|(b)){3,}")
 
         val stringSingles = arrayOf(
-                arrayOf("aaaaa", "aaa"),
-                arrayOf("aa", "a", "aaa", "aaaaaa", "aaaa", "aaaaa"),
-                arrayOf("aaa", "a", "aaaa", "aa")
+            arrayOf("aaaaa", "aaa"),
+            arrayOf("aa", "a", "aaa", "aaaaaa", "aaaa", "aaaaa"),
+            arrayOf("aaa", "a", "aaaa", "aa")
         )
 
         val stringMultiples = arrayOf(
-                arrayOf("ababb", "aba"),
-                arrayOf("ab", "b", "bab", "ababa", "abba", "abababbb"),
-                arrayOf("aba", "b", "abaa", "ba")
+            arrayOf("ababb", "aba"),
+            arrayOf("ab", "b", "bab", "ababa", "abba", "abababbb"),
+            arrayOf("aba", "b", "abaa", "ba")
         )
 
         for (i in testPatternsSingles.indices) {
             val regex = Regex(testPatternsSingles[i])
             for (j in 0..stringSingles.size / 2 - 1) {
-                assertTrue("Match expected, but failed: " + regex.pattern + " : " + stringSingles[i][j],
-                        regex.matches(stringSingles[i][j * 2])
+                assertTrue(
+                    "Match expected, but failed: " + regex.pattern + " : " + stringSingles[i][j],
+                    regex.matches(stringSingles[i][j * 2])
                 )
-                assertFalse("Match failure expected, but match succeed: " + regex.pattern + " : " + stringSingles[i][j * 2 + 1],
-                        regex.matches(stringSingles[i][j * 2 + 1])
+                assertFalse(
+                    "Match failure expected, but match succeed: " + regex.pattern + " : " + stringSingles[i][j * 2 + 1],
+                    regex.matches(stringSingles[i][j * 2 + 1])
                 )
             }
         }
@@ -164,11 +168,13 @@ class MatchResultTest {
         for (i in testPatternsMultiple.indices) {
             val regex = Regex(testPatternsMultiple[i])
             for (j in 0..stringMultiples.size / 2 - 1) {
-                assertTrue("Match expected, but failed: " + regex.pattern + " : " + stringMultiples[i][j],
-                        regex.matches(stringMultiples[i][j * 2])
+                assertTrue(
+                    "Match expected, but failed: " + regex.pattern + " : " + stringMultiples[i][j],
+                    regex.matches(stringMultiples[i][j * 2])
                 )
-                assertFalse("Match failure expected, but match succeed: " + regex.pattern + " : " + stringMultiples[i][j * 2 + 1],
-                        regex.matches(stringMultiples[i][j * 2 + 1])
+                assertFalse(
+                    "Match failure expected, but match succeed: " + regex.pattern + " : " + stringMultiples[i][j * 2 + 1],
+                    regex.matches(stringMultiples[i][j * 2 + 1])
                 )
             }
         }
@@ -399,7 +405,6 @@ class MatchResultTest {
         assertTrue(Regex("[a-d\\p{Lu}]").matches("K"))
 
         assertFalse(Regex("[\\p{L}&&[^\\p{Lu}&&[^G]]]").matches("K"))
-
     }
 
     @Test fun testSplitEmpty() {

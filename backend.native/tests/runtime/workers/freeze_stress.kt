@@ -5,9 +5,8 @@
 
 package runtime.workers.freeze_stress
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 class Random(private var seed: Int) {
     fun next(): Int {
@@ -18,7 +17,7 @@ class Random(private var seed: Int) {
     fun next(maxExclusiveValue: Int) = if (maxExclusiveValue == 0) 0 else next() % maxExclusiveValue
 
     fun next(minInclusiveValue: Int, maxInclusiveValue: Int) =
-            minInclusiveValue + next(maxInclusiveValue - minInclusiveValue + 1)
+        minInclusiveValue + next(maxInclusiveValue - minInclusiveValue + 1)
 }
 
 class Node(val id: Int) {
@@ -140,7 +139,7 @@ fun freezeOneGraph() {
     val graph = generate(100, 5, 20)
     graph.roots.forEach { it.freeze() }
     for (node in graph.nodes)
-        assert (node.isFrozen, { "All nodes should be frozen" })
+        assert(node.isFrozen, { "All nodes should be frozen" })
 }
 
 @Test fun runTest() {

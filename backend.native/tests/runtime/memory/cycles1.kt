@@ -5,8 +5,8 @@
 
 package runtime.memory.cycles1
 
-import kotlin.test.*
 import kotlin.native.ref.*
+import kotlin.test.*
 
 @Test fun runTest() {
     // TODO: make it work in relaxed model as well.

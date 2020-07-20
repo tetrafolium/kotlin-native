@@ -11,7 +11,7 @@ import kotlin.test.*
     main(arrayOf("a"))
 }
 
-fun main(args : Array<String>) {
+fun main(args: Array<String>) {
     val nonConstStr = args[0]
     val list = arrayListOf(nonConstStr, "b", "c")
     for (element in list) print(element)

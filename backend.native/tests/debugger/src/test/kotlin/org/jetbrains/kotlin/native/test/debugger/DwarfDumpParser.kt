@@ -86,22 +86,22 @@ sealed class DwarfTag(val tag: Tag) {
     val attributes = mutableMapOf<DwarfAttribute.Attribute, DwarfAttribute>()
     operator fun DwarfAttribute.unaryPlus() { attributes[this.attribute] = this }
     companion object {
-        fun by(name: String)  = by(Tag.valueOf(name))
-        fun by(tag: Tag) = when(tag) {
+        fun by(name: String) = by(Tag.valueOf(name))
+        fun by(tag: Tag) = when (tag) {
             Tag.DW_TAG_subprogram -> DwarfTagSubprogram()
             else -> DwarfTagDefault(tag)
         }
     }
 }
 
-class DwarfTagDefault(tag: DwarfTag.Tag): DwarfTag(tag)
-class DwarfTagSubprogram: DwarfTag(Tag.DW_TAG_subprogram) {
+class DwarfTagDefault(tag: DwarfTag.Tag) : DwarfTag(tag)
+class DwarfTagSubprogram : DwarfTag(Tag.DW_TAG_subprogram) {
     val name: String
         get() = attributes[DwarfAttribute.Attribute.DW_AT_name]!!.rvString
     val path: String?
         get() = attributes[DwarfAttribute.Attribute.DW_AT_decl_file]?.rvString
     val file: File?
-        get() = path?.run {  File(this) }
+        get() = path?.run { File(this) }
 }
 
 class DwarfAttribute(val attribute: Attribute, val rawValue: String) {
@@ -204,7 +204,7 @@ class DwarfAttribute(val attribute: Attribute, val rawValue: String) {
         DW_AT_str_offsets_base(0x72),
         DW_AT_addr_base(0x73),
         DW_AT_rnglists_base(0x74),
-        DW_AT_dwo_id(0x75), ///< Retracted from DWARF v5.
+        DW_AT_dwo_id(0x75), // /< Retracted from DWARF v5.
         DW_AT_dwo_name(0x76),
         DW_AT_reference(0x77),
         DW_AT_rvalue_reference(0x78),
@@ -306,7 +306,6 @@ class DwarfAttribute(val attribute: Attribute, val rawValue: String) {
 
 val DwarfAttribute.rvString: String
     get() = rawValue.trim().substring(1, rawValue.length - 2)
-
 
 class DwarfUtilParser() {
     val tags = mutableListOf<DwarfTag>()

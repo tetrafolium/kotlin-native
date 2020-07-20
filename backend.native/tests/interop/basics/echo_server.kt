@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
         val serverAddr = alloc<sockaddr_in>()
 
         val listenFd = socket(AF_INET, SOCK_STREAM, 0)
-                .toInt().ensureUnixCallResult { it >= 0 }
+            .toInt().ensureUnixCallResult { it >= 0 }
 
         with(serverAddr) {
             memset(this.ptr, 0, sockaddr_in.size.convert())
@@ -31,24 +31,24 @@ fun main(args: Array<String>) {
         }
 
         bind(listenFd, serverAddr.ptr.reinterpret(), sockaddr_in.size.toUInt())
-                .toInt().ensureUnixCallResult { it == 0 }
+            .toInt().ensureUnixCallResult { it == 0 }
 
         listen(listenFd, 10)
-                .toInt().ensureUnixCallResult { it == 0 }
+            .toInt().ensureUnixCallResult { it == 0 }
 
         val commFd = accept(listenFd, null, null)
-                .toInt().ensureUnixCallResult { it >= 0 }
+            .toInt().ensureUnixCallResult { it >= 0 }
 
         while (true) {
             val length = read(commFd, buffer, bufferLength.convert())
-                    .toInt().ensureUnixCallResult { it >= 0 }
+                .toInt().ensureUnixCallResult { it >= 0 }
 
             if (length == 0) {
                 break
             }
 
             write(commFd, buffer, length.convert())
-                    .toInt().ensureUnixCallResult { it >= 0 }
+                .toInt().ensureUnixCallResult { it >= 0 }
         }
     }
 }

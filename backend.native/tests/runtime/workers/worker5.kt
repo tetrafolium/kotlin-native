@@ -3,17 +3,18 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest0() {
     val worker = Worker.start()
     val future = worker.execute(TransferMode.SAFE, { "zzz" }) {
-        input -> input.length
+        input ->
+        input.length
     }
     future.consume {
-        result -> println("Got $result")
+        result ->
+        println("Got $result")
     }
     worker.requestTermination().result
     println("OK")
@@ -25,9 +26,12 @@ var done = false
     val worker = Worker.current
     done = false
     // Here we request execution of the operation on the current worker.
-    worker.executeAfter(0, {
-        done = true
-    }.freeze())
+    worker.executeAfter(
+        0,
+        {
+            done = true
+        }.freeze()
+    )
     while (!done)
         worker.processQueue()
 }
@@ -40,9 +44,14 @@ var done = false
     assertEquals(future.state, FutureState.COMPUTED)
     future.consume {}
     // After termination request this worker is no longer addressable.
-    assertFailsWith<IllegalStateException> { worker.executeAfter(0, {
-        println("BUG!")
-    }.freeze()) }
+    assertFailsWith<IllegalStateException> {
+        worker.executeAfter(
+            0,
+            {
+                println("BUG!")
+            }.freeze()
+        )
+    }
 }
 
 fun main() {

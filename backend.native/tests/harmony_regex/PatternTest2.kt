@@ -16,8 +16,8 @@
 
 package test.text.harmony_regex
 
-import kotlin.text.*
 import kotlin.test.*
+import kotlin.text.*
 
 class PatternTest2 {
 
@@ -59,7 +59,6 @@ class PatternTest2 {
             assertEquals(3, result.range.endInclusive + 1)
             assertNull(result.next())
 
-
             result = regex.find("barfoobar")
             assertNotNull(result)
             assertEquals(3, result!!.range.start)
@@ -99,7 +98,6 @@ class PatternTest2 {
             println(e.message)
             fail()
         }
-
     }
 
     @Test fun testGroups() {
@@ -359,7 +357,6 @@ class PatternTest2 {
             }
             assertTrue(match_char == i + 1)
         }
-
 
         // Test invalid control escapes
         try {
@@ -751,7 +748,6 @@ class PatternTest2 {
             if (block.high < 0xFFFF) {
                 assertTrue(regex.matches((block.high + 1).toChar().toString()))
             }
-
         }
     }
 
@@ -862,7 +858,7 @@ class PatternTest2 {
         assertTrue(regex.matches("abc;bar0-def$-;123"))
 
         regex = Regex("[a-z]+;(bar[0-9]-[a-z\\Q[0-9]\\E]+);[0-9]+")
-        assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"));
+        assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"))
 
         regex = Regex("[a-z]+;(bar[0-9]-[a-z\\[0\\-9\\]]+);[0-9]+")
         assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"))
@@ -1017,179 +1013,179 @@ class PatternTest2 {
 
     // A table representing the unicode character blocks
     private val UBlocks = arrayOf(
-            /* 0000; 007F; Basic Latin */
-            UBInfo(0x0000, 0x007F, "BasicLatin"), // Character.UnicodeBlock.BASIC_LATIN
-            /* 0080; 00FF; Latin-1 Supplement */
-            UBInfo(0x0080, 0x00FF, "Latin-1Supplement"), // Character.UnicodeBlock.LATIN_1_SUPPLEMENT
-            /* 0100; 017F; Latin Extended-A */
-            UBInfo(0x0100, 0x017F, "LatinExtended-A"), // Character.UnicodeBlock.LATIN_EXTENDED_A
-            /* 0180; 024F; Latin Extended-B */
-            // new UBInfo (0x0180,0x024F,"InLatinExtended-B"), //
-            // Character.UnicodeBlock.LATIN_EXTENDED_B
-            /* 0250; 02AF; IPA Extensions */
-            UBInfo(0x0250, 0x02AF, "IPAExtensions"), // Character.UnicodeBlock.IPA_EXTENSIONS
-            /* 02B0; 02FF; Spacing Modifier Letters */
-            UBInfo(0x02B0, 0x02FF, "SpacingModifierLetters"), // Character.UnicodeBlock.SPACING_MODIFIER_LETTERS
-            /* 0300; 036F; Combining Diacritical Marks */
-            UBInfo(0x0300, 0x036F, "CombiningDiacriticalMarks"), // Character.UnicodeBlock.COMBINING_DIACRITICAL_MARKS
-            /* 0370; 03FF; Greek */
-            UBInfo(0x0370, 0x03FF, "Greek"), // Character.UnicodeBlock.GREEK
-            /* 0400; 04FF; Cyrillic */
-            UBInfo(0x0400, 0x04FF, "Cyrillic"), // Character.UnicodeBlock.CYRILLIC
-            /* 0530; 058F; Armenian */
-            UBInfo(0x0530, 0x058F, "Armenian"), // Character.UnicodeBlock.ARMENIAN
-            /* 0590; 05FF; Hebrew */
-            UBInfo(0x0590, 0x05FF, "Hebrew"), // Character.UnicodeBlock.HEBREW
-            /* 0600; 06FF; Arabic */
-            UBInfo(0x0600, 0x06FF, "Arabic"), // Character.UnicodeBlock.ARABIC
-            /* 0700; 074F; Syriac */
-            UBInfo(0x0700, 0x074F, "Syriac"), // Character.UnicodeBlock.SYRIAC
-            /* 0780; 07BF; Thaana */
-            UBInfo(0x0780, 0x07BF, "Thaana"), // Character.UnicodeBlock.THAANA
-            /* 0900; 097F; Devanagari */
-            UBInfo(0x0900, 0x097F, "Devanagari"), // Character.UnicodeBlock.DEVANAGARI
-            /* 0980; 09FF; Bengali */
-            UBInfo(0x0980, 0x09FF, "Bengali"), // Character.UnicodeBlock.BENGALI
-            /* 0A00; 0A7F; Gurmukhi */
-            UBInfo(0x0A00, 0x0A7F, "Gurmukhi"), // Character.UnicodeBlock.GURMUKHI
-            /* 0A80; 0AFF; Gujarati */
-            UBInfo(0x0A80, 0x0AFF, "Gujarati"), // Character.UnicodeBlock.GUJARATI
-            /* 0B00; 0B7F; Oriya */
-            UBInfo(0x0B00, 0x0B7F, "Oriya"), // Character.UnicodeBlock.ORIYA
-            /* 0B80; 0BFF; Tamil */
-            UBInfo(0x0B80, 0x0BFF, "Tamil"), // Character.UnicodeBlock.TAMIL
-            /* 0C00; 0C7F; Telugu */
-            UBInfo(0x0C00, 0x0C7F, "Telugu"), // Character.UnicodeBlock.TELUGU
-            /* 0C80; 0CFF; Kannada */
-            UBInfo(0x0C80, 0x0CFF, "Kannada"), // Character.UnicodeBlock.KANNADA
-            /* 0D00; 0D7F; Malayalam */
-            UBInfo(0x0D00, 0x0D7F, "Malayalam"), // Character.UnicodeBlock.MALAYALAM
-            /* 0D80; 0DFF; Sinhala */
-            UBInfo(0x0D80, 0x0DFF, "Sinhala"), // Character.UnicodeBlock.SINHALA
-            /* 0E00; 0E7F; Thai */
-            UBInfo(0x0E00, 0x0E7F, "Thai"), // Character.UnicodeBlock.THAI
-            /* 0E80; 0EFF; Lao */
-            UBInfo(0x0E80, 0x0EFF, "Lao"), // Character.UnicodeBlock.LAO
-            /* 0F00; 0FFF; Tibetan */
-            UBInfo(0x0F00, 0x0FFF, "Tibetan"), // Character.UnicodeBlock.TIBETAN
-            /* 1000; 109F; Myanmar */
-            UBInfo(0x1000, 0x109F, "Myanmar"), // Character.UnicodeBlock.MYANMAR
-            /* 10A0; 10FF; Georgian */
-            UBInfo(0x10A0, 0x10FF, "Georgian"), // Character.UnicodeBlock.GEORGIAN
-            /* 1100; 11FF; Hangul Jamo */
-            UBInfo(0x1100, 0x11FF, "HangulJamo"), // Character.UnicodeBlock.HANGUL_JAMO
-            /* 1200; 137F; Ethiopic */
-            UBInfo(0x1200, 0x137F, "Ethiopic"), // Character.UnicodeBlock.ETHIOPIC
-            /* 13A0; 13FF; Cherokee */
-            UBInfo(0x13A0, 0x13FF, "Cherokee"), // Character.UnicodeBlock.CHEROKEE
-            /* 1400; 167F; Unified Canadian Aboriginal Syllabics */
-            UBInfo(0x1400, 0x167F, "UnifiedCanadianAboriginalSyllabics"), // Character.UnicodeBlock.UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS
-            /* 1680; 169F; Ogham */
-            UBInfo(0x1680, 0x169F, "Ogham"), // Character.UnicodeBlock.OGHAM
-            /* 16A0; 16FF; Runic */
-            UBInfo(0x16A0, 0x16FF, "Runic"), // Character.UnicodeBlock.RUNIC
-            /* 1780; 17FF; Khmer */
-            UBInfo(0x1780, 0x17FF, "Khmer"), // Character.UnicodeBlock.KHMER
-            /* 1800; 18AF; Mongolian */
-            UBInfo(0x1800, 0x18AF, "Mongolian"), // Character.UnicodeBlock.MONGOLIAN
-            /* 1E00; 1EFF; Latin Extended Additional */
-            UBInfo(0x1E00, 0x1EFF, "LatinExtendedAdditional"), // Character.UnicodeBlock.LATIN_EXTENDED_ADDITIONAL
-            /* 1F00; 1FFF; Greek Extended */
-            UBInfo(0x1F00, 0x1FFF, "GreekExtended"), // Character.UnicodeBlock.GREEK_EXTENDED
-            /* 2000; 206F; General Punctuation */
-            UBInfo(0x2000, 0x206F, "GeneralPunctuation"), // Character.UnicodeBlock.GENERAL_PUNCTUATION
-            /* 2070; 209F; Superscripts and Subscripts */
-            UBInfo(0x2070, 0x209F, "SuperscriptsandSubscripts"), // Character.UnicodeBlock.SUPERSCRIPTS_AND_SUBSCRIPTS
-            /* 20A0; 20CF; Currency Symbols */
-            UBInfo(0x20A0, 0x20CF, "CurrencySymbols"), // Character.UnicodeBlock.CURRENCY_SYMBOLS
-            /* 20D0; 20FF; Combining Marks for Symbols */
-            UBInfo(0x20D0, 0x20FF, "CombiningMarksforSymbols"), // Character.UnicodeBlock.COMBINING_MARKS_FOR_SYMBOLS
-            /* 2100; 214F; Letterlike Symbols */
-            UBInfo(0x2100, 0x214F, "LetterlikeSymbols"), // Character.UnicodeBlock.LETTERLIKE_SYMBOLS
-            /* 2150; 218F; Number Forms */
-            UBInfo(0x2150, 0x218F, "NumberForms"), // Character.UnicodeBlock.NUMBER_FORMS
-            /* 2190; 21FF; Arrows */
-            UBInfo(0x2190, 0x21FF, "Arrows"), // Character.UnicodeBlock.ARROWS
-            /* 2200; 22FF; Mathematical Operators */
-            UBInfo(0x2200, 0x22FF, "MathematicalOperators"), // Character.UnicodeBlock.MATHEMATICAL_OPERATORS
-            /* 2300; 23FF; Miscellaneous Technical */
-            UBInfo(0x2300, 0x23FF, "MiscellaneousTechnical"), // Character.UnicodeBlock.MISCELLANEOUS_TECHNICAL
-            /* 2400; 243F; Control Pictures */
-            UBInfo(0x2400, 0x243F, "ControlPictures"), // Character.UnicodeBlock.CONTROL_PICTURES
-            /* 2440; 245F; Optical Character Recognition */
-            UBInfo(0x2440, 0x245F, "OpticalCharacterRecognition"), // Character.UnicodeBlock.OPTICAL_CHARACTER_RECOGNITION
-            /* 2460; 24FF; Enclosed Alphanumerics */
-            UBInfo(0x2460, 0x24FF, "EnclosedAlphanumerics"), // Character.UnicodeBlock.ENCLOSED_ALPHANUMERICS
-            /* 2500; 257F; Box Drawing */
-            UBInfo(0x2500, 0x257F, "BoxDrawing"), // Character.UnicodeBlock.BOX_DRAWING
-            /* 2580; 259F; Block Elements */
-            UBInfo(0x2580, 0x259F, "BlockElements"), // Character.UnicodeBlock.BLOCK_ELEMENTS
-            /* 25A0; 25FF; Geometric Shapes */
-            UBInfo(0x25A0, 0x25FF, "GeometricShapes"), // Character.UnicodeBlock.GEOMETRIC_SHAPES
-            /* 2600; 26FF; Miscellaneous Symbols */
-            UBInfo(0x2600, 0x26FF, "MiscellaneousSymbols"), // Character.UnicodeBlock.MISCELLANEOUS_SYMBOLS
-            /* 2700; 27BF; Dingbats */
-            UBInfo(0x2700, 0x27BF, "Dingbats"), // Character.UnicodeBlock.DINGBATS
-            /* 2800; 28FF; Braille Patterns */
-            UBInfo(0x2800, 0x28FF, "BraillePatterns"), // Character.UnicodeBlock.BRAILLE_PATTERNS
-            /* 2E80; 2EFF; CJK Radicals Supplement */
-            UBInfo(0x2E80, 0x2EFF, "CJKRadicalsSupplement"), // Character.UnicodeBlock.CJK_RADICALS_SUPPLEMENT
-            /* 2F00; 2FDF; Kangxi Radicals */
-            UBInfo(0x2F00, 0x2FDF, "KangxiRadicals"), // Character.UnicodeBlock.KANGXI_RADICALS
-            /* 2FF0; 2FFF; Ideographic Description Characters */
-            UBInfo(0x2FF0, 0x2FFF, "IdeographicDescriptionCharacters"), // Character.UnicodeBlock.IDEOGRAPHIC_DESCRIPTION_CHARACTERS
-            /* 3000; 303F; CJK Symbols and Punctuation */
-            UBInfo(0x3000, 0x303F, "CJKSymbolsandPunctuation"), // Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
-            /* 3040; 309F; Hiragana */
-            UBInfo(0x3040, 0x309F, "Hiragana"), // Character.UnicodeBlock.HIRAGANA
-            /* 30A0; 30FF; Katakana */
-            UBInfo(0x30A0, 0x30FF, "Katakana"), // Character.UnicodeBlock.KATAKANA
-            /* 3100; 312F; Bopomofo */
-            UBInfo(0x3100, 0x312F, "Bopomofo"), // Character.UnicodeBlock.BOPOMOFO
-            /* 3130; 318F; Hangul Compatibility Jamo */
-            UBInfo(0x3130, 0x318F, "HangulCompatibilityJamo"), // Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
-            /* 3190; 319F; Kanbun */
-            UBInfo(0x3190, 0x319F, "Kanbun"), // Character.UnicodeBlock.KANBUN
-            /* 31A0; 31BF; Bopomofo Extended */
-            UBInfo(0x31A0, 0x31BF, "BopomofoExtended"), // Character.UnicodeBlock.BOPOMOFO_EXTENDED
-            /* 3200; 32FF; Enclosed CJK Letters and Months */
-            UBInfo(0x3200, 0x32FF, "EnclosedCJKLettersandMonths"), // Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS
-            /* 3300; 33FF; CJK Compatibility */
-            UBInfo(0x3300, 0x33FF, "CJKCompatibility"), // Character.UnicodeBlock.CJK_COMPATIBILITY
-            /* 3400; 4DB5; CJK Unified Ideographs Extension A */
-            UBInfo(0x3400, 0x4DB5, "CJKUnifiedIdeographsExtensionA"), // Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
-            /* 4E00; 9FFF; CJK Unified Ideographs */
-            UBInfo(0x4E00, 0x9FFF, "CJKUnifiedIdeographs"), // Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-            /* A000; A48F; Yi Syllables */
-            UBInfo(0xA000, 0xA48F, "YiSyllables"), // Character.UnicodeBlock.YI_SYLLABLES
-            /* A490; A4CF; Yi Radicals */
-            UBInfo(0xA490, 0xA4CF, "YiRadicals"), // Character.UnicodeBlock.YI_RADICALS
-            /* AC00; D7A3; Hangul Syllables */
-            UBInfo(0xAC00, 0xD7A3, "HangulSyllables"), // Character.UnicodeBlock.HANGUL_SYLLABLES
-            /* D800; DB7F; High Surrogates */
-            /* DB80; DBFF; High Private Use Surrogates */
-            /* DC00; DFFF; Low Surrogates */
-            /* E000; F8FF; Private Use */
-            /* F900; FAFF; CJK Compatibility Ideographs */
-            UBInfo(0xF900, 0xFAFF, "CJKCompatibilityIdeographs"), // Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-            /* FB00; FB4F; Alphabetic Presentation Forms */
-            UBInfo(0xFB00, 0xFB4F, "AlphabeticPresentationForms"), // Character.UnicodeBlock.ALPHABETIC_PRESENTATION_FORMS
-            /* FB50; FDFF; Arabic Presentation Forms-A */
-            UBInfo(0xFB50, 0xFDFF, "ArabicPresentationForms-A"), // Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_A
-            /* FE20; FE2F; Combining Half Marks */
-            UBInfo(0xFE20, 0xFE2F, "CombiningHalfMarks"), // Character.UnicodeBlock.COMBINING_HALF_MARKS
-            /* FE30; FE4F; CJK Compatibility Forms */
-            UBInfo(0xFE30, 0xFE4F, "CJKCompatibilityForms"), // Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS
-            /* FE50; FE6F; Small Form Variants */
-            UBInfo(0xFE50, 0xFE6F, "SmallFormVariants"), // Character.UnicodeBlock.SMALL_FORM_VARIANTS
-            /* FE70; FEFE; Arabic Presentation Forms-B */
-            // new UBInfo (0xFE70,0xFEFE,"InArabicPresentationForms-B"), //
-            // Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_B
-            /* FEFF; FEFF; Specials */
-            UBInfo(0xFEFF, 0xFEFF, "Specials"), // Character.UnicodeBlock.SPECIALS
-            /* FF00; FFEF; Halfwidth and Fullwidth Forms */
-            UBInfo(0xFF00, 0xFFEF, "HalfwidthandFullwidthForms"), // Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
-            /* FFF0; FFFD; Specials */
-            UBInfo(0xFFF0, 0xFFFD, "Specials") // Character.UnicodeBlock.SPECIALS
+        /* 0000; 007F; Basic Latin */
+        UBInfo(0x0000, 0x007F, "BasicLatin"), // Character.UnicodeBlock.BASIC_LATIN
+        /* 0080; 00FF; Latin-1 Supplement */
+        UBInfo(0x0080, 0x00FF, "Latin-1Supplement"), // Character.UnicodeBlock.LATIN_1_SUPPLEMENT
+        /* 0100; 017F; Latin Extended-A */
+        UBInfo(0x0100, 0x017F, "LatinExtended-A"), // Character.UnicodeBlock.LATIN_EXTENDED_A
+        /* 0180; 024F; Latin Extended-B */
+        // new UBInfo (0x0180,0x024F,"InLatinExtended-B"), //
+        // Character.UnicodeBlock.LATIN_EXTENDED_B
+        /* 0250; 02AF; IPA Extensions */
+        UBInfo(0x0250, 0x02AF, "IPAExtensions"), // Character.UnicodeBlock.IPA_EXTENSIONS
+        /* 02B0; 02FF; Spacing Modifier Letters */
+        UBInfo(0x02B0, 0x02FF, "SpacingModifierLetters"), // Character.UnicodeBlock.SPACING_MODIFIER_LETTERS
+        /* 0300; 036F; Combining Diacritical Marks */
+        UBInfo(0x0300, 0x036F, "CombiningDiacriticalMarks"), // Character.UnicodeBlock.COMBINING_DIACRITICAL_MARKS
+        /* 0370; 03FF; Greek */
+        UBInfo(0x0370, 0x03FF, "Greek"), // Character.UnicodeBlock.GREEK
+        /* 0400; 04FF; Cyrillic */
+        UBInfo(0x0400, 0x04FF, "Cyrillic"), // Character.UnicodeBlock.CYRILLIC
+        /* 0530; 058F; Armenian */
+        UBInfo(0x0530, 0x058F, "Armenian"), // Character.UnicodeBlock.ARMENIAN
+        /* 0590; 05FF; Hebrew */
+        UBInfo(0x0590, 0x05FF, "Hebrew"), // Character.UnicodeBlock.HEBREW
+        /* 0600; 06FF; Arabic */
+        UBInfo(0x0600, 0x06FF, "Arabic"), // Character.UnicodeBlock.ARABIC
+        /* 0700; 074F; Syriac */
+        UBInfo(0x0700, 0x074F, "Syriac"), // Character.UnicodeBlock.SYRIAC
+        /* 0780; 07BF; Thaana */
+        UBInfo(0x0780, 0x07BF, "Thaana"), // Character.UnicodeBlock.THAANA
+        /* 0900; 097F; Devanagari */
+        UBInfo(0x0900, 0x097F, "Devanagari"), // Character.UnicodeBlock.DEVANAGARI
+        /* 0980; 09FF; Bengali */
+        UBInfo(0x0980, 0x09FF, "Bengali"), // Character.UnicodeBlock.BENGALI
+        /* 0A00; 0A7F; Gurmukhi */
+        UBInfo(0x0A00, 0x0A7F, "Gurmukhi"), // Character.UnicodeBlock.GURMUKHI
+        /* 0A80; 0AFF; Gujarati */
+        UBInfo(0x0A80, 0x0AFF, "Gujarati"), // Character.UnicodeBlock.GUJARATI
+        /* 0B00; 0B7F; Oriya */
+        UBInfo(0x0B00, 0x0B7F, "Oriya"), // Character.UnicodeBlock.ORIYA
+        /* 0B80; 0BFF; Tamil */
+        UBInfo(0x0B80, 0x0BFF, "Tamil"), // Character.UnicodeBlock.TAMIL
+        /* 0C00; 0C7F; Telugu */
+        UBInfo(0x0C00, 0x0C7F, "Telugu"), // Character.UnicodeBlock.TELUGU
+        /* 0C80; 0CFF; Kannada */
+        UBInfo(0x0C80, 0x0CFF, "Kannada"), // Character.UnicodeBlock.KANNADA
+        /* 0D00; 0D7F; Malayalam */
+        UBInfo(0x0D00, 0x0D7F, "Malayalam"), // Character.UnicodeBlock.MALAYALAM
+        /* 0D80; 0DFF; Sinhala */
+        UBInfo(0x0D80, 0x0DFF, "Sinhala"), // Character.UnicodeBlock.SINHALA
+        /* 0E00; 0E7F; Thai */
+        UBInfo(0x0E00, 0x0E7F, "Thai"), // Character.UnicodeBlock.THAI
+        /* 0E80; 0EFF; Lao */
+        UBInfo(0x0E80, 0x0EFF, "Lao"), // Character.UnicodeBlock.LAO
+        /* 0F00; 0FFF; Tibetan */
+        UBInfo(0x0F00, 0x0FFF, "Tibetan"), // Character.UnicodeBlock.TIBETAN
+        /* 1000; 109F; Myanmar */
+        UBInfo(0x1000, 0x109F, "Myanmar"), // Character.UnicodeBlock.MYANMAR
+        /* 10A0; 10FF; Georgian */
+        UBInfo(0x10A0, 0x10FF, "Georgian"), // Character.UnicodeBlock.GEORGIAN
+        /* 1100; 11FF; Hangul Jamo */
+        UBInfo(0x1100, 0x11FF, "HangulJamo"), // Character.UnicodeBlock.HANGUL_JAMO
+        /* 1200; 137F; Ethiopic */
+        UBInfo(0x1200, 0x137F, "Ethiopic"), // Character.UnicodeBlock.ETHIOPIC
+        /* 13A0; 13FF; Cherokee */
+        UBInfo(0x13A0, 0x13FF, "Cherokee"), // Character.UnicodeBlock.CHEROKEE
+        /* 1400; 167F; Unified Canadian Aboriginal Syllabics */
+        UBInfo(0x1400, 0x167F, "UnifiedCanadianAboriginalSyllabics"), // Character.UnicodeBlock.UNIFIED_CANADIAN_ABORIGINAL_SYLLABICS
+        /* 1680; 169F; Ogham */
+        UBInfo(0x1680, 0x169F, "Ogham"), // Character.UnicodeBlock.OGHAM
+        /* 16A0; 16FF; Runic */
+        UBInfo(0x16A0, 0x16FF, "Runic"), // Character.UnicodeBlock.RUNIC
+        /* 1780; 17FF; Khmer */
+        UBInfo(0x1780, 0x17FF, "Khmer"), // Character.UnicodeBlock.KHMER
+        /* 1800; 18AF; Mongolian */
+        UBInfo(0x1800, 0x18AF, "Mongolian"), // Character.UnicodeBlock.MONGOLIAN
+        /* 1E00; 1EFF; Latin Extended Additional */
+        UBInfo(0x1E00, 0x1EFF, "LatinExtendedAdditional"), // Character.UnicodeBlock.LATIN_EXTENDED_ADDITIONAL
+        /* 1F00; 1FFF; Greek Extended */
+        UBInfo(0x1F00, 0x1FFF, "GreekExtended"), // Character.UnicodeBlock.GREEK_EXTENDED
+        /* 2000; 206F; General Punctuation */
+        UBInfo(0x2000, 0x206F, "GeneralPunctuation"), // Character.UnicodeBlock.GENERAL_PUNCTUATION
+        /* 2070; 209F; Superscripts and Subscripts */
+        UBInfo(0x2070, 0x209F, "SuperscriptsandSubscripts"), // Character.UnicodeBlock.SUPERSCRIPTS_AND_SUBSCRIPTS
+        /* 20A0; 20CF; Currency Symbols */
+        UBInfo(0x20A0, 0x20CF, "CurrencySymbols"), // Character.UnicodeBlock.CURRENCY_SYMBOLS
+        /* 20D0; 20FF; Combining Marks for Symbols */
+        UBInfo(0x20D0, 0x20FF, "CombiningMarksforSymbols"), // Character.UnicodeBlock.COMBINING_MARKS_FOR_SYMBOLS
+        /* 2100; 214F; Letterlike Symbols */
+        UBInfo(0x2100, 0x214F, "LetterlikeSymbols"), // Character.UnicodeBlock.LETTERLIKE_SYMBOLS
+        /* 2150; 218F; Number Forms */
+        UBInfo(0x2150, 0x218F, "NumberForms"), // Character.UnicodeBlock.NUMBER_FORMS
+        /* 2190; 21FF; Arrows */
+        UBInfo(0x2190, 0x21FF, "Arrows"), // Character.UnicodeBlock.ARROWS
+        /* 2200; 22FF; Mathematical Operators */
+        UBInfo(0x2200, 0x22FF, "MathematicalOperators"), // Character.UnicodeBlock.MATHEMATICAL_OPERATORS
+        /* 2300; 23FF; Miscellaneous Technical */
+        UBInfo(0x2300, 0x23FF, "MiscellaneousTechnical"), // Character.UnicodeBlock.MISCELLANEOUS_TECHNICAL
+        /* 2400; 243F; Control Pictures */
+        UBInfo(0x2400, 0x243F, "ControlPictures"), // Character.UnicodeBlock.CONTROL_PICTURES
+        /* 2440; 245F; Optical Character Recognition */
+        UBInfo(0x2440, 0x245F, "OpticalCharacterRecognition"), // Character.UnicodeBlock.OPTICAL_CHARACTER_RECOGNITION
+        /* 2460; 24FF; Enclosed Alphanumerics */
+        UBInfo(0x2460, 0x24FF, "EnclosedAlphanumerics"), // Character.UnicodeBlock.ENCLOSED_ALPHANUMERICS
+        /* 2500; 257F; Box Drawing */
+        UBInfo(0x2500, 0x257F, "BoxDrawing"), // Character.UnicodeBlock.BOX_DRAWING
+        /* 2580; 259F; Block Elements */
+        UBInfo(0x2580, 0x259F, "BlockElements"), // Character.UnicodeBlock.BLOCK_ELEMENTS
+        /* 25A0; 25FF; Geometric Shapes */
+        UBInfo(0x25A0, 0x25FF, "GeometricShapes"), // Character.UnicodeBlock.GEOMETRIC_SHAPES
+        /* 2600; 26FF; Miscellaneous Symbols */
+        UBInfo(0x2600, 0x26FF, "MiscellaneousSymbols"), // Character.UnicodeBlock.MISCELLANEOUS_SYMBOLS
+        /* 2700; 27BF; Dingbats */
+        UBInfo(0x2700, 0x27BF, "Dingbats"), // Character.UnicodeBlock.DINGBATS
+        /* 2800; 28FF; Braille Patterns */
+        UBInfo(0x2800, 0x28FF, "BraillePatterns"), // Character.UnicodeBlock.BRAILLE_PATTERNS
+        /* 2E80; 2EFF; CJK Radicals Supplement */
+        UBInfo(0x2E80, 0x2EFF, "CJKRadicalsSupplement"), // Character.UnicodeBlock.CJK_RADICALS_SUPPLEMENT
+        /* 2F00; 2FDF; Kangxi Radicals */
+        UBInfo(0x2F00, 0x2FDF, "KangxiRadicals"), // Character.UnicodeBlock.KANGXI_RADICALS
+        /* 2FF0; 2FFF; Ideographic Description Characters */
+        UBInfo(0x2FF0, 0x2FFF, "IdeographicDescriptionCharacters"), // Character.UnicodeBlock.IDEOGRAPHIC_DESCRIPTION_CHARACTERS
+        /* 3000; 303F; CJK Symbols and Punctuation */
+        UBInfo(0x3000, 0x303F, "CJKSymbolsandPunctuation"), // Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+        /* 3040; 309F; Hiragana */
+        UBInfo(0x3040, 0x309F, "Hiragana"), // Character.UnicodeBlock.HIRAGANA
+        /* 30A0; 30FF; Katakana */
+        UBInfo(0x30A0, 0x30FF, "Katakana"), // Character.UnicodeBlock.KATAKANA
+        /* 3100; 312F; Bopomofo */
+        UBInfo(0x3100, 0x312F, "Bopomofo"), // Character.UnicodeBlock.BOPOMOFO
+        /* 3130; 318F; Hangul Compatibility Jamo */
+        UBInfo(0x3130, 0x318F, "HangulCompatibilityJamo"), // Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
+        /* 3190; 319F; Kanbun */
+        UBInfo(0x3190, 0x319F, "Kanbun"), // Character.UnicodeBlock.KANBUN
+        /* 31A0; 31BF; Bopomofo Extended */
+        UBInfo(0x31A0, 0x31BF, "BopomofoExtended"), // Character.UnicodeBlock.BOPOMOFO_EXTENDED
+        /* 3200; 32FF; Enclosed CJK Letters and Months */
+        UBInfo(0x3200, 0x32FF, "EnclosedCJKLettersandMonths"), // Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS
+        /* 3300; 33FF; CJK Compatibility */
+        UBInfo(0x3300, 0x33FF, "CJKCompatibility"), // Character.UnicodeBlock.CJK_COMPATIBILITY
+        /* 3400; 4DB5; CJK Unified Ideographs Extension A */
+        UBInfo(0x3400, 0x4DB5, "CJKUnifiedIdeographsExtensionA"), // Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+        /* 4E00; 9FFF; CJK Unified Ideographs */
+        UBInfo(0x4E00, 0x9FFF, "CJKUnifiedIdeographs"), // Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+        /* A000; A48F; Yi Syllables */
+        UBInfo(0xA000, 0xA48F, "YiSyllables"), // Character.UnicodeBlock.YI_SYLLABLES
+        /* A490; A4CF; Yi Radicals */
+        UBInfo(0xA490, 0xA4CF, "YiRadicals"), // Character.UnicodeBlock.YI_RADICALS
+        /* AC00; D7A3; Hangul Syllables */
+        UBInfo(0xAC00, 0xD7A3, "HangulSyllables"), // Character.UnicodeBlock.HANGUL_SYLLABLES
+        /* D800; DB7F; High Surrogates */
+        /* DB80; DBFF; High Private Use Surrogates */
+        /* DC00; DFFF; Low Surrogates */
+        /* E000; F8FF; Private Use */
+        /* F900; FAFF; CJK Compatibility Ideographs */
+        UBInfo(0xF900, 0xFAFF, "CJKCompatibilityIdeographs"), // Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+        /* FB00; FB4F; Alphabetic Presentation Forms */
+        UBInfo(0xFB00, 0xFB4F, "AlphabeticPresentationForms"), // Character.UnicodeBlock.ALPHABETIC_PRESENTATION_FORMS
+        /* FB50; FDFF; Arabic Presentation Forms-A */
+        UBInfo(0xFB50, 0xFDFF, "ArabicPresentationForms-A"), // Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_A
+        /* FE20; FE2F; Combining Half Marks */
+        UBInfo(0xFE20, 0xFE2F, "CombiningHalfMarks"), // Character.UnicodeBlock.COMBINING_HALF_MARKS
+        /* FE30; FE4F; CJK Compatibility Forms */
+        UBInfo(0xFE30, 0xFE4F, "CJKCompatibilityForms"), // Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS
+        /* FE50; FE6F; Small Form Variants */
+        UBInfo(0xFE50, 0xFE6F, "SmallFormVariants"), // Character.UnicodeBlock.SMALL_FORM_VARIANTS
+        /* FE70; FEFE; Arabic Presentation Forms-B */
+        // new UBInfo (0xFE70,0xFEFE,"InArabicPresentationForms-B"), //
+        // Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_B
+        /* FEFF; FEFF; Specials */
+        UBInfo(0xFEFF, 0xFEFF, "Specials"), // Character.UnicodeBlock.SPECIALS
+        /* FF00; FFEF; Halfwidth and Fullwidth Forms */
+        UBInfo(0xFF00, 0xFFEF, "HalfwidthandFullwidthForms"), // Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+        /* FFF0; FFFD; Specials */
+        UBInfo(0xFFF0, 0xFFFD, "Specials") // Character.UnicodeBlock.SPECIALS
     )
 }

@@ -3,15 +3,14 @@
  * that can be found in the LICENSE file.
  */
 
+import kotlinx.cinterop.*
 import platform.Foundation.*
 import platform.objc.*
-import kotlin.test.*
-
-import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.system.exitProcess
+import kotlin.test.*
 
-fun exc_handler(x: Any?) : Unit {
+fun exc_handler(x: Any?) {
     println("Uncaught exception handler")
     println(x.toString())
     exitProcess(0)

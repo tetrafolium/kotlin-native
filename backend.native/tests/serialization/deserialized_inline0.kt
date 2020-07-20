@@ -7,7 +7,6 @@ package serialization.deserialized_inline0
 
 import kotlin.test.*
 
-
 fun inline_todo() {
     try {
         TODO("OK")
@@ -23,7 +22,7 @@ fun inline_maxof() {
 }
 
 fun inline_assert() {
-    //assert(true)
+    // assert(true)
 }
 
 @Test fun runTest() {
@@ -31,4 +30,3 @@ fun inline_assert() {
     inline_assert()
     inline_maxof()
 }
-

@@ -5,7 +5,6 @@
 
 package test.text
 
-
 internal actual val surrogateCodePointDecoding: String = "\uFFFD".repeat(3)
 
 internal actual val surrogateCharEncoding: ByteArray = byteArrayOf(0xEF.toByte(), 0xBF.toByte(), 0xBD.toByte())

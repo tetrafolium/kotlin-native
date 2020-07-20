@@ -5,9 +5,8 @@
 
 package runtime.workers.worker9
 
-import kotlin.test.*
-
 import kotlin.native.concurrent.*
+import kotlin.test.*
 
 @Test fun runTest1() {
     withLock { println("zzz") }
@@ -31,7 +30,7 @@ fun withLock(op: () -> Unit) {
     val future = worker.execute(TransferMode.SAFE, {}) {
         val me = Worker.current
         var x = 1
-        me.executeAfter (20000) {
+        me.executeAfter(20000) {
             println("second ${++x}")
         }
         me.executeAfter(10000) {
@@ -49,14 +48,20 @@ fun withLock(op: () -> Unit) {
         }
     }
     assertFailsWith<IllegalArgumentException> {
-        worker.executeAfter(-1, {
-            println("shall not happen")
-        }.freeze())
+        worker.executeAfter(
+            -1,
+            {
+                println("shall not happen")
+            }.freeze()
+        )
     }
 
-    worker.executeAfter(0, {
-        println("frozen OK")
-    }.freeze())
+    worker.executeAfter(
+        0,
+        {
+            println("frozen OK")
+        }.freeze()
+    )
 
     worker.requestTermination().result
 }

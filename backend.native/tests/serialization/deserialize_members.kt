@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
     c3.foo(13)
     d3.foo("cha-cha-cha")
     e3.foo(1.0f)
-    
+
     // This part doesn't work with file local inline functions.
     // So disabled for now.
     // val c4 = C4<Int>()
@@ -35,5 +35,4 @@ fun main(args: Array<String>) {
     // c4.foo(13)
     // d4.foo("cawabunga", 17)
     // e4.foo(19, "raqa-taqa", 23)
-
 }

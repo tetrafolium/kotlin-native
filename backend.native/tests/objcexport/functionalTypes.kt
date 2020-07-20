@@ -11,12 +11,75 @@ typealias AN = Any?
 typealias F2 = (AN, AN) -> AN
 typealias F5 = (AN, AN, AN, AN, AN) -> AN
 typealias F6 = (AN, AN, AN, AN, AN, AN,) -> AN
-typealias F32 = (AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
-                 AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
-                 AN, AN, AN, AN, AN, AN, AN, AN) -> AN
-typealias F33 = (AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
-                 AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
-                 AN, AN, AN, AN, AN, AN, AN, AN, AN) -> AN
+typealias F32 = (
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN
+) -> AN
+typealias F33 = (
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN,
+    AN
+) -> AN
 
 fun callDynType2(list: List<F2>, param: AN) {
     val fct = list.first()
@@ -31,42 +94,30 @@ fun callStaticType2(fct: F2, param: AN) {
 
 fun callDynType32(list: List<F32>, param: AN) {
     val fct = list.first()
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
+    val ret = fct(
+        param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callStaticType32(fct: F32, param: AN) {
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
+    val ret = fct(
+        param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callDynType33(list: List<F33>, param: AN) {
     val fct = list.first()
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null, null
+    val ret = fct(
+        param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callStaticType33(fct: F33, param: AN) {
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null, null
+    val ret = fct(
+        param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
@@ -89,18 +140,74 @@ fun getDynTypeRef2(): F2Holder = F2Holder(::f2)
 fun getStaticRef2(): F2 = ::f2
 
 private fun f32(
-        p1: AN, p2: AN, p3: AN, p4: AN, p5: AN, p6: AN, p7: AN, p8: AN,
-        p9: AN, p10: AN, p11: AN, p12: AN, p13: AN, p14: AN, p15: AN, p16: AN,
-        p17: AN, p18: AN, p19: AN, p20: AN, p21: AN, p22: AN, p23: AN, p24: AN,
-        p25: AN, p26: AN, p27: AN, p28: AN, p29: AN, p30: AN, p31: AN, p32: AN
+    p1: AN,
+    p2: AN,
+    p3: AN,
+    p4: AN,
+    p5: AN,
+    p6: AN,
+    p7: AN,
+    p8: AN,
+    p9: AN,
+    p10: AN,
+    p11: AN,
+    p12: AN,
+    p13: AN,
+    p14: AN,
+    p15: AN,
+    p16: AN,
+    p17: AN,
+    p18: AN,
+    p19: AN,
+    p20: AN,
+    p21: AN,
+    p22: AN,
+    p23: AN,
+    p24: AN,
+    p25: AN,
+    p26: AN,
+    p27: AN,
+    p28: AN,
+    p29: AN,
+    p30: AN,
+    p31: AN,
+    p32: AN
 ): AN = p1
 
 private fun f33(
-        p1: AN, p2: AN, p3: AN, p4: AN, p5: AN, p6: AN, p7: AN, p8: AN,
-        p9: AN, p10: AN, p11: AN, p12: AN, p13: AN, p14: AN, p15: AN, p16: AN,
-        p17: AN, p18: AN, p19: AN, p20: AN, p21: AN, p22: AN, p23: AN, p24: AN,
-        p25: AN, p26: AN, p27: AN, p28: AN, p29: AN, p30: AN, p31: AN, p32: AN,
-        p33: AN
+    p1: AN,
+    p2: AN,
+    p3: AN,
+    p4: AN,
+    p5: AN,
+    p6: AN,
+    p7: AN,
+    p8: AN,
+    p9: AN,
+    p10: AN,
+    p11: AN,
+    p12: AN,
+    p13: AN,
+    p14: AN,
+    p15: AN,
+    p16: AN,
+    p17: AN,
+    p18: AN,
+    p19: AN,
+    p20: AN,
+    p21: AN,
+    p22: AN,
+    p23: AN,
+    p24: AN,
+    p25: AN,
+    p26: AN,
+    p27: AN,
+    p28: AN,
+    p29: AN,
+    p30: AN,
+    p31: AN,
+    p32: AN,
+    p33: AN
 ): AN = p1
 
 class F32Holder(override val value: F32) : FHolder()

@@ -31,12 +31,12 @@ fun functionB() {
 
 const val depth = 5
 
-fun main(args : Array<String>) {
+fun main(args: Array<String>) {
     try {
         functionB()
     } catch (e: Throwable) {
         val stacktrace = e.getStackTrace()
-	assert(stacktrace.size >= depth)
-	stacktrace.take(depth).forEach(::checkStringFormat)
+        assert(stacktrace.size >= depth)
+        stacktrace.take(depth).forEach(::checkStringFormat)
     }
 }

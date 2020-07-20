@@ -133,7 +133,7 @@ class DoubleMathTest {
         assertEquals(0.25, 2.0.pow(-2))
         assertTrue(0.0.pow(Double.NaN).isNaN())
         assertTrue(Double.NaN.pow(-1).isNaN())
-        assertTrue((-7.0).pow(1/3.0).isNaN())
+        assertTrue((-7.0).pow(1 / 3.0).isNaN())
         assertTrue(1.0.pow(Double.POSITIVE_INFINITY).isNaN())
         assertTrue((-1.0).pow(Double.NEGATIVE_INFINITY).isNaN())
 
@@ -201,19 +201,19 @@ class DoubleMathTest {
         assertTrue(truncate(Double.NaN).isNaN())
         assertTrue(round(Double.NaN).isNaN())
         val data = arrayOf( //   v floor trunc round  ceil
-                doubleArrayOf( 1.3,  1.0,  1.0,  1.0,  2.0),
-                doubleArrayOf(-1.3, -2.0, -1.0, -1.0, -1.0),
-                doubleArrayOf( 1.5,  1.0,  1.0,  2.0,  2.0),
-                doubleArrayOf(-1.5, -2.0, -1.0, -2.0, -1.0),
-                doubleArrayOf( 1.8,  1.0,  1.0,  2.0,  2.0),
-                doubleArrayOf(-1.8, -2.0, -1.0, -2.0, -1.0),
+            doubleArrayOf(1.3, 1.0, 1.0, 1.0, 2.0),
+            doubleArrayOf(-1.3, -2.0, -1.0, -1.0, -1.0),
+            doubleArrayOf(1.5, 1.0, 1.0, 2.0, 2.0),
+            doubleArrayOf(-1.5, -2.0, -1.0, -2.0, -1.0),
+            doubleArrayOf(1.8, 1.0, 1.0, 2.0, 2.0),
+            doubleArrayOf(-1.8, -2.0, -1.0, -2.0, -1.0),
 
-                doubleArrayOf( 2.3,  2.0,  2.0,  2.0,  3.0),
-                doubleArrayOf(-2.3, -3.0, -2.0, -2.0, -2.0),
-                doubleArrayOf( 2.5,  2.0,  2.0,  2.0,  3.0),
-                doubleArrayOf(-2.5, -3.0, -2.0, -2.0, -2.0),
-                doubleArrayOf( 2.8,  2.0,  2.0,  3.0,  3.0),
-                doubleArrayOf(-2.8, -3.0, -2.0, -3.0, -2.0)
+            doubleArrayOf(2.3, 2.0, 2.0, 2.0, 3.0),
+            doubleArrayOf(-2.3, -3.0, -2.0, -2.0, -2.0),
+            doubleArrayOf(2.5, 2.0, 2.0, 2.0, 3.0),
+            doubleArrayOf(-2.5, -3.0, -2.0, -2.0, -2.0),
+            doubleArrayOf(2.8, 2.0, 2.0, 3.0, 3.0),
+            doubleArrayOf(-2.8, -3.0, -2.0, -3.0, -2.0)
         )
         for ((v, f, t, r, c) in data) {
             assertEquals(f, floor(v), "floor($v)")
@@ -277,7 +277,6 @@ class DoubleMathTest {
             assertEquals(value, value.sign)
         }
 
-
         val positives = listOf(Double.POSITIVE_INFINITY, Double.MAX_VALUE, 1.0, Double.MIN_VALUE)
         for (value in positives) {
             assertEquals(1.0, sign(value))
@@ -321,8 +320,7 @@ class DoubleMathTest {
             val prev = value.nextDown()
             if (prev > 0) {
                 assertEquals(value, prev + prev.ulp)
-            }
-            else {
+            } else {
                 assertEquals(prev, value - value.ulp)
             }
 
@@ -354,18 +352,18 @@ class DoubleMathTest {
     }
 
     @Test fun IEEEremainder() {
-        val data = arrayOf(  //  a    a IEEErem 2.5
-                doubleArrayOf(-2.0,   0.5),
-                doubleArrayOf(-1.25, -1.25),
-                doubleArrayOf( 0.0,   0.0),
-                doubleArrayOf( 1.0,   1.0),
-                doubleArrayOf( 1.25,  1.25),
-                doubleArrayOf( 1.5,  -1.0),
-                doubleArrayOf( 2.0,  -0.5),
-                doubleArrayOf( 2.5,   0.0),
-                doubleArrayOf( 3.5,   1.0),
-                doubleArrayOf( 3.75, -1.25),
-                doubleArrayOf( 4.0,  -1.0)
+        val data = arrayOf( //  a    a IEEErem 2.5
+            doubleArrayOf(-2.0, 0.5),
+            doubleArrayOf(-1.25, -1.25),
+            doubleArrayOf(0.0, 0.0),
+            doubleArrayOf(1.0, 1.0),
+            doubleArrayOf(1.25, 1.25),
+            doubleArrayOf(1.5, -1.0),
+            doubleArrayOf(2.0, -0.5),
+            doubleArrayOf(2.5, 0.0),
+            doubleArrayOf(3.5, 1.0),
+            doubleArrayOf(3.75, -1.25),
+            doubleArrayOf(4.0, -1.0)
         )
         for ((a, r) in data) {
             assertEquals(r, a.IEEErem(2.5), "($a).IEEErem(2.5)")
@@ -401,10 +399,10 @@ class DoubleMathTest {
         assertEquals(atan2(-1.0, Double.POSITIVE_INFINITY), -0.0)
         assertEquals(atan2(1.0, Double.NEGATIVE_INFINITY), PI)
         assertEquals(atan2(-1.0, Double.NEGATIVE_INFINITY), -PI)
-        assertEquals(atan2(1.0, 0.0), PI/2)
-        assertEquals(atan2(-1.0, 0.0), -PI/2)
-        assertEquals(atan2(Double.POSITIVE_INFINITY, 1.0), PI/2)
-        assertEquals(atan2(Double.NEGATIVE_INFINITY, 1.0), -PI/2)
+        assertEquals(atan2(1.0, 0.0), PI / 2)
+        assertEquals(atan2(-1.0, 0.0), -PI / 2)
+        assertEquals(atan2(Double.POSITIVE_INFINITY, 1.0), PI / 2)
+        assertEquals(atan2(Double.NEGATIVE_INFINITY, 1.0), -PI / 2)
 
         assertTrue(atan2(Double.NaN, 1.0).isNaN())
         assertTrue(atan2(1.0, Double.NaN).isNaN())
@@ -528,7 +526,7 @@ class FloatMathTest {
         assertEquals(0.25F, 2.0F.pow(-2))
         assertTrue(0.0F.pow(Float.NaN).isNaN())
         assertTrue(Float.NaN.pow(-1).isNaN())
-        assertTrue((-7.0F).pow(1/3.0F).isNaN())
+        assertTrue((-7.0F).pow(1 / 3.0F).isNaN())
         assertTrue(1.0F.pow(Float.POSITIVE_INFINITY).isNaN())
         assertTrue((-1.0F).pow(Float.NEGATIVE_INFINITY).isNaN())
 
@@ -592,19 +590,19 @@ class FloatMathTest {
         assertTrue(truncate(Float.NaN).isNaN())
         assertTrue(round(Float.NaN).isNaN())
         val data = arrayOf( //   v floor trunc round  ceil
-                floatArrayOf( 1.3F,  1.0F,  1.0F,  1.0F,  2.0F),
-                floatArrayOf(-1.3F, -2.0F, -1.0F, -1.0F, -1.0F),
-                floatArrayOf( 1.5F,  1.0F,  1.0F,  2.0F,  2.0F),
-                floatArrayOf(-1.5F, -2.0F, -1.0F, -2.0F, -1.0F),
-                floatArrayOf( 1.8F,  1.0F,  1.0F,  2.0F,  2.0F),
-                floatArrayOf(-1.8F, -2.0F, -1.0F, -2.0F, -1.0F),
+            floatArrayOf(1.3F, 1.0F, 1.0F, 1.0F, 2.0F),
+            floatArrayOf(-1.3F, -2.0F, -1.0F, -1.0F, -1.0F),
+            floatArrayOf(1.5F, 1.0F, 1.0F, 2.0F, 2.0F),
+            floatArrayOf(-1.5F, -2.0F, -1.0F, -2.0F, -1.0F),
+            floatArrayOf(1.8F, 1.0F, 1.0F, 2.0F, 2.0F),
+            floatArrayOf(-1.8F, -2.0F, -1.0F, -2.0F, -1.0F),
 
-                floatArrayOf( 2.3F,  2.0F,  2.0F,  2.0F,  3.0F),
-                floatArrayOf(-2.3F, -3.0F, -2.0F, -2.0F, -2.0F),
-                floatArrayOf( 2.5F,  2.0F,  2.0F,  2.0F,  3.0F),
-                floatArrayOf(-2.5F, -3.0F, -2.0F, -2.0F, -2.0F),
-                floatArrayOf( 2.8F,  2.0F,  2.0F,  3.0F,  3.0F),
-                floatArrayOf(-2.8F, -3.0F, -2.0F, -3.0F, -2.0F)
+            floatArrayOf(2.3F, 2.0F, 2.0F, 2.0F, 3.0F),
+            floatArrayOf(-2.3F, -3.0F, -2.0F, -2.0F, -2.0F),
+            floatArrayOf(2.5F, 2.0F, 2.0F, 2.0F, 3.0F),
+            floatArrayOf(-2.5F, -3.0F, -2.0F, -2.0F, -2.0F),
+            floatArrayOf(2.8F, 2.0F, 2.0F, 3.0F, 3.0F),
+            floatArrayOf(-2.8F, -3.0F, -2.0F, -3.0F, -2.0F)
         )
         for ((v, f, t, r, c) in data) {
             assertEquals(f, floor(v), "floor($v)")
@@ -668,7 +666,6 @@ class FloatMathTest {
             assertEquals(value, value.sign)
         }
 
-
         val positives = listOf(Float.POSITIVE_INFINITY, Float.MAX_VALUE, 1.0F, Float.MIN_VALUE)
         for (value in positives) {
             assertEquals(1.0F, sign(value))
@@ -709,8 +706,7 @@ class FloatMathTest {
             val prev = value.nextDown()
             if (prev > 0) {
                 assertEquals(value, prev + prev.ulp)
-            }
-            else {
+            } else {
                 assertEquals(prev, value - value.ulp)
             }
 
@@ -742,18 +738,18 @@ class FloatMathTest {
     }
 
     @Test fun IEEEremainder() {
-        val data = arrayOf(  //  a    a IEEErem 2.5
-                floatArrayOf(-2.0f,   0.5f),
-                floatArrayOf(-1.25f, -1.25f),
-                floatArrayOf( 0.0f,   0.0f),
-                floatArrayOf( 1.0f,   1.0f),
-                floatArrayOf( 1.25f,  1.25f),
-                floatArrayOf( 1.5f,  -1.0f),
-                floatArrayOf( 2.0f,  -0.5f),
-                floatArrayOf( 2.5f,   0.0f),
-                floatArrayOf( 3.5f,   1.0f),
-                floatArrayOf( 3.75f, -1.25f),
-                floatArrayOf( 4.0f,  -1.0f)
+        val data = arrayOf( //  a    a IEEErem 2.5
+            floatArrayOf(-2.0f, 0.5f),
+            floatArrayOf(-1.25f, -1.25f),
+            floatArrayOf(0.0f, 0.0f),
+            floatArrayOf(1.0f, 1.0f),
+            floatArrayOf(1.25f, 1.25f),
+            floatArrayOf(1.5f, -1.0f),
+            floatArrayOf(2.0f, -0.5f),
+            floatArrayOf(2.5f, 0.0f),
+            floatArrayOf(3.5f, 1.0f),
+            floatArrayOf(3.75f, -1.25f),
+            floatArrayOf(4.0f, -1.0f)
         )
         for ((a, r) in data) {
             assertEquals(r, a.IEEErem(2.5f), "($a).IEEErem(2.5f)")
@@ -782,7 +778,6 @@ class IntegerMathTest {
 
         positives.forEach { assertEquals(it, it.absoluteValue) }
     }
-
 
     @Test
     fun longSigns() {

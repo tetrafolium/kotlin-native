@@ -32,7 +32,7 @@ class ArraysDefault {
     fun log() = "size: ${memberArray.size}, contents: ${memberArray.contentToString()}"
 }
 class ArraysInitBlock {
-    private val memberArray : IntArray
+    private val memberArray: IntArray
     init {
         memberArray = IntArray(2)
     }
@@ -45,4 +45,3 @@ class ArraysInitBlock {
     }
     fun log() = "size: ${memberArray.size}, contents: ${memberArray.contentToString()}"
 }
-

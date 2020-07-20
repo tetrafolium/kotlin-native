@@ -161,23 +161,23 @@ fun testSet() {
     try {
         b.set(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.clear(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.clear(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.set(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b[-1]
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun testFlip() {
@@ -234,11 +234,11 @@ fun testFlip() {
     try {
         b.flip(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.flip(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun testNextBit() {
@@ -325,19 +325,19 @@ fun testNextBit() {
     try {
         b.previousSetBit(-2)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.previousClearBit(-2)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.nextSetBit(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.nextClearBit(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun BitSet.setBits(vararg indices: Int, value: Boolean = true) {
@@ -348,10 +348,12 @@ fun BitSet.setBits(vararg indices: Int, value: Boolean = true) {
 
 fun testLogic() {
     var b2 = BitSet(76)
-    b2.setBits(1, 3,
-            61, 63,
-            65, 67,
-            70, 72)
+    b2.setBits(
+        1, 3,
+        61, 63,
+        65, 67,
+        70, 72
+    )
 
     // and
     var b1 = BitSet(73)

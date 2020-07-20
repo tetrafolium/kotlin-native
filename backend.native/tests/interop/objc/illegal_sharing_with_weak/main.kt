@@ -1,6 +1,6 @@
-import kotlin.native.concurrent.*
 import kotlinx.cinterop.autoreleasepool
 import objclib.*
+import kotlin.native.concurrent.*
 
 fun main() {
     autoreleasepool {

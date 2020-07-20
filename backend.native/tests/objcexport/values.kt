@@ -8,6 +8,7 @@
 
 package conversions
 
+import kotlinx.cinterop.*
 import kotlin.native.concurrent.freeze
 import kotlin.native.concurrent.isFrozen
 import kotlin.native.internal.ObjCErrorException
@@ -16,7 +17,6 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.test.*
-import kotlinx.cinterop.*
 
 // Ensure loaded function IR classes aren't ordered by arity:
 internal fun referenceFunction1(block: (Any?) -> Unit) {}
@@ -93,7 +93,7 @@ val lazyVal: String by lazy {
 // Delegation
 var delegatedGlobalArray: Array<String> by DelegateClass()
 
-class DelegateClass: ReadWriteProperty<Nothing?, Array<String>> {
+class DelegateClass : ReadWriteProperty<Nothing?, Array<String>> {
 
     private var holder: Array<String> = arrayOf("property")
 
@@ -148,7 +148,6 @@ fun Char?.isA(): Boolean = (this == 'A')
 // Lambdas
 val sumLambda = { x: Int, y: Int -> x + y }
 
-
 // Inheritance
 interface I {
     fun iFun(): String = "I::iFun"
@@ -182,7 +181,7 @@ open class MultiExtClass : OpenClassI(), PI {
 open class ConstrClass(open val i: Int, val s: String, val a: Any = "AnyS") : OpenClassI()
 
 class ExtConstrClass(override val i: Int) : ConstrClass(i, "String") {
-    override fun iFun(): String  = "ExtConstrClass::iFun::$i-$s-$a"
+    override fun iFun(): String = "ExtConstrClass::iFun::$i-$s-$a"
 }
 
 // Enum
@@ -227,7 +226,7 @@ fun getNamedObject() = WithCompanionAndObject.Named
 fun getNamedObjectInterface(): OpenClassI = WithCompanionAndObject.Named
 
 typealias EE = Enumeration
-fun EE.getAnswer() : EE  = Enumeration.ANSWER
+fun EE.getAnswer(): EE = Enumeration.ANSWER
 
 inline class IC1(val value: Int)
 inline class IC2(val value: String)
@@ -238,7 +237,7 @@ fun box(ic2: IC2): Any = ic2
 fun box(ic3: IC3): Any = ic3
 
 fun concatenateInlineClassValues(ic1: IC1, ic1N: IC1?, ic2: IC2, ic2N: IC2?, ic3: IC3, ic3N: IC3?): String =
-        "${ic1.value} ${ic1N?.value} ${ic2.value} ${ic2N?.value} ${ic3.value} ${ic3N?.value}"
+    "${ic1.value} ${ic1N?.value} ${ic2.value} ${ic2N?.value} ${ic3.value} ${ic3N?.value}"
 
 fun IC1.getValue1() = this.value
 fun IC1?.getValueOrNull1() = this?.value
@@ -258,7 +257,7 @@ class MyException : Exception()
 class MyError : Error()
 
 @Throws(MyException::class, MyError::class)
-fun throwException(error: Boolean): Unit {
+fun throwException(error: Boolean) {
     throw if (error) MyError() else MyException()
 }
 
@@ -306,7 +305,7 @@ open class Throwing : MethodsWithThrows {
 class NotThrowing : MethodsWithThrows {
     @Throws(MyException::class) constructor() {}
 
-    override fun unit(): Unit {}
+    override fun unit() {}
     override fun nothing(): Nothing = throw MyException()
     override fun nothingN(): Nothing? = null
     override fun any(): Any = Any()
@@ -329,7 +328,7 @@ fun testSwiftThrowing(methods: SwiftOverridableMethodsWithThrows) = with(methods
 }
 
 private inline fun assertSwiftThrowing(block: () -> Unit) =
-        assertFailsWith<ObjCErrorException>(block = block)
+    assertFailsWith<ObjCErrorException>(block = block)
 
 @Throws(Throwable::class)
 fun testSwiftNotThrowing(methods: SwiftOverridableMethodsWithThrows) = with(methods) {
@@ -448,7 +447,7 @@ interface TransformIntString {
 }
 
 abstract class TransformIntToString : Transform<Int, String>, TransformIntString {
-    override abstract fun map(intValue: Int): String
+    abstract override fun map(intValue: Int): String
 }
 
 open class TransformIntToDecimalString : TransformIntToString() {
@@ -796,7 +795,6 @@ open class TestDeprecation() {
 
     @Suppress("DEPRECATION_ERROR") fun test(extendingHiddenNested: ExtendingHidden.Nested) {}
     @Suppress("DEPRECATION_ERROR") fun test(extendingNestedInHidden: ExtendingNestedInHidden) {}
-
 }
 
 @Deprecated("hidden", level = DeprecationLevel.HIDDEN) class TopLevelHidden {
@@ -880,7 +878,7 @@ class SharedRefs {
     }
 
     private fun <T : Any> create(block: () -> T) = block()
-            .also { mustBeRemoved += WeakReference(it) }
+        .also { mustBeRemoved += WeakReference(it) }
 
     private val mustBeRemoved = mutableListOf<WeakReference<*>>()
 }
@@ -1011,4 +1009,3 @@ fun mutUInt2Long(): MutableMap<UInt, Long> = mutableMapOf(Pair(0x8000_0000U, 8))
 fun mutULong2Long(): MutableMap<ULong, Long> = mutableMapOf(Pair(0x8000_0000_0000_0000UL, 8))
 fun mutFloat2Float(): MutableMap<Float, Float> = mutableMapOf(Pair(3.14f, 100f))
 fun mutDouble2String(): MutableMap<Double, String> = mutableMapOf(Pair(2.718281828459045, "2.718281828459045"))
-

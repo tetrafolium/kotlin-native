@@ -15,8 +15,6 @@ fun bar() {
     println("Hello, without args.")
 }
 
-
 fun main(args: Array<String>) {
     fail()
 }
-
