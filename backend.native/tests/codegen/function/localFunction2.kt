@@ -15,9 +15,8 @@ import kotlin.test.*
             fun f() {
                 a = b
             }
-
         }
-        fun local2() : A {
+        fun local2(): A {
             return A()
         }
     }

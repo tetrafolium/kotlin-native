@@ -16,7 +16,7 @@ import kotlin.test.*
  * to label %label_1 unwind label %cleanup_landingpad
  */
 
-fun <T> foo(a : T, b : Int = 42){
+fun <T> foo(a: T, b: Int = 42) {
     println(b)
 }
 

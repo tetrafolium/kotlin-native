@@ -10,18 +10,18 @@ import kotlin.test.*
 /**
  * Created by minamoto on 12/26/16.
  */
-//package defaults
+// package defaults
 
-open class A(val a:Int) {
+open class A(val a: Int) {
     override fun equals(other: Any?): Boolean {
         if (other == null || other as? A == null) return false
         return (other as A).a == a // Where is smart casting?
     }
 
     companion object {
-        val zero  = A(0)
-        val one   =  A(1)
-        val magic =  A(42)
+        val zero = A(0)
+        val one = A(1)
+        val magic = A(42)
     }
 }
 
@@ -33,7 +33,7 @@ open class A(val a:Int) {
 //         RETURN type=kotlin.Nothing from='foo(A = ...): Int'
 //           CALL '<get-a>(): Int' type=kotlin.Int origin=GET_PROPERTY
 //             $this: GET_VAR 'value-parameter a: A = ...' type=defaults.A origin=null
-fun foo(a: A = A.magic, b:Int = 0xdeadbeef.toInt()) = a.a
+fun foo(a: A = A.magic, b: Int = 0xdeadbeef.toInt()) = a.a
 
 //     FUN public fun bar(a: defaults.A, inc: kotlin.Int = ...): defaults.A
 //       inc: EXPRESSION_BODY
@@ -45,8 +45,7 @@ fun foo(a: A = A.magic, b:Int = 0xdeadbeef.toInt()) = a.a
 //               $this: CALL '<get-a>(): Int' type=kotlin.Int origin=GET_PROPERTY
 //                 $this: GET_VAR 'value-parameter a: A' type=defaults.A origin=null
 //               other: GET_VAR 'value-parameter inc: Int = ...' type=kotlin.Int origin=null
-fun bar(a:A, inc:Int = 0) = A(a.a + inc)
-
+fun bar(a: A, inc: Int = 0) = A(a.a + inc)
 
 @Test fun runTest() {
 
@@ -84,7 +83,6 @@ fun bar(a:A, inc:Int = 0) = A(a.a + inc)
         println("A one failed")
         throw Error()
     }
-
 
 //  if: CALL 'NOT(Boolean): Boolean' type=kotlin.Boolean origin=EXCLEQ
 //    arg0: CALL 'EQEQ(Any?, Any?): Boolean' type=kotlin.Boolean origin=EXCLEQ

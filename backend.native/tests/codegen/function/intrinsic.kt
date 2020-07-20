@@ -13,11 +13,11 @@ import kotlin.test.*
 // the function names are all wrong.
 
 fun intrinsic(b: Int): Int {
-  var sum = 1
-  sum = sum + b
-  return sum
+    var sum = 1
+    sum = sum + b
+    return sum
 }
 
 @Test fun runTest() {
-  if (intrinsic(3) != 4) throw Error()
+    if (intrinsic(3) != 4) throw Error()
 }
