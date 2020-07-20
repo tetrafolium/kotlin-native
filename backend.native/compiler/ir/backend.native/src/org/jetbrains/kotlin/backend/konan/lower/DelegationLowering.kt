@@ -35,37 +35,39 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
 
     private val kTypeGenerator = KTypeGenerator(context)
 
-    private fun getKPropertyImplConstructor(receiverTypes: List<IrType>,
-                                            returnType: IrType,
-                                            isLocal: Boolean,
-                                            isMutable: Boolean) : Pair<IrConstructorSymbol, List<IrType>> {
+    private fun getKPropertyImplConstructor(
+        receiverTypes: List<IrType>,
+        returnType: IrType,
+        isLocal: Boolean,
+        isMutable: Boolean
+    ): Pair<IrConstructorSymbol, List<IrType>> {
 
         val symbols = context.ir.symbols
 
         val classSymbol =
-                if (isLocal) {
-                    assert(receiverTypes.isEmpty()) { "Local delegated property cannot have explicit receiver" }
-                    when {
-                        isMutable -> symbols.kLocalDelegatedMutablePropertyImpl
-                        else -> symbols.kLocalDelegatedPropertyImpl
-                    }
-                } else {
-                    when (receiverTypes.size) {
-                        0 -> when {
-                            isMutable -> symbols.kMutableProperty0Impl
-                            else -> symbols.kProperty0Impl
-                        }
-                        1 -> when {
-                            isMutable -> symbols.kMutableProperty1Impl
-                            else -> symbols.kProperty1Impl
-                        }
-                        2 -> when {
-                            isMutable -> symbols.kMutableProperty2Impl
-                            else -> symbols.kProperty2Impl
-                        }
-                        else -> throw AssertionError("More than 2 receivers is not allowed")
-                    }
+            if (isLocal) {
+                assert(receiverTypes.isEmpty()) { "Local delegated property cannot have explicit receiver" }
+                when {
+                    isMutable -> symbols.kLocalDelegatedMutablePropertyImpl
+                    else -> symbols.kLocalDelegatedPropertyImpl
                 }
+            } else {
+                when (receiverTypes.size) {
+                    0 -> when {
+                        isMutable -> symbols.kMutableProperty0Impl
+                        else -> symbols.kProperty0Impl
+                    }
+                    1 -> when {
+                        isMutable -> symbols.kMutableProperty1Impl
+                        else -> symbols.kProperty1Impl
+                    }
+                    2 -> when {
+                        isMutable -> symbols.kMutableProperty2Impl
+                        else -> symbols.kProperty2Impl
+                    }
+                    else -> throw AssertionError("More than 2 receivers is not allowed")
+                }
+            }
 
         val arguments = (receiverTypes + listOf(returnType))
 
@@ -88,15 +90,15 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
 
         val kPropertiesField = WrappedFieldDescriptor().let {
             IrFieldImpl(
-                    SYNTHETIC_OFFSET, SYNTHETIC_OFFSET,
-                    DECLARATION_ORIGIN_KPROPERTIES_FOR_DELEGATION,
-                    IrFieldSymbolImpl(it),
-                    "KPROPERTIES".synthesizedName,
-                    kPropertiesFieldType,
-                    Visibilities.PRIVATE,
-                    isFinal = true,
-                    isExternal = false,
-                    isStatic = true,
+                SYNTHETIC_OFFSET, SYNTHETIC_OFFSET,
+                DECLARATION_ORIGIN_KPROPERTIES_FOR_DELEGATION,
+                IrFieldSymbolImpl(it),
+                "KPROPERTIES".synthesizedName,
+                kPropertiesFieldType,
+                Visibilities.PRIVATE,
+                isFinal = true,
+                isExternal = false,
+                isStatic = true,
             ).apply {
                 it.bind(this)
                 parent = irFile
@@ -142,14 +144,14 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
                 irBuilder.run {
                     val receiversCount = listOf(expression.dispatchReceiver, expression.extensionReceiver).count { it != null }
                     if (receiversCount == 2)
-                        throw AssertionError("Callable reference to properties with two receivers is not allowed: ${expression}")
+                        throw AssertionError("Callable reference to properties with two receivers is not allowed: $expression")
                     else { // Cache KProperties with no arguments.
                         // TODO: what about `receiversCount == 1` case?
                         val field = kProperties.getOrPut(expression.symbol.owner) {
                             createLocalKProperty(
-                                    expression.symbol.owner.name.asString(),
-                                    expression.getter.owner.returnType,
-                                    this
+                                expression.symbol.owner.name.asString(),
+                                expression.getter.owner.returnType,
+                                this
                             ) to kProperties.size
                         }
 
@@ -165,10 +167,15 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
         if (kProperties.isNotEmpty()) {
             val initializers = kProperties.values.sortedBy { it.second }.map { it.first }
             // TODO: move to object for lazy initialization.
-            irFile.declarations.add(0, kPropertiesField.apply {
-                initializer = IrExpressionBodyImpl(startOffset, endOffset,
-                        context.createArrayOfExpression(startOffset, endOffset, kPropertyImplType, initializers))
-            })
+            irFile.declarations.add(
+                0,
+                kPropertiesField.apply {
+                    initializer = IrExpressionBodyImpl(
+                        startOffset, endOffset,
+                        context.createArrayOfExpression(startOffset, endOffset, kPropertyImplType, initializers)
+                    )
+                }
+            )
         }
     }
 
@@ -201,17 +208,17 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
                         receiverTypes.add(it.type)
                 }
                 val getterKFunctionType = this@PropertyDelegationLowering.context.ir.symbols.getKFunctionType(
-                        returnType,
-                        receiverTypes
+                    returnType,
+                    receiverTypes
                 )
                 IrFunctionReferenceImpl(
-                        startOffset   = startOffset,
-                        endOffset     = endOffset,
-                        type          = getterKFunctionType,
-                        symbol        = expression.getter!!,
-                        typeArgumentsCount = getter.typeParameters.size,
-                        valueArgumentsCount = getter.valueParameters.size,
-                        reflectionTarget = expression.getter!!
+                    startOffset = startOffset,
+                    endOffset = endOffset,
+                    type = getterKFunctionType,
+                    symbol = expression.getter!!,
+                    typeArgumentsCount = getter.typeParameters.size,
+                    valueArgumentsCount = getter.valueParameters.size,
+                    reflectionTarget = expression.getter!!
                 ).apply {
                     this.dispatchReceiver = dispatchReceiver?.let { irGet(it) }
                     this.extensionReceiver = extensionReceiver?.let { irGet(it) }
@@ -224,17 +231,17 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
                 if (!isKMutablePropertyType(expression.type)) null
                 else {
                     val setterKFunctionType = this@PropertyDelegationLowering.context.ir.symbols.getKFunctionType(
-                            context.irBuiltIns.unitType,
-                            receiverTypes + returnType
+                        context.irBuiltIns.unitType,
+                        receiverTypes + returnType
                     )
                     IrFunctionReferenceImpl(
-                            startOffset   = startOffset,
-                            endOffset     = endOffset,
-                            type          = setterKFunctionType,
-                            symbol        = expression.setter!!,
-                            typeArgumentsCount = setter.typeParameters.size,
-                            valueArgumentsCount = setter.valueParameters.size,
-                            reflectionTarget = expression.setter!!
+                        startOffset = startOffset,
+                        endOffset = endOffset,
+                        type = setterKFunctionType,
+                        symbol = expression.setter!!,
+                        typeArgumentsCount = setter.typeParameters.size,
+                        valueArgumentsCount = setter.valueParameters.size,
+                        reflectionTarget = expression.setter!!
                     ).apply {
                         this.dispatchReceiver = dispatchReceiver?.let { irGet(it) }
                         this.extensionReceiver = extensionReceiver?.let { irGet(it) }
@@ -245,10 +252,11 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
             }
 
             val (symbol, constructorTypeArguments) = getKPropertyImplConstructor(
-                    receiverTypes = receiverTypes,
-                    returnType    = returnType,
-                    isLocal       = false,
-                    isMutable     = setterCallableReference != null)
+                receiverTypes = receiverTypes,
+                returnType = returnType,
+                isLocal = false,
+                isMutable = setterCallableReference != null
+            )
             val initializer = irCall(symbol.owner, constructorTypeArguments).apply {
                 putValueArgument(0, irString(expression.symbol.owner.name.asString()))
                 putValueArgument(1, with(kTypeGenerator) { irKType(returnType) })
@@ -261,15 +269,18 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
         }
     }
 
-    private fun createLocalKProperty(propertyName: String,
-                                     propertyType: IrType,
-                                     irBuilder: IrBuilderWithScope): IrExpression {
+    private fun createLocalKProperty(
+        propertyName: String,
+        propertyType: IrType,
+        irBuilder: IrBuilderWithScope
+    ): IrExpression {
         irBuilder.run {
             val (symbol, constructorTypeArguments) = getKPropertyImplConstructor(
-                    receiverTypes = emptyList(),
-                    returnType = propertyType,
-                    isLocal = true,
-                    isMutable = false)
+                receiverTypes = emptyList(),
+                returnType = propertyType,
+                isLocal = true,
+                isMutable = false
+            )
             val initializer = irCall(symbol.owner, constructorTypeArguments).apply {
                 putValueArgument(0, irString(propertyName))
                 putValueArgument(1, with(kTypeGenerator) { irKType(propertyType) })
@@ -291,5 +302,5 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
     }
 
     private object DECLARATION_ORIGIN_KPROPERTIES_FOR_DELEGATION :
-            IrDeclarationOriginImpl("KPROPERTIES_FOR_DELEGATION")
+        IrDeclarationOriginImpl("KPROPERTIES_FOR_DELEGATION")
 }

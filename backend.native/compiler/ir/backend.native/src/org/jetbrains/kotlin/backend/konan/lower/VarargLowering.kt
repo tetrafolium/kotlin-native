@@ -38,11 +38,11 @@ import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.util.OperatorNameConventions
 
-internal class VarargInjectionLowering constructor(val context: KonanBackendContext): DeclarationContainerLoweringPass {
+internal class VarargInjectionLowering constructor(val context: KonanBackendContext) : DeclarationContainerLoweringPass {
     override fun lower(irDeclarationContainer: IrDeclarationContainer) {
-        irDeclarationContainer.declarations.forEach{
+        irDeclarationContainer.declarations.forEach {
             when (it) {
-                is IrField    -> lower(it.symbol, it.initializer)
+                is IrField -> lower(it.symbol, it.initializer)
                 is IrFunction -> lower(it.symbol, it.body)
                 is IrProperty -> {
                     it.backingField?.let { field ->
@@ -60,7 +60,7 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
     }
 
     private fun lower(owner: IrSymbol, element: IrElement?) {
-        element?.transformChildrenVoid(object: IrElementTransformerVoid() {
+        element?.transformChildrenVoid(object : IrElementTransformerVoid() {
             val transformer = this
 
             private fun replaceEmptyParameterWithEmptyArray(expression: IrFunctionAccessExpression) {
@@ -104,8 +104,8 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
 
                     val vars = expression.elements.map {
                         it to irTemporaryVar(
-                                (it as? IrSpreadElement)?.expression ?: it as IrExpression,
-                                "elem".synthesizedString
+                            (it as? IrSpreadElement)?.expression ?: it as IrExpression,
+                            "elem".synthesizedString
                         )
                     }.toMap()
                     val arraySize = calculateArraySize(arrayHandle, hasSpreadElement, scope, expression, vars)
@@ -131,9 +131,9 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
                             val arraySizeVariable = irTemporary(irArraySize(arrayHandle, irGet(dst)), "length".synthesizedString)
                             +irCall(arrayHandle.copyIntoSymbol.owner).apply {
                                 extensionReceiver = irGet(dst)
-                                putValueArgument(0, irGet(arrayTmpVariable))  /* destination */
-                                putValueArgument(1, irGet(indexTmpVariable))  /* destinationOffset */
-                                putValueArgument(2, kIntZero)                 /* startIndex */
+                                putValueArgument(0, irGet(arrayTmpVariable)) /* destination */
+                                putValueArgument(1, irGet(indexTmpVariable)) /* destinationOffset */
+                                putValueArgument(2, kIntZero) /* startIndex */
                                 putValueArgument(3, irGet(arraySizeVariable)) /* endIndex */
                             }
                             +incrementVariable(indexTmpVariable, irGet(arraySizeVariable))
@@ -163,18 +163,21 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
     }
 
     private fun IrBuilderWithScope.incrementVariable(variable: IrVariable, value: IrExpression): IrExpression {
-        return irSetVar(variable.symbol, intPlus().apply {
-            dispatchReceiver = irGet(variable)
-            putValueArgument(0, value)
-        })
+        return irSetVar(
+            variable.symbol,
+            intPlus().apply {
+                dispatchReceiver = irGet(variable)
+                putValueArgument(0, value)
+            }
+        )
     }
-    private fun calculateArraySize(arrayHandle: ArrayHandle, hasSpreadElement: Boolean, scope:Scope, expression: IrVararg, vars: Map<IrVarargElement, IrVariable>): IrExpression {
+    private fun calculateArraySize(arrayHandle: ArrayHandle, hasSpreadElement: Boolean, scope: Scope, expression: IrVararg, vars: Map<IrVarargElement, IrVariable>): IrExpression {
         context.createIrBuilder(scope.scopeOwnerSymbol, expression.startOffset, expression.endOffset).run {
             if (!hasSpreadElement)
                 return irConstInt(expression.elements.size)
-            val notSpreadElementCount = expression.elements.filter { it !is IrSpreadElement}.size
+            val notSpreadElementCount = expression.elements.filter { it !is IrSpreadElement }.size
             val initialValue = irConstInt(notSpreadElementCount) as IrExpression
-            return vars.filter{it.key is IrSpreadElement}.toList().fold( initial = initialValue) { result, it ->
+            return vars.filter { it.key is IrSpreadElement }.toList().fold(initial = initialValue) { result, it ->
                 val arraySize = irArraySize(arrayHandle, irGet(it.second))
                 increment(result, arraySize)
             }
@@ -188,10 +191,9 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
         return arraySize
     }
 
+    private fun hasSpreadElement(expression: IrVararg?) = expression?.elements?.any { it is IrSpreadElement } ?: false
 
-    private fun hasSpreadElement(expression: IrVararg?) = expression?.elements?.any { it is IrSpreadElement }?:false
-
-    private fun log(msg:() -> String) {
+    private fun log(msg: () -> String) {
         context.log { "VARARG-INJECTOR:    ${msg()}" }
     }
 
@@ -214,8 +216,8 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
         }
     }
 
-    inner class PrimitiveArrayHandle(primitiveType: PrimitiveType)
-        : ArrayHandle(symbols.primitiveArrays[primitiveType]!!) {
+    inner class PrimitiveArrayHandle(primitiveType: PrimitiveType) :
+        ArrayHandle(symbols.primitiveArrays[primitiveType]!!) {
 
         override fun createArray(builder: IrBuilderWithScope, elementType: IrType, size: IrExpression): IrExpression {
             return builder.irCall(singleParameterConstructor).apply {
@@ -253,7 +255,6 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
 
     val arrayToHandle =
         (primitiveArrayHandles.values + unsignedArrayHandles + ReferenceArrayHandle()).associateBy { it.arraySymbol }
-
 }
 
 private fun IrBuilderWithScope.irConstInt(value: Int): IrConst<Int> =

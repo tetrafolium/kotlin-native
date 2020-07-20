@@ -30,8 +30,8 @@ internal class PostInlineLowering(val context: Context) : FileLoweringPass {
     private val symbols get() = context.ir.symbols
 
     private val kTypeGenerator = KTypeGenerator(
-            context,
-            eraseTypeParameters = true // Mimic JVM BE behaviour until proper type parameter impl is ready.
+        context,
+        eraseTypeParameters = true // Mimic JVM BE behaviour until proper type parameter impl is ready.
     )
 
     override fun lower(irFile: IrFile) {
@@ -77,7 +77,7 @@ internal class PostInlineLowering(val context: Context) : FileLoweringPass {
                     // Convert arguments of the binary blob to special IrConst<String> structure, so that
                     // vararg lowering will not affect it.
                     val args = expression.getValueArgument(0) as? IrVararg
-                            ?: throw Error("varargs shall not be lowered yet")
+                        ?: throw Error("varargs shall not be lowered yet")
                     if (args.elements.any { it is IrSpreadElement }) {
                         context.reportCompilationError("no spread elements allowed here", irFile, args)
                     }
@@ -85,10 +85,11 @@ internal class PostInlineLowering(val context: Context) : FileLoweringPass {
                     args.elements.forEach {
                         if (it !is IrConst<*>) {
                             context.reportCompilationError(
-                                    "all elements of binary blob must be constants", irFile, it)
+                                "all elements of binary blob must be constants", irFile, it
+                            )
                         }
                         val value = when (it.kind) {
-                            IrConstKind.Short ->  (it.value as Short).toInt()
+                            IrConstKind.Short -> (it.value as Short).toInt()
                             else ->
                                 context.reportCompilationError("incorrect value for binary data: $it.value", irFile, it)
                         }
@@ -99,23 +100,27 @@ internal class PostInlineLowering(val context: Context) : FileLoweringPass {
                         // Basic Multilingual Plane, so we could just append data "as is".
                         builder.append(value.toChar())
                     }
-                    expression.putValueArgument(0, IrConstImpl(
+                    expression.putValueArgument(
+                        0,
+                        IrConstImpl(
                             expression.startOffset, expression.endOffset,
                             context.irBuiltIns.stringType,
-                            IrConstKind.String, builder.toString()))
+                            IrConstKind.String, builder.toString()
+                        )
+                    )
                 } else if (expression.symbol.owner.isTypeOfIntrinsic()) {
                     val type = expression.getTypeArgument(0)
-                            ?: error(irFile, expression, "missing type argument")
-                    return with (kTypeGenerator) { createIrBuilder(expression).irKType(type) }
+                        ?: error(irFile, expression, "missing type argument")
+                    return with(kTypeGenerator) { createIrBuilder(expression).irKType(type) }
                 }
 
                 return expression
             }
 
             private fun createIrBuilder(element: IrElement) = context.createIrBuilder(
-                    currentScope!!.scope.scopeOwnerSymbol,
-                    element.startOffset,
-                    element.endOffset
+                currentScope!!.scope.scopeOwnerSymbol,
+                element.startOffset,
+                element.endOffset
             )
         })
     }

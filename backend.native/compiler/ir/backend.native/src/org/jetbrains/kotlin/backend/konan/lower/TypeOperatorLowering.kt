@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.backend.common.FunctionLoweringPass
 import org.jetbrains.kotlin.backend.common.lower.at
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlock
-import org.jetbrains.kotlin.ir.util.isSimpleTypeWithQuestionMark
 import org.jetbrains.kotlin.backend.konan.ir.containsNull
 import org.jetbrains.kotlin.backend.konan.ir.isSubtypeOf
 import org.jetbrains.kotlin.ir.IrStatement
@@ -27,6 +26,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.makeNotNull
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.util.irCall
+import org.jetbrains.kotlin.ir.util.isSimpleTypeWithQuestionMark
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 import org.jetbrains.kotlin.types.KotlinType
@@ -41,7 +41,6 @@ internal class TypeOperatorLowering(val context: CommonBackendContext) : Functio
         irFunction.transformChildrenVoid(transformer)
     }
 }
-
 
 private class TypeOperatorTransformer(val context: CommonBackendContext, val function: IrFunctionSymbol) : IrElementTransformerVoid() {
 
@@ -61,8 +60,8 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
         return when (classifier) {
             is IrClassSymbol -> this
             is IrTypeParameterSymbol -> {
-                val upperBound = classifier.owner.superTypes.firstOrNull() ?:
-                        TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
+                val upperBound = classifier.owner.superTypes.firstOrNull()
+                    ?: TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
 
                 if (this.hasQuestionMark) {
                     // `T?`
@@ -87,18 +86,18 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
             expression.argument.type.isSubtypeOf(typeOperand) -> expression.argument
 
             expression.argument.type.containsNull() -> {
-                with (builder) {
+                with(builder) {
                     irLetS(expression.argument) { argument ->
                         irIfThenElse(
-                                type = expression.type,
-                                condition = irEqeqeq(irGet(argument.owner), irNull()),
+                            type = expression.type,
+                            condition = irEqeqeq(irGet(argument.owner), irNull()),
 
-                                thenPart = if (typeOperand.isSimpleTypeWithQuestionMark)
-                                    irNull()
-                                else
-                                    irCall(throwNullPointerException.owner),
+                            thenPart = if (typeOperand.isSimpleTypeWithQuestionMark)
+                                irNull()
+                            else
+                                irCall(throwNullPointerException.owner),
 
-                                elsePart = irAs(irGet(argument.owner), typeOperand.makeNotNull())
+                            elsePart = irAs(irGet(argument.owner), typeOperand.makeNotNull())
                         )
                     }
                 }
@@ -119,10 +118,12 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
 
         return builder.irBlock(expression) {
             +irLetS(expression.argument) { variable ->
-                irIfThenElse(expression.type,
-                        condition = irIs(irGet(variable.owner), typeOperand),
-                        thenPart = irImplicitCast(irGet(variable.owner), typeOperand),
-                        elsePart = irNull())
+                irIfThenElse(
+                    expression.type,
+                    condition = irIs(irGet(variable.owner), typeOperand),
+                    thenPart = irImplicitCast(irGet(variable.owner), typeOperand),
+                    elsePart = irNull()
+                )
             }
         }
     }

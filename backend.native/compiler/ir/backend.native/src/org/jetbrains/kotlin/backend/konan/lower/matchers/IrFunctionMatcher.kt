@@ -10,8 +10,8 @@ import org.jetbrains.kotlin.name.FqName
 internal interface IrFunctionMatcher : (IrFunction) -> Boolean
 
 internal class ParameterMatcher(
-        val index: Int,
-        val restriction: (IrValueParameter) -> Boolean
+    val index: Int,
+    val restriction: (IrValueParameter) -> Boolean
 ) : IrFunctionMatcher {
 
     override fun invoke(function: IrFunction): Boolean {
@@ -21,7 +21,7 @@ internal class ParameterMatcher(
 }
 
 internal class DispatchReceiverMatcher(
-        val restriction: (IrValueParameter?) -> Boolean
+    val restriction: (IrValueParameter?) -> Boolean
 ) : IrFunctionMatcher {
 
     override fun invoke(function: IrFunction): Boolean {
@@ -30,7 +30,7 @@ internal class DispatchReceiverMatcher(
 }
 
 internal class ExtensionReceiverMatcher(
-        val restriction: (IrValueParameter?) -> Boolean
+    val restriction: (IrValueParameter?) -> Boolean
 ) : IrFunctionMatcher {
 
     override fun invoke(function: IrFunction): Boolean {
@@ -39,7 +39,7 @@ internal class ExtensionReceiverMatcher(
 }
 
 internal class ParameterCountMatcher(
-        val restriction: (Int) -> Boolean
+    val restriction: (Int) -> Boolean
 ) : IrFunctionMatcher {
 
     override fun invoke(function: IrFunction): Boolean {
@@ -48,7 +48,7 @@ internal class ParameterCountMatcher(
 }
 
 internal class FqNameMatcher(
-        val restriction: (FqName) -> Boolean
+    val restriction: (FqName) -> Boolean
 ) : IrFunctionMatcher {
 
     override fun invoke(function: IrFunction): Boolean {
@@ -64,33 +64,32 @@ internal open class IrFunctionMatcherContainer : IrFunctionMatcher {
     }
 
     fun fqName(restriction: (FqName) -> Boolean) =
-            add(FqNameMatcher(restriction))
+        add(FqNameMatcher(restriction))
 
     fun parameterCount(restriction: (Int) -> Boolean) =
-            add(ParameterCountMatcher(restriction))
+        add(ParameterCountMatcher(restriction))
 
     fun extensionReceiver(restriction: (IrValueParameter?) -> Boolean) =
-            add(ExtensionReceiverMatcher(restriction))
+        add(ExtensionReceiverMatcher(restriction))
 
     fun dispatchReceiver(restriction: (IrValueParameter?) -> Boolean) =
-            add(DispatchReceiverMatcher(restriction))
+        add(DispatchReceiverMatcher(restriction))
 
     fun parameter(index: Int, restriction: (IrValueParameter) -> Boolean) =
-            add(ParameterMatcher(index, restriction))
+        add(ParameterMatcher(index, restriction))
 
     override fun invoke(function: IrFunction) = restrictions.all { it(function) }
 }
 
 internal fun createIrFunctionRestrictions(restrictions: IrFunctionMatcherContainer.() -> Unit) =
-        IrFunctionMatcherContainer().apply(restrictions)
+    IrFunctionMatcherContainer().apply(restrictions)
 
 internal fun IrFunctionMatcherContainer.singleArgumentExtension(
-        fqName: FqName,
-        classes: Collection<IrClassSymbol>
+    fqName: FqName,
+    classes: Collection<IrClassSymbol>
 ): IrFunctionMatcherContainer {
     extensionReceiver { it != null && it.type.classifierOrNull in classes }
     parameterCount { it == 1 }
     fqName { it == fqName }
     return this
 }
-

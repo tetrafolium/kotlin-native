@@ -57,8 +57,12 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                 }
 
                 override fun visitAnonymousInitializer(declaration: IrAnonymousInitializer): IrStatement {
-                    initializers.add(IrBlockImpl(declaration.startOffset, declaration.endOffset,
-                            context.irBuiltIns.unitType, STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER, declaration.body.statements))
+                    initializers.add(
+                        IrBlockImpl(
+                            declaration.startOffset, declaration.endOffset,
+                            context.irBuiltIns.unitType, STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER, declaration.body.statements
+                        )
+                    )
                     return declaration
                 }
 
@@ -67,28 +71,35 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                     val startOffset = initializer.startOffset
                     val endOffset = initializer.endOffset
                     val initExpression = initializer.expression
-                    initializers.add(IrBlockImpl(startOffset, endOffset,
+                    initializers.add(
+                        IrBlockImpl(
+                            startOffset, endOffset,
                             context.irBuiltIns.unitType,
                             STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER,
                             listOf(
-                                    IrSetFieldImpl(startOffset, endOffset, declaration.symbol,
-                                            IrGetValueImpl(
-                                                    startOffset, endOffset,
-                                                    irClass.thisReceiver!!.type, irClass.thisReceiver!!.symbol
-                                            ),
-                                            initExpression,
-                                            context.irBuiltIns.unitType,
-                                            STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER)))
+                                IrSetFieldImpl(
+                                    startOffset, endOffset, declaration.symbol,
+                                    IrGetValueImpl(
+                                        startOffset, endOffset,
+                                        irClass.thisReceiver!!.type, irClass.thisReceiver!!.symbol
+                                    ),
+                                    initExpression,
+                                    context.irBuiltIns.unitType,
+                                    STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER
+                                )
+                            )
+                        )
                     )
 
                     // We shall keep initializer for constants for compile-time instantiation.
                     declaration.initializer =
-                            if (initExpression is IrConst<*> &&
-                                    (initExpression.type.isPrimitiveType() || initExpression.type.isString())) {
-                                IrExpressionBodyImpl(initExpression.copy())
-                            } else {
-                                null
-                            }
+                        if (initExpression is IrConst<*> &&
+                            (initExpression.type.isPrimitiveType() || initExpression.type.isString())
+                        ) {
+                            IrExpressionBodyImpl(initExpression.copy())
+                        } else {
+                            null
+                        }
                     return declaration
                 }
             })
@@ -108,20 +119,20 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
             val endOffset = irClass.endOffset
             val initializeFun = WrappedSimpleFunctionDescriptor().let {
                 IrFunctionImpl(
-                        startOffset, endOffset,
-                        DECLARATION_ORIGIN_ANONYMOUS_INITIALIZER,
-                        IrSimpleFunctionSymbolImpl(it),
-                        "INITIALIZER".synthesizedName,
-                        Visibilities.PRIVATE,
-                        Modality.FINAL,
-                        context.irBuiltIns.unitType,
-                        isInline = false,
-                        isSuspend = false,
-                        isExternal = false,
-                        isTailrec = false,
-                        isExpect = false,
-                        isFakeOverride = false,
-                        isOperator = false
+                    startOffset, endOffset,
+                    DECLARATION_ORIGIN_ANONYMOUS_INITIALIZER,
+                    IrSimpleFunctionSymbolImpl(it),
+                    "INITIALIZER".synthesizedName,
+                    Visibilities.PRIVATE,
+                    Modality.FINAL,
+                    context.irBuiltIns.unitType,
+                    isInline = false,
+                    isSuspend = false,
+                    isExternal = false,
+                    isTailrec = false,
+                    isExpect = false,
+                    isFakeOverride = false,
+                    isOperator = false
                 ).apply {
                     it.bind(this)
                     parent = irClass
@@ -138,10 +149,10 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                     override fun visitGetValue(expression: IrGetValue): IrExpression {
                         if (expression.symbol == irClass.thisReceiver!!.symbol) {
                             return IrGetValueImpl(
-                                    expression.startOffset,
-                                    expression.endOffset,
-                                    initializeFun.dispatchReceiverParameter!!.type,
-                                    initializeFun.dispatchReceiverParameter!!.symbol
+                                expression.startOffset,
+                                expression.endOffset,
+                                initializeFun.dispatchReceiverParameter!!.type,
+                                initializeFun.dispatchReceiverParameter!!.symbol
                             )
                         }
                         return expression
@@ -173,7 +184,7 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
 
                 override fun visitConstructor(declaration: IrConstructor): IrStatement {
                     val blockBody = declaration.body as? IrBlockBody
-                            ?: throw AssertionError("Unexpected constructor body: ${declaration.body}")
+                        ?: throw AssertionError("Unexpected constructor body: ${declaration.body}")
 
                     blockBody.statements.transformFlat {
                         when {
@@ -186,14 +197,17 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                                 } else {
                                     val startOffset = it.startOffset
                                     val endOffset = it.endOffset
-                                    listOf(IrCallImpl(startOffset, endOffset,
+                                    listOf(
+                                        IrCallImpl(
+                                            startOffset, endOffset,
                                             context.irBuiltIns.unitType, initializeMethodSymbol
-                                    ).apply {
-                                        dispatchReceiver = IrGetValueImpl(
+                                        ).apply {
+                                            dispatchReceiver = IrGetValueImpl(
                                                 startOffset, endOffset,
                                                 irClass.thisReceiver!!.type, irClass.thisReceiver!!.symbol
-                                        )
-                                    })
+                                            )
+                                        }
+                                    )
                                 }
                             }
 
@@ -205,9 +219,9 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                              *
                              *   to avoid possible recursion we manually reject body generation for Any.
                              */
-                            it is IrDelegatingConstructorCall
-                                    && irClass.symbol == context.irBuiltIns.anyClass
-                                    && it.symbol == declaration.symbol -> {
+                            it is IrDelegatingConstructorCall &&
+                                irClass.symbol == context.irBuiltIns.anyClass
+                                && it.symbol == declaration.symbol -> {
                                 listOf()
                             }
 

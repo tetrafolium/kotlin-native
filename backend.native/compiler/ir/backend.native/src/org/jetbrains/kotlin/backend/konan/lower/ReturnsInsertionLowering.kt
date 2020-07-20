@@ -35,7 +35,7 @@ internal class ReturnsInsertionLowering(val context: Context) : FileLoweringPass
                 if (declaration is IrConstructor || declaration.returnType == context.irBuiltIns.unitType) {
                     val irBuilder = context.createIrBuilder(declaration.symbol, declaration.endOffset, declaration.endOffset)
                     irBuilder.run {
-                         (body as IrBlockBody).statements += irReturn(irGetObject(symbols.unit))
+                        (body as IrBlockBody).statements += irReturn(irGetObject(symbols.unit))
                     }
                 }
             }

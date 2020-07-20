@@ -66,19 +66,19 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
             if (irConstructor.callsSuper(context.irBuiltIns)) {
                 // Initializing constructor: initialize 'this.this$0' with '$outer'.
                 val blockBody = irConstructor.body as? IrBlockBody
-                        ?: throw AssertionError("Unexpected constructor body: ${irConstructor.body}")
+                    ?: throw AssertionError("Unexpected constructor body: ${irConstructor.body}")
                 val startOffset = irConstructor.startOffset
                 val endOffset = irConstructor.endOffset
                 val thisReceiver = irClass.thisReceiver!!
                 val outerReceiver = irConstructor.dispatchReceiverParameter!!
                 blockBody.statements.add(
-                        0,
-                        IrSetFieldImpl(
-                                startOffset, endOffset, outerThisFieldSymbol,
-                                IrGetValueImpl(startOffset, endOffset, thisReceiver.type, thisReceiver.symbol),
-                                IrGetValueImpl(startOffset, endOffset, outerReceiver.type, outerReceiver.symbol),
-                                context.irBuiltIns.unitType
-                        )
+                    0,
+                    IrSetFieldImpl(
+                        startOffset, endOffset, outerThisFieldSymbol,
+                        IrGetValueImpl(startOffset, endOffset, thisReceiver.type, thisReceiver.symbol),
+                        IrGetValueImpl(startOffset, endOffset, outerReceiver.type, outerReceiver.symbol),
+                        context.irBuiltIns.unitType
+                    )
                 )
             }
 
@@ -108,16 +108,16 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
 
                         val currentFunctionReceiver = currentIrFunction.dispatchReceiverParameter
                         val thisParameter =
-                                if (currentFunctionReceiver?.type?.classifierOrNull == irClass.symbol)
-                                    currentFunctionReceiver
-                                else
-                                    irClass.thisReceiver!!
+                            if (currentFunctionReceiver?.type?.classifierOrNull == irClass.symbol)
+                                currentFunctionReceiver
+                            else
+                                irClass.thisReceiver!!
 
                         irThis = IrGetValueImpl(startOffset, endOffset, thisParameter.type, thisParameter.symbol, origin)
                     } else {
                         // For constructor we have outer class as dispatchReceiverParameter.
-                        innerClass = irClass.parent as? IrClass ?:
-                                throw AssertionError("No containing class for inner class ${irClass.dump()}")
+                        innerClass = irClass.parent as? IrClass
+                            ?: throw AssertionError("No containing class for inner class ${irClass.dump()}")
                         val thisParameter = constructorSymbol.owner.dispatchReceiverParameter!!
                         irThis = IrGetValueImpl(startOffset, endOffset, thisParameter.type, thisParameter.symbol, origin)
                     }
@@ -131,15 +131,15 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
 
                         val outerThisField = context.specialDeclarationsFactory.getOuterThisField(innerClass)
                         irThis = IrGetFieldImpl(
-                                startOffset, endOffset,
-                                outerThisField.symbol, outerThisField.type,
-                                irThis,
-                                origin
+                            startOffset, endOffset,
+                            outerThisField.symbol, outerThisField.type,
+                            irThis,
+                            origin
                         )
 
                         val outer = innerClass.parent
-                        innerClass = outer as? IrClass ?:
-                                throw AssertionError("Unexpected containing declaration for inner class ${innerClass.dump()}: $outer")
+                        innerClass = outer as? IrClass
+                            ?: throw AssertionError("Unexpected containing declaration for inner class ${innerClass.dump()}: $outer")
                     }
 
                     return irThis
@@ -148,4 +148,3 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
         }
     }
 }
-

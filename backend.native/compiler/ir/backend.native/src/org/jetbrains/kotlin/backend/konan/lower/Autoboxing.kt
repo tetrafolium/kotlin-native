@@ -47,13 +47,12 @@ internal class Autoboxing(val context: Context) : FileLoweringPass {
         irFile.transformChildrenVoid(transformer)
         irFile.transform(InlineClassTransformer(context), data = null)
     }
-
 }
 
 private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTransformer(
-        context.builtIns,
-        context.ir.symbols,
-        context.irBuiltIns
+    context.builtIns,
+    context.ir.symbols,
+    context.irBuiltIns
 ) {
 
     // TODO: should we handle the cases when expression type
@@ -61,7 +60,8 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
 
     override fun IrExpression.useInTypeOperator(operator: IrTypeOperator, typeOperand: IrType): IrExpression {
         return if (operator == IrTypeOperator.IMPLICIT_COERCION_TO_UNIT ||
-                   operator == IrTypeOperator.IMPLICIT_INTEGER_COERCION) {
+            operator == IrTypeOperator.IMPLICIT_INTEGER_COERCION
+        ) {
             this
         } else {
             // Codegen expects the argument of type-checking operator to be an object reference:
@@ -79,11 +79,12 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
     }
 
     override fun IrExpression.useAsReturnValue(returnTarget: IrReturnTargetSymbol): IrExpression = when (returnTarget) {
-        is IrSimpleFunctionSymbol -> if (returnTarget.owner.isSuspend && returnTarget == currentFunction?.symbol) {
-            this.useAs(irBuiltIns.anyNType)
-        } else {
-            this.useAs(returnTarget.owner.returnType)
-        }
+        is IrSimpleFunctionSymbol ->
+            if (returnTarget.owner.isSuspend && returnTarget == currentFunction?.symbol) {
+                this.useAs(irBuiltIns.anyNType)
+            } else {
+                this.useAs(returnTarget.owner.returnType)
+            }
         is IrConstructorSymbol -> this.useAs(irBuiltIns.unitType)
         is IrReturnableBlockSymbol -> this.useAs(returnTarget.owner.type)
         else -> error(returnTarget)
@@ -93,10 +94,10 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
         if (this.isNullConst() && type.isNullablePointer()) {
             // TODO: consider using IrConst with proper type.
             return IrCallImpl(
-                    startOffset,
-                    endOffset,
-                    symbols.getNativeNullPtr.owner.returnType,
-                    symbols.getNativeNullPtr
+                startOffset,
+                endOffset,
+                symbols.getNativeNullPtr.owner.returnType,
+                symbols.getNativeNullPtr
             ).uncheckedCast(type)
         }
 
@@ -125,7 +126,7 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
     }
 
     private fun IrType.isNullablePointer(): Boolean =
-            this.containsNull() && this.computePrimitiveBinaryTypeOrNull() == PrimitiveBinaryType.POINTER
+        this.containsNull() && this.computePrimitiveBinaryTypeOrNull() == PrimitiveBinaryType.POINTER
 
     private val IrFunctionAccessExpression.target: IrFunction get() = when (this) {
         is IrCall -> this.callTarget
@@ -150,8 +151,10 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
         return this.useAsArgument(expression.target.extensionReceiverParameter!!)
     }
 
-    override fun IrExpression.useAsValueArgument(expression: IrFunctionAccessExpression,
-                                                 parameter: IrValueParameter): IrExpression {
+    override fun IrExpression.useAsValueArgument(
+        expression: IrFunctionAccessExpression,
+        parameter: IrValueParameter
+    ): IrExpression {
 
         return this.useAsArgument(expression.target.valueParameters[parameter.index])
     }
@@ -204,7 +207,6 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
             else -> super.visitCall(expression)
         }
     }
-
 }
 
 private class InlineClassTransformer(private val context: Context) : IrBuildingTransformer(context) {
@@ -251,11 +253,12 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
             expression
         else {
             builder.at(expression)
-                    .irCall(symbols.reinterpret, field.type,
-                            listOf(parentClass.defaultType, field.type)
-                    ).apply {
-                        extensionReceiver = expression.receiver!!
-                    }
+                .irCall(
+                    symbols.reinterpret, field.type,
+                    listOf(parentClass.defaultType, field.type)
+                ).apply {
+                    extensionReceiver = expression.receiver!!
+                }
         }
     }
 
@@ -331,26 +334,30 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
             val valueToBox = function.valueParameters[0]
             if (valueToBox.type.containsNull()) {
                 +irIfThen(
-                        condition = irIsNull(irGet(valueToBox)),
-                        thenPart = irReturn(irNull())
+                    condition = irIsNull(irGet(valueToBox)),
+                    thenPart = irReturn(irNull())
                 )
             }
 
             if (cache != null) {
                 +irIfThen(
-                        condition = irCall(symbols.boxCachePredicates[cache]!!.owner).apply {
+                    condition = irCall(symbols.boxCachePredicates[cache]!!.owner).apply {
+                        putValueArgument(0, irGet(valueToBox))
+                    },
+                    thenPart = irReturn(
+                        irCall(symbols.boxCacheGetters[cache]!!.owner).apply {
                             putValueArgument(0, irGet(valueToBox))
-                        },
-                        thenPart = irReturn(irCall(symbols.boxCacheGetters[cache]!!.owner).apply {
-                            putValueArgument(0, irGet(valueToBox))
-                        })
+                        }
+                    )
                 )
             }
 
             // Note: IR variable created below has reference type intentionally.
-            val box = irTemporary(irCall(symbols.createUninitializedInstance.owner).also {
-                it.putTypeArgument(0, irClass.defaultType)
-            })
+            val box = irTemporary(
+                irCall(symbols.createUninitializedInstance.owner).also {
+                    it.putTypeArgument(0, irClass.defaultType)
+                }
+            )
             +irSetField(irGet(box), getInlineClassBackingField(irClass), irGet(valueToBox))
             +irReturn(irGet(box))
         }
@@ -359,11 +366,11 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
     }
 
     private fun IrBuilderWithScope.irNullPointerOrReference(type: IrType): IrExpression =
-            if (type.binaryTypeIsReference()) {
-                irNull()
-            } else {
-                irNullPointer()
-            }
+        if (type.binaryTypeIsReference()) {
+            irNull()
+        } else {
+            irNullPointer()
+        }
 
     private fun IrBuilderWithScope.irNullPointer(): IrExpression = irCall(symbols.getNativeNullPtr.owner)
 
@@ -374,8 +381,8 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
             val boxParameter = function.valueParameters.single()
             if (boxParameter.type.containsNull()) {
                 +irIfThen(
-                        condition = irEqeqeq(irGet(boxParameter), irNull()),
-                        thenPart = irReturn(irNullPointerOrReference(function.returnType))
+                    condition = irEqeqeq(irGet(boxParameter), irNull()),
+                    thenPart = irReturn(irNullPointerOrReference(function.returnType))
                 )
             }
             +irReturn(irGetField(irGet(boxParameter), getInlineClassBackingField(irClass)))
@@ -390,32 +397,32 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
         val descriptor = WrappedPropertyDescriptor()
 
         val irField = IrFieldImpl(
-                startOffset,
-                endOffset,
-                IrDeclarationOrigin.DEFINED,
-                IrFieldSymbolImpl(descriptor),
-                Name.identifier("value"),
-                declaration.defaultType,
-                Visibilities.PRIVATE,
-                isFinal = true,
-                isExternal = false,
-                isStatic = false,
+            startOffset,
+            endOffset,
+            IrDeclarationOrigin.DEFINED,
+            IrFieldSymbolImpl(descriptor),
+            Name.identifier("value"),
+            declaration.defaultType,
+            Visibilities.PRIVATE,
+            isFinal = true,
+            isExternal = false,
+            isStatic = false,
         )
         irField.parent = declaration
 
         val irProperty = IrPropertyImpl(
-                startOffset,
-                endOffset,
-                IrDeclarationOrigin.DEFINED,
-                IrPropertySymbolImpl(descriptor),
-                irField.name,
-                irField.visibility,
-                Modality.FINAL,
-                isVar = false,
-                isConst = false,
-                isLateinit = false,
-                isDelegated = false,
-                isExternal = false
+            startOffset,
+            endOffset,
+            IrDeclarationOrigin.DEFINED,
+            IrPropertySymbolImpl(descriptor),
+            irField.name,
+            irField.visibility,
+            Modality.FINAL,
+            isVar = false,
+            isConst = false,
+            isLateinit = false,
+            isDelegated = false,
+            isExternal = false
         )
         descriptor.bind(irProperty)
         irProperty.backingField = irField
@@ -424,8 +431,8 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
     }
 
     private fun IrBuilderWithScope.lowerConstructorCallToValue(
-            expression: IrMemberAccessExpression<*>,
-            callee: IrConstructor
+        expression: IrMemberAccessExpression<*>,
+        callee: IrConstructor
     ): IrExpression = if (callee.isPrimary) {
         expression.getValueArgument(0)!!
     } else {
@@ -448,46 +455,50 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
 
             (irConstructor.body as IrBlockBody).statements.forEach { statement ->
                 statement.setDeclarationsParent(result)
-                +statement.transform(object : IrElementTransformerVoid() {
-                    override fun visitDelegatingConstructorCall(expression: IrDelegatingConstructorCall): IrExpression {
-                        expression.transformChildrenVoid()
+                +statement.transform(
+                    object : IrElementTransformerVoid() {
+                        override fun visitDelegatingConstructorCall(expression: IrDelegatingConstructorCall): IrExpression {
+                            expression.transformChildrenVoid()
 
-                        val value = lowerConstructorCallToValue(expression, expression.symbol.owner)
-                        return irBlock(expression) {
-                            thisVar = irTemporary(value)
-                        }
-                    }
-
-                    override fun visitGetValue(expression: IrGetValue): IrExpression {
-                        expression.transformChildrenVoid()
-                        if (expression.symbol == irClass.thisReceiver?.symbol) {
-                            return irGet(thisVar)
+                            val value = lowerConstructorCallToValue(expression, expression.symbol.owner)
+                            return irBlock(expression) {
+                                thisVar = irTemporary(value)
+                            }
                         }
 
-                        parameterMapping[expression.symbol]?.let { return irGet(it) }
-                        return expression
-                    }
+                        override fun visitGetValue(expression: IrGetValue): IrExpression {
+                            expression.transformChildrenVoid()
+                            if (expression.symbol == irClass.thisReceiver?.symbol) {
+                                return irGet(thisVar)
+                            }
 
-                    override fun visitReturn(expression: IrReturn): IrExpression {
-                        expression.transformChildrenVoid()
-                        if (expression.returnTargetSymbol == irConstructor.symbol) {
-                            return irReturn(irBlock(expression.startOffset, expression.endOffset) {
-                                +expression.value
-                                +irGet(thisVar)
-                            })
+                            parameterMapping[expression.symbol]?.let { return irGet(it) }
+                            return expression
                         }
 
-                        return expression
-                    }
+                        override fun visitReturn(expression: IrReturn): IrExpression {
+                            expression.transformChildrenVoid()
+                            if (expression.returnTargetSymbol == irConstructor.symbol) {
+                                return irReturn(
+                                    irBlock(expression.startOffset, expression.endOffset) {
+                                        +expression.value
+                                        +irGet(thisVar)
+                                    }
+                                )
+                            }
 
-                }, null)
+                            return expression
+                        }
+                    },
+                    null
+                )
             }
             +irReturn(irGet(thisVar))
         }
     }
 
     private fun getInlineClassBackingField(irClass: IrClass): IrField =
-            irClass.declarations.filterIsInstance<IrProperty>().mapNotNull { it.backingField }.single()
+        irClass.declarations.filterIsInstance<IrProperty>().mapNotNull { it.backingField }.single()
 }
 
 private val Context.getLoweredInlineClassConstructor: (IrConstructor) -> IrSimpleFunction by Context.lazyMapMember { irConstructor ->
@@ -496,20 +507,20 @@ private val Context.getLoweredInlineClassConstructor: (IrConstructor) -> IrSimpl
 
     val descriptor = WrappedSimpleFunctionDescriptor(irConstructor.descriptor.annotations, irConstructor.descriptor.source)
     IrFunctionImpl(
-            irConstructor.startOffset, irConstructor.endOffset,
-            IrDeclarationOrigin.DEFINED,
-            IrSimpleFunctionSymbolImpl(descriptor),
-            Name.special("<constructor>"),
-            irConstructor.visibility,
-            Modality.FINAL,
-            isInline = false,
-            isExternal = false,
-            isTailrec = false,
-            isSuspend = false,
-            returnType = irConstructor.returnType,
-            isExpect = false,
-            isFakeOverride = false,
-            isOperator = false
+        irConstructor.startOffset, irConstructor.endOffset,
+        IrDeclarationOrigin.DEFINED,
+        IrSimpleFunctionSymbolImpl(descriptor),
+        Name.special("<constructor>"),
+        irConstructor.visibility,
+        Modality.FINAL,
+        isInline = false,
+        isExternal = false,
+        isTailrec = false,
+        isSuspend = false,
+        returnType = irConstructor.returnType,
+        isExpect = false,
+        isFakeOverride = false,
+        isOperator = false
     ).apply {
         descriptor.bind(this)
         parent = irConstructor.parent

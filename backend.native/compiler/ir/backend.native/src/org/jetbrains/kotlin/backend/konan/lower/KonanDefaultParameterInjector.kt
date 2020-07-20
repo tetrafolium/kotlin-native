@@ -12,8 +12,8 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.irCall
 
-internal class KonanDefaultParameterInjector(private val konanContext: KonanBackendContext)
-    : DefaultParameterInjector(konanContext, skipInline = false) {
+internal class KonanDefaultParameterInjector(private val konanContext: KonanBackendContext) :
+    DefaultParameterInjector(konanContext, skipInline = false) {
 
     override fun nullConst(startOffset: Int, endOffset: Int, type: IrType): IrExpression {
         val symbols = konanContext.ir.symbols
@@ -35,10 +35,10 @@ internal class KonanDefaultParameterInjector(private val konanContext: KonanBack
         }
 
         return irCall(
-                startOffset,
-                endOffset,
-                symbols.reinterpret.owner,
-                listOf(nullConstOfEquivalentType.type, type)
+            startOffset,
+            endOffset,
+            symbols.reinterpret.owner,
+            listOf(nullConstOfEquivalentType.type, type)
         ).apply {
             extensionReceiver = nullConstOfEquivalentType
         }

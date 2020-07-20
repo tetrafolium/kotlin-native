@@ -72,28 +72,28 @@ internal class ExpectToActualDefaultValueCopier(private val irModule: IrModuleFr
                 assert(function.valueParameters[index] == declaration)
 
                 if (function is IrConstructor &&
-                        ExpectedActualDeclarationChecker.isOptionalAnnotationClass(
-                                function.descriptor.constructedClass
-                        )
+                    ExpectedActualDeclarationChecker.isOptionalAnnotationClass(
+                        function.descriptor.constructedClass
+                    )
                 ) {
                     return
                 }
 
                 val actualForExpected = function.findActualForExpected()
                 actualForExpected.valueParameters[index].defaultValue =
-                        IrExpressionBodyImpl(
-                                defaultValue.startOffset, defaultValue.endOffset,
-                                defaultValue.expression.remapExpectValueSymbols().patchDeclarationParents(actualForExpected)
-                        )
+                    IrExpressionBodyImpl(
+                        defaultValue.startOffset, defaultValue.endOffset,
+                        defaultValue.expression.remapExpectValueSymbols().patchDeclarationParents(actualForExpected)
+                    )
             }
         })
     }
 
-    private inline fun <reified T: IrFunction> T.findActualForExpected(): T =
-            moduleIndex.functions[descriptor.findActualForExpect()] as T
+    private inline fun <reified T : IrFunction> T.findActualForExpected(): T =
+        moduleIndex.functions[descriptor.findActualForExpect()] as T
 
     private fun IrClass.findActualForExpected(): IrClass =
-            moduleIndex.classes[descriptor.findActualForExpect()]!!
+        moduleIndex.classes[descriptor.findActualForExpect()]!!
 
     private inline fun <reified T : MemberDescriptor> T.findActualForExpect() = with(ExpectedActualResolver) {
         val descriptor = this@findActualForExpect
@@ -106,12 +106,12 @@ internal class ExpectToActualDefaultValueCopier(private val irModule: IrModuleFr
     private fun IrExpression.remapExpectValueSymbols(): IrExpression {
         class SymbolRemapper : DeepCopySymbolRemapper() {
             override fun getReferencedClass(symbol: IrClassSymbol) =
-                    if (symbol.descriptor.isExpect)
-                        symbol.owner.findActualForExpected().symbol
-                    else super.getReferencedClass(symbol)
+                if (symbol.descriptor.isExpect)
+                    symbol.owner.findActualForExpected().symbol
+                else super.getReferencedClass(symbol)
 
             override fun getReferencedClassOrNull(symbol: IrClassSymbol?) =
-                    symbol?.let { getReferencedClass(it) }
+                symbol?.let { getReferencedClass(it) }
 
             override fun getReferencedClassifier(symbol: IrClassifierSymbol): IrClassifierSymbol = when (symbol) {
                 is IrClassSymbol -> getReferencedClass(symbol)
@@ -120,9 +120,9 @@ internal class ExpectToActualDefaultValueCopier(private val irModule: IrModuleFr
             }
 
             override fun getReferencedConstructor(symbol: IrConstructorSymbol) =
-                    if (symbol.descriptor.isExpect)
-                        symbol.owner.findActualForExpected().symbol
-                    else super.getReferencedConstructor(symbol)
+                if (symbol.descriptor.isExpect)
+                    symbol.owner.findActualForExpected().symbol
+                else super.getReferencedConstructor(symbol)
 
             override fun getReferencedFunction(symbol: IrFunctionSymbol): IrFunctionSymbol = when (symbol) {
                 is IrSimpleFunctionSymbol -> getReferencedSimpleFunction(symbol)
@@ -148,7 +148,7 @@ internal class ExpectToActualDefaultValueCopier(private val irModule: IrModuleFr
             }
 
             override fun getReferencedValue(symbol: IrValueSymbol) =
-                    remapExpectValue(symbol)?.symbol ?: super.getReferencedValue(symbol)
+                remapExpectValue(symbol)?.symbol ?: super.getReferencedValue(symbol)
         }
 
         val symbolRemapper = SymbolRemapper()

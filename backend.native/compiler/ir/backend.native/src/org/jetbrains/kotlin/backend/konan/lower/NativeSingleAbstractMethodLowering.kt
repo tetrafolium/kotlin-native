@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.ir.util.render
 
 internal class NativeSingleAbstractMethodLowering(context: Context) : SingleAbstractMethodLowering(context) {
     override fun getWrapperVisibility(expression: IrTypeOperatorCall, scopes: List<ScopeWithIr>) =
-            Visibilities.PRIVATE
+        Visibilities.PRIVATE
 
     override fun getSuperTypeForWrapper(typeOperand: IrType): IrType {
         return typeOperand.classOrNull?.defaultType ?: error("Unsupported SAM conversion: ${typeOperand.render()}")

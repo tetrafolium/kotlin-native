@@ -23,26 +23,26 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameUnsafe
 import org.jetbrains.kotlin.resolve.descriptorUtil.getAllSuperClassifiers
 
 internal class KTypeGenerator(
-        private val context: KonanBackendContext,
-        private val eraseTypeParameters: Boolean = false
+    private val context: KonanBackendContext,
+    private val eraseTypeParameters: Boolean = false
 ) {
     private val symbols = context.ir.symbols
 
     fun IrBuilderWithScope.irKType(type: IrType): IrExpression = if (type !is IrSimpleType) {
         // Represent as non-denotable type:
         irKTypeImpl(
-                kClassifier = irNull(),
-                irTypeArguments = emptyList(),
-                isMarkedNullable = false
+            kClassifier = irNull(),
+            irTypeArguments = emptyList(),
+            isMarkedNullable = false
         )
     } else {
         val classifier = type.classifier
 
         if (classifier is IrClassSymbol) {
             irKTypeImpl(
-                    kClassifier = irKClass(classifier),
-                    irTypeArguments = type.arguments,
-                    isMarkedNullable = type.hasQuestionMark
+                kClassifier = irKClass(classifier),
+                irTypeArguments = type.arguments,
+                isMarkedNullable = type.hasQuestionMark
             )
         } else {
             if (eraseTypeParameters) {
@@ -54,9 +54,9 @@ internal class KTypeGenerator(
     }
 
     private fun IrBuilderWithScope.irKTypeImpl(
-            kClassifier: IrExpression,
-            irTypeArguments: List<IrTypeArgument>,
-            isMarkedNullable: Boolean
+        kClassifier: IrExpression,
+        irTypeArguments: List<IrTypeArgument>,
+        isMarkedNullable: Boolean
     ): IrExpression = irCall(symbols.kTypeImpl.constructors.single()).apply {
         putValueArgument(0, kClassifier)
         putValueArgument(1, irKTypeProjectionsList(irTypeArguments))
@@ -66,7 +66,7 @@ internal class KTypeGenerator(
     private fun IrBuilderWithScope.irKClass(symbol: IrClassSymbol) = irKClass(this@KTypeGenerator.context, symbol)
 
     private fun IrBuilderWithScope.irKTypeProjectionsList(
-            irTypeArguments: List<IrTypeArgument>
+        irTypeArguments: List<IrTypeArgument>
     ): IrMemberAccessExpression<*> {
         val kTypeProjectionType = symbols.kTypeProjection.typeWithoutArguments
 
@@ -74,13 +74,16 @@ internal class KTypeGenerator(
             irCall(symbols.emptyList, listOf(kTypeProjectionType))
         } else {
             irCall(symbols.listOf, listOf(kTypeProjectionType)).apply {
-                putValueArgument(0, IrVarargImpl(
+                putValueArgument(
+                    0,
+                    IrVarargImpl(
                         startOffset,
                         endOffset,
                         type = symbols.array.typeWith(kTypeProjectionType),
                         varargElementType = kTypeProjectionType,
                         elements = irTypeArguments.map { irKTypeProjection(it) }
-                ))
+                    )
+                )
             }
         }
     }
@@ -118,6 +121,6 @@ internal fun IrBuilderWithScope.irKClass(context: KonanBackendContext, symbol: I
 }
 
 private fun IrBuilderWithScope.irKClassUnsupported(context: KonanBackendContext, message: String) =
-        irCall(context.ir.symbols.kClassUnsupportedImplConstructor.owner).apply {
-            putValueArgument(0, irString(message))
-        }
+    irCall(context.ir.symbols.kClassUnsupportedImplConstructor.owner).apply {
+        putValueArgument(0, irString(message))
+    }

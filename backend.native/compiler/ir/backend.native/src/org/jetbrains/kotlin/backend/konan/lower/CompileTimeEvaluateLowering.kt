@@ -16,10 +16,10 @@ import org.jetbrains.kotlin.ir.util.fqNameForIrSerialization
 import org.jetbrains.kotlin.ir.util.irCall
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
 
-internal class CompileTimeEvaluateLowering(val context: Context): FileLoweringPass {
+internal class CompileTimeEvaluateLowering(val context: Context) : FileLoweringPass {
 
     override fun lower(irFile: IrFile) {
-        irFile.transformChildrenVoid(object: IrBuildingTransformer(context) {
+        irFile.transformChildrenVoid(object : IrBuildingTransformer(context) {
             override fun visitCall(expression: IrCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
@@ -33,10 +33,10 @@ internal class CompileTimeEvaluateLowering(val context: Context): FileLoweringPa
                 // The function is kotlin.collections.listOf<T>(vararg args: T).
                 // TODO: refer functions more reliably.
 
-                if (elementsArr.elements.any { it is IrSpreadElement }
-                        || !elementsArr.elements.all { it is IrConst<*> && it.type.isString() })
+                if (elementsArr.elements.any { it is IrSpreadElement } ||
+                    !elementsArr.elements.all { it is IrConst<*> && it.type.isString() }
+                )
                     return expression
-
 
                 builder.at(expression)
 
