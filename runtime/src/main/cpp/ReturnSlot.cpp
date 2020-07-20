@@ -25,16 +25,16 @@ THREAD_LOCAL_VARIABLE long long storage;
 
 extern "C" {
 
-RUNTIME_USED
-KDouble ReturnSlot_getDouble() {
-  return *reinterpret_cast<KDouble*>(&::storage);
-}
+    RUNTIME_USED
+    KDouble ReturnSlot_getDouble() {
+        return *reinterpret_cast<KDouble*>(&::storage);
+    }
 
-RUNTIME_USED
-void ReturnSlot_setDouble(KInt upper, KInt lower) {
-  reinterpret_cast<KInt*>(&::storage)[0] = lower;
-  reinterpret_cast<KInt*>(&::storage)[1] = upper;
-}
+    RUNTIME_USED
+    void ReturnSlot_setDouble(KInt upper, KInt lower) {
+        reinterpret_cast<KInt*>(&::storage)[0] = lower;
+        reinterpret_cast<KInt*>(&::storage)[1] = upper;
+    }
 
 }  // extern "C"
 #endif  // KONAN_WASM

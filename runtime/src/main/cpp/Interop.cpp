@@ -25,21 +25,21 @@
 
 extern "C" {
 
-KNativePtr Kotlin_Interop_createStablePointer(KRef any) {
-  KRefSharedHolder* holder = konanConstructInstance<KRefSharedHolder>();
-  holder->init(any);
-  return holder;
-}
+    KNativePtr Kotlin_Interop_createStablePointer(KRef any) {
+        KRefSharedHolder* holder = konanConstructInstance<KRefSharedHolder>();
+        holder->init(any);
+        return holder;
+    }
 
-void Kotlin_Interop_disposeStablePointer(KNativePtr pointer) {
-  KRefSharedHolder* holder = reinterpret_cast<KRefSharedHolder*>(pointer);
-  holder->dispose();
-  konanDestructInstance(holder);
-}
+    void Kotlin_Interop_disposeStablePointer(KNativePtr pointer) {
+        KRefSharedHolder* holder = reinterpret_cast<KRefSharedHolder*>(pointer);
+        holder->dispose();
+        konanDestructInstance(holder);
+    }
 
-OBJ_GETTER(Kotlin_Interop_derefStablePointer, KNativePtr pointer) {
-  KRefSharedHolder* holder = reinterpret_cast<KRefSharedHolder*>(pointer);
-  RETURN_OBJ(holder->ref<ErrorPolicy::kThrow>());
-}
+    OBJ_GETTER(Kotlin_Interop_derefStablePointer, KNativePtr pointer) {
+        KRefSharedHolder* holder = reinterpret_cast<KRefSharedHolder*>(pointer);
+        RETURN_OBJ(holder->ref<ErrorPolicy::kThrow>());
+    }
 
 }

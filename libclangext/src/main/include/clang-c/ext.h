@@ -22,13 +22,13 @@
 // libclang doesn't include the type attributes when constructing `CXType`,
 // so attributes have to be represented separately:
 typedef struct {
-  const void* typeOpaquePtr;
+    const void* typeOpaquePtr;
 } CXTypeAttributes;
 
 enum CXNullabilityKind {
-  CXNullabilityKind_Nullable,
-  CXNullabilityKind_NonNull,
-  CXNullabilityKind_Unspecified
+    CXNullabilityKind_Nullable,
+    CXNullabilityKind_NonNull,
+    CXNullabilityKind_Unspecified
 };
 
 #ifdef __cplusplus

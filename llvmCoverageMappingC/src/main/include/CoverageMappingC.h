@@ -49,7 +49,7 @@ LLVMAddFunctionMappingRecord(LLVMContextRef context, const char *name, uint64_t 
  * Wraps creation of coverage::CoverageMappingWriter and call to coverage::CoverageMappingWriter::write.
  */
 struct LLVMFunctionCoverage* LLVMWriteCoverageRegionMapping(unsigned int *fileIdMapping, size_t fileIdMappingSize,
-                                           struct LLVMCoverageRegion **mappingRegions, size_t mappingRegionsSize);
+        struct LLVMCoverageRegion **mappingRegions, size_t mappingRegionsSize);
 
 void LLVMFunctionCoverageDispose(struct LLVMFunctionCoverage* functionCoverage);
 
@@ -57,8 +57,8 @@ void LLVMFunctionCoverageDispose(struct LLVMFunctionCoverage* functionCoverage);
  * Create __llvm_coverage_mapping global.
  */
 LLVMValueRef LLVMCoverageEmit(LLVMModuleRef moduleRef, LLVMValueRef *records, size_t recordsSize,
-        const char **filenames, int *filenamesIndices, size_t filenamesSize,
-        struct LLVMFunctionCoverage** functionCoverages, size_t functionCoveragesSize);
+                              const char **filenames, int *filenamesIndices, size_t filenamesSize,
+                              struct LLVMFunctionCoverage** functionCoverages, size_t functionCoveragesSize);
 
 /**
  * Wrapper for `llvm.instrprof.increment` declaration.

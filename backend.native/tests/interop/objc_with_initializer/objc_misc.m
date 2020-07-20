@@ -4,17 +4,19 @@
 
 @end
 
-@implementation B:A
-+(A*)giveC{
-  return [[C alloc] init];
+@implementation B:
+A
++(A*)giveC {
+    return [[C alloc] init];
 }
 @end
 
-@implementation C:A
+@implementation C:
+A
 @end
 
 #if 0
 int main() {
-  [B giveC];
+    [B giveC];
 }
 #endif

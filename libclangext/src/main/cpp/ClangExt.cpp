@@ -26,195 +26,199 @@ using namespace clang;
 #if LIBCLANGEXT_ENABLE
 
 static CXCursor makeObjCProtocolDeclCXCursor(const ObjCProtocolDecl* decl, CXTranslationUnit translationUnit) {
-  auto kind = CXCursor_ObjCProtocolDecl;
-  CXCursor result = { kind, 0, { decl, (void*)(intptr_t) 1, translationUnit } };
-  return result;
+    auto kind = CXCursor_ObjCProtocolDecl;
+    CXCursor result = { kind, 0, { decl, (void*)(intptr_t) 1, translationUnit } };
+    return result;
 }
 
 static const Attr* getCursorAttr(CXCursor cursor) {
-  return static_cast<const Attr *>(cursor.data[1]);
+    return static_cast<const Attr *>(cursor.data[1]);
 }
 
 static const Decl *getCursorDecl(CXCursor Cursor) {
-  return static_cast<const Decl *>(Cursor.data[0]);
+    return static_cast<const Decl *>(Cursor.data[0]);
 }
 
 static const QualType unwrapCXType(CXType type) {
-  return QualType::getFromOpaquePtr(type.data[0]);
+    return QualType::getFromOpaquePtr(type.data[0]);
 }
 
 static CXTranslationUnit getTranslationUnit(CXType type) {
-  return static_cast<CXTranslationUnit>(type.data[1]);
+    return static_cast<CXTranslationUnit>(type.data[1]);
 }
 
 static ASTUnit* getASTUnit(CXTranslationUnit translationUnit) {
-  return reinterpret_cast<ASTUnit**>(translationUnit)[1];
+    return reinterpret_cast<ASTUnit**>(translationUnit)[1];
 }
 
 // The functions above are totally libclang-implementation-specific and thus version-dependent.
 
 static CXTypeAttributes makeCXTypeAttributes(QualType qualType) {
-  CXTypeAttributes result = { qualType.getAsOpaquePtr() };
-  return result;
+    CXTypeAttributes result = { qualType.getAsOpaquePtr() };
+    return result;
 }
 
 static QualType unwrapCXTypeAttributes(CXTypeAttributes attributes) {
-  return QualType::getFromOpaquePtr(attributes.typeOpaquePtr);
+    return QualType::getFromOpaquePtr(attributes.typeOpaquePtr);
 }
 
 #else // LIBCLANGEXT_ENABLE
 
 static CXTypeAttributes makeCXTypeAttributes() {
-  CXTypeAttributes result = { nullptr };
-  return result;
+    CXTypeAttributes result = { nullptr };
+    return result;
 }
 
 #endif // LIBCLANGEXT_ENABLE
 
 extern "C" {
 
-  const char* clang_Cursor_getAttributeSpelling(CXCursor cursor) {
+    const char* clang_Cursor_getAttributeSpelling(CXCursor cursor) {
 #if LIBCLANGEXT_ENABLE
-    if (clang_isAttribute(cursor.kind) == 0) {
-      return nullptr;
-    }
+        if (clang_isAttribute(cursor.kind) == 0) {
+            return nullptr;
+        }
 
-    return getCursorAttr(cursor)->getSpelling();
+        return getCursorAttr(cursor)->getSpelling();
 #else
-    return "";
+        return "";
 #endif
-  }
-
-  CXTypeAttributes clang_getDeclTypeAttributes(CXCursor cursor) {
-#if LIBCLANGEXT_ENABLE
-    CXType cxType = clang_getCursorType(cursor);
-    if (clang_isDeclaration(cursor.kind)) {
-      const Decl *D = getCursorDecl(cursor);
-      if (D) {
-        if (const DeclaratorDecl *DD = dyn_cast<DeclaratorDecl>(D))
-          return makeCXTypeAttributes(DD->getType());
-      }
     }
-    return makeCXTypeAttributes(QualType());
+
+    CXTypeAttributes clang_getDeclTypeAttributes(CXCursor cursor) {
+#if LIBCLANGEXT_ENABLE
+        CXType cxType = clang_getCursorType(cursor);
+        if (clang_isDeclaration(cursor.kind)) {
+            const Decl *D = getCursorDecl(cursor);
+            if (D) {
+                if (const DeclaratorDecl *DD = dyn_cast<DeclaratorDecl>(D))
+                    return makeCXTypeAttributes(DD->getType());
+            }
+        }
+        return makeCXTypeAttributes(QualType());
 #else
-    return makeCXTypeAttributes();
+        return makeCXTypeAttributes();
 #endif
-  }
+    }
 
-  CXTypeAttributes clang_getResultTypeAttributes(CXTypeAttributes typeAttributes) {
+    CXTypeAttributes clang_getResultTypeAttributes(CXTypeAttributes typeAttributes) {
 #if LIBCLANGEXT_ENABLE
-    QualType qualType = unwrapCXTypeAttributes(typeAttributes);
-    if (qualType.isNull())
-      return makeCXTypeAttributes(qualType);
+        QualType qualType = unwrapCXTypeAttributes(typeAttributes);
+        if (qualType.isNull())
+            return makeCXTypeAttributes(qualType);
 
-    if (const FunctionType *functionType = qualType->getAs<FunctionType>())
-      return makeCXTypeAttributes(functionType->getReturnType());
+        if (const FunctionType *functionType = qualType->getAs<FunctionType>())
+            return makeCXTypeAttributes(functionType->getReturnType());
 
-    return makeCXTypeAttributes(QualType());
+        return makeCXTypeAttributes(QualType());
 #else
-    return makeCXTypeAttributes();
+        return makeCXTypeAttributes();
 #endif
-  }
-
-  CXTypeAttributes clang_getCursorResultTypeAttributes(CXCursor cursor) {
-#if LIBCLANGEXT_ENABLE
-    if (clang_isDeclaration(cursor.kind)) {
-      const Decl *decl = getCursorDecl(cursor);
-      if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl))
-        return makeCXTypeAttributes(methodDecl->getReturnType());
-
-      return clang_getResultTypeAttributes(clang_getDeclTypeAttributes(cursor));
     }
 
-    return makeCXTypeAttributes(QualType());
+    CXTypeAttributes clang_getCursorResultTypeAttributes(CXCursor cursor) {
+#if LIBCLANGEXT_ENABLE
+        if (clang_isDeclaration(cursor.kind)) {
+            const Decl *decl = getCursorDecl(cursor);
+            if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl))
+                return makeCXTypeAttributes(methodDecl->getReturnType());
+
+            return clang_getResultTypeAttributes(clang_getDeclTypeAttributes(cursor));
+        }
+
+        return makeCXTypeAttributes(QualType());
 #else
-    return makeCXTypeAttributes();
+        return makeCXTypeAttributes();
 #endif
-  }
+    }
 
-  enum CXNullabilityKind clang_Type_getNullabilityKind(CXType type, CXTypeAttributes attributes) {
+    enum CXNullabilityKind clang_Type_getNullabilityKind(CXType type, CXTypeAttributes attributes) {
 #if LIBCLANGEXT_ENABLE
-    CXTranslationUnit translationUnit = getTranslationUnit(type);
-    ASTContext& astContext = getASTUnit(translationUnit)->getASTContext();
+        CXTranslationUnit translationUnit = getTranslationUnit(type);
+        ASTContext& astContext = getASTUnit(translationUnit)->getASTContext();
 
-    QualType qualType = unwrapCXTypeAttributes(attributes);
+        QualType qualType = unwrapCXTypeAttributes(attributes);
 
-    auto kind = qualType->getNullability(astContext);
-    if (!kind.hasValue()) {
-      return CXNullabilityKind_Unspecified;
-    }
+        auto kind = qualType->getNullability(astContext);
+        if (!kind.hasValue()) {
+            return CXNullabilityKind_Unspecified;
+        }
 
-    switch (*kind) {
-      case NullabilityKind::NonNull: return CXNullabilityKind_NonNull;
-      case NullabilityKind::Nullable: return CXNullabilityKind_Nullable;
-      case NullabilityKind::Unspecified: return CXNullabilityKind_Unspecified;
-      default: assert(false);
-    }
+        switch (*kind) {
+        case NullabilityKind::NonNull:
+            return CXNullabilityKind_NonNull;
+        case NullabilityKind::Nullable:
+            return CXNullabilityKind_Nullable;
+        case NullabilityKind::Unspecified:
+            return CXNullabilityKind_Unspecified;
+        default:
+            assert(false);
+        }
 #else
-    return CXNullabilityKind_Unspecified;
+        return CXNullabilityKind_Unspecified;
 #endif
-  }
-
-  unsigned clang_Type_getNumProtocols(CXType type) {
-#if LIBCLANGEXT_ENABLE
-    QualType qualType = unwrapCXType(type);
-    if (auto objCObjectPointerType = qualType->getAs<ObjCObjectPointerType>()) {
-      return objCObjectPointerType->getObjectType()->getNumProtocols();
     }
-#endif
-    return 0;
-  }
 
-  CXCursor clang_Type_getProtocol(CXType type, unsigned index) {
+    unsigned clang_Type_getNumProtocols(CXType type) {
 #if LIBCLANGEXT_ENABLE
-    QualType qualType = unwrapCXType(type);
-    if (auto objCObjectPointerType = qualType->getAs<ObjCObjectPointerType>()) {
-      auto objectType = objCObjectPointerType->getObjectType();
-      unsigned n = objectType->getNumProtocols();
-      if (index < n) {
-        auto protocolDecl = objectType->getProtocol(index);
-        auto kind = CXCursor_ObjCProtocolDecl;
-        return makeObjCProtocolDeclCXCursor(protocolDecl, getTranslationUnit(type));
-      }
-    }
+        QualType qualType = unwrapCXType(type);
+        if (auto objCObjectPointerType = qualType->getAs<ObjCObjectPointerType>()) {
+            return objCObjectPointerType->getObjectType()->getNumProtocols();
+        }
 #endif
-    return clang_getNullCursor();
-  }
+        return 0;
+    }
 
-  unsigned clang_Cursor_isObjCInitMethod(CXCursor cursor) {
+    CXCursor clang_Type_getProtocol(CXType type, unsigned index) {
 #if LIBCLANGEXT_ENABLE
-    if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
-      const Decl *decl = getCursorDecl(cursor);
-      if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
-        return methodDecl->getMethodFamily() == OMF_init;
-      }
-    }
+        QualType qualType = unwrapCXType(type);
+        if (auto objCObjectPointerType = qualType->getAs<ObjCObjectPointerType>()) {
+            auto objectType = objCObjectPointerType->getObjectType();
+            unsigned n = objectType->getNumProtocols();
+            if (index < n) {
+                auto protocolDecl = objectType->getProtocol(index);
+                auto kind = CXCursor_ObjCProtocolDecl;
+                return makeObjCProtocolDeclCXCursor(protocolDecl, getTranslationUnit(type));
+            }
+        }
 #endif
-    return 0;
-  }
+        return clang_getNullCursor();
+    }
 
-  unsigned clang_Cursor_isObjCReturningRetainedMethod(CXCursor cursor) {
+    unsigned clang_Cursor_isObjCInitMethod(CXCursor cursor) {
 #if LIBCLANGEXT_ENABLE
-    if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
-      const Decl *decl = getCursorDecl(cursor);
-      if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
-        return methodDecl->hasAttr<NSReturnsRetainedAttr>();
-      }
-    }
+        if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
+            const Decl *decl = getCursorDecl(cursor);
+            if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
+                return methodDecl->getMethodFamily() == OMF_init;
+            }
+        }
 #endif
-    return 0;
-  }
+        return 0;
+    }
 
-  unsigned clang_Cursor_isObjCConsumingSelfMethod(CXCursor cursor) {
+    unsigned clang_Cursor_isObjCReturningRetainedMethod(CXCursor cursor) {
 #if LIBCLANGEXT_ENABLE
-    if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
-      const Decl *decl = getCursorDecl(cursor);
-      if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
-        return methodDecl->hasAttr<NSConsumesSelfAttr>();
-      }
-    }
+        if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
+            const Decl *decl = getCursorDecl(cursor);
+            if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
+                return methodDecl->hasAttr<NSReturnsRetainedAttr>();
+            }
+        }
 #endif
-    return 0;
-  }
+        return 0;
+    }
+
+    unsigned clang_Cursor_isObjCConsumingSelfMethod(CXCursor cursor) {
+#if LIBCLANGEXT_ENABLE
+        if (cursor.kind == CXCursor_ObjCInstanceMethodDecl) {
+            const Decl *decl = getCursorDecl(cursor);
+            if (const ObjCMethodDecl *methodDecl = dyn_cast_or_null<ObjCMethodDecl>(decl)) {
+                return methodDecl->hasAttr<NSConsumesSelfAttr>();
+            }
+        }
+#endif
+        return 0;
+    }
 
 }

@@ -15,54 +15,54 @@ terms of the MIT license. A copy of the license can be found in the file
 // ------------------------------------------------------
 
 #ifdef __cplusplus
-  #if (__GNUC__ <= 5) || (_MSC_VER <= 1900)
-    #define mi_attr_noexcept   throw()
-  #else
-    #define mi_attr_noexcept   noexcept
-  #endif
+#if (__GNUC__ <= 5) || (_MSC_VER <= 1900)
+#define mi_attr_noexcept   throw()
 #else
-  #define mi_attr_noexcept
+#define mi_attr_noexcept   noexcept
+#endif
+#else
+#define mi_attr_noexcept
 #endif
 
 #ifdef _MSC_VER
-  #if !defined(MI_SHARED_LIB)
-    #define mi_decl_export
-  #elif defined(MI_SHARED_LIB_EXPORT)
-    #define mi_decl_export            __declspec(dllexport)
-  #else
-    #define mi_decl_export            __declspec(dllimport)
-  #endif
-  #if (_MSC_VER >= 1900) && !defined(__EDG__)
-    #define mi_decl_allocator         __declspec(allocator) __declspec(restrict)
-  #else
-    #define mi_decl_allocator         __declspec(restrict)
-  #endif
-  #define mi_decl_thread              __declspec(thread)
-  #define mi_attr_malloc
-  #define mi_attr_alloc_size(s)
-  #define mi_attr_alloc_size2(s1,s2)
-  #define mi_cdecl                   __cdecl
-#elif defined(__GNUC__) || defined(__clang__)
-  #define mi_decl_thread              __thread
-  #define mi_decl_export              __attribute__((visibility("default")))
-  #define mi_decl_allocator
-  #define mi_attr_malloc              __attribute__((malloc))
-  #if defined(__clang_major__) && (__clang_major__ < 4)
-  #define mi_attr_alloc_size(s)
-  #define mi_attr_alloc_size2(s1,s2)
-  #else
-  #define mi_attr_alloc_size(s)       __attribute__((alloc_size(s)))
-  #define mi_attr_alloc_size2(s1,s2)  __attribute__((alloc_size(s1,s2)))
-  #endif
-  #define mi_cdecl                    // leads to warnings... __attribute__((cdecl))
+#if !defined(MI_SHARED_LIB)
+#define mi_decl_export
+#elif defined(MI_SHARED_LIB_EXPORT)
+#define mi_decl_export            __declspec(dllexport)
 #else
-  #define mi_decl_thread              __thread
-  #define mi_decl_export
-  #define mi_decl_allocator
-  #define mi_attr_malloc
-  #define mi_attr_alloc_size(s)
-  #define mi_attr_alloc_size2(s1,s2)
-  #define mi_cdecl
+#define mi_decl_export            __declspec(dllimport)
+#endif
+#if (_MSC_VER >= 1900) && !defined(__EDG__)
+#define mi_decl_allocator         __declspec(allocator) __declspec(restrict)
+#else
+#define mi_decl_allocator         __declspec(restrict)
+#endif
+#define mi_decl_thread              __declspec(thread)
+#define mi_attr_malloc
+#define mi_attr_alloc_size(s)
+#define mi_attr_alloc_size2(s1,s2)
+#define mi_cdecl                   __cdecl
+#elif defined(__GNUC__) || defined(__clang__)
+#define mi_decl_thread              __thread
+#define mi_decl_export              __attribute__((visibility("default")))
+#define mi_decl_allocator
+#define mi_attr_malloc              __attribute__((malloc))
+#if defined(__clang_major__) && (__clang_major__ < 4)
+#define mi_attr_alloc_size(s)
+#define mi_attr_alloc_size2(s1,s2)
+#else
+#define mi_attr_alloc_size(s)       __attribute__((alloc_size(s)))
+#define mi_attr_alloc_size2(s1,s2)  __attribute__((alloc_size(s1,s2)))
+#endif
+#define mi_cdecl                    // leads to warnings... __attribute__((cdecl))
+#else
+#define mi_decl_thread              __thread
+#define mi_decl_export
+#define mi_decl_allocator
+#define mi_attr_malloc
+#define mi_attr_alloc_size(s)
+#define mi_attr_alloc_size2(s1,s2)
+#define mi_cdecl
 #endif
 
 // ------------------------------------------------------
@@ -215,11 +215,11 @@ mi_decl_export bool mi_check_owned(const void* p);
 
 // An area of heap space contains blocks of a single size.
 typedef struct mi_heap_area_s {
-  void*  blocks;      // start of the area containing heap blocks
-  size_t reserved;    // bytes reserved for this area (virtual)
-  size_t committed;   // current available bytes for this area
-  size_t used;        // bytes in use by allocated blocks
-  size_t block_size;  // size in bytes of each block
+    void*  blocks;      // start of the area containing heap blocks
+    size_t reserved;    // bytes reserved for this area (virtual)
+    size_t committed;   // current available bytes for this area
+    size_t used;        // bytes in use by allocated blocks
+    size_t block_size;  // size in bytes of each block
 } mi_heap_area_t;
 
 typedef bool (mi_cdecl mi_block_visit_fun)(const mi_heap_t* heap, const mi_heap_area_t* area, void* block, size_t block_size, void* arg);
@@ -255,24 +255,24 @@ mi_decl_export bool mi_is_redirected() mi_attr_noexcept;
 // ------------------------------------------------------
 
 typedef enum mi_option_e {
-  // stable options
-  mi_option_show_errors,
-  mi_option_show_stats,
-  mi_option_verbose,
-  // the following options are experimental
-  mi_option_eager_commit,
-  mi_option_eager_region_commit,
-  mi_option_large_os_pages,         // implies eager commit
-  mi_option_reserve_huge_os_pages,
-  mi_option_segment_cache,
-  mi_option_page_reset,
-  mi_option_cache_reset,
-  mi_option_reset_decommits,
-  mi_option_eager_commit_delay,
-  mi_option_segment_reset,
-  mi_option_os_tag,
-  mi_option_max_errors,
-  _mi_option_last
+    // stable options
+    mi_option_show_errors,
+    mi_option_show_stats,
+    mi_option_verbose,
+    // the following options are experimental
+    mi_option_eager_commit,
+    mi_option_eager_region_commit,
+    mi_option_large_os_pages,         // implies eager commit
+    mi_option_reserve_huge_os_pages,
+    mi_option_segment_cache,
+    mi_option_page_reset,
+    mi_option_cache_reset,
+    mi_option_reset_decommits,
+    mi_option_eager_commit_delay,
+    mi_option_segment_reset,
+    mi_option_os_tag,
+    mi_option_max_errors,
+    _mi_option_last
 } mi_option_t;
 
 

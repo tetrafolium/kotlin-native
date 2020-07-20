@@ -1,6 +1,7 @@
 #import "mangling.h"
 
 // [KT-36067] mangling
-@implementation FooMangled : NSObject
+@implementation FooMangled :
+NSObject
 @synthesize Companion;
 @end;

@@ -9,7 +9,7 @@
 #ifdef __APPLE__
 
 bool renameAtomic(const char* from, const char* to, bool replaceExisting) {
-  return renamex_np(from, to, replaceExisting ? 0 : RENAME_EXCL) == 0;
+    return renamex_np(from, to, replaceExisting ? 0 : RENAME_EXCL) == 0;
 }
 
 #elif _WIN32
@@ -27,7 +27,7 @@ bool renameAtomic(const char* from, const char* to, bool replaceExisting) {
 #include <linux/fs.h>
 
 bool renameAtomic(const char* from, const char* to, bool replaceExisting) {
-  return syscall(SYS_renameat2, 0, from, 0, to, replaceExisting ? 0 : RENAME_NOREPLACE) == 0;
+    return syscall(SYS_renameat2, 0, from, 0, to, replaceExisting ? 0 : RENAME_NOREPLACE) == 0;
 }
 
 

@@ -3,15 +3,15 @@
 // [KT-36067] cinterop tool fails when there is a structure member named Companion
 
 struct EnumFieldMangleStruct {
-	enum {Companion, Any} smth;
+    enum {Companion, Any} smth;
 };
 struct EnumFieldMangleStruct enumMangledStruct = { Any };
 
 struct MyStruct {
-	int Companion;      // simple clash
-	int _Companion;
-	int $_Companion;
-	int super;
+    int Companion;      // simple clash
+    int _Companion;
+    int $_Companion;
+    int super;
 };
 
 struct MyStruct myStruct = {11, 12, 13, 14};

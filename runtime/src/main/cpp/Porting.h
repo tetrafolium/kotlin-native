@@ -56,20 +56,20 @@ size_t strnlen(const char* buffer, size_t maxSize);
 extern "C" {
 #ifdef KONAN_WASM
 
-RUNTIME_USED
-double pow(double x, double y);
+    RUNTIME_USED
+    double pow(double x, double y);
 
-RUNTIME_USED
-void *memcpy(void *dst, const void *src, size_t n);
+    RUNTIME_USED
+    void *memcpy(void *dst, const void *src, size_t n);
 
-RUNTIME_USED
-void *memmove(void *dst, const void *src, size_t len);
+    RUNTIME_USED
+    void *memmove(void *dst, const void *src, size_t len);
 
-RUNTIME_USED
-int memcmp(const void *s1, const void *s2, size_t n);
+    RUNTIME_USED
+    int memcmp(const void *s1, const void *s2, size_t n);
 
-RUNTIME_USED
-void *memset(void *b, int c, size_t len);
+    RUNTIME_USED
+    void *memset(void *b, int c, size_t len);
 
 #endif
 }

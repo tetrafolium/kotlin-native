@@ -6,7 +6,7 @@
 #define CAST(T, v) testlib_kref_ ## T { .pinned = v }
 
 void errorHandler(const char* str) {
-  printf("Error handler: %s\n", str);
+    printf("Error handler: %s\n", str);
 }
 
 void testVector128() {
@@ -57,10 +57,10 @@ int main(void) {
     __ kotlin.root.I.foo(casted_impl2, "e", 5, casted_impl2);
 
     printf("String is %s nullable is %s null is %s\n", string1, string4,
-        string5 ? "BAD" : "OK");
+           string5 ? "BAD" : "OK");
 
     printf("RO property is %d\n", __ kotlin.root.Child.get_roProperty(child));
-     __ kotlin.root.Child.set_rwProperty(child, 238);
+    __ kotlin.root.Child.set_rwProperty(child, 238);
     printf("RW property is %d\n", __ kotlin.root.Child.get_rwProperty(child));
 
     printf("enum100 = %d\n",  __ kotlin.root.Enum.get_code(enum1));

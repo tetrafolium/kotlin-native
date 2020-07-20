@@ -50,8 +50,8 @@ public class VersionGenerator extends DefaultTask {
     }
 
     private final static Pattern versionPattern = Pattern.compile(
-            "^(\\d+)\\.(\\d+)(?:\\.(\\d+))?(?:-M(\\p{Digit}))?(?:-(\\p{Alpha}\\p{Alnum}*))?(?:-(\\d+))?$"
-    );
+                "^(\\d+)\\.(\\d+)(?:\\.(\\d+))?(?:-M(\\p{Digit}))?(?:-(\\p{Alpha}\\p{Alnum}*))?(?:-(\\d+))?$"
+            );
 
     @TaskAction
     public void generateVersion() {
@@ -79,15 +79,15 @@ public class VersionGenerator extends DefaultTask {
 
         try (PrintWriter printWriter = new PrintWriter(getVersionFile())) {
             printWriter.println(
-                    "package org.jetbrains.kotlin.konan\n" +
-                    "\n" +
-                    "internal val currentCompilerVersion: CompilerVersion =\n" +
-                    "    CompilerVersionImpl(\n" +
-                            getMeta() + ", " + major + ", " + minor + ",\n" +
-                            maintenance + ", " + milestone + ", "+ build + ")\n" +
-                    "\n" +
-                    "val CompilerVersion.Companion.CURRENT: CompilerVersion\n" +
-                    "    get() = currentCompilerVersion"
+                "package org.jetbrains.kotlin.konan\n" +
+                "\n" +
+                "internal val currentCompilerVersion: CompilerVersion =\n" +
+                "    CompilerVersionImpl(\n" +
+                getMeta() + ", " + major + ", " + minor + ",\n" +
+                maintenance + ", " + milestone + ", "+ build + ")\n" +
+                "\n" +
+                "val CompilerVersion.Companion.CURRENT: CompilerVersion\n" +
+                "    get() = currentCompilerVersion"
             );
         } catch (FileNotFoundException e) {
             throw new IllegalStateException(e);

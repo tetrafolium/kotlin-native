@@ -20,14 +20,14 @@ namespace {
 
 // TODO: an ugly hack with fixed layout.
 struct WeakReferenceCounter {
-  ObjHeader header;
-  KRef referred;
-  KInt lock;
-  KInt cookie;
+    ObjHeader header;
+    KRef referred;
+    KInt lock;
+    KInt cookie;
 };
 
 inline WeakReferenceCounter* asWeakReferenceCounter(ObjHeader* obj) {
-  return reinterpret_cast<WeakReferenceCounter*>(obj);
+    return reinterpret_cast<WeakReferenceCounter*>(obj);
 }
 
 #if !KONAN_NO_THREADS
@@ -48,57 +48,57 @@ inline void unlock(int32_t* address) {
 
 extern "C" {
 
-OBJ_GETTER(makeWeakReferenceCounter, void*);
-OBJ_GETTER(makeObjCWeakReferenceImpl, void*);
-OBJ_GETTER(makePermanentWeakReferenceImpl, ObjHeader*);
+    OBJ_GETTER(makeWeakReferenceCounter, void*);
+    OBJ_GETTER(makeObjCWeakReferenceImpl, void*);
+    OBJ_GETTER(makePermanentWeakReferenceImpl, ObjHeader*);
 
 // See Weak.kt for implementation details.
 // Retrieve link on the counter object.
-OBJ_GETTER(Konan_getWeakReferenceImpl, ObjHeader* referred) {
-  if (referred->container() == nullptr) {
-    RETURN_RESULT_OF(makePermanentWeakReferenceImpl, referred);
-  }
+    OBJ_GETTER(Konan_getWeakReferenceImpl, ObjHeader* referred) {
+        if (referred->container() == nullptr) {
+            RETURN_RESULT_OF(makePermanentWeakReferenceImpl, referred);
+        }
 
-  MetaObjHeader* meta = referred->meta_object();
+        MetaObjHeader* meta = referred->meta_object();
 
 #if KONAN_OBJC_INTEROP
-  if (IsInstance(referred, theObjCObjectWrapperTypeInfo)) {
-    RETURN_RESULT_OF(makeObjCWeakReferenceImpl, meta->associatedObject_);
-  }
+        if (IsInstance(referred, theObjCObjectWrapperTypeInfo)) {
+            RETURN_RESULT_OF(makeObjCWeakReferenceImpl, meta->associatedObject_);
+        }
 #endif // KONAN_OBJC_INTEROP
 
-  if (meta->WeakReference.counter_ == nullptr) {
-     ObjHolder counterHolder;
-     // Cast unneeded, just to emphasize we store an object reference as void*.
-     ObjHeader* counter = makeWeakReferenceCounter(reinterpret_cast<void*>(referred), counterHolder.slot());
-     UpdateHeapRefIfNull(&meta->WeakReference.counter_, counter);
-  }
-  RETURN_OBJ(meta->WeakReference.counter_);
-}
+        if (meta->WeakReference.counter_ == nullptr) {
+            ObjHolder counterHolder;
+            // Cast unneeded, just to emphasize we store an object reference as void*.
+            ObjHeader* counter = makeWeakReferenceCounter(reinterpret_cast<void*>(referred), counterHolder.slot());
+            UpdateHeapRefIfNull(&meta->WeakReference.counter_, counter);
+        }
+        RETURN_OBJ(meta->WeakReference.counter_);
+    }
 
 // Materialize a weak reference to either null or the real reference.
-OBJ_GETTER(Konan_WeakReferenceCounter_get, ObjHeader* counter) {
-  ObjHeader** referredAddress = &asWeakReferenceCounter(counter)->referred;
+    OBJ_GETTER(Konan_WeakReferenceCounter_get, ObjHeader* counter) {
+        ObjHeader** referredAddress = &asWeakReferenceCounter(counter)->referred;
 #if KONAN_NO_THREADS
-  RETURN_OBJ(*referredAddress);
+        RETURN_OBJ(*referredAddress);
 #else
-  auto* weakCounter = asWeakReferenceCounter(counter);
-  RETURN_RESULT_OF(ReadHeapRefLocked, referredAddress,  &weakCounter->lock,  &weakCounter->cookie);
+        auto* weakCounter = asWeakReferenceCounter(counter);
+        RETURN_RESULT_OF(ReadHeapRefLocked, referredAddress,  &weakCounter->lock,  &weakCounter->cookie);
 #endif
-}
+    }
 
-void WeakReferenceCounterClear(ObjHeader* counter) {
-  ObjHeader** referredAddress = &asWeakReferenceCounter(counter)->referred;
-  // Note, that we don't do UpdateRef here, as reference is weak.
+    void WeakReferenceCounterClear(ObjHeader* counter) {
+        ObjHeader** referredAddress = &asWeakReferenceCounter(counter)->referred;
+        // Note, that we don't do UpdateRef here, as reference is weak.
 #if KONAN_NO_THREADS
-  *referredAddress = nullptr;
+        *referredAddress = nullptr;
 #else
-  int32_t* lockAddress = &asWeakReferenceCounter(counter)->lock;
-  // Spinlock.
-  lock(lockAddress);
-  *referredAddress = nullptr;
-  unlock(lockAddress);
+        int32_t* lockAddress = &asWeakReferenceCounter(counter)->lock;
+        // Spinlock.
+        lock(lockAddress);
+        *referredAddress = nullptr;
+        unlock(lockAddress);
 #endif
-}
+    }
 
 }  // extern "C"

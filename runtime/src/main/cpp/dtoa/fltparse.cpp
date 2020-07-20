@@ -40,12 +40,12 @@
 #define DEFAULT_WIDTH MAX_ACCURACY_WIDTH
 
 extern "C" KFloat Kotlin_native_int_bits_to_float(KInt x) {
-  union {
-    int32_t x;
-    float f;
-  } tmp;
-  tmp.x = x;
-  return tmp.f;
+    union {
+        int32_t x;
+        float f;
+    } tmp;
+    tmp.x = x;
+    return tmp.f;
 }
 
 KFloat createFloat1 (U_64 * f, IDATA length, KInt e);
@@ -53,17 +53,17 @@ KFloat floatAlgorithm (U_64 * f, IDATA length, KInt e, KFloat z);
 KFloat createFloat (const char *s, KInt e);
 
 static const U_32 tens[] = {
-  0x3f800000,
-  0x41200000,
-  0x42c80000,
-  0x447a0000,
-  0x461c4000,
-  0x47c35000,
-  0x49742400,
-  0x4b189680,
-  0x4cbebc20,
-  0x4e6e6b28,
-  0x501502f9                    /* 10 ^ 10 in float */
+    0x3f800000,
+    0x41200000,
+    0x42c80000,
+    0x447a0000,
+    0x461c4000,
+    0x47c35000,
+    0x49742400,
+    0x4b189680,
+    0x4cbebc20,
+    0x4e6e6b28,
+    0x501502f9                    /* 10 ^ 10 in float */
 };
 
 #define tenToTheE(e) (*((KFloat *) (tens + (e))))
@@ -120,208 +120,208 @@ static const U_32 tens[] = {
 #define release(r) if ((r)) konan::free((r));
 
 KFloat createFloat(const char *s, KInt e) {
-  /* assumes s is a null terminated string with at least one
-   * character in it */
-  U_64 def[DEFAULT_WIDTH];
-  U_64 defBackup[DEFAULT_WIDTH];
-  U_64 *f, *fNoOverflow, *g, *tempBackup;
-  U_32 overflow;
-  KFloat result;
-  IDATA index = 1;
-  int unprocessedDigits = 0;
+    /* assumes s is a null terminated string with at least one
+     * character in it */
+    U_64 def[DEFAULT_WIDTH];
+    U_64 defBackup[DEFAULT_WIDTH];
+    U_64 *f, *fNoOverflow, *g, *tempBackup;
+    U_32 overflow;
+    KFloat result;
+    IDATA index = 1;
+    int unprocessedDigits = 0;
 
-  f = def;
-  fNoOverflow = defBackup;
-  *f = 0;
-  tempBackup = g = 0;
-  do
+    f = def;
+    fNoOverflow = defBackup;
+    *f = 0;
+    tempBackup = g = 0;
+    do
     {
-      if (*s >= '0' && *s <= '9')
+        if (*s >= '0' && *s <= '9')
         {
-          /* Make a back up of f before appending, so that we can
-           * back out of it if there is no more room, i.e. index >
-           * MAX_ACCURACY_WIDTH.
-           */
-          memcpy (fNoOverflow, f, sizeof (U_64) * index);
-          overflow =
-            simpleAppendDecimalDigitHighPrecision (f, index, *s - '0');
-          if (overflow)
+            /* Make a back up of f before appending, so that we can
+             * back out of it if there is no more room, i.e. index >
+             * MAX_ACCURACY_WIDTH.
+             */
+            memcpy (fNoOverflow, f, sizeof (U_64) * index);
+            overflow =
+                simpleAppendDecimalDigitHighPrecision (f, index, *s - '0');
+            if (overflow)
             {
 
-              f[index++] = overflow;
-              /* There is an overflow, but there is no more room
-               * to store the result. We really only need the top 52
-               * bits anyway, so we must back out of the overflow,
-               * and ignore the rest of the string.
-               */
-              if (index >= MAX_ACCURACY_WIDTH)
+                f[index++] = overflow;
+                /* There is an overflow, but there is no more room
+                 * to store the result. We really only need the top 52
+                 * bits anyway, so we must back out of the overflow,
+                 * and ignore the rest of the string.
+                 */
+                if (index >= MAX_ACCURACY_WIDTH)
                 {
-                  index--;
-                  memcpy (f, fNoOverflow, sizeof (U_64) * index);
-                  break;
+                    index--;
+                    memcpy (f, fNoOverflow, sizeof (U_64) * index);
+                    break;
                 }
-              if (tempBackup)
+                if (tempBackup)
                 {
-                  fNoOverflow = tempBackup;
+                    fNoOverflow = tempBackup;
                 }
             }
         }
-      else
-        index = -1;
+        else
+            index = -1;
     }
-  while (index > 0 && *(++s) != '\0');
+    while (index > 0 && *(++s) != '\0');
 
-  /* We've broken out of the parse loop either because we've reached
-   * the end of the string or we've overflowed the maximum accuracy
-   * limit of a double. If we still have unprocessed digits in the
-   * given string, then there are three possible results:
-   *   1. (unprocessed digits + e) == 0, in which case we simply
-   *      convert the existing bits that are already parsed
-   *   2. (unprocessed digits + e) < 0, in which case we simply
-   *      convert the existing bits that are already parsed along
-   *      with the given e
-   *   3. (unprocessed digits + e) > 0 indicates that the value is
-   *      simply too big to be stored as a double, so return Infinity
-   */
-  if ((unprocessedDigits = strlen (s)) > 0)
+    /* We've broken out of the parse loop either because we've reached
+     * the end of the string or we've overflowed the maximum accuracy
+     * limit of a double. If we still have unprocessed digits in the
+     * given string, then there are three possible results:
+     *   1. (unprocessed digits + e) == 0, in which case we simply
+     *      convert the existing bits that are already parsed
+     *   2. (unprocessed digits + e) < 0, in which case we simply
+     *      convert the existing bits that are already parsed along
+     *      with the given e
+     *   3. (unprocessed digits + e) > 0 indicates that the value is
+     *      simply too big to be stored as a double, so return Infinity
+     */
+    if ((unprocessedDigits = strlen (s)) > 0)
     {
-      e += unprocessedDigits;
-      if (index > -1)
+        e += unprocessedDigits;
+        if (index > -1)
         {
-          if (e <= 0)
+            if (e <= 0)
             {
-              result = createFloat1 (f, index, e);
+                result = createFloat1 (f, index, e);
             }
-          else
+            else
             {
-              FLOAT_TO_INTBITS (result) = INFINITE_INTBITS;
+                FLOAT_TO_INTBITS (result) = INFINITE_INTBITS;
             }
         }
-      else
+        else
         {
-          result = *(KFloat *) & index;
+            result = *(KFloat *) & index;
         }
     }
-  else
+    else
     {
-      if (index > -1)
+        if (index > -1)
         {
-          result = createFloat1 (f, index, e);
+            result = createFloat1 (f, index, e);
         }
-      else
+        else
         {
-        result = *(KFloat *) & index;
+            result = *(KFloat *) & index;
         }
     }
 
-  return result;
+    return result;
 
 }
 
 KFloat
 createFloat1 (U_64 * f, IDATA length, KInt e)
 {
-  IDATA numBits;
-  KDouble dresult;
-  KFloat result;
+    IDATA numBits;
+    KDouble dresult;
+    KFloat result;
 
-  numBits = highestSetBitHighPrecision (f, length) + 1;
-  if (numBits < 25 && e >= 0 && e < LOG5_OF_TWO_TO_THE_N)
+    numBits = highestSetBitHighPrecision (f, length) + 1;
+    if (numBits < 25 && e >= 0 && e < LOG5_OF_TWO_TO_THE_N)
     {
-      return ((KFloat) LOW_I32_FROM_PTR (f)) * tenToTheE (e);
+        return ((KFloat) LOW_I32_FROM_PTR (f)) * tenToTheE (e);
     }
-  else if (numBits < 25 && e < 0 && (-e) < LOG5_OF_TWO_TO_THE_N)
+    else if (numBits < 25 && e < 0 && (-e) < LOG5_OF_TWO_TO_THE_N)
     {
-      return ((KFloat) LOW_I32_FROM_PTR (f)) / tenToTheE (-e);
+        return ((KFloat) LOW_I32_FROM_PTR (f)) / tenToTheE (-e);
     }
-  else if (e >= 0 && e < 39)
+    else if (e >= 0 && e < 39)
     {
-      result = (KFloat) (toDoubleHighPrecision (f, length) * pow (10.0, (double) e));
+        result = (KFloat) (toDoubleHighPrecision (f, length) * pow (10.0, (double) e));
     }
-  else if (e >= 39)
+    else if (e >= 39)
     {
-      /* Convert the partial result to make sure that the
-       * non-exponential part is not zero. This check fixes the case
-       * where the user enters 0.0e309! */
-      result = (KFloat) toDoubleHighPrecision (f, length);
+        /* Convert the partial result to make sure that the
+         * non-exponential part is not zero. This check fixes the case
+         * where the user enters 0.0e309! */
+        result = (KFloat) toDoubleHighPrecision (f, length);
 
-      if (result == 0.0)
+        if (result == 0.0)
 
+            FLOAT_TO_INTBITS (result) = MINIMUM_INTBITS;
+        else
+            FLOAT_TO_INTBITS (result) = INFINITE_INTBITS;
+    }
+    else if (e > -309)
+    {
+        int dexp;
+        U_32 fmant, fovfl;
+        U_64 dmant;
+        dresult = toDoubleHighPrecision (f, length) / pow (10.0, (double) -e);
+        if (IS_DENORMAL_DBL (dresult))
+        {
+            FLOAT_TO_INTBITS (result) = 0;
+            return result;
+        }
+        dexp = doubleExponent (dresult) + 51;
+        dmant = doubleMantissa (dresult);
+        /* Is it too small to be represented by a single-precision
+         * float? */
+        if (dexp <= -155)
+        {
+            FLOAT_TO_INTBITS (result) = 0;
+            return result;
+        }
+        /* Is it a denormalized single-precision float? */
+        if ((dexp <= -127) && (dexp > -155))
+        {
+            /* Only interested in 24 msb bits of the 53-bit double mantissa */
+            fmant = (U_32) (dmant >> 29);
+            fovfl = ((U_32) (dmant & 0x1FFFFFFF)) << 3;
+            while ((dexp < -127) && ((fmant | fovfl) != 0))
+            {
+                if ((fmant & 1) != 0)
+                {
+                    fovfl |= 0x80000000;
+                }
+                fovfl >>= 1;
+                fmant >>= 1;
+                dexp++;
+            }
+            if ((fovfl & 0x80000000) != 0)
+            {
+                if ((fovfl & 0x7FFFFFFC) != 0)
+                {
+                    fmant++;
+                }
+                else if ((fmant & 1) != 0)
+                {
+                    fmant++;
+                }
+            }
+            else if ((fovfl & 0x40000000) != 0)
+            {
+                if ((fovfl & 0x3FFFFFFC) != 0)
+                {
+                    fmant++;
+                }
+            }
+            FLOAT_TO_INTBITS (result) = fmant;
+        }
+        else
+        {
+            result = (KFloat) dresult;
+        }
+    }
+
+    /* Don't go straight to zero as the fact that x*0 = 0 independent
+     * of x might cause the algorithm to produce an incorrect result.
+     * Instead try the min  value first and let it fall to zero if need
+     * be.
+     */
+    if (e <= -309 || FLOAT_TO_INTBITS (result) == 0)
         FLOAT_TO_INTBITS (result) = MINIMUM_INTBITS;
-      else
-        FLOAT_TO_INTBITS (result) = INFINITE_INTBITS;
-    }
-  else if (e > -309)
-    {
-      int dexp;
-      U_32 fmant, fovfl;
-      U_64 dmant;
-      dresult = toDoubleHighPrecision (f, length) / pow (10.0, (double) -e);
-      if (IS_DENORMAL_DBL (dresult))
-        {
-          FLOAT_TO_INTBITS (result) = 0;
-          return result;
-        }
-      dexp = doubleExponent (dresult) + 51;
-      dmant = doubleMantissa (dresult);
-      /* Is it too small to be represented by a single-precision
-       * float? */
-      if (dexp <= -155)
-        {
-          FLOAT_TO_INTBITS (result) = 0;
-          return result;
-        }
-      /* Is it a denormalized single-precision float? */
-      if ((dexp <= -127) && (dexp > -155))
-        {
-          /* Only interested in 24 msb bits of the 53-bit double mantissa */
-          fmant = (U_32) (dmant >> 29);
-          fovfl = ((U_32) (dmant & 0x1FFFFFFF)) << 3;
-          while ((dexp < -127) && ((fmant | fovfl) != 0))
-            {
-              if ((fmant & 1) != 0)
-                {
-                  fovfl |= 0x80000000;
-                }
-              fovfl >>= 1;
-              fmant >>= 1;
-              dexp++;
-            }
-          if ((fovfl & 0x80000000) != 0)
-            {
-              if ((fovfl & 0x7FFFFFFC) != 0)
-                {
-                  fmant++;
-                }
-              else if ((fmant & 1) != 0)
-                {
-                  fmant++;
-                }
-            }
-          else if ((fovfl & 0x40000000) != 0)
-            {
-              if ((fovfl & 0x3FFFFFFC) != 0)
-                {
-                  fmant++;
-                }
-            }
-          FLOAT_TO_INTBITS (result) = fmant;
-        }
-      else
-        {
-          result = (KFloat) dresult;
-        }
-    }
 
-  /* Don't go straight to zero as the fact that x*0 = 0 independent
-   * of x might cause the algorithm to produce an incorrect result.
-   * Instead try the min  value first and let it fall to zero if need
-   * be.
-   */
-  if (e <= -309 || FLOAT_TO_INTBITS (result) == 0)
-    FLOAT_TO_INTBITS (result) = MINIMUM_INTBITS;
-
-  return floatAlgorithm (f, length, e, result);
+    return floatAlgorithm (f, length, e, result);
 }
 
 #if defined(WIN32)
@@ -350,187 +350,187 @@ createFloat1 (U_64 * f, IDATA length, KInt e)
 KFloat
 floatAlgorithm (U_64 * f, IDATA length, KInt e, KFloat z)
 {
-  U_64 m;
-  IDATA k, comparison, comparison2;
-  U_64 *x, *y, *D, *D2;
-  IDATA xLength, yLength, DLength, D2Length;
-  IDATA decApproxCount, incApproxCount;
-  //PORT_ACCESS_FROM_ENV (env);
+    U_64 m;
+    IDATA k, comparison, comparison2;
+    U_64 *x, *y, *D, *D2;
+    IDATA xLength, yLength, DLength, D2Length;
+    IDATA decApproxCount, incApproxCount;
+    //PORT_ACCESS_FROM_ENV (env);
 
-  x = y = D = D2 = 0;
-  xLength = yLength = DLength = D2Length = 0;
-  decApproxCount = incApproxCount = 0;
+    x = y = D = D2 = 0;
+    xLength = yLength = DLength = D2Length = 0;
+    decApproxCount = incApproxCount = 0;
 
-  do
+    do
     {
-      m = floatMantissa (z);
-      k = floatExponent (z);
+        m = floatMantissa (z);
+        k = floatExponent (z);
 
-      if (x && x != f)
-        //jclmem_free_memory (env, x);
-        release(x);
-      release (y);
-      release (D);
-      release (D2);
+        if (x && x != f)
+            //jclmem_free_memory (env, x);
+            release(x);
+        release (y);
+        release (D);
+        release (D2);
 
-      if (e >= 0 && k >= 0)
+        if (e >= 0 && k >= 0)
         {
-          xLength = sizeOfTenToTheE (e) + length;
-          allocateU64 (x, xLength);
-          memset (x + length, 0, sizeof (U_64) * (xLength - length));
-          memcpy (x, f, sizeof (U_64) * length);
-          timesTenToTheEHighPrecision (x, xLength, e);
+            xLength = sizeOfTenToTheE (e) + length;
+            allocateU64 (x, xLength);
+            memset (x + length, 0, sizeof (U_64) * (xLength - length));
+            memcpy (x, f, sizeof (U_64) * length);
+            timesTenToTheEHighPrecision (x, xLength, e);
 
-          yLength = (k >> 6) + 2;
-          allocateU64 (y, yLength);
-          memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
-          *y = m;
-          simpleShiftLeftHighPrecision (y, yLength, k);
+            yLength = (k >> 6) + 2;
+            allocateU64 (y, yLength);
+            memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
+            *y = m;
+            simpleShiftLeftHighPrecision (y, yLength, k);
         }
-      else if (e >= 0)
+        else if (e >= 0)
         {
-          xLength = sizeOfTenToTheE (e) + length + ((-k) >> 6) + 1;
-          allocateU64 (x, xLength);
-          memset (x + length, 0, sizeof (U_64) * (xLength - length));
-          memcpy (x, f, sizeof (U_64) * length);
-          timesTenToTheEHighPrecision (x, xLength, e);
-          simpleShiftLeftHighPrecision (x, xLength, -k);
+            xLength = sizeOfTenToTheE (e) + length + ((-k) >> 6) + 1;
+            allocateU64 (x, xLength);
+            memset (x + length, 0, sizeof (U_64) * (xLength - length));
+            memcpy (x, f, sizeof (U_64) * length);
+            timesTenToTheEHighPrecision (x, xLength, e);
+            simpleShiftLeftHighPrecision (x, xLength, -k);
 
-          yLength = 1;
-          allocateU64 (y, 1);
-          *y = m;
+            yLength = 1;
+            allocateU64 (y, 1);
+            *y = m;
         }
-      else if (k >= 0)
+        else if (k >= 0)
         {
-          xLength = length;
-          x = f;
+            xLength = length;
+            x = f;
 
-          yLength = sizeOfTenToTheE (-e) + 2 + (k >> 6);
-          allocateU64 (y, yLength);
-          memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
-          *y = m;
-          timesTenToTheEHighPrecision (y, yLength, -e);
-          simpleShiftLeftHighPrecision (y, yLength, k);
+            yLength = sizeOfTenToTheE (-e) + 2 + (k >> 6);
+            allocateU64 (y, yLength);
+            memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
+            *y = m;
+            timesTenToTheEHighPrecision (y, yLength, -e);
+            simpleShiftLeftHighPrecision (y, yLength, k);
         }
-      else
+        else
         {
-          xLength = length + ((-k) >> 6) + 1;
-          allocateU64 (x, xLength);
-          memset (x + length, 0, sizeof (U_64) * (xLength - length));
-          memcpy (x, f, sizeof (U_64) * length);
-          simpleShiftLeftHighPrecision (x, xLength, -k);
+            xLength = length + ((-k) >> 6) + 1;
+            allocateU64 (x, xLength);
+            memset (x + length, 0, sizeof (U_64) * (xLength - length));
+            memcpy (x, f, sizeof (U_64) * length);
+            simpleShiftLeftHighPrecision (x, xLength, -k);
 
-          yLength = sizeOfTenToTheE (-e) + 1;
-          allocateU64 (y, yLength);
-          memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
-          *y = m;
-          timesTenToTheEHighPrecision (y, yLength, -e);
+            yLength = sizeOfTenToTheE (-e) + 1;
+            allocateU64 (y, yLength);
+            memset (y + 1, 0, sizeof (U_64) * (yLength - 1));
+            *y = m;
+            timesTenToTheEHighPrecision (y, yLength, -e);
         }
 
-      comparison = compareHighPrecision (x, xLength, y, yLength);
-      if (comparison > 0)
-        {                       /* x > y */
-          DLength = xLength;
-          allocateU64 (D, DLength);
-          memcpy (D, x, DLength * sizeof (U_64));
-          subtractHighPrecision (D, DLength, y, yLength);
+        comparison = compareHighPrecision (x, xLength, y, yLength);
+        if (comparison > 0)
+        {   /* x > y */
+            DLength = xLength;
+            allocateU64 (D, DLength);
+            memcpy (D, x, DLength * sizeof (U_64));
+            subtractHighPrecision (D, DLength, y, yLength);
         }
-      else if (comparison)
-        {                       /* y > x */
-          DLength = yLength;
-          allocateU64 (D, DLength);
-          memcpy (D, y, DLength * sizeof (U_64));
-          subtractHighPrecision (D, DLength, x, xLength);
+        else if (comparison)
+        {   /* y > x */
+            DLength = yLength;
+            allocateU64 (D, DLength);
+            memcpy (D, y, DLength * sizeof (U_64));
+            subtractHighPrecision (D, DLength, x, xLength);
         }
-      else
-        {                       /* y == x */
-          DLength = 1;
-          allocateU64 (D, 1);
-          *D = 0;
+        else
+        {   /* y == x */
+            DLength = 1;
+            allocateU64 (D, 1);
+            *D = 0;
         }
 
-      D2Length = DLength + 1;
-      allocateU64 (D2, D2Length);
-      m <<= 1;
-      multiplyHighPrecision (D, DLength, &m, 1, D2, D2Length);
-      m >>= 1;
+        D2Length = DLength + 1;
+        allocateU64 (D2, D2Length);
+        m <<= 1;
+        multiplyHighPrecision (D, DLength, &m, 1, D2, D2Length);
+        m >>= 1;
 
-      comparison2 = compareHighPrecision (D2, D2Length, y, yLength);
-      if (comparison2 < 0)
+        comparison2 = compareHighPrecision (D2, D2Length, y, yLength);
+        if (comparison2 < 0)
         {
-          if (comparison < 0 && m == NORMAL_MASK)
+            if (comparison < 0 && m == NORMAL_MASK)
             {
-              simpleShiftLeftHighPrecision (D2, D2Length, 1);
-              if (compareHighPrecision (D2, D2Length, y, yLength) > 0)
+                simpleShiftLeftHighPrecision (D2, D2Length, 1);
+                if (compareHighPrecision (D2, D2Length, y, yLength) > 0)
                 {
-                  DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
+                    DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
                 }
-              else
+                else
                 {
-                  break;
-                }
-            }
-          else
-            {
-              break;
-            }
-        }
-      else if (comparison2 == 0)
-        {
-          if ((m & 1) == 0)
-            {
-              if (comparison < 0 && m == NORMAL_MASK)
-                {
-                  DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
-                }
-              else
-                {
-                  break;
+                    break;
                 }
             }
-          else if (comparison < 0)
+            else
             {
-              DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
-              break;
-            }
-          else
-            {
-              INCREMENT_FLOAT (z, decApproxCount, incApproxCount);
-              break;
+                break;
             }
         }
-      else if (comparison < 0)
+        else if (comparison2 == 0)
         {
-          DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
+            if ((m & 1) == 0)
+            {
+                if (comparison < 0 && m == NORMAL_MASK)
+                {
+                    DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else if (comparison < 0)
+            {
+                DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
+                break;
+            }
+            else
+            {
+                INCREMENT_FLOAT (z, decApproxCount, incApproxCount);
+                break;
+            }
         }
-      else
+        else if (comparison < 0)
         {
-          if (FLOAT_TO_INTBITS (z) == EXPONENT_MASK)
-            break;
-          INCREMENT_FLOAT (z, decApproxCount, incApproxCount);
+            DECREMENT_FLOAT (z, decApproxCount, incApproxCount);
+        }
+        else
+        {
+            if (FLOAT_TO_INTBITS (z) == EXPONENT_MASK)
+                break;
+            INCREMENT_FLOAT (z, decApproxCount, incApproxCount);
         }
     }
-  while (1);
+    while (1);
 
-  if (x && x != f)
-    //jclmem_free_memory (env, x);
-    release(x);
-  release (y);
-  release (D);
-  release (D2);
-  return z;
+    if (x && x != f)
+        //jclmem_free_memory (env, x);
+        release(x);
+    release (y);
+    release (D);
+    release (D2);
+    return z;
 
 OutOfMemory:
-  if (x && x != f)
-    //jclmem_free_memory (env, x);
-    release(x);
-  release (y);
-  release (D);
-  release (D2);
+    if (x && x != f)
+        //jclmem_free_memory (env, x);
+        release(x);
+    release (y);
+    release (D);
+    release (D2);
 
-  FLOAT_TO_INTBITS (z) = -2;
+    FLOAT_TO_INTBITS (z) = -2;
 
-  return z;
+    return z;
 }
 
 #if defined(WIN32)
@@ -540,24 +540,24 @@ OutOfMemory:
 extern "C" KFloat
 Kotlin_native_FloatingPointParser_parseFloatImpl(KString s, KInt e)
 {
-  const KChar* utf16 = CharArrayAddressOfElementAt(s, 0);
-  KStdString utf8;
-  utf8.reserve(s->count_);
-  TRY_CATCH(utf8::utf16to8(utf16, utf16 + s->count_, back_inserter(utf8)),
-            utf8::unchecked::utf16to8(utf16, utf16 + s->count_, back_inserter(utf8)),
-            /* Illegal UTF-16 string. */ ThrowNumberFormatException());
-  const char *str = utf8.c_str();
-  auto flt = createFloat(str, e);
+    const KChar* utf16 = CharArrayAddressOfElementAt(s, 0);
+    KStdString utf8;
+    utf8.reserve(s->count_);
+    TRY_CATCH(utf8::utf16to8(utf16, utf16 + s->count_, back_inserter(utf8)),
+              utf8::unchecked::utf16to8(utf16, utf16 + s->count_, back_inserter(utf8)),
+              /* Illegal UTF-16 string. */ ThrowNumberFormatException());
+    const char *str = utf8.c_str();
+    auto flt = createFloat(str, e);
 
-  if (((I_32) FLOAT_TO_INTBITS (flt)) >= 0) {
-    return flt;
-  } else if (((I_32) FLOAT_TO_INTBITS (flt)) == (I_32) - 1) {
-      /* NumberFormatException */
-    ThrowNumberFormatException();
-  } else {
-    /* OutOfMemoryError */
-    ThrowOutOfMemoryError();
-  }
+    if (((I_32) FLOAT_TO_INTBITS (flt)) >= 0) {
+        return flt;
+    } else if (((I_32) FLOAT_TO_INTBITS (flt)) == (I_32) - 1) {
+        /* NumberFormatException */
+        ThrowNumberFormatException();
+    } else {
+        /* OutOfMemoryError */
+        ThrowOutOfMemoryError();
+    }
 
-  return 0.0f;
+    return 0.0f;
 }

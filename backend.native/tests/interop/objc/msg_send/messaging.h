@@ -19,13 +19,15 @@ typedef struct __attribute__((packed)) {
     short f2;
     char f3;
     char f4;
-} SimplePacked;
+}
+SimplePacked;
 
 typedef struct __attribute__((packed)) {
     char x;
     short y;
     char z;
-} EvenSmallerPacked;
+}
+EvenSmallerPacked;
 
 typedef struct {
     float f1;

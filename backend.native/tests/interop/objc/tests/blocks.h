@@ -6,7 +6,7 @@
 @end;
 
 int callProvidedBlock(id<BlockProvider> blockProvider, int argument) {
-  return [blockProvider block](argument);
+    return [blockProvider block](argument);
 }
 
 @protocol BlockConsumer
@@ -15,7 +15,10 @@ int callProvidedBlock(id<BlockProvider> blockProvider, int argument) {
 @end;
 
 int callPlusOneBlock(id<BlockConsumer> blockConsumer, int argument) {
-  return [blockConsumer callBlock:^int(int p) { return p + 1; } argument:argument];
+    return [blockConsumer callBlock:^int(int p) {
+                      return p + 1;
+                  }
+                  argument:argument];
 }
 
 @interface Blocks : NSObject

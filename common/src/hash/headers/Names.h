@@ -33,7 +33,7 @@ typedef LocalHash FieldNameHash;
 typedef LocalHash MethodNameHash;
 // Global hash.
 typedef struct {
-  uint8_t bits[20];
+    uint8_t bits[20];
 } GlobalHash;
 // Hash of function name.
 typedef GlobalHash FunctionNameHash;

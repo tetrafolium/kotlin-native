@@ -9,56 +9,56 @@
 
 extern "C" {
 
-const bool IsStrictMemoryModel = false;
+    const bool IsStrictMemoryModel = false;
 
-OBJ_GETTER(AllocInstance, const TypeInfo* typeInfo) {
-  RETURN_RESULT_OF(AllocInstanceRelaxed, typeInfo);
-}
+    OBJ_GETTER(AllocInstance, const TypeInfo* typeInfo) {
+        RETURN_RESULT_OF(AllocInstanceRelaxed, typeInfo);
+    }
 
-OBJ_GETTER(AllocArrayInstance, const TypeInfo* typeInfo, int32_t elements) {
-  RETURN_RESULT_OF(AllocArrayInstanceRelaxed, typeInfo, elements);
-}
+    OBJ_GETTER(AllocArrayInstance, const TypeInfo* typeInfo, int32_t elements) {
+        RETURN_RESULT_OF(AllocArrayInstanceRelaxed, typeInfo, elements);
+    }
 
-OBJ_GETTER(InitInstance,
-    ObjHeader** location, const TypeInfo* typeInfo, void (*ctor)(ObjHeader*)) {
-  RETURN_RESULT_OF(InitInstanceRelaxed, location, typeInfo, ctor);
-}
+    OBJ_GETTER(InitInstance,
+               ObjHeader** location, const TypeInfo* typeInfo, void (*ctor)(ObjHeader*)) {
+        RETURN_RESULT_OF(InitInstanceRelaxed, location, typeInfo, ctor);
+    }
 
-OBJ_GETTER(InitSharedInstance,
-    ObjHeader** location, const TypeInfo* typeInfo, void (*ctor)(ObjHeader*)) {
-  RETURN_RESULT_OF(InitSharedInstanceRelaxed, location, typeInfo, ctor);
-}
+    OBJ_GETTER(InitSharedInstance,
+               ObjHeader** location, const TypeInfo* typeInfo, void (*ctor)(ObjHeader*)) {
+        RETURN_RESULT_OF(InitSharedInstanceRelaxed, location, typeInfo, ctor);
+    }
 
-void ReleaseHeapRef(const ObjHeader* object) {
-  ReleaseHeapRefRelaxed(object);
-}
+    void ReleaseHeapRef(const ObjHeader* object) {
+        ReleaseHeapRefRelaxed(object);
+    }
 
-void ZeroStackRef(ObjHeader** location) {
-  ZeroStackRefRelaxed(location);
-}
+    void ZeroStackRef(ObjHeader** location) {
+        ZeroStackRefRelaxed(location);
+    }
 
-void SetStackRef(ObjHeader** location, const ObjHeader* object) {
-  SetStackRefRelaxed(location, object);
-}
+    void SetStackRef(ObjHeader** location, const ObjHeader* object) {
+        SetStackRefRelaxed(location, object);
+    }
 
-void SetHeapRef(ObjHeader** location, const ObjHeader* object) {
-  SetHeapRefRelaxed(location, object);
-}
+    void SetHeapRef(ObjHeader** location, const ObjHeader* object) {
+        SetHeapRefRelaxed(location, object);
+    }
 
-void UpdateHeapRef(ObjHeader** location, const ObjHeader* object) {
-  UpdateHeapRefRelaxed(location, object);
-}
+    void UpdateHeapRef(ObjHeader** location, const ObjHeader* object) {
+        UpdateHeapRefRelaxed(location, object);
+    }
 
-void UpdateReturnRef(ObjHeader** returnSlot, const ObjHeader* object) {
-  UpdateReturnRefRelaxed(returnSlot, object);
-}
+    void UpdateReturnRef(ObjHeader** returnSlot, const ObjHeader* object) {
+        UpdateReturnRefRelaxed(returnSlot, object);
+    }
 
-void EnterFrame(ObjHeader** start, int parameters, int count) {
-  EnterFrameRelaxed(start, parameters, count);
-}
+    void EnterFrame(ObjHeader** start, int parameters, int count) {
+        EnterFrameRelaxed(start, parameters, count);
+    }
 
-void LeaveFrame(ObjHeader** start, int parameters, int count) {
-  LeaveFrameRelaxed(start, parameters, count);
-}
+    void LeaveFrame(ObjHeader** start, int parameters, int count) {
+        LeaveFrameRelaxed(start, parameters, count);
+    }
 
 }  // extern "C"
