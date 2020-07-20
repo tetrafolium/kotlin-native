@@ -38,12 +38,13 @@ private fun makeDependencyAssigner(targets: List<String>, defFiles: List<File>) 
 
 private fun makeDependencyAssignerForTarget(target: String, defFiles: List<File>): SingleTargetDependencyAssigner {
     val tool = prepareTool(target, KotlinPlatform.NATIVE)
-
+    val cinteropArguments = CInteropArguments()
+    cinteropArguments.argParser.parse(arrayOf())
     val libraries = defFiles.associateWith {
         buildNativeLibrary(
                 tool,
                 DefFile(it, tool.substitutions),
-                CInteropArguments(),
+                cinteropArguments,
                 ImportsImpl(emptyMap())
         ).getHeaderPaths()
     }
@@ -71,7 +72,7 @@ private fun patchDepends(file: File, newDepends: List<String>) {
     val newDefFileLines = listOf(dependsLine) + defFileLines.filter { !it.startsWith("depends =") }
 
     file.bufferedWriter().use { writer ->
-        newDefFileLines.forEach { writer.appendln(it) }
+        newDefFileLines.forEach { writer.appendLine(it) }
     }
 }
 
@@ -87,7 +88,7 @@ private class CompositeDependencyAssigner(val dependencyAssigners: List<Dependen
     override fun getReady(): Map<File, Set<String>> {
         return dependencyAssigners.map { it.getReady() }.reduce { left, right ->
             (left.keys intersect right.keys)
-                    .associateWith { left[it]!! union right[it]!! }
+                    .associateWith { left.getValue(it) union right.getValue(it) }
         }.also {
             require(it.isNotEmpty()) { "incompatible dependencies" } // TODO: add more info.
         }

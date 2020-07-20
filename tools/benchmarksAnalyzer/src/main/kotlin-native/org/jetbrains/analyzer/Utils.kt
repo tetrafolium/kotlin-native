@@ -21,7 +21,7 @@ import kotlinx.cinterop.*
 import libcurl.*
 
 actual fun readFile(fileName: String): String {
-    val file = fopen(fileName, "r") ?: error("Cannot write file '$fileName'")
+    val file = fopen(fileName, "r") ?: error("Cannot read file '$fileName'")
     var buffer = ByteArray(1024)
     var text = StringBuilder()
     try {
@@ -39,7 +39,7 @@ actual fun readFile(fileName: String): String {
 actual fun Double.format(decimalNumber: Int): String {
     var buffer = ByteArray(1024)
     snprintf(buffer.refTo(0), buffer.size.toULong(), "%.${decimalNumber}f", this)
-    return buffer.stringFromUtf8()
+    return buffer.toKString()
 }
 
 actual fun writeToFile(fileName: String, text: String) {
@@ -78,9 +78,16 @@ class CUrl(url: String, user: String? = null, password: String? = null, followLo
     val body = StringBuilder()
 
     fun fetch() {
-        val res = curl_easy_perform(curl)
-        if (res != CURLE_OK)
-            println("curl_easy_perform() failed: ${curl_easy_strerror(res)?.toKString()}")
+        memScoped {
+            val res = curl_easy_perform(curl)
+            if (res != CURLE_OK)
+                error("curl_easy_perform() failed: ${curl_easy_strerror(res)?.toKString()}")
+            val http_code = alloc<LongVar>()
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, http_code.ptr)
+            if (http_code.value >= 400L) {
+                error("Error http code ${http_code.value}")
+            }
+        }
     }
 
     fun close() {
@@ -91,7 +98,7 @@ class CUrl(url: String, user: String? = null, password: String? = null, followLo
 
 fun CPointer<ByteVar>.toKString(length: Int): String {
     val bytes = this.readBytes(length)
-    return bytes.stringFromUtf8()
+    return bytes.toKString()
 }
 
 fun collectResponse(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {

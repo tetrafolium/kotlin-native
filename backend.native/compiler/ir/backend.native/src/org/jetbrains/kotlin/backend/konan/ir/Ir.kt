@@ -6,8 +6,6 @@
 package org.jetbrains.kotlin.backend.konan.ir
 
 import org.jetbrains.kotlin.backend.common.COROUTINE_SUSPENDED_NAME
-import org.jetbrains.kotlin.backend.common.RenderIrElementWithDescriptorsVisitor.Companion.DECLARATION_RENDERER
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedDeclarationDescriptor
 import org.jetbrains.kotlin.backend.common.ir.Ir
 import org.jetbrains.kotlin.backend.common.ir.Symbols
 import org.jetbrains.kotlin.backend.konan.*
@@ -21,117 +19,35 @@ import org.jetbrains.kotlin.config.coroutinesPackageFqName
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
-import org.jetbrains.kotlin.ir.IrElement
-import org.jetbrains.kotlin.ir.declarations.*
-import org.jetbrains.kotlin.ir.expressions.*
+import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
+import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.ir.symbols.IrEnumEntrySymbol
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
-import org.jetbrains.kotlin.ir.symbols.IrSymbol
-import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
-import org.jetbrains.kotlin.ir.symbols.impl.IrTypeParameterSymbolImpl
-import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
-import org.jetbrains.kotlin.ir.types.impl.IrStarProjectionImpl
-import org.jetbrains.kotlin.ir.types.impl.makeTypeProjection
-import org.jetbrains.kotlin.ir.types.impl.originalKotlinType
-import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.*
-import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.renderer.*
+import org.jetbrains.kotlin.resolve.calls.components.isVararg
+import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.TypeUtils
-import org.jetbrains.kotlin.utils.Printer
-import org.jetbrains.kotlin.utils.addIfNotNull
-import java.io.StringWriter
+import org.jetbrains.kotlin.types.Variance
 import kotlin.properties.Delegates
 
 // This is what Context collects about IR.
 internal class KonanIr(context: Context, irModule: IrModuleFragment): Ir<Context>(context, irModule) {
-
-    val propertiesWithBackingFields = mutableSetOf<PropertyDescriptor>()
-    val classesDelegatedBackingFields = mutableMapOf<ClassDescriptor, MutableList<PropertyDescriptor>>()
-
-    val originalModuleIndex = ModuleIndex(irModule)
-
-    lateinit var moduleIndexForCodegen: ModuleIndex
-
     override var symbols: KonanSymbols by Delegates.notNull()
-
-    fun get(descriptor: FunctionDescriptor): IrFunction {
-        return moduleIndexForCodegen.functions[descriptor]
-                ?: symbols.lazySymbolTable.referenceFunction(descriptor).owner
-    }
-
-    fun get(descriptor: ClassDescriptor): IrClass {
-        return moduleIndexForCodegen.classes[descriptor]
-                ?: symbols.lazySymbolTable.referenceClass(descriptor)
-                        .also {
-                            if (!it.isBound)
-                                error(descriptor)
-                        }
-                        .owner
-    }
-
-    fun getFromCurrentModule(descriptor: ClassDescriptor): IrClass = moduleIndexForCodegen.classes[descriptor]!!
-
-    fun getFromCurrentModule(descriptor: FunctionDescriptor): IrFunction = moduleIndexForCodegen.functions[descriptor]!!
-
-    fun getEnumEntryFromCurrentModule(descriptor: ClassDescriptor): IrEnumEntry =
-            originalModuleIndex.enumEntries[descriptor] ?: error(descriptor)
-
-    fun getEnumEntry(descriptor: ClassDescriptor): IrEnumEntry {
-        assert(descriptor.kind == ClassKind.ENUM_ENTRY)
-
-        return originalModuleIndex.enumEntries[descriptor]
-                ?: symbols.lazySymbolTable.referenceEnumEntry(descriptor).owner
-    }
-
-    fun translateErased(type: KotlinType): IrSimpleType = symbols.symbolTable.translateErased(type)
-
-    fun translateBroken(type: KotlinType): IrType {
-        val declarationDescriptor = type.constructor.declarationDescriptor
-        return when (declarationDescriptor) {
-            is ClassDescriptor -> {
-                val classifier = IrClassSymbolImpl(declarationDescriptor)
-                val typeArguments = type.arguments.map {
-                    if (it.isStarProjection) {
-                        IrStarProjectionImpl
-                    } else {
-                        makeTypeProjection(translateBroken(it.type), it.projectionKind)
-                    }
-                }
-                IrSimpleTypeImpl(
-                        classifier,
-                        type.isMarkedNullable,
-                        typeArguments,
-                        emptyList()
-                )
-            }
-            is TypeParameterDescriptor -> IrSimpleTypeImpl(
-                    IrTypeParameterSymbolImpl(declarationDescriptor),
-                    type.isMarkedNullable,
-                    emptyList(),
-                    emptyList()
-            )
-            else -> error(declarationDescriptor ?: "null")
-        }
-    }
 }
 
-internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val lazySymbolTable: ReferenceSymbolTable): Symbols<Context>(context, lazySymbolTable) {
-    /**
-     * @note:
-     * [lateinitIsInitializedPropertyGetter] is used in [org.jetbrains.kotlin.backend.common.lower.LateinitLowering] and
-     * it's irrelevant for [org.jetbrains.kotlin.backend.konan.lower.LateinitLowering].
-     */
-    override val lateinitIsInitializedPropertyGetter: IrSimpleFunctionSymbol
-       get() = TODO("unimplemented")
+internal class KonanSymbols(
+        context: Context,
+        irBuiltIns: IrBuiltIns,
+        private val symbolTable: SymbolTable,
+        lazySymbolTable: ReferenceSymbolTable,
+        val functionIrClassFactory: BuiltInFictitiousFunctionIrClassFactory
+): Symbols<Context>(context, irBuiltIns, symbolTable) {
 
     val entryPoint = findMainEntryPoint(context)?.let { symbolTable.referenceSimpleFunction(it) }
 
@@ -139,17 +55,20 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
 
     val nothing = symbolTable.referenceClass(builtIns.nothing)
     val throwable = symbolTable.referenceClass(builtIns.throwable)
-    val string = symbolTable.referenceClass(builtIns.string)
     val enum = symbolTable.referenceClass(builtIns.enum)
     val nativePtr = symbolTable.referenceClass(context.nativePtr)
+    val nativePointed = symbolTable.referenceClass(context.interopBuiltIns.nativePointed)
     val nativePtrType = nativePtr.typeWith(arguments = emptyList())
+    val nonNullNativePtr = symbolTable.referenceClass(context.nonNullNativePtr)
+
+    val immutableBlobOf = symbolTable.referenceSimpleFunction(context.immutableBlobOf)
 
     private fun unsignedClass(unsignedType: UnsignedType): IrClassSymbol = classById(unsignedType.classId)
 
-    val uByte = unsignedClass(UnsignedType.UBYTE)
-    val uShort = unsignedClass(UnsignedType.USHORT)
-    val uInt = unsignedClass(UnsignedType.UINT)
-    val uLong = unsignedClass(UnsignedType.ULONG)
+    override val uByte = unsignedClass(UnsignedType.UBYTE)
+    override val uShort = unsignedClass(UnsignedType.USHORT)
+    override val uInt = unsignedClass(UnsignedType.UINT)
+    override val uLong = unsignedClass(UnsignedType.ULONG)
 
     val signedIntegerClasses = setOf(byte, short, int, long)
     val unsignedIntegerClasses = setOf(uByte, uShort, uInt, uLong)
@@ -192,10 +111,13 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
 
     val arrayList = symbolTable.referenceClass(getArrayListClassDescriptor(context))
 
-    val symbolName = topLevelClass(RuntimeNames.symbolName)
+    val symbolName = topLevelClass(RuntimeNames.symbolNameAnnotation)
+    val filterExceptions = topLevelClass(RuntimeNames.filterExceptions)
     val exportForCppRuntime = topLevelClass(RuntimeNames.exportForCppRuntime)
 
     val objCMethodImp = symbolTable.referenceClass(context.interopBuiltIns.objCMethodImp)
+
+    val onUnhandledException = internalFunction("OnUnhandledException")
 
     val interopNativePointedGetRawPointer =
             symbolTable.referenceSimpleFunction(context.interopBuiltIns.nativePointedGetRawPointer)
@@ -211,21 +133,35 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
     val interopCValueRead = symbolTable.referenceSimpleFunction(context.interopBuiltIns.cValueRead)
     val interopAllocType = symbolTable.referenceSimpleFunction(context.interopBuiltIns.allocType)
 
+    val interopTypeOf = symbolTable.referenceSimpleFunction(context.interopBuiltIns.typeOf)
+
     val interopCPointerGetRawValue = symbolTable.referenceSimpleFunction(context.interopBuiltIns.cPointerGetRawValue)
 
     val interopAllocObjCObject = symbolTable.referenceSimpleFunction(context.interopBuiltIns.allocObjCObject)
 
-    val interopObjCRelease = symbolTable.referenceSimpleFunction(
-            context.interopBuiltIns.packageScope
-                    .getContributedFunctions(Name.identifier("objc_release"), NoLookupLocation.FROM_BACKEND)
-                    .single()
-    )
+    val interopForeignObjCObject = interopClass("ForeignObjCObject")
 
-    val interopObjCRetain = symbolTable.referenceSimpleFunction(
-            context.interopBuiltIns.packageScope
-                    .getContributedFunctions(Name.identifier("objc_retain"), NoLookupLocation.FROM_BACKEND)
-                    .single()
-    )
+    // These are possible supertypes of forward declarations - we need to reference them explicitly to force their deserialization.
+    // TODO: Do it lazily.
+    val interopCOpaque = symbolTable.referenceClass(context.interopBuiltIns.cOpaque)
+    val interopObjCObject = symbolTable.referenceClass(context.interopBuiltIns.objCObject)
+    val interopObjCObjectBase = symbolTable.referenceClass(context.interopBuiltIns.objCObjectBase)
+
+    val interopObjCRelease = interopFunction("objc_release")
+
+    val interopObjCRetain = interopFunction("objc_retain")
+
+    val interopObjcRetainAutoreleaseReturnValue = interopFunction("objc_retainAutoreleaseReturnValue")
+
+    val interopCreateObjCObjectHolder = interopFunction("createObjCObjectHolder")
+
+    val interopCreateKotlinObjectHolder = interopFunction("createKotlinObjectHolder")
+    val interopUnwrapKotlinObjectHolderImpl = interopFunction("unwrapKotlinObjectHolderImpl")
+
+    val interopCreateObjCSuperStruct = interopFunction("createObjCSuperStruct")
+
+    val interopGetMessenger = interopFunction("getMessenger")
+    val interopGetMessengerStret = interopFunction("getMessengerStret")
 
     val interopGetObjCClass = symbolTable.referenceSimpleFunction(context.interopBuiltIns.getObjCClass)
 
@@ -237,14 +173,35 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
     val interopObjCObjectRawValueGetter =
             symbolTable.referenceSimpleFunction(context.interopBuiltIns.objCObjectRawPtr)
 
+    val interopNativePointedRawPtrGetter =
+            symbolTable.referenceSimpleFunction(context.interopBuiltIns.nativePointedRawPtrGetter)
+
+    val interopCPointerRawValue =
+            symbolTable.referenceProperty(context.interopBuiltIns.cPointerRawValue)
+
     val interopInterpretObjCPointer =
             symbolTable.referenceSimpleFunction(context.interopBuiltIns.interpretObjCPointer)
 
     val interopInterpretObjCPointerOrNull =
             symbolTable.referenceSimpleFunction(context.interopBuiltIns.interpretObjCPointerOrNull)
 
+    val interopInterpretNullablePointed =
+            symbolTable.referenceSimpleFunction(context.interopBuiltIns.interpretNullablePointed)
+
+    val interopInterpretCPointer =
+            symbolTable.referenceSimpleFunction(context.interopBuiltIns.interpretCPointer)
+
     val interopCreateNSStringFromKString =
             symbolTable.referenceSimpleFunction(context.interopBuiltIns.CreateNSStringFromKString)
+
+    val interopObjCGetSelector = interopFunction("objCGetSelector")
+
+    val interopCEnumVar = interopClass("CEnumVar")
+
+    val nativeMemUtils = symbolTable.referenceClass(context.interopBuiltIns.nativeMemUtils)
+
+    val readBits = interopFunction("readBits")
+    val writeBits = interopFunction("writeBits")
 
     val objCExportTrapOnUndeclaredException =
             symbolTable.referenceSimpleFunction(context.builtIns.kotlinNativeInternal.getContributedFunctions(
@@ -252,16 +209,19 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
                     NoLookupLocation.FROM_BACKEND
             ).single())
 
+    val objCExportResumeContinuation = internalFunction("resumeContinuation")
+    val objCExportResumeContinuationWithException = internalFunction("resumeContinuationWithException")
+    val objCExportGetCoroutineSuspended = internalFunction("getCoroutineSuspended")
+    val objCExportInterceptedContinuation = internalFunction("interceptedContinuation")
+
     val getNativeNullPtr = symbolTable.referenceSimpleFunction(context.getNativeNullPtr)
 
     val boxCachePredicates = BoxCache.values().associate {
-        val name = "in${it.name.toLowerCase().capitalize()}BoxCache"
-        it to symbolTable.referenceSimpleFunction(context.getInternalFunctions(name).single())
+        it to internalFunction("in${it.name.toLowerCase().capitalize()}BoxCache")
     }
 
     val boxCacheGetters = BoxCache.values().associate {
-        val name = "getCached${it.name.toLowerCase().capitalize()}Box"
-        it to symbolTable.referenceSimpleFunction(context.getInternalFunctions(name).single())
+        it to internalFunction("getCached${it.name.toLowerCase().capitalize()}Box")
     }
 
     val immutableBlob = symbolTable.referenceClass(
@@ -270,15 +230,19 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
             ) as ClassDescriptor
     )
 
-    val executeImpl = symbolTable.referenceSimpleFunction(context.interopBuiltIns.executeImplFunction)
+    val executeImpl = symbolTable.referenceSimpleFunction(
+            builtIns.builtInsModule.getPackage(FqName("kotlin.native.concurrent")).memberScope
+                    .getContributedFunctions(Name.identifier("executeImpl"), NoLookupLocation.FROM_BACKEND)
+                    .single()
+    )
 
-    val areEqualByValue = context.getInternalFunctions("areEqualByValue").map {
+    val areEqualByValue = context.getKonanInternalFunctions("areEqualByValue").map {
         symbolTable.referenceSimpleFunction(it)
     }.associateBy { it.descriptor.valueParameters[0].type.computePrimitiveBinaryTypeOrNull()!! }
 
-    val reinterpret = symbolTable.referenceSimpleFunction(context.getInternalFunctions("reinterpret").single())
+    val reinterpret = internalFunction("reinterpret")
 
-    val ieee754Equals = context.getInternalFunctions("ieee754Equals").map {
+    val ieee754Equals = context.getKonanInternalFunctions("ieee754Equals").map {
         symbolTable.referenceSimpleFunction(it)
     }
 
@@ -286,26 +250,28 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
             .getContributedFunctions(Name.identifier("equals"), NoLookupLocation.FROM_BACKEND)
             .single().let { symbolTable.referenceSimpleFunction(it) }
 
-    override val areEqual get() = error("Must not be used")
+    val throwArithmeticException = internalFunction("ThrowArithmeticException")
 
-    val throwArithmeticException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowArithmeticException").single())
+    val throwIndexOutOfBoundsException = internalFunction("ThrowIndexOutOfBoundsException")
 
-    override val ThrowNullPointerException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowNullPointerException").single())
+    override val ThrowNullPointerException = internalFunction("ThrowNullPointerException")
 
-    override val ThrowNoWhenBranchMatchedException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowNoWhenBranchMatchedException").single())
+    override val ThrowNoWhenBranchMatchedException = internalFunction("ThrowNoWhenBranchMatchedException")
 
-    override val ThrowTypeCastException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowTypeCastException").single())
+    override val ThrowTypeCastException = internalFunction("ThrowTypeCastException")
 
-    val throwInvalidReceiverTypeException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowInvalidReceiverTypeException").single())
+    override val ThrowKotlinNothingValueException  = internalFunction("ThrowKotlinNothingValueException")
 
-    override val ThrowUninitializedPropertyAccessException = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("ThrowUninitializedPropertyAccessException").single()
-    )
+    val throwClassCastException = internalFunction("ThrowClassCastException")
+
+    val throwInvalidReceiverTypeException = internalFunction("ThrowInvalidReceiverTypeException")
+    val throwIllegalStateException = internalFunction("ThrowIllegalStateException")
+    val throwIllegalStateExceptionWithMessage = internalFunction("ThrowIllegalStateExceptionWithMessage")
+    val throwIllegalArgumentException = internalFunction("ThrowIllegalArgumentException")
+    val throwIllegalArgumentExceptionWithMessage = internalFunction("ThrowIllegalArgumentExceptionWithMessage")
+
+
+    override val ThrowUninitializedPropertyAccessException = internalFunction("ThrowUninitializedPropertyAccessException")
 
     override val stringBuilder = symbolTable.referenceClass(
             builtInsPackage("kotlin", "text").getContributedClassifier(
@@ -313,9 +279,13 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
             ) as ClassDescriptor
     )
 
-    val checkProgressionStep = context.getInternalFunctions("checkProgressionStep")
+    override val defaultConstructorMarker = symbolTable.referenceClass(
+            context.getKonanInternalClass("DefaultConstructorMarker")
+    )
+
+    val checkProgressionStep = context.getKonanInternalFunctions("checkProgressionStep")
             .map { Pair(it.returnType, symbolTable.referenceSimpleFunction(it)) }.toMap()
-    val getProgressionLast = context.getInternalFunctions("getProgressionLast")
+    val getProgressionLast = context.getKonanInternalFunctions("getProgressionLast")
             .map { Pair(it.returnType, symbolTable.referenceSimpleFunction(it)) }.toMap()
 
     val arrayContentToString = arrays.associateBy(
@@ -327,18 +297,28 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
             { findArrayExtension(it.descriptor, "contentHashCode") }
     )
 
+    private val kotlinCollectionsPackageScope: MemberScope
+        get() = builtInsPackage("kotlin", "collections")
+
     private fun findArrayExtension(descriptor: ClassDescriptor, name: String): IrSimpleFunctionSymbol {
-        val functionDescriptor = builtInsPackage("kotlin", "collections")
+        val functionDescriptor = kotlinCollectionsPackageScope
                 .getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND)
                 .singleOrNull {
                     it.valueParameters.isEmpty()
                             && it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == descriptor
+                            && it.extensionReceiverParameter?.type?.isMarkedNullable == false
                             && !it.isExpect
                 } ?: error(descriptor.toString())
         return symbolTable.referenceSimpleFunction(functionDescriptor)
     }
     override val copyRangeTo get() = TODO()
 
+    fun getNoParamFunction(name: Name, receiverType: KotlinType): IrFunctionSymbol {
+        val descriptor = receiverType.memberScope.getContributedFunctions(name, NoLookupLocation.FROM_BACKEND)
+                .first { it.valueParameters.isEmpty() }
+        return symbolTable.referenceFunction(descriptor)
+    }
+    
     val copyInto = arrays.map { symbol ->
         val packageViewDescriptor = builtIns.builtInsModule.getPackage(KotlinBuiltIns.COLLECTIONS_PACKAGE_FQ_NAME)
         val functionDescriptor = packageViewDescriptor.memberScope
@@ -364,25 +344,13 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
                     .single().let { symbolTable.referenceSimpleFunction(it.getter!!) } }
 
 
-    val valuesForEnum = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("valuesForEnum").single())
+    val valuesForEnum = internalFunction("valuesForEnum")
 
-    val valueOfForEnum = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("valueOfForEnum").single())
+    val valueOfForEnum = internalFunction("valueOfForEnum")
 
-    val enumValues = symbolTable.referenceSimpleFunction(
-             builtInsPackage("kotlin").getContributedFunctions(
-                     Name.identifier("enumValues"), NoLookupLocation.FROM_BACKEND).single())
+    val createUninitializedInstance = internalFunction("createUninitializedInstance")
 
-    val enumValueOf = symbolTable.referenceSimpleFunction(
-            builtInsPackage("kotlin").getContributedFunctions(
-                    Name.identifier("enumValueOf"), NoLookupLocation.FROM_BACKEND).single())
-
-    val createUninitializedInstance = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("createUninitializedInstance").single())
-
-    val initInstance = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("initInstance").single())
+    val initInstance = internalFunction("initInstance")
 
     val freeze = symbolTable.referenceSimpleFunction(
             builtInsPackage("kotlin", "native", "concurrent").getContributedFunctions(
@@ -398,17 +366,13 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
                     Name.identifier("toString"), NoLookupLocation.FROM_BACKEND)
                     .single { it.extensionReceiverParameter?.type == builtIns.nullableAnyType})
 
-    val getContinuation = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("getContinuation").single())
+    override val getContinuation = internalFunction("getContinuation")
 
-    val returnIfSuspended = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("returnIfSuspended").single())
+    override val returnIfSuspended = internalFunction("returnIfSuspended")
 
-    val konanSuspendCoroutineUninterceptedOrReturn = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("suspendCoroutineUninterceptedOrReturn").single())
+    val coroutineLaunchpad = internalFunction("coroutineLaunchpad")
 
-    val konanCoroutineContextGetter = symbolTable.referenceSimpleFunction(
-            context.getInternalFunctions("getCoroutineContext").single())
+    override val suspendCoroutineUninterceptedOrReturn = internalFunction("suspendCoroutineUninterceptedOrReturn")
 
     private val coroutinesIntrinsicsPackage = context.builtIns.builtInsModule.getPackage(
         context.config.configuration.languageVersionSettings.coroutinesIntrinsicsPackageFqName()).memberScope
@@ -416,13 +380,13 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
     private val coroutinesPackage = context.builtIns.builtInsModule.getPackage(
             context.config.configuration.languageVersionSettings.coroutinesPackageFqName()).memberScope
 
-    val continuationClassDescriptor = coroutinesPackage
-            .getContributedClassifier(Name.identifier("Continuation"), NoLookupLocation.FROM_BACKEND) as ClassDescriptor
+    override val coroutineContextGetter = symbolTable.referenceSimpleFunction(
+            coroutinesPackage
+                    .getContributedVariables(Name.identifier("coroutineContext"), NoLookupLocation.FROM_BACKEND)
+                    .single()
+                    .getter!!)
 
-    val coroutineContextGetter = coroutinesPackage
-            .getContributedVariables(Name.identifier("coroutineContext"), NoLookupLocation.FROM_BACKEND)
-            .single()
-            .getter!!
+    override val coroutineGetContext = internalFunction("getCoroutineContext")
 
     override val coroutineImpl get() = TODO()
 
@@ -432,11 +396,20 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
 
     val continuationImpl = topLevelClass("kotlin.coroutines.native.internal.ContinuationImpl")
 
+    val invokeSuspendFunction =
+            symbolTable.referenceSimpleFunction(
+                    baseContinuationImpl.descriptor.unsubstitutedMemberScope
+                            .getContributedFunctions(Name.identifier("invokeSuspend"), NoLookupLocation.FROM_BACKEND)
+                            .single()
+            )
+
     override val coroutineSuspendedGetter = symbolTable.referenceSimpleFunction(
             coroutinesIntrinsicsPackage
                     .getContributedVariables(COROUTINE_SUSPENDED_NAME, NoLookupLocation.FROM_BACKEND)
                     .filterNot { it.isExpect }.single().getter!!
     )
+
+    val cancellationException = topLevelClass(KonanFqNames.cancellationException)
 
     val kotlinResult = topLevelClass("kotlin.Result")
 
@@ -448,18 +421,10 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
                     }
     )
 
-    val refClass = symbolTable.referenceClass(context.getInternalClass("Ref"))
-
-    val isInitializedPropertyDescriptor = builtInsPackage("kotlin")
-            .getContributedVariables(Name.identifier("isInitialized"), NoLookupLocation.FROM_BACKEND).single {
-                it.extensionReceiverParameter.let {
-                    it != null && TypeUtils.getClassDescriptor(it.type) == context.reflectionTypes.kProperty0
-                } && !it.isExpect
-            }
-
-    val isInitializedGetter = symbolTable.referenceSimpleFunction(isInitializedPropertyDescriptor.getter!!)
+    val refClass = symbolTable.referenceClass(context.getKonanInternalClass("Ref"))
 
     val kFunctionImpl =  symbolTable.referenceClass(context.reflectionTypes.kFunctionImpl)
+    val kSuspendFunctionImpl =  symbolTable.referenceClass(context.reflectionTypes.kSuspendFunctionImpl)
 
     val kMutableProperty0 = symbolTable.referenceClass(context.reflectionTypes.kMutableProperty0)
     val kMutableProperty1 = symbolTable.referenceClass(context.reflectionTypes.kMutableProperty1)
@@ -483,15 +448,50 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
     val kTypeImpl = internalClass("KTypeImpl")
     val kTypeImplForGenerics = internalClass("KTypeImplForGenerics")
 
+    val kTypeProjection = symbolTable.referenceClass(context.reflectionTypes.kTypeProjection)
+
+    private val kTypeProjectionCompanionDescriptor = context.reflectionTypes.kTypeProjection.companionObjectDescriptor!!
+
+    val kTypeProjectionCompanion = symbolTable.referenceClass(kTypeProjectionCompanionDescriptor)
+
+    val kTypeProjectionStar = symbolTable.referenceProperty(
+            kTypeProjectionCompanionDescriptor.unsubstitutedMemberScope
+                    .getContributedVariables(Name.identifier("STAR"), NoLookupLocation.FROM_BACKEND).single()
+    )
+
+    val kTypeProjectionFactories: Map<Variance, IrSimpleFunctionSymbol> = Variance.values().toList().associateWith {
+        val factoryName = when (it) {
+            Variance.INVARIANT -> "invariant"
+            Variance.IN_VARIANCE -> "contravariant"
+            Variance.OUT_VARIANCE -> "covariant"
+        }
+
+        symbolTable.referenceSimpleFunction(
+                kTypeProjectionCompanionDescriptor.unsubstitutedMemberScope
+                        .getContributedFunctions(Name.identifier(factoryName), NoLookupLocation.FROM_BACKEND).single()
+        )
+    }
+
+    val emptyList = symbolTable.referenceSimpleFunction(
+            kotlinCollectionsPackageScope
+                    .getContributedFunctions(Name.identifier("emptyList"), NoLookupLocation.FROM_BACKEND)
+                    .single { it.valueParameters.isEmpty() }
+    )
+
+    val listOf = symbolTable.referenceSimpleFunction(
+            kotlinCollectionsPackageScope
+                    .getContributedFunctions(Name.identifier("listOf"), NoLookupLocation.FROM_BACKEND)
+                    .single { it.valueParameters.size == 1 && it.valueParameters[0].isVararg }
+    )
     val listOfInternal = internalFunction("listOfInternal")
 
-    val threadLocal =
+    val threadLocal = symbolTable.referenceClass(
             context.builtIns.builtInsModule.findClassAcrossModuleDependencies(
-                    ClassId.topLevel(FqName("kotlin.native.concurrent.ThreadLocal")))!!
+                    ClassId.topLevel(KonanFqNames.threadLocal))!!)
 
-    val sharedImmutable =
+    val sharedImmutable = symbolTable.referenceClass(
             context.builtIns.builtInsModule.findClassAcrossModuleDependencies(
-                    ClassId.topLevel(FqName("kotlin.native.concurrent.SharedImmutable")))!!
+                    ClassId.topLevel(KonanFqNames.sharedImmutable))!!)
 
     private fun topLevelClass(fqName: String): IrClassSymbol = topLevelClass(FqName(fqName))
     private fun topLevelClass(fqName: FqName): IrClassSymbol = classById(ClassId.topLevel(fqName))
@@ -499,45 +499,53 @@ internal class KonanSymbols(context: Context, val symbolTable: SymbolTable, val 
             symbolTable.referenceClass(builtIns.builtInsModule.findClassAcrossModuleDependencies(classId)!!)
 
     private fun internalFunction(name: String): IrSimpleFunctionSymbol =
-            symbolTable.referenceSimpleFunction(context.getInternalFunctions(name).single())
+            symbolTable.referenceSimpleFunction(context.getKonanInternalFunctions(name).single())
 
     private fun internalClass(name: String): IrClassSymbol =
-            symbolTable.referenceClass(context.getInternalClass(name))
+            symbolTable.referenceClass(context.getKonanInternalClass(name))
 
     private fun getKonanTestClass(className: String) = symbolTable.referenceClass(
             builtInsPackage("kotlin", "native", "internal", "test").getContributedClassifier(
                     Name.identifier(className), NoLookupLocation.FROM_BACKEND
             ) as ClassDescriptor)
 
-    private fun getFunction(name: Name, receiverType: KotlinType, predicate: (FunctionDescriptor) -> Boolean) =
-            symbolTable.referenceFunction(receiverType.memberScope
-                    .getContributedFunctions(name, NoLookupLocation.FROM_BACKEND).single(predicate)
-            )
+    private fun interopFunction(name: String) = symbolTable.referenceSimpleFunction(
+            context.interopBuiltIns.packageScope
+                    .getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND)
+                    .single()
+    )
 
-    val functions = (0 .. KONAN_FUNCTION_INTERFACES_MAX_PARAMETERS)
-            .map { symbolTable.referenceClass(builtIns.getFunction(it)) }
+    private fun interopClass(name: String) = symbolTable.referenceClass(
+            context.interopBuiltIns.packageScope
+                    .getContributedClassifier(Name.identifier(name), NoLookupLocation.FROM_BACKEND) as ClassDescriptor
+    )
 
-    val kFunctions = (0 .. KONAN_FUNCTION_INTERFACES_MAX_PARAMETERS)
-            .map { symbolTable.referenceClass(context.reflectionTypes.getKFunction(it)) }
+    override fun functionN(n: Int) = functionIrClassFactory.functionN(n).symbol
 
-    fun getKFunctionType(returnType: IrType, parameterTypes: List<IrType>): IrType {
-        val kFunctionClassSymbol = kFunctions[parameterTypes.size]
-        return kFunctionClassSymbol.typeWith(parameterTypes + returnType)
-    }
+    override fun suspendFunctionN(n: Int) = functionIrClassFactory.suspendFunctionN(n).symbol
 
-    val suspendFunctions = (0 .. KONAN_FUNCTION_INTERFACES_MAX_PARAMETERS)
-            .map { symbolTable.referenceClass(builtIns.getSuspendFunction(it)) }
+    fun kFunctionN(n: Int) = functionIrClassFactory.kFunctionN(n).symbol
+
+    fun kSuspendFunctionN(n: Int) = functionIrClassFactory.kSuspendFunctionN(n).symbol
+
+    fun getKFunctionType(returnType: IrType, parameterTypes: List<IrType>) =
+            kFunctionN(parameterTypes.size).typeWith(parameterTypes + returnType)
 
     val baseClassSuite   = getKonanTestClass("BaseClassSuite")
     val topLevelSuite    = getKonanTestClass("TopLevelSuite")
     val testFunctionKind = getKonanTestClass("TestFunctionKind")
 
-    private val testFunctionKindCache = mutableMapOf<TestProcessor.FunctionKind, IrEnumEntrySymbol>()
-    fun getTestFunctionKind(kind: TestProcessor.FunctionKind): IrEnumEntrySymbol = testFunctionKindCache.getOrPut(kind) {
-        symbolTable.referenceEnumEntry(testFunctionKind.descriptor.unsubstitutedMemberScope.getContributedClassifier(
-                kind.runtimeKindName, NoLookupLocation.FROM_BACKEND
-        ) as ClassDescriptor)
+    private val testFunctionKindCache = TestProcessor.FunctionKind.values().associate {
+        val symbol = if (it.runtimeKindString.isEmpty())
+            null
+        else
+            symbolTable.referenceEnumEntry(testFunctionKind.descriptor.unsubstitutedMemberScope.getContributedClassifier(
+                    Name.identifier(it.runtimeKindString), NoLookupLocation.FROM_BACKEND
+            ) as ClassDescriptor)
+        it to symbol
     }
+
+    fun getTestFunctionKind(kind: TestProcessor.FunctionKind) = testFunctionKindCache[kind]!!
 }
 
 private fun getArrayListClassDescriptor(context: Context): ClassDescriptor {
@@ -547,635 +555,4 @@ private fun getArrayListClassDescriptor(context: Context): ClassDescriptor {
             NoLookupLocation.FROM_BACKEND)
 
     return classifier as ClassDescriptor
-}
-
-fun IrElement.render() = accept(RenderIrElementVisitor(), null)
-
-fun IrType.render() =
-        originalKotlinType?.let {
-            DECLARATION_RENDERER.renderType(it)
-        } ?: DECLARATION_RENDERER.renderType(this.toKotlinType())
-
-class RenderIrElementVisitor : IrElementVisitor<String, Nothing?> {
-    override fun visitElement(element: IrElement, data: Nothing?): String =
-            "? ${element::class.java.simpleName}"
-
-    override fun visitDeclaration(declaration: IrDeclaration, data: Nothing?): String =
-            "? ${declaration::class.java.simpleName} ${declaration.descriptor.ref()}"
-
-    override fun visitModuleFragment(declaration: IrModuleFragment, data: Nothing?): String =
-            "MODULE_FRAGMENT name:${declaration.name}"
-
-    override fun visitExternalPackageFragment(declaration: IrExternalPackageFragment, data: Nothing?): String =
-            "EXTERNAL_PACKAGE_FRAGMENT fqName:${declaration.fqName}"
-
-    override fun visitFile(declaration: IrFile, data: Nothing?): String =
-            "FILE fqName:${declaration.fqName} fileName:${declaration.name}"
-
-    override fun visitFunction(declaration: IrFunction, data: Nothing?): String =
-            "FUN ${declaration.renderOriginIfNonTrivial()}${declaration.renderDeclared()}"
-
-    override fun visitSimpleFunction(declaration: IrSimpleFunction, data: Nothing?): String =
-            declaration.run {
-                "FUN ${renderOriginIfNonTrivial()}" +
-                        //"name:$name visibility:$visibility modality:$modality " +
-                        "name:$name $descriptor $symbol visibility:$visibility modality:$modality " +
-                        renderTypeParameters() + " " +
-                        renderValueParameterTypes() + " " +
-                        "returnType:${returnType.render()} " +
-                        "flags:${renderSimpleFunctionFlags()}"
-            }
-
-    private fun renderFlagsList(vararg flags: String?) =
-            flags.filterNotNull().joinToString(separator = ",")
-
-    private fun IrSimpleFunction.renderSimpleFunctionFlags(): String =
-            renderFlagsList(
-                    "tailrec".takeIf { isTailrec },
-                    "inline".takeIf { isInline },
-                    "external".takeIf { isExternal },
-                    "suspend".takeIf { isSuspend }
-            )
-
-    private fun IrFunction.renderTypeParameters(): String =
-            typeParameters.joinToString(separator = ", ", prefix = "<", postfix = ">") { it.name.toString() }
-
-    private fun IrFunction.renderValueParameterTypes(): String =
-            ArrayList<String>().apply {
-                addIfNotNull(dispatchReceiverParameter?.run { "\$this:${type.render()}" })
-                addIfNotNull(extensionReceiverParameter?.run { "\$receiver:${type.render()}" })
-                valueParameters.mapTo(this) { "${it.name}:${it.type.render()}" }
-            }.joinToString(separator = ", ", prefix = "(", postfix = ")")
-
-    override fun visitConstructor(declaration: IrConstructor, data: Nothing?): String =
-            declaration.run {
-                "CONSTRUCTOR ${renderOriginIfNonTrivial()}" +
-                        "visibility:$visibility " +
-                        renderTypeParameters() + " " +
-                        renderValueParameterTypes() + " " +
-                        "returnType:${returnType.render()} " +
-                        "flags:${renderConstructorFlags()}"
-            }
-
-    private fun IrConstructor.renderConstructorFlags() =
-            renderFlagsList(
-                    "inline".takeIf { isInline },
-                    "external".takeIf { isExternal },
-                    "primary".takeIf { isPrimary }
-            )
-
-    override fun visitProperty(declaration: IrProperty, data: Nothing?): String =
-            declaration.run {
-                "PROPERTY ${renderOriginIfNonTrivial()}" +
-                        "name:$name visibility:$visibility modality:$modality " +
-                        "flags:${renderPropertyFlags()}"
-            }
-
-    private fun IrProperty.renderPropertyFlags() =
-            renderFlagsList(
-                    "external".takeIf { isExternal },
-                    "const".takeIf { isConst },
-                    "lateinit".takeIf { isLateinit },
-                    "delegated".takeIf { isDelegated },
-                    if (isVar) "var" else "val"
-            )
-
-    override fun visitField(declaration: IrField, data: Nothing?): String =
-            "FIELD ${declaration.renderOriginIfNonTrivial()}" +
-                    "name:${declaration.name} type:${declaration.type.render()} visibility:${declaration.visibility} " +
-                    "flags:${declaration.renderFieldFlags()}"
-
-    private fun IrField.renderFieldFlags() =
-            renderFlagsList(
-                    "final".takeIf { isFinal },
-                    "external".takeIf { isExternal },
-                    "static".takeIf { isStatic }
-            )
-
-    override fun visitClass(declaration: IrClass, data: Nothing?): String =
-            declaration.run {
-                "CLASS ${renderOriginIfNonTrivial()}" +
-                        "$kind name:$name modality:$modality visibility:$visibility " +
-                        "flags:${renderClassFlags()} " +
-                        "superTypes:[${superTypes.joinToString(separator = "; ") { it.render() }}]"
-            }
-
-    private fun IrClass.renderClassFlags() =
-            renderFlagsList(
-                    "companion".takeIf { isCompanion },
-                    "inner".takeIf { isInner },
-                    "data".takeIf { isData },
-                    "external".takeIf { isExternal },
-                    "inline".takeIf { isInline }
-            )
-
-    override fun visitTypeAlias(declaration: IrTypeAlias, data: Nothing?): String =
-            "TYPEALIAS ${declaration.renderOriginIfNonTrivial()}${declaration.descriptor.ref()} " +
-                    "type=${declaration.descriptor.underlyingType.render()}"
-
-    override fun visitVariable(declaration: IrVariable, data: Nothing?): String =
-            "VAR ${declaration.renderOriginIfNonTrivial()}" +
-                    "name:${declaration.name} type:${declaration.type.render()} flags:${declaration.renderVariableFlags()}"
-
-    private fun IrVariable.renderVariableFlags(): String =
-            renderFlagsList(
-                    "const".takeIf { isConst },
-                    "lateinit".takeIf { isLateinit },
-                    if (isVar) "var" else "val"
-            )
-
-    override fun visitEnumEntry(declaration: IrEnumEntry, data: Nothing?): String =
-            "ENUM_ENTRY ${declaration.renderOriginIfNonTrivial()}name:${declaration.name}"
-
-    override fun visitAnonymousInitializer(declaration: IrAnonymousInitializer, data: Nothing?): String =
-            "ANONYMOUS_INITIALIZER ${declaration.descriptor.ref()}"
-
-    override fun visitTypeParameter(declaration: IrTypeParameter, data: Nothing?): String =
-            declaration.run {
-                "TYPE_PARAMETER ${renderOriginIfNonTrivial()}" +
-                        "name:$name index:$index variance:$variance " +
-                        "superTypes:[${superTypes.joinToString(separator = "; ") { it.render() }}]"
-            }
-
-    override fun visitValueParameter(declaration: IrValueParameter, data: Nothing?): String =
-            declaration.run {
-                "VALUE_PARAMETER ${renderOriginIfNonTrivial()}" +
-                        "name:$name " +
-                        (if (index >= 0) "index:$index " else "") +
-                        "type:${type.render()} " +
-                        (varargElementType?.let { "varargElementType:${it.render()} " } ?: "") +
-                        "flags:${renderValueParameterFlags()}"
-            }
-
-    private fun IrValueParameter.renderValueParameterFlags(): String =
-            renderFlagsList(
-                    "vararg".takeIf { varargElementType != null },
-                    "crossinline".takeIf { isCrossinline },
-                    "noinline".takeIf { isNoinline }
-            )
-
-    override fun visitLocalDelegatedProperty(declaration: IrLocalDelegatedProperty, data: Nothing?): String =
-            declaration.run {
-                "LOCAL_DELEGATED_PROPERTY ${declaration.renderOriginIfNonTrivial()}" +
-                        "name:$name type:${type.render()} flags:${renderLocalDelegatedPropertyFlags()}"
-            }
-
-    private fun IrLocalDelegatedProperty.renderLocalDelegatedPropertyFlags() =
-            if (isVar) "var" else "val"
-
-    override fun visitExpressionBody(body: IrExpressionBody, data: Nothing?): String =
-            "EXPRESSION_BODY"
-
-    override fun visitBlockBody(body: IrBlockBody, data: Nothing?): String =
-            "BLOCK_BODY"
-
-    override fun visitSyntheticBody(body: IrSyntheticBody, data: Nothing?): String =
-            "SYNTHETIC_BODY kind=${body.kind}"
-
-    override fun visitExpression(expression: IrExpression, data: Nothing?): String =
-            "? ${expression::class.java.simpleName} type=${expression.type.render()}"
-
-    override fun <T> visitConst(expression: IrConst<T>, data: Nothing?): String =
-            "CONST ${expression.kind} type=${expression.type.render()} value=${expression.value}"
-
-    override fun visitVararg(expression: IrVararg, data: Nothing?): String =
-            "VARARG type=${expression.type.render()} varargElementType=${expression.varargElementType.render()}"
-
-    override fun visitSpreadElement(spread: IrSpreadElement, data: Nothing?): String =
-            "SPREAD_ELEMENT"
-
-    override fun visitBlock(expression: IrBlock, data: Nothing?): String =
-            if (expression is IrReturnableBlock)
-                "RETURNABLE_BLOCK type=${expression.type.render()} origin=${expression.origin} function=name:${expression.symbol.descriptor.name} ${expression.symbol.descriptor} ${expression.symbol}"
-            else "BLOCK type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitComposite(expression: IrComposite, data: Nothing?): String =
-            "COMPOSITE type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitReturn(expression: IrReturn, data: Nothing?): String =
-            "RETURN type=${expression.type.render()} from='name=${expression.returnTarget.name} ${expression.returnTarget/*.ref()*/} ${expression.returnTargetSymbol}'"
-
-    override fun visitCall(expression: IrCall, data: Nothing?): String =
-            "CALL '${expression.descriptor/*.ref()*/} ${expression.descriptor} ${expression.symbol}' ${expression.renderSuperQualifier()}" +
-                    "type=${expression.type.render()} origin=${expression.origin}"
-
-    private fun IrCall.renderSuperQualifier(): String =
-            superQualifier?.let { "superQualifier=${it.name} " } ?: ""
-
-    override fun visitDelegatingConstructorCall(expression: IrDelegatingConstructorCall, data: Nothing?): String =
-            "DELEGATING_CONSTRUCTOR_CALL '${expression.descriptor.ref()}'"
-
-    override fun visitEnumConstructorCall(expression: IrEnumConstructorCall, data: Nothing?): String =
-            "ENUM_CONSTRUCTOR_CALL '${expression.descriptor.ref()}'"
-
-    override fun visitInstanceInitializerCall(expression: IrInstanceInitializerCall, data: Nothing?): String =
-            "INSTANCE_INITIALIZER_CALL classDescriptor='${expression.classDescriptor.ref()}'"
-
-    override fun visitGetValue(expression: IrGetValue, data: Nothing?): String =
-            "GET_VAR '${expression.descriptor.ref()}' /*${expression.symbol.owner} ${expression.symbol.owner.hashCode()} ${expression.descriptor} ${expression.descriptor.hashCode()} */ type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitSetVariable(expression: IrSetVariable, data: Nothing?): String =
-            "SET_VAR '${expression.descriptor.ref()}' type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitGetField(expression: IrGetField, data: Nothing?): String =
-            "GET_FIELD '${expression.descriptor.ref()}' type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitSetField(expression: IrSetField, data: Nothing?): String =
-            "SET_FIELD '${expression.descriptor.ref()}' type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitGetObjectValue(expression: IrGetObjectValue, data: Nothing?): String =
-            "GET_OBJECT '${expression.descriptor.ref()}' type=${expression.type.render()}"
-
-    override fun visitGetEnumValue(expression: IrGetEnumValue, data: Nothing?): String =
-            "GET_ENUM '${expression.descriptor.ref()}' type=${expression.type.render()}"
-
-    override fun visitStringConcatenation(expression: IrStringConcatenation, data: Nothing?): String =
-            "STRING_CONCATENATION type=${expression.type.render()}"
-
-    override fun visitTypeOperator(expression: IrTypeOperatorCall, data: Nothing?): String =
-            "TYPE_OP type=${expression.type.render()} origin=${expression.operator} typeOperand=${expression.typeOperand.render()}"
-
-    override fun visitWhen(expression: IrWhen, data: Nothing?): String =
-            "WHEN type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitBranch(branch: IrBranch, data: Nothing?): String =
-            "BRANCH"
-
-    override fun visitWhileLoop(loop: IrWhileLoop, data: Nothing?): String =
-            "WHILE label=${loop.label} origin=${loop.origin}"
-
-    override fun visitDoWhileLoop(loop: IrDoWhileLoop, data: Nothing?): String =
-            "DO_WHILE label=${loop.label} origin=${loop.origin}"
-
-    override fun visitBreak(jump: IrBreak, data: Nothing?): String =
-            "BREAK label=${jump.label} loop.label=${jump.loop.label}"
-
-    override fun visitContinue(jump: IrContinue, data: Nothing?): String =
-            "CONTINUE label=${jump.label} loop.label=${jump.loop.label}"
-
-    override fun visitThrow(expression: IrThrow, data: Nothing?): String =
-            "THROW type=${expression.type.render()}"
-
-    override fun visitFunctionReference(expression: IrFunctionReference, data: Nothing?): String =
-            "FUNCTION_REFERENCE 'name=${expression.descriptor.name/*.ref()*/} ${expression.descriptor} ${expression.symbol}' type=${expression.type.render()} origin=${expression.origin}"
-
-    override fun visitPropertyReference(expression: IrPropertyReference, data: Nothing?): String =
-            buildString {
-                append("PROPERTY_REFERENCE ")
-                append("'${expression.descriptor.ref()}' ")
-                appendNullableAttribute("field=", expression.field) { "'${it.descriptor.ref()}'" }
-                appendNullableAttribute("getter=", expression.getter) { "'${it.descriptor.ref()}'" }
-                appendNullableAttribute("setter=", expression.setter) { "'${it.descriptor.ref()}'" }
-                append("type=${expression.type.render()} ")
-                append("origin=${expression.origin}")
-            }
-
-    private inline fun <T : Any> StringBuilder.appendNullableAttribute(prefix: String, value: T?, toString: (T) -> String) {
-        append(prefix)
-        if (value != null) {
-            append(toString(value))
-        } else {
-            append("null")
-        }
-        append(" ")
-    }
-
-    override fun visitLocalDelegatedPropertyReference(expression: IrLocalDelegatedPropertyReference, data: Nothing?): String =
-            buildString {
-                append("LOCAL_DELEGATED_PROPERTY_REFERENCE ")
-                append("'${expression.descriptor.ref()}' ")
-                append("delegate='${expression.delegate.descriptor.ref()}' ")
-                append("getter='${expression.getter.descriptor.ref()}' ")
-                appendNullableAttribute("setter=", expression.setter) { "'${it.descriptor.ref()}'" }
-                append("type=${expression.type.render()} ")
-                append("origin=${expression.origin}")
-            }
-
-    override fun visitClassReference(expression: IrClassReference, data: Nothing?): String =
-            "CLASS_REFERENCE '${expression.descriptor.ref()}' type=${expression.type.render()}"
-
-    override fun visitGetClass(expression: IrGetClass, data: Nothing?): String =
-            "GET_CLASS type=${expression.type.render()}"
-
-    override fun visitTry(aTry: IrTry, data: Nothing?): String =
-            "TRY type=${aTry.type.render()}"
-
-    override fun visitCatch(aCatch: IrCatch, data: Nothing?): String =
-            "CATCH parameter=${aCatch.parameter.ref()}"
-
-    override fun visitErrorDeclaration(declaration: IrErrorDeclaration, data: Nothing?): String =
-            "ERROR_DECL ${declaration.descriptor::class.java.simpleName} ${declaration.descriptor.ref()}"
-
-    override fun visitErrorExpression(expression: IrErrorExpression, data: Nothing?): String =
-            "ERROR_EXPR '${expression.description}' type=${expression.type.render()}"
-
-    override fun visitErrorCallExpression(expression: IrErrorCallExpression, data: Nothing?): String =
-            "ERROR_CALL '${expression.description}' type=${expression.type.render()}"
-
-    companion object {
-        val DECLARATION_RENDERER = DescriptorRenderer.withOptions {
-            withDefinedIn = false
-            overrideRenderingPolicy = OverrideRenderingPolicy.RENDER_OPEN_OVERRIDE
-            includePropertyConstant = true
-            classifierNamePolicy = ClassifierNamePolicy.FULLY_QUALIFIED
-            verbose = false
-            modifiers = DescriptorRendererModifier.ALL
-        }
-
-        val REFERENCE_RENDERER = DescriptorRenderer.ONLY_NAMES_WITH_SHORT_TYPES
-
-        internal fun IrDeclaration.name(): String =
-                descriptor.name.toString()
-
-        internal fun DescriptorRenderer.renderDescriptor(descriptor: DeclarationDescriptor): String =
-                if (descriptor is ReceiverParameterDescriptor)
-                    "this@${if (descriptor is WrappedDeclarationDescriptor<*>) "Wrapped" else descriptor.containingDeclaration.name}: ${if (descriptor is WrappedDeclarationDescriptor<*>) "Wrapped"  else descriptor.type}"
-                else
-                    render(descriptor)
-
-        internal fun IrDeclaration.renderDeclared(): String =
-                DECLARATION_RENDERER.renderDescriptor(this.descriptor)
-
-        internal fun DeclarationDescriptor.ref(): String =
-                REFERENCE_RENDERER.renderDescriptor(this)
-
-        internal fun KotlinType.render(): String =
-                DECLARATION_RENDERER.renderType(this)
-
-        internal fun IrDeclaration.renderOriginIfNonTrivial(): String =
-                if (origin != IrDeclarationOrigin.DEFINED) origin.toString() + " " else ""
-    }
-}
-
-
-class DumpIrTreeVizitor(out: Appendable) : IrElementVisitor<Unit, String> {
-
-    private val printer = Printer(out, "  ")
-    private val elementRenderer = RenderIrElementVisitor()
-
-    companion object {
-        val ANNOTATIONS_RENDERER = DescriptorRenderer.withOptions {
-            verbose = true
-            annotationArgumentsRenderingPolicy = AnnotationArgumentsRenderingPolicy.UNLESS_EMPTY
-        }
-    }
-
-    override fun visitElement(element: IrElement, data: String) {
-        element.dumpLabeledElementWith(data) {
-            if (element is IrAnnotationContainer) {
-                dumpAnnotations(element)
-            }
-            element.acceptChildren(this@DumpIrTreeVizitor, "")
-        }
-    }
-
-    override fun visitModuleFragment(declaration: IrModuleFragment, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            declaration.files.dumpElements()
-        }
-    }
-
-    override fun visitFile(declaration: IrFile, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            declaration.fileAnnotations.dumpItemsWith("fileAnnotations") {
-                ANNOTATIONS_RENDERER.renderAnnotation(it)
-            }
-            dumpAnnotations(declaration)
-            declaration.declarations.dumpElements()
-        }
-    }
-
-    override fun visitClass(declaration: IrClass, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.thisReceiver?.accept(this, "\$this")
-            declaration.typeParameters.dumpElements()
-            declaration.declarations.dumpElements()
-        }
-    }
-
-    override fun visitTypeParameter(declaration: IrTypeParameter, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-        }
-    }
-
-    override fun visitSimpleFunction(declaration: IrSimpleFunction, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.correspondingProperty?.dumpInternal("correspondingProperty")
-            declaration.overriddenSymbols.dumpItems<IrSymbol>("overridden") {
-                it.dumpDeclarationElementOrDescriptor()
-            }
-            declaration.typeParameters.dumpElements()
-            declaration.dispatchReceiverParameter?.accept(this, "\$this")
-            declaration.extensionReceiverParameter?.accept(this, "\$receiver")
-            declaration.valueParameters.dumpElements()
-            declaration.body?.accept(this, "")
-        }
-    }
-
-    private fun dumpAnnotations(element: IrAnnotationContainer) {
-        element.annotations.dumpItems("annotations") {
-            element.annotations.dumpElements()
-        }
-    }
-
-    private fun IrSymbol.dumpDeclarationElementOrDescriptor(label: String? = null) {
-        when {
-            isBound ->
-                owner.dumpInternal(label)
-            label != null ->
-                printer.println("$label: ", "UNBOUND: ", DescriptorRenderer.COMPACT.render(descriptor))
-            else ->
-                printer.println("UNBOUND: ", DescriptorRenderer.COMPACT.render(descriptor))
-        }
-    }
-
-    override fun visitConstructor(declaration: IrConstructor, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.typeParameters.dumpElements()
-            declaration.dispatchReceiverParameter?.accept(this, "\$outer")
-            declaration.valueParameters.dumpElements()
-            declaration.body?.accept(this, "")
-        }
-    }
-
-    override fun visitProperty(declaration: IrProperty, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.backingField?.accept(this, "")
-            declaration.getter?.accept(this, "")
-            declaration.setter?.accept(this, "")
-        }
-    }
-
-    override fun visitField(declaration: IrField, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.overriddenSymbols.dumpItems("overridden") {
-                it.dumpDeclarationElementOrDescriptor()
-            }
-            declaration.initializer?.accept(this, "")
-        }
-    }
-
-    private fun List<IrElement>.dumpElements() {
-        forEach { it.accept(this@DumpIrTreeVizitor, "") }
-    }
-
-    override fun visitErrorCallExpression(expression: IrErrorCallExpression, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            expression.explicitReceiver?.accept(this, "receiver")
-            expression.arguments.dumpElements()
-        }
-    }
-
-    override fun visitEnumEntry(declaration: IrEnumEntry, data: String) {
-        declaration.dumpLabeledElementWith(data) {
-            dumpAnnotations(declaration)
-            declaration.initializerExpression?.accept(this, "init")
-            declaration.correspondingClass?.accept(this, "class")
-        }
-    }
-
-    override fun visitMemberAccess(expression: IrMemberAccessExpression, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            dumpTypeArguments(expression)
-            expression.dispatchReceiver?.accept(this, "\$this")
-            expression.extensionReceiver?.accept(this, "\$receiver")
-            for (valueParameter in expression.descriptor.valueParameters) {
-                expression.getValueArgument(valueParameter.index)?.accept(this, valueParameter.name.asString())
-            }
-        }
-    }
-
-    private fun dumpTypeArguments(expression: IrMemberAccessExpression) {
-        for (index in 0 until expression.typeArgumentsCount) {
-            printer.println(
-                    "${expression.descriptor.renderTypeParameter(index)}: ${expression.renderTypeArgument(index)}"
-            )
-        }
-    }
-
-    private fun CallableDescriptor.renderTypeParameter(index: Int): String {
-        val typeParameter = original.typeParameters.getOrNull(index)
-        return if (typeParameter != null)
-            DescriptorRenderer.ONLY_NAMES_WITH_SHORT_TYPES.render(typeParameter)
-        else
-            "<`$index>"
-    }
-
-    private fun IrMemberAccessExpression.renderTypeArgument(index: Int): String =
-            getTypeArgument(index)?.render() ?: "<none>"
-
-    override fun visitGetField(expression: IrGetField, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            expression.receiver?.accept(this, "receiver")
-        }
-    }
-
-    override fun visitSetField(expression: IrSetField, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            expression.receiver?.accept(this, "receiver")
-            expression.value.accept(this, "value")
-        }
-    }
-
-    override fun visitWhen(expression: IrWhen, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            expression.branches.dumpElements()
-        }
-    }
-
-    override fun visitBranch(branch: IrBranch, data: String) {
-        branch.dumpLabeledElementWith(data) {
-            branch.condition.accept(this, "if")
-            branch.result.accept(this, "then")
-        }
-    }
-
-    override fun visitWhileLoop(loop: IrWhileLoop, data: String) {
-        loop.dumpLabeledElementWith(data) {
-            loop.condition.accept(this, "condition")
-            loop.body?.accept(this, "body")
-        }
-    }
-
-    override fun visitDoWhileLoop(loop: IrDoWhileLoop, data: String) {
-        loop.dumpLabeledElementWith(data) {
-            loop.body?.accept(this, "body")
-            loop.condition.accept(this, "condition")
-        }
-    }
-
-    override fun visitTry(aTry: IrTry, data: String) {
-        aTry.dumpLabeledElementWith(data) {
-            aTry.tryResult.accept(this, "try")
-            aTry.catches.dumpElements()
-            aTry.finallyExpression?.accept(this, "finally")
-        }
-    }
-
-    override fun visitTypeOperator(expression: IrTypeOperatorCall, data: String) {
-        expression.dumpLabeledElementWith(data) {
-            expression.typeOperandClassifier.dumpDeclarationElementOrDescriptor("typeOperand")
-            expression.acceptChildren(this, "")
-        }
-    }
-
-    private inline fun IrElement.dumpLabeledElementWith(label: String, body: () -> Unit) {
-        printer.println(accept(elementRenderer, null).withLabel(label))
-        indented(body)
-    }
-
-    private inline fun <T> Collection<T>.dumpItems(caption: String, renderElement: (T) -> Unit) {
-        if (isEmpty()) return
-        indented(caption) {
-            forEach {
-                renderElement(it)
-            }
-        }
-    }
-
-    private inline fun <T> Collection<T>.dumpItemsWith(caption: String, renderElement: (T) -> String) {
-        if (isEmpty()) return
-        indented(caption) {
-            forEach {
-                printer.println(renderElement(it))
-            }
-        }
-    }
-
-    private fun IrElement.dumpInternal(label: String? = null) {
-        if (label != null) {
-            printer.println("$label: ", accept(elementRenderer, null))
-        } else {
-            printer.println(accept(elementRenderer, null))
-        }
-
-    }
-
-    private inline fun indented(label: String, body: () -> Unit) {
-        printer.println("$label:")
-        indented(body)
-    }
-
-    private inline fun indented(body: () -> Unit) {
-        printer.pushIndent()
-        body()
-        printer.popIndent()
-    }
-
-    private fun String.withLabel(label: String) =
-            if (label.isEmpty()) this else "$label: $this"
-}
-
-
-fun ir2stringWholezzz(ir: IrElement?): String {
-    val strWriter = StringWriter()
-
-    ir?.accept(DumpIrTreeVizitor(strWriter), "")
-    return strWriter.toString()
 }

@@ -34,10 +34,12 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.gradle.plugin.konan.KonanPlugin.Companion.COMPILE_ALL_TASK_NAME
 import org.jetbrains.kotlin.gradle.plugin.model.KonanToolingModelBuilder
 import org.jetbrains.kotlin.gradle.plugin.tasks.*
-import org.jetbrains.kotlin.konan.KonanVersion
-import org.jetbrains.kotlin.konan.parseKonanVersion
+import org.jetbrains.kotlin.konan.CURRENT
+import org.jetbrains.kotlin.konan.CompilerVersion
+import org.jetbrains.kotlin.konan.parseCompilerVersion
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
+import org.jetbrains.kotlin.konan.target.buildDistribution
 import org.jetbrains.kotlin.konan.target.customerDistribution
 import org.jetbrains.kotlin.konan.util.DependencyProcessor
 import java.io.File
@@ -87,10 +89,10 @@ internal val Project.konanHome: String
         return project.file(getProperty(KonanPlugin.ProjectProperty.KONAN_HOME)).canonicalPath
     }
 
-internal val Project.konanVersion: KonanVersion
+internal val Project.konanVersion: CompilerVersion
     get() = project.findProperty(KonanPlugin.ProjectProperty.KONAN_VERSION)
-        ?.toString()?.parseKonanVersion()
-        ?: KonanVersion.CURRENT
+        ?.toString()?.let { CompilerVersion.fromString(it) }
+        ?: CompilerVersion.CURRENT
 
 internal val Project.konanBuildRoot          get() = buildDir.resolve("konan")
 internal val Project.konanBinBaseDir         get() = konanBuildRoot.resolve("bin")
@@ -114,7 +116,10 @@ internal val Project.konanArtifactsContainer: KonanArtifactContainer
 // stage (e.g. by getting it from maven as a plugin dependency) and bring back the PlatformManager here.
 internal val Project.hostManager: HostManager
     get() = findProperty("hostManager") as HostManager? ?:
-        HostManager(customerDistribution(konanHome))
+            if (hasProperty("org.jetbrains.kotlin.native.experimentalTargets"))
+                HostManager(buildDistribution(rootProject.rootDir.absolutePath), true)
+            else
+                HostManager(customerDistribution(konanHome))
 
 internal val Project.konanTargets: List<KonanTarget>
     get() = hostManager.toKonanTargets(konanExtension.targets)
@@ -198,12 +203,6 @@ internal fun MutableList<String>.addFileArgs(parameter: String, values: Collecti
     }
 }
 
-internal fun MutableList<String>.addListArg(parameter: String, values: List<String>) {
-    if (values.isNotEmpty()) {
-        addArg(parameter, values.joinToString(separator = " "))
-    }
-}
-
 // endregion
 
 internal fun dumpProperties(task: Task) {
@@ -230,10 +229,11 @@ internal fun dumpProperties(task: Task) {
             println("enableOptimization : $enableOptimizations")
             println("enableAssertions   : $enableAssertions")
             println("noDefaultLibs      : $noDefaultLibs")
+            println("noEndorsedLibs     : $noEndorsedLibs")
             println("target             : $target")
             println("languageVersion    : $languageVersion")
             println("apiVersion         : $apiVersion")
-            println("konanVersion       : ${KonanVersion.CURRENT}")
+            println("konanVersion       : ${CompilerVersion.CURRENT}")
             println("konanHome          : $konanHome")
             println()
         }
@@ -254,7 +254,7 @@ internal fun dumpProperties(task: Task) {
             println("linkerOpts         : $linkerOpts")
             println("headers            : ${headers.dump()}")
             println("linkFiles          : ${linkFiles.dump()}")
-            println("konanVersion       : ${KonanVersion.CURRENT}")
+            println("konanVersion       : ${CompilerVersion.CURRENT}")
             println("konanHome          : $konanHome")
             println()
         }
@@ -299,7 +299,6 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
         KONAN_CONFIGURATION_BUILD_DIR  ("konan.configuration.build.dir"),
         KONAN_DEBUGGING_SYMBOLS        ("konan.debugging.symbols"),
         KONAN_OPTIMIZATIONS_ENABLE     ("konan.optimizations.enable"),
-        KONAN_PUBLICATION_ENABLED      ("konan.publication.enabled")
     }
 
     companion object {
@@ -337,16 +336,16 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
         project.tasks.create(KONAN_DOWNLOAD_TASK_NAME, KonanCompilerDownloadTask::class.java)
         project.tasks.create(KONAN_GENERATE_CMAKE_TASK_NAME, KonanGenerateCMakeTask::class.java)
         project.extensions.create(KONAN_EXTENSION_NAME, KonanExtension::class.java)
-        val container = project.extensions.create(KonanArtifactContainer::class.java, ARTIFACTS_CONTAINER_NAME, KonanArtifactContainer::class.java, project)
-        val isPublicationEnabled = project.gradle.services.get(FeaturePreviews::class.java).isFeatureEnabled(FeaturePreviews.Feature.GRADLE_METADATA)
-        project.setProperty(ProjectProperty.KONAN_PUBLICATION_ENABLED, isPublicationEnabled)
-        if (!isPublicationEnabled) {
-            project.logger.warn("feature GRADLE_METADATA is not enabled: publication is disabled")
-        }
+        val container = project.extensions.create(
+                KonanArtifactContainer::class.java,
+                ARTIFACTS_CONTAINER_NAME,
+                KonanArtifactContainer::class.java,
+                project
+        )
 
         project.warnAboutDeprecatedProperty(ProjectProperty.KONAN_HOME)
 
-        // Set additional project properties like konan.home, konan.build.targets etc.
+        // Set additional project properties like org.jetbrains.kotlin.native.home, konan.build.targets etc.
         if (!project.hasProperty(ProjectProperty.KONAN_HOME)) {
             project.setProperty(ProjectProperty.KONAN_HOME, project.konanCompilerDownloadDir())
             project.setProperty(ProjectProperty.DOWNLOAD_COMPILER, true)
@@ -378,8 +377,6 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
         // Enable multiplatform support
         project.pluginManager.apply(KotlinNativePlatformPlugin::class.java)
         project.afterEvaluate {
-            if (!isPublicationEnabled)
-                return@afterEvaluate
             project.pluginManager.withPlugin("maven-publish") {
                 container.all { buildingConfig ->
                     val konanSoftwareComponent = buildingConfig.mainVariant

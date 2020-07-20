@@ -5,6 +5,8 @@
 
 package org.jetbrains.kotlin.backend.konan.objcexport
 
+import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
+
 sealed class ObjCType {
     final override fun toString(): String = this.render()
 
@@ -49,6 +51,15 @@ class ObjCClassType(
     }
 }
 
+class ObjCGenericTypeDeclaration(
+        val typeParameterDescriptor: TypeParameterDescriptor,
+        val namer: ObjCExportNamer
+) : ObjCNonNullReferenceType() {
+    override fun render(attrsAndName: String): String {
+        return namer.getTypeParameterName(typeParameterDescriptor).withAttrsAndName(attrsAndName)
+    }
+}
+
 class ObjCProtocolType(
         val protocolName: String
 ) : ObjCNonNullReferenceType() {
@@ -64,7 +75,7 @@ object ObjCInstanceType : ObjCNonNullReferenceType() {
 }
 
 class ObjCBlockPointerType(
-        val returnType: ObjCReferenceType,
+        val returnType: ObjCType,
         val parameterTypes: List<ObjCReferenceType>
 ) : ObjCNonNullReferenceType() {
 
@@ -78,9 +89,38 @@ class ObjCBlockPointerType(
     })
 }
 
-class ObjCPrimitiveType(
+object ObjCMetaClassType : ObjCNonNullReferenceType() {
+    override fun render(attrsAndName: String): String = "Class".withAttrsAndName(attrsAndName)
+}
+
+sealed class ObjCPrimitiveType(
         val cName: String
 ) : ObjCType() {
+    object NSUInteger : ObjCPrimitiveType("NSUInteger")
+    object BOOL : ObjCPrimitiveType("BOOL")
+    object unichar : ObjCPrimitiveType("unichar")
+    object int8_t : ObjCPrimitiveType("int8_t")
+    object int16_t : ObjCPrimitiveType("int16_t")
+    object int32_t : ObjCPrimitiveType("int32_t")
+    object int64_t : ObjCPrimitiveType("int64_t")
+    object uint8_t : ObjCPrimitiveType("uint8_t")
+    object uint16_t : ObjCPrimitiveType("uint16_t")
+    object uint32_t : ObjCPrimitiveType("uint32_t")
+    object uint64_t : ObjCPrimitiveType("uint64_t")
+    object float : ObjCPrimitiveType("float")
+    object double : ObjCPrimitiveType("double")
+    object NSInteger : ObjCPrimitiveType("NSInteger")
+    object char : ObjCPrimitiveType("char")
+    object unsigned_char: ObjCPrimitiveType("unsigned char")
+    object unsigned_short: ObjCPrimitiveType("unsigned short")
+    object int: ObjCPrimitiveType("int")
+    object unsigned_int: ObjCPrimitiveType("unsigned int")
+    object long: ObjCPrimitiveType("long")
+    object unsigned_long: ObjCPrimitiveType("unsigned long")
+    object long_long: ObjCPrimitiveType("long long")
+    object unsigned_long_long: ObjCPrimitiveType("unsigned long long")
+    object short: ObjCPrimitiveType("short")
+
     override fun render(attrsAndName: String) = cName.withAttrsAndName(attrsAndName)
 }
 
@@ -114,4 +154,17 @@ internal enum class ObjCValueType(val encoding: String) {
     FLOAT("f"),
     DOUBLE("d"),
     POINTER("^v")
+}
+
+internal fun ObjCType.makeNullableIfReferenceOrPointer(): ObjCType = when (this) {
+    is ObjCPointerType -> ObjCPointerType(this.pointee, nullable = true)
+
+    is ObjCNonNullReferenceType -> ObjCNullableReferenceType(this)
+
+    is ObjCNullableReferenceType, is ObjCRawType, is ObjCPrimitiveType, ObjCVoidType -> this
+}
+
+internal fun ObjCReferenceType.makeNullable(): ObjCNullableReferenceType = when (this) {
+    is ObjCNonNullReferenceType -> ObjCNullableReferenceType(this)
+    is ObjCNullableReferenceType -> this
 }

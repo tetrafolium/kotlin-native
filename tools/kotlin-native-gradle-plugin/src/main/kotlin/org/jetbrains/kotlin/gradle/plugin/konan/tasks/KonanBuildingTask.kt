@@ -18,6 +18,7 @@ package org.jetbrains.kotlin.gradle.plugin.tasks
 
 import org.gradle.api.tasks.Console
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.plugin.konan.*
 import org.jetbrains.kotlin.gradle.plugin.model.KonanModelArtifact
@@ -27,6 +28,7 @@ import java.io.File
 /** Base class for both interop and compiler tasks. */
 abstract class KonanBuildingTask: KonanArtifactWithLibrariesTask(), KonanBuildingSpec {
 
+    @get:Internal
     internal abstract val toolRunner: KonanToolRunner
     internal abstract fun toModelArtifact(): KonanModelArtifact
 
@@ -47,16 +49,8 @@ abstract class KonanBuildingTask: KonanArtifactWithLibrariesTask(), KonanBuildin
     val konanVersion
         @Input get() = project.konanVersion.toString(true, true)
 
-    protected abstract fun buildArgs(): List<String>
-
     @TaskAction
-    open fun run() {
-        destinationDir.mkdirs()
-        if (dumpParameters) {
-            dumpProperties(this)
-        }
-        toolRunner.run(buildArgs())
-    }
+    abstract fun run()
 
     // DSL.
 

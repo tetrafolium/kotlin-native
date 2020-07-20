@@ -75,6 +75,10 @@ fun PrimitiveType.getKotlinType(declarationMapper: DeclarationMapper): KotlinCla
         else -> TODO(this.toString())
     }
 
+    is VectorType -> {
+        /// @todo assert elementType and size here
+        KotlinTypes.vector128
+    }
     else -> throw NotImplementedError()
 }
 
@@ -307,7 +311,8 @@ sealed class TypeInfo {
                         type.returnType,
                         type.parameterTypes.mapIndexed { index, it ->
                             TypedKotlinValue(it, "p$index")
-                        } + TypedKotlinValue(PointerType(VoidType), "interpretCPointer<COpaque>($kniBlockPtr)")
+                        } + TypedKotlinValue(PointerType(VoidType), "interpretCPointer<COpaque>($kniBlockPtr)"),
+                        independent = true
 
                 ) { nativeValues ->
                     val type = type
@@ -315,7 +320,7 @@ sealed class TypeInfo {
                     val objCBlock = "((__bridge $blockType)${nativeValues.last()})"
                     "$objCBlock(${nativeValues.dropLast(1).joinToString()})"
                 }.let {
-                    codeBuilder.out("return $it")
+                    codeBuilder.returnResult(it)
                 }
 
                 codeBuilder.build().joinTo(this, separator = "\n")
@@ -341,7 +346,7 @@ sealed class TypeInfo {
                 error(pointed)
         override fun cToBridged(expr: String) = error(pointed)
 
-        // TODO: this method must not exist
+        // TODO: this method must not exist.
         override fun constructPointedType(valueType: KotlinType): KotlinClassifierType = error(pointed)
     }
 }
@@ -372,13 +377,16 @@ fun mirrorPrimitiveType(type: PrimitiveType, declarationMapper: DeclarationMappe
             8 -> "DoubleVar"
             else -> TODO(type.toString())
         }
+        is VectorType -> {
+            "Vector128Var"
+        }
         else -> TODO(type.toString())
     }
 
     val varClass = Classifier.topLevel("kotlinx.cinterop", varClassName)
     val varClassOf = Classifier.topLevel("kotlinx.cinterop", "${varClassName}Of")
 
-    val info = if (type == BoolType) {
+    val info = if (type is BoolType) {
         TypeInfo.Boolean()
     } else {
         TypeInfo.Primitive(type.getBridgedType(declarationMapper), varClassOf)
@@ -399,6 +407,7 @@ fun mirror(declarationMapper: DeclarationMapper, type: Type): TypeMirror = when 
     is EnumType -> {
         val pkg = declarationMapper.getPackageFor(type.def)
         val kotlinName = declarationMapper.getKotlinNameForValue(type.def)
+                .let { mangleSimple(it) } // enum class requires additional mangling
 
         when {
             declarationMapper.isMappedToStrict(type.def) -> {
@@ -410,9 +419,9 @@ fun mirror(declarationMapper: DeclarationMapper, type: Type): TypeMirror = when 
             !type.def.isAnonymous -> {
                 val baseTypeMirror = mirror(declarationMapper, type.def.baseType)
                 TypeMirror.ByValue(
-                        Classifier.topLevel(pkg, kotlinName + "Var").type,
+                        Classifier.topLevel(pkg, kotlinName + "Var").typeAbbreviation(baseTypeMirror.pointedType),
                         baseTypeMirror.info,
-                        Classifier.topLevel(pkg, kotlinName).type
+                        Classifier.topLevel(pkg, kotlinName).typeAbbreviation(baseTypeMirror.argType)
                 )
             }
             else -> mirror(declarationMapper, type.def.baseType)
@@ -461,14 +470,25 @@ fun mirror(declarationMapper: DeclarationMapper, type: Type): TypeMirror = when 
 
         val name = type.def.name
         when (baseType) {
-            is TypeMirror.ByValue -> TypeMirror.ByValue(
-                    Classifier.topLevel(pkg, "${name}Var").type,
-                    baseType.info,
-                    Classifier.topLevel(pkg, name).type,
-                    nullable = baseType.nullable
-            )
+            is TypeMirror.ByValue -> {
+                val valueType = Classifier.topLevel(pkg, name).typeAbbreviation(baseType.valueType)
+                val underlyingPointedType = if (baseType.info is TypeInfo.Pointer) {
+                    KotlinTypes.cPointerVarOf.typeWith(valueType)
+                } else {
+                    baseType.pointedType
+                }
+                val pointedType = Classifier.topLevel(pkg, "${name}Var").typeAbbreviation(underlyingPointedType)
+                TypeMirror.ByValue(
+                        pointedType,
+                        baseType.info,
+                        valueType,
+                        nullable = baseType.nullable)
+            }
 
-            is TypeMirror.ByRef -> TypeMirror.ByRef(Classifier.topLevel(pkg, name).type, baseType.info)
+            is TypeMirror.ByRef -> TypeMirror.ByRef(
+                    Classifier.topLevel(pkg, name).typeAbbreviation(baseType.pointedType),
+                    baseType.info
+            )
         }
 
     }

@@ -20,10 +20,6 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import spock.lang.Unroll
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-
 class IncrementalSpecification extends BaseKonanSpecification {
 
     Tuple buildTwice(KonanProject project, String task = 'build', Closure change) {
@@ -112,8 +108,9 @@ class IncrementalSpecification extends BaseKonanSpecification {
         "enableAssertions"    | "true"
         "enableDebug"         | "true"
         "artifactName"        | "'foo'"
-        "extraOpts"           | "'--time'"
+        "extraOpts"           | "'-Xtime'"
         "noDefaultLibs"       | "true"
+        "noEndorsedLibs"       | "true"
     }
 
     def 'Plugin should support a custom entry point and recompile an artifact if it changes'() {
@@ -212,8 +209,9 @@ class IncrementalSpecification extends BaseKonanSpecification {
         "linkerOpts"             | "'--help'"
         "includeDirs"            | "'src'"
         "includeDirs.allHeaders" | "'src'"
-        "extraOpts"              | "'-shims', 'false'"
+        "extraOpts"              | "'-verbose'"
         "noDefaultLibs"          | "true"
+        "noEndorsedLibs"          | "true"
     }
 
     def 'includeDirs.headerFilterOnly change should cause recompilation and interop reprocessing'() {

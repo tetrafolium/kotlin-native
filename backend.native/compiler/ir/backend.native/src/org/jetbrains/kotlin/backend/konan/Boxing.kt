@@ -6,23 +6,16 @@
 package org.jetbrains.kotlin.backend.konan
 
 import llvm.*
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedValueParameterDescriptor
 import org.jetbrains.kotlin.backend.konan.ir.KonanSymbols
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.fqNameSafe
 import org.jetbrains.kotlin.backend.konan.llvm.*
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.descriptors.annotations.Annotations
-import org.jetbrains.kotlin.descriptors.impl.SimpleFunctionDescriptorImpl
-import org.jetbrains.kotlin.descriptors.impl.ValueParameterDescriptorImpl
-import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.declarations.IrClass
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedValueParameterDescriptor
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
@@ -30,18 +23,9 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.types.KotlinType
 
 internal fun KonanSymbols.getTypeConversion(actualType: IrType, expectedType: IrType): IrSimpleFunctionSymbol? =
-        getTypeConversionImpl(actualType.getInlinedClass(), expectedType.getInlinedClass())
-
-internal fun KonanSymbols.getTypeConversion(actualType: KotlinType, expectedType: KotlinType): IrSimpleFunctionSymbol? {
-    // TODO: rework all usages and remove this method.
-    val actualInlinedClass = actualType.getInlinedClass()?.let { context.ir.get(it) }
-    val expectedInlinedClass = expectedType.getInlinedClass()?.let { context.ir.get(it) }
-
-    return getTypeConversionImpl(actualInlinedClass, expectedInlinedClass)
-}
+        getTypeConversionImpl(actualType.getInlinedClassNative(), expectedType.getInlinedClassNative())
 
 private fun KonanSymbols.getTypeConversionImpl(
         actualInlinedClass: IrClass?,
@@ -53,12 +37,15 @@ private fun KonanSymbols.getTypeConversionImpl(
         actualInlinedClass == null && expectedInlinedClass == null -> null
         actualInlinedClass != null && expectedInlinedClass == null -> context.getBoxFunction(actualInlinedClass)
         actualInlinedClass == null && expectedInlinedClass != null -> context.getUnboxFunction(expectedInlinedClass)
-        else -> error("actual type is ${actualInlinedClass?.fqNameSafe}, expected ${expectedInlinedClass?.fqNameSafe}")
+        else -> error("actual type is ${actualInlinedClass?.fqNameForIrSerialization}, expected ${expectedInlinedClass?.fqNameForIrSerialization}")
     }?.symbol
 }
 
+internal object DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION : IrDeclarationOriginImpl("INLINE_CLASS_SPECIAL_FUNCTION")
+
 internal val Context.getBoxFunction: (IrClass) -> IrSimpleFunction by Context.lazyMapMember { inlinedClass ->
     assert(inlinedClass.isUsedAsBoxClass())
+    assert(inlinedClass.parent is IrFile) { "Expected top level inline class" }
 
     val symbols = ir.symbols
 
@@ -75,18 +62,21 @@ internal val Context.getBoxFunction: (IrClass) -> IrSimpleFunction by Context.la
     val descriptor = WrappedSimpleFunctionDescriptor()
     IrFunctionImpl(
             startOffset, endOffset,
-            IrDeclarationOrigin.DEFINED,
+            DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
             IrSimpleFunctionSymbolImpl(descriptor),
-            Name.special("<box>"),
+            Name.special("<${inlinedClass.name}-box>"),
             Visibilities.PUBLIC,
             Modality.FINAL,
             returnType,
             isInline = false,
             isExternal = false,
             isTailrec = false,
-            isSuspend = false
+            isSuspend = false,
+            isExpect = false,
+            isFakeOverride = false,
+            isOperator = false
     ).also { function ->
-        function.valueParameters.add(WrappedValueParameterDescriptor().let {
+        function.valueParameters = listOf(WrappedValueParameterDescriptor().let {
             IrValueParameterImpl(
                     startOffset, endOffset,
                     IrDeclarationOrigin.DEFINED,
@@ -103,12 +93,13 @@ internal val Context.getBoxFunction: (IrClass) -> IrSimpleFunction by Context.la
             }
         })
         descriptor.bind(function)
-        function.parent = inlinedClass
+        function.parent = inlinedClass.getContainingFile()!!
     }
 }
 
 internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.lazyMapMember { inlinedClass ->
     assert(inlinedClass.isUsedAsBoxClass())
+    assert(inlinedClass.parent is IrFile) { "Expected top level inline class" }
 
     val symbols = ir.symbols
 
@@ -125,18 +116,21 @@ internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.
     val descriptor = WrappedSimpleFunctionDescriptor()
     IrFunctionImpl(
             startOffset, endOffset,
-            IrDeclarationOrigin.DEFINED,
+            DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION,
             IrSimpleFunctionSymbolImpl(descriptor),
-            Name.special("<unbox>"),
+            Name.special("<${inlinedClass.name}-unbox>"),
             Visibilities.PUBLIC,
             Modality.FINAL,
             returnType,
             isInline = false,
             isExternal = false,
             isTailrec = false,
-            isSuspend = false
+            isSuspend = false,
+            isExpect = false,
+            isFakeOverride = false,
+            isOperator = false
     ).also { function ->
-        function.valueParameters.add(WrappedValueParameterDescriptor().let {
+        function.valueParameters = listOf(WrappedValueParameterDescriptor().let {
             IrValueParameterImpl(
                     startOffset, endOffset,
                     IrDeclarationOrigin.DEFINED,
@@ -153,7 +147,7 @@ internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.
             }
         })
         descriptor.bind(function)
-        function.parent = inlinedClass
+        function.parent = inlinedClass.getContainingFile()!!
     }
 }
 
@@ -162,7 +156,7 @@ internal val Context.getUnboxFunction: (IrClass) -> IrSimpleFunction by Context.
  * If output target is native binary then the cache is created.
  */
 internal fun initializeCachedBoxes(context: Context) {
-    if (context.config.produce.isNativeBinary) {
+    if (context.producedLlvmModuleContainsStdlib) {
         BoxCache.values().forEach { cache ->
             val cacheName = "${cache.name}_CACHE"
             val rangeStart = "${cache.name}_RANGE_FROM"

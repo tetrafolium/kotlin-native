@@ -15,7 +15,12 @@ package kotlin.native.internal
  *
  * This annotation is not intended for the general consumption and is public only for the launcher!
  */
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CONSTRUCTOR)
+@Target(
+        AnnotationTarget.FUNCTION,
+        AnnotationTarget.CONSTRUCTOR,
+        AnnotationTarget.PROPERTY_GETTER,
+        AnnotationTarget.PROPERTY_SETTER
+)
 @Retention(AnnotationRetention.BINARY)
 public annotation class ExportForCppRuntime(val name: String = "")
 
@@ -34,13 +39,6 @@ internal annotation class Intrinsic
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 public annotation class ExportForCompiler
-
-/**
- * Annotated constructor will be inlined.
- */
-@Target(AnnotationTarget.CONSTRUCTOR)
-@Retention(AnnotationRetention.BINARY)
-internal annotation class InlineConstructor
 
 /**
  * Class is frozen by default. Also this annotation is (ab)used for marking objects
@@ -100,3 +98,36 @@ internal annotation class PointsTo(vararg val onWhom: Int)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 internal annotation class TypedIntrinsic(val kind: String)
+
+/**
+ * Indicates that `@SymbolName external` function is implemented in library-stored bitcode
+ * and doesn't have native dependencies.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+annotation class Independent
+
+/**
+ * Indicates that `@SymbolName external` function can throw foreign exception to be filtered on callsite.
+ *
+ * Note: this annotation describes rather behaviour of the (direct) call than that of the function.
+ * E.g. it doesn't have any effect when calling the function virtually. TODO: rework.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+@PublishedApi internal annotation class FilterExceptions
+
+/**
+ * Marks a class whose instances to be added to the list of leak detector candidates.
+ */
+@Target(AnnotationTarget.CLASS)
+@PublishedApi internal annotation class LeakDetectorCandidate
+
+/**
+ * Indicates that given top level signleton object can be created in compile time and thus
+ * members access doesn't need to use an init barrier and allow better optimizations for
+ * field access, such as constant folding.
+ */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.SOURCE)
+public annotation class CanBePrecreated

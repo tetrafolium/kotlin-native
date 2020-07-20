@@ -33,6 +33,12 @@ public interface MutableSet<E> : Set<E>, MutableCollection<E> {
     override fun iterator(): MutableIterator<E>
 
     // Modification Operations
+
+    /**
+     * Adds the specified element to the set.
+     *
+     * @return `true` if the element has been added, `false` if the element is already contained in the set.
+     */
     override fun add(element: E): Boolean
 
     override fun remove(element: E): Boolean
@@ -44,9 +50,3 @@ public interface MutableSet<E> : Set<E>, MutableCollection<E> {
     override fun retainAll(elements: Collection<E>): Boolean
     override fun clear(): Unit
 }
-
-// TODO: Add SingletonSet class
-/**
- * Returns an immutable set containing only the specified object [element].
- */
-public fun <T> setOf(element: T): Set<T> = hashSetOf(element)

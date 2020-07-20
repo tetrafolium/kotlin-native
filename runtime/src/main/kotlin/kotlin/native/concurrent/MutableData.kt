@@ -14,10 +14,14 @@ external private fun Any.share()
 @SymbolName("Kotlin_CPointer_CopyMemory")
 external private fun CopyMemory(to: COpaquePointer?, from: COpaquePointer?, count: Int)
 
+@SymbolName("ReadHeapRefNoLock")
+internal external fun readHeapRefNoLock(where: Any, index: Int): Any?
+
 /**
  * Mutable concurrently accessible data buffer. Could be accessed from several workers simulteniously.
  */
 @Frozen
+@NoReorderFields
 public class MutableData constructor(capacity: Int = 16) {
     init {
         if (capacity <= 0) throw IllegalArgumentException()
@@ -25,7 +29,10 @@ public class MutableData constructor(capacity: Int = 16) {
         share()
     }
 
-    private var buffer = ByteArray(capacity).apply { share() }
+    private var buffer_ = ByteArray(capacity).apply { share() }
+    private var buffer: ByteArray
+        get() = readHeapRefNoLock(this, 0) as ByteArray
+        set(value) { buffer_ = value}
     private var size_ = 0
     private val lock = Lock()
 
@@ -34,7 +41,7 @@ public class MutableData constructor(capacity: Int = 16) {
         if (newSize > buffer.size) {
             val actualSize = maxOf(buffer.size * 3 / 2 + 1, newSize)
             val newBuffer = ByteArray(actualSize)
-            buffer.copyRangeTo(newBuffer, 0, size, 0)
+            buffer.copyInto(newBuffer, startIndex = 0, endIndex = size)
             newBuffer.share()
             buffer = newBuffer
         }
@@ -73,7 +80,7 @@ public class MutableData constructor(capacity: Int = 16) {
             throw IndexOutOfBoundsException("$fromIndex is bigger than $toIndex")
         if (toIndex == toIndex) return
         val where = resizeDataLocked(this.size + (toIndex - fromIndex))
-        data.copyRangeTo(buffer, fromIndex, toIndex, where)
+        data.copyInto(buffer, where, fromIndex, toIndex)
     }
 
     /**
@@ -91,7 +98,7 @@ public class MutableData constructor(capacity: Int = 16) {
      * Copies range of mutable data to the byte array.
      */
     public fun copyInto(output: ByteArray, destinationIndex: Int, startIndex: Int, endIndex: Int): Unit = locked(lock) {
-        buffer.copyRangeTo(output, startIndex, endIndex, destinationIndex)
+        buffer.copyInto(output, destinationIndex, startIndex, endIndex)
     }
 
     /**

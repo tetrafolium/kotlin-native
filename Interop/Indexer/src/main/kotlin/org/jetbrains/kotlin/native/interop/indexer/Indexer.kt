@@ -276,7 +276,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                     val name = clang_getCursorSpelling(childCursor).convertAndDispose()
                     val value = clang_getEnumConstantDeclValue(childCursor)
 
-                    val constant = EnumConstant(name, value, isExplicitlyDefined = !childCursor.isLeaf())
+                    val constant = EnumConstant(name, value, isExplicitlyDefined = childCursor.hasExpressionChild())
                     enumDef.constants.add(constant)
                 }
 
@@ -430,7 +430,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         if (library.language == Language.OBJECTIVE_C) {
             if (name == "BOOL" || name == "Boolean") {
                 assert(clang_Type_getSizeOf(type) == 1L)
-                return BoolType
+                return ObjCBoolType
             }
 
             if (underlying is ObjCPointer && (name == "Class" || name == "id") ||
@@ -469,6 +469,78 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         Language.OBJECTIVE_C -> supplier()
     }
 
+    // We omit `const` qualifier for IntegerType and FloatingType to make `CBridgeGen` simpler.
+    // See KT-28102.
+    private fun String.dropConstQualifier() =
+            substringAfterLast("const ")
+
+    private fun convertUnqualifiedPrimitiveType(type: CValue<CXType>): Type = when (type.kind) {
+        CXTypeKind.CXType_Char_U, CXTypeKind.CXType_Char_S -> {
+            assert(type.getSize() == 1L)
+            CharType
+        }
+
+        CXTypeKind.CXType_UChar, CXTypeKind.CXType_UShort,
+        CXTypeKind.CXType_UInt, CXTypeKind.CXType_ULong, CXTypeKind.CXType_ULongLong -> IntegerType(
+                size = type.getSize().toInt(),
+                isSigned = false,
+                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+        )
+
+        CXTypeKind.CXType_SChar, CXTypeKind.CXType_Short,
+        CXTypeKind.CXType_Int, CXTypeKind.CXType_Long, CXTypeKind.CXType_LongLong -> IntegerType(
+                size = type.getSize().toInt(),
+                isSigned = true,
+                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+        )
+
+        CXTypeKind.CXType_Float, CXTypeKind.CXType_Double -> FloatingType(
+                size = type.getSize().toInt(),
+                spelling = clang_getTypeSpelling(type).convertAndDispose().dropConstQualifier()
+        )
+
+        CXType_Unexposed -> {
+            // FIXME  Remove this cludge for libclang version >= 9 (CINDEX_VERSION > 55)
+            if (clang_isExtVectorType(type) != 0) {
+                val size = clang_Type_getSizeOf(type)
+                if (size == 16L) {
+                    //  ExtVector elementType and elementCount are ignored for now but stubs are still needed for
+                    //  CXType_Vector compatibility. Incoming clang v9 provide CXType_ExtVector compatible with CXType_Vector
+                    val spelling = "__attribute__((__vector_size__($size))) float"
+                    VectorType(FloatingType(4, "float"), 4, spelling)
+                } else {
+                    UnsupportedType
+                }
+            } else {
+                UnsupportedType
+            }
+        }
+
+        CXType_Vector -> {
+            val elementCXType = clang_getElementType(type)
+            val elementType = convertType(elementCXType)
+            val size = clang_Type_getSizeOf(type)
+            val elemSize = clang_Type_getSizeOf(elementCXType)
+            val elementCount = clang_getNumElements(type)
+            assert(size >= elemSize * elementCount && size % elemSize == 0L)
+
+            // Spelling example: `__attribute__((__vector_size__(4 * sizeof(float)))) const float`
+            // Re-generate spelling removing constness and typedefs to limit number of variants for bridge generator
+            // Supposed to be the same (i.e. natively compatible) as clang_getTypeSpelling(type) aka type.name
+            val spelling = "__attribute__((__vector_size__($size))) ${clang_getCanonicalType(elementCXType).name}"
+
+            if (size == 16L) {
+                VectorType(elementType, elementCount.toInt(), spelling)
+            } else {
+                UnsupportedType
+            }
+        }
+
+        CXTypeKind.CXType_Bool -> CBoolType
+
+        else -> UnsupportedType
+    }
+
     fun convertType(type: CValue<CXType>, typeAttributes: CValue<CXTypeAttributes>? = null): Type {
         val primitiveType = convertUnqualifiedPrimitiveType(type)
         if (primitiveType != UnsupportedType) {
@@ -476,6 +548,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
 
         val kind = type.kind
+
         return when (kind) {
             CXType_Elaborated -> convertType(clang_Type_getNamedType(type))
 
@@ -522,14 +595,19 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             }
 
             CXType_ConstantArray -> {
-                val elemType = convertType(clang_getArrayElementType(type))
+                val elementType = convertType(clang_getArrayElementType(type))
                 val length = clang_getArraySize(type)
-                ConstArrayType(elemType, length)
+                ConstArrayType(elementType, length)
             }
 
             CXType_IncompleteArray -> {
-                val elemType = convertType(clang_getArrayElementType(type))
-                IncompleteArrayType(elemType)
+                val elementType = convertType(clang_getArrayElementType(type))
+                IncompleteArrayType(elementType)
+            }
+
+            CXType_VariableArray -> {
+                val elementType = convertType(clang_getArrayElementType(type))
+                VariableArrayType(elementType)
             }
 
             CXType_FunctionProto -> {
@@ -610,7 +688,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
 
     private fun convertFunctionType(type: CValue<CXType>): Type {
         val kind = type.kind
-        assert(kind == CXType_Unexposed || kind == CXType_FunctionProto)
+        assert(kind == CXType_Unexposed || kind == CXType_FunctionProto || kind == CXType_FunctionNoProto) { kind }
 
         if (clang_isFunctionTypeVariadic(type) != 0) {
             return VoidType // make this function pointer opaque.
@@ -860,9 +938,10 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
 
         return ObjCMethod(
                 selector, encoding, parameters, returnType,
+                isVariadic = clang_Cursor_isVariadic(cursor) != 0,
                 isClass = isClass,
-                nsConsumesSelf = hasAttribute(cursor, NS_CONSUMES_SELF),
-                nsReturnsRetained = hasAttribute(cursor, NS_RETURNS_RETAINED),
+                nsConsumesSelf = clang_Cursor_isObjCConsumingSelfMethod(cursor) != 0,
+                nsReturnsRetained = clang_Cursor_isObjCReturningRetainedMethod(cursor) != 0,
                 isOptional = (clang_Cursor_isObjCOptional(cursor) != 0),
                 isInit = (clang_Cursor_isObjCInitMethod(cursor) != 0),
                 isExplicitlyDesignatedInitializer = hasAttribute(cursor, OBJC_DESGINATED_INITIALIZER)
@@ -891,8 +970,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private val NS_CONSUMED = "ns_consumed"
-    private val NS_CONSUMES_SELF = "ns_consumes_self"
-    private val NS_RETURNS_RETAINED = "ns_returns_retained"
     private val OBJC_DESGINATED_INITIALIZER = "objc_designated_initializer"
 
     private fun hasAttribute(cursor: CValue<CXCursor>, name: String): Boolean {
@@ -910,17 +987,22 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
 
 }
 
-fun buildNativeIndexImpl(library: NativeLibrary, verbose: Boolean): NativeIndex {
+fun buildNativeIndexImpl(library: NativeLibrary, verbose: Boolean): IndexerResult {
     val result = NativeIndexImpl(library, verbose)
-    indexDeclarations(result)
-    return result
+    val compilation = indexDeclarations(result)
+    return IndexerResult(result, compilation)
 }
 
-private fun indexDeclarations(nativeIndex: NativeIndexImpl) {
+private fun indexDeclarations(nativeIndex: NativeIndexImpl): CompilationWithPCH {
     withIndex { index ->
-        val translationUnit = nativeIndex.library.parse(index, options = CXTranslationUnit_DetailedPreprocessingRecord)
+        val translationUnit = nativeIndex.library.copyWithArgsForPCH().parse(
+                index,
+                options = CXTranslationUnit_DetailedPreprocessingRecord or CXTranslationUnit_ForSerialization
+        )
         try {
             translationUnit.ensureNoCompileErrors()
+
+            val compilation = nativeIndex.library.withPrecompiledHeader(translationUnit)
 
             val headers = getFilteredHeaders(nativeIndex, index, translationUnit)
 
@@ -954,7 +1036,9 @@ private fun indexDeclarations(nativeIndex: NativeIndexImpl) {
                 CXChildVisitResult.CXChildVisit_Continue
             }
 
-            findMacros(nativeIndex, translationUnit, headers)
+            findMacros(nativeIndex, compilation, translationUnit, headers)
+
+            return compilation
         } finally {
             clang_disposeTranslationUnit(translationUnit)
         }

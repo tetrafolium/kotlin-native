@@ -7,7 +7,7 @@ package kotlin.native.ref
 
 /**
  * Class WeakReference encapsulates weak reference to an object, which could be used to either
- * retrieve a strong reference to an object, or return null, if object was already destoyed by
+ * retrieve a strong reference to an object, or return null, if object was already destroyed by
  * the memory manager.
  */
 public class WeakReference<T : Any> {
@@ -35,6 +35,13 @@ public class WeakReference<T : Any> {
     /**
      * Returns either reference to an object or null, if it was collected.
      */
+    @Suppress("UNCHECKED_CAST")
     public fun get(): T? = pointer?.get() as T?
+
+    /**
+     * Returns either reference to an object or null, if it was collected.
+     */
+    public val value: T?
+        get() = this.get()
 }
 

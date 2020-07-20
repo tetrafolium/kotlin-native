@@ -9,7 +9,7 @@ package kotlin.reflect
  * Represents a type. Type is usually either a class with optional type arguments,
  * or a type parameter of some declaration, plus nullability.
  */
-public interface KType {
+public actual interface KType {
     /**
      * The declaration of the classifier used in this type.
      * For example, in the type `List<String>` the classifier would be the [KClass] instance for [List].
@@ -17,7 +17,18 @@ public interface KType {
      * Returns `null` if this type is not denotable in Kotlin, for example if it is an intersection type.
      */
     @SinceKotlin("1.1")
-    public val classifier: KClassifier?
+    public actual val classifier: KClassifier?
+
+    /**
+     * Type arguments passed for the parameters of the classifier in this type.
+     * For example, in the type `Array<out Number>` the only type argument is `out Number`.
+     *
+     * In case this type is based on an inner class, the returned list contains the type arguments provided for the innermost class first,
+     * then its outer class, and so on.
+     * For example, in the type `Outer<A, B>.Inner<C, D>` the returned list is `[C, D, A, B]`.
+     */
+    @SinceKotlin("1.1")
+    public actual val arguments: List<KTypeProjection>
 
     /**
      * `true` if this type was marked nullable in the source code.
@@ -36,5 +47,5 @@ public interface KType {
      * }
      * ```
      */
-    public val isMarkedNullable: Boolean
+    public actual val isMarkedNullable: Boolean
 }

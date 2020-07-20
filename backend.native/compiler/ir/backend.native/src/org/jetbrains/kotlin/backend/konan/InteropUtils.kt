@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
 import org.jetbrains.kotlin.types.TypeUtils
-import org.jetbrains.kotlin.util.OperatorNameConventions
 
 object InteropFqNames {
 
@@ -27,7 +26,7 @@ object InteropFqNames {
     val nativePointed = packageName.child(Name.identifier(nativePointedName)).toUnsafe()
 }
 
-internal class InteropBuiltIns(builtIns: KonanBuiltIns, vararg konanPrimitives: ClassDescriptor) {
+internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
 
     val packageScope = builtIns.builtInsModule.getPackage(InteropFqNames.packageName).memberScope
 
@@ -36,10 +35,20 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns, vararg konanPrimitives: 
     val cValuesRef = this.packageScope.getContributedClass("CValuesRef")
     val cValues = this.packageScope.getContributedClass("CValues")
     val cValue = this.packageScope.getContributedClass("CValue")
+    val cOpaque = this.packageScope.getContributedClass("COpaque")
     val cValueWrite = this.packageScope.getContributedFunctions("write")
             .single { it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == cValue }
     val cValueRead = this.packageScope.getContributedFunctions("readValue")
             .single { it.valueParameters.size == 1 }
+
+    val cEnum = this.packageScope.getContributedClass("CEnum")
+    val cEnumVar = this.packageScope.getContributedClass("CEnumVar")
+    val cStructVar = this.packageScope.getContributedClass("CStructVar")
+    val cStructVarType = cStructVar.defaultType.memberScope.getContributedClass("Type")
+    val cPrimitiveVar = this.packageScope.getContributedClass("CPrimitiveVar")
+    val cPrimitiveVarType = cPrimitiveVar.defaultType.memberScope.getContributedClass("Type")
+
+    val nativeMemUtils = this.packageScope.getContributedClass("nativeMemUtils")
 
     val allocType = this.packageScope.getContributedFunctions("alloc")
             .single { it.extensionReceiverParameter != null
@@ -70,10 +79,6 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns, vararg konanPrimitives: 
 
     val typeOf = packageScope.getContributedFunctions("typeOf").single()
 
-    val concurrentPackageScope = builtIns.builtInsModule.getPackage(FqName("kotlin.native.concurrent")).memberScope
-
-    val executeImplFunction = concurrentPackageScope.getContributedFunctions("executeImpl").single()
-
     private fun KonanBuiltIns.getUnsignedClass(unsignedType: UnsignedType): ClassDescriptor =
             this.builtInsModule.findClassAcrossModuleDependencies(unsignedType.classId)!!
 
@@ -89,6 +94,8 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns, vararg konanPrimitives: 
 
     val interpretObjCPointerOrNull = packageScope.getContributedFunctions("interpretObjCPointerOrNull").single()
     val interpretObjCPointer = packageScope.getContributedFunctions("interpretObjCPointer").single()
+    val interpretNullablePointed = packageScope.getContributedFunctions("interpretNullablePointed").single()
+    val interpretCPointer = packageScope.getContributedFunctions("interpretCPointer").single()
 
     val objCObjectSuperInitCheck = packageScope.getContributedFunctions("superInitCheck").single()
     val objCObjectInitBy = packageScope.getContributedFunctions("initBy").single()

@@ -63,9 +63,10 @@ private fun tryRenderUnion(def: StructDef): String? =
         }
 
 private fun tryRenderVar(type: Type, name: String): String? = when (type) {
-    CharType, BoolType -> "char $name"
+    CharType, is BoolType -> "char $name"
     is IntegerType -> "${type.spelling} $name"
     is FloatingType -> "${type.spelling} $name"
+    is VectorType -> "${type.spelling} $name"
     is RecordType -> "${tryRenderStructOrUnion(type.decl.def!!)} $name"
     is EnumType -> tryRenderVar(type.def.baseType, name)
     is PointerType -> "void* $name"

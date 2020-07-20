@@ -24,69 +24,92 @@ import org.jetbrains.kotlin.konan.properties.propertyList
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.util.defaultTargetSubstitutions
 import org.jetbrains.kotlin.konan.util.substitute
+import org.jetbrains.kotlin.library.*
+import org.jetbrains.kotlin.library.impl.*
 
-class KonanLibraryImpl(
-        override val libraryFile: File,
-        internal val target: KonanTarget?,
-        override val isDefault: Boolean,
-        private val metadataReader: MetadataReader
-) : KonanLibrary {
+open class TargetedLibraryImpl(
+    private val access: TargetedLibraryAccess<TargetedKotlinLibraryLayout>,
+    private val base: BaseKotlinLibrary
+) : TargetedLibrary, BaseKotlinLibrary by base {
 
-    // For the zipped libraries inPlace gives files from zip file system
-    // whereas realFiles extracts them to /tmp.
-    // For unzipped libraries inPlace and realFiles are the same
-    // providing files in the library directory.
+    private val target: KonanTarget? get() = access.target
 
-    private val layout = createKonanLibraryLayout(libraryFile, target)
-
-    override val libraryName: String by lazy { layout.inPlace { it.libraryName } }
+    override val targetList: List<String>
+        get() = nativeTargets.ifEmpty {
+            // TODO: We have a choice: either assume it is the CURRENT TARGET
+            //  or a list of ALL KNOWN targets.
+            listOfNotNull(access.target?.visibleName)
+        }
 
     override val manifestProperties: Properties by lazy {
-        val properties = layout.inPlace { it.manifestFile.loadProperties() }
-        if (target != null) substitute(properties, defaultTargetSubstitutions(target))
+        val properties = access.inPlace {
+            it.manifestFile.loadProperties()
+        }
+        target?.let { substitute(properties, defaultTargetSubstitutions(it)) }
         properties
     }
 
-    override val versions: KonanLibraryVersioning
-        get() = manifestProperties.readKonanLibraryVersioning()
+    override val includedPaths: List<String>
+        get() = access.realFiles {
+            it.includedDir.listFilesOrEmpty.map { it.absolutePath }
+        }
+}
+
+open class BitcodeLibraryImpl(
+    private val access: BitcodeLibraryAccess<BitcodeKotlinLibraryLayout>,
+    targeted: TargetedLibrary
+) : BitcodeLibrary, TargetedLibrary by targeted {
+    override val bitcodePaths: List<String>
+        get() = access.realFiles { it: BitcodeKotlinLibraryLayout ->
+            (it.kotlinDir.listFilesOrEmpty + it.nativeDir.listFilesOrEmpty).map { it.absolutePath }
+        }
+}
+
+class KonanLibraryImpl(
+    targeted: TargetedLibraryImpl,
+    metadata: MetadataLibraryImpl,
+    ir: IrLibraryImpl,
+    bitcode: BitcodeLibraryImpl
+) : KonanLibrary,
+    BaseKotlinLibrary by targeted,
+    MetadataLibrary by metadata,
+    IrLibrary by ir,
+    BitcodeLibrary by bitcode {
 
     override val linkerOpts: List<String>
-        get() = manifestProperties.propertyList(KLIB_PROPERTY_LINKED_OPTS)
+        get() = manifestProperties.propertyList(KLIB_PROPERTY_LINKED_OPTS, escapeInQuotes = true)
+}
 
-    override val bitcodePaths: List<String>
-        get() = layout.realFiles { (it.kotlinDir.listFilesOrEmpty + it.nativeDir.listFilesOrEmpty).map { it.absolutePath } }
 
-    override val includedPaths: List<String>
-        get() = layout.realFiles { it.includedDir.listFilesOrEmpty.map { it.absolutePath } }
+fun createKonanLibrary(
+    libraryFile: File,
+    component: String,
+    target: KonanTarget? = null,
+    isDefault: Boolean = false
+): KonanLibrary {
+    val baseAccess = BaseLibraryAccess<KotlinLibraryLayout>(libraryFile, component)
+    val targetedAccess = TargetedLibraryAccess<TargetedKotlinLibraryLayout>(libraryFile, component, target)
+    val metadataAccess = MetadataLibraryAccess<MetadataKotlinLibraryLayout>(libraryFile, component)
+    val irAccess = IrLibraryAccess<IrKotlinLibraryLayout>(libraryFile, component)
+    val bitcodeAccess = BitcodeLibraryAccess<BitcodeKotlinLibraryLayout>(libraryFile, component, target)
 
-    override val targetList by lazy { layout.inPlace { it.targetsDir.listFiles.map { it.name } } }
+    val base = BaseKotlinLibraryImpl(baseAccess, isDefault)
+    val targeted = TargetedLibraryImpl(targetedAccess, base)
+    val metadata = MetadataLibraryImpl(metadataAccess)
+    val ir = IrMonoliticLibraryImpl(irAccess)
+    val bitcode = BitcodeLibraryImpl(bitcodeAccess, targeted)
 
-    override val dataFlowGraph by lazy { layout.inPlace { it.dataFlowGraphFile.let { if (it.exists) it.readBytes() else null } } }
+    return KonanLibraryImpl(targeted, metadata, ir, bitcode)
+}
 
-    override val moduleHeaderData: ByteArray by lazy { layout.inPlace { metadataReader.loadSerializedModule(it) } }
-
-    override fun packageMetadata(packageFqName: String, partName: String) =
-            layout.inPlace { metadataReader.loadSerializedPackageFragment(it, packageFqName, partName) }
-
-    override fun packageMetadataParts(fqName: String): Set<String> =
-            layout.inPlace { inPlaceLayout ->
-                val fileList =
-                        inPlaceLayout.packageFragmentsDir(fqName)
-                                .listFiles
-                                .mapNotNull {
-                                    it.name
-                                            .substringBeforeLast(KLIB_METADATA_FILE_EXTENSION_WITH_DOT, missingDelimiterValue = "")
-                                            .takeIf { it.isNotEmpty() }
-                                }
-
-                fileList.toSortedSet().also {
-                    require(it.size == fileList.size) { "Duplicated names: ${fileList.groupingBy { it }.eachCount().filter { (_, count) -> count > 1 }}" }
-                }
-            }
-
-    override val irHeader: ByteArray? by lazy { layout.inPlace { library -> library.irHeader.let { if (it.exists) metadataReader.loadIrHeader(library) else null }}}
-
-    override fun irDeclaration(index: Long, isLocal: Boolean) = layout.inPlace { metadataReader.loadIrDeclaraton(it, index, isLocal) }
-
-    override fun toString() = "$libraryName[default=$isDefault]"
+fun createKonanLibraryComponents(
+    libraryFile: File,
+    target: KonanTarget? = null,
+    isDefault: Boolean = true
+) : List<KonanLibrary> {
+    val baseAccess = BaseLibraryAccess<KotlinLibraryLayout>(libraryFile, null)
+    val base = BaseKotlinLibraryImpl(baseAccess, isDefault)
+    return base.componentList.map {
+        createKonanLibrary(libraryFile, it, target, isDefault)
+    }
 }

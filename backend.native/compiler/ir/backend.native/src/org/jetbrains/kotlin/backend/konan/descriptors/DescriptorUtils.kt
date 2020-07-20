@@ -5,13 +5,26 @@
 
 package org.jetbrains.kotlin.backend.konan.descriptors
 
-import org.jetbrains.kotlin.backend.common.ir.ir2stringWhole
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.*
-import org.jetbrains.kotlin.backend.konan.isInlined
-import org.jetbrains.kotlin.descriptors.*
+import org.jetbrains.kotlin.backend.common.atMostOne
+import org.jetbrains.kotlin.backend.konan.*
+import org.jetbrains.kotlin.backend.konan.ir.*
+import org.jetbrains.kotlin.backend.konan.llvm.longName
+import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor
 import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
+import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.symbols.IrClassifierSymbol
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.types.isUnit
-import org.jetbrains.kotlin.types.SimpleType
+import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.resolve.annotations.argumentValue
+import org.jetbrains.kotlin.resolve.constants.StringValue
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
+import org.jetbrains.kotlin.utils.addToStdlib.cast
+import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 /**
  * List of all implemented interfaces (including those which implemented by a super class)
@@ -26,56 +39,8 @@ internal val IrClass.implementedInterfaces: List<IrClass>
                 superInterfaces).distinct()
     }
 
-
-/**
- * Implementation of given method.
- *
- * TODO: this method is actually a part of resolve and probably duplicates another one
- */
-internal fun IrSimpleFunction.resolveFakeOverride(allowAbstract: Boolean = false): IrSimpleFunction {
-    if (this.isReal) {
-        return this
-    }
-
-    val visited = mutableSetOf<IrSimpleFunction>()
-    val realSupers = mutableSetOf<IrSimpleFunction>()
-
-    fun findRealSupers(function: IrSimpleFunction) {
-        if (function in visited) return
-        visited += function
-        if (function.isReal) {
-            realSupers += function
-        } else {
-            function.overriddenSymbols.forEach { findRealSupers(it.owner) }
-        }
-    }
-
-    findRealSupers(this)
-
-    if (realSupers.size > 1) {
-        visited.clear()
-
-        fun excludeOverridden(function: IrSimpleFunction) {
-            if (function in visited) return
-            visited += function
-            function.overriddenSymbols.forEach {
-                realSupers.remove(it.owner)
-                excludeOverridden(it.owner)
-            }
-        }
-
-        realSupers.toList().forEach { excludeOverridden(it) }
-    }
-
-    return realSupers.first { allowAbstract || it.modality != Modality.ABSTRACT }
-}
-
-// TODO: don't forget to remove descriptor access here.
 internal val IrFunction.isTypedIntrinsic: Boolean
-    get() = this.descriptor.isTypedIntrinsic
-
-internal val IrDeclaration.isFrozen: Boolean
-    get() = this.descriptor.isFrozen
+    get() = annotations.hasAnnotation(KonanFqNames.typedIntrinsic)
 
 internal val arrayTypes = setOf(
         "kotlin.Array",
@@ -91,32 +56,40 @@ internal val arrayTypes = setOf(
         "kotlin.native.internal.NativePtrArray"
 )
 
+internal val arraysWithFixedSizeItems = setOf(
+        "kotlin.ByteArray",
+        "kotlin.CharArray",
+        "kotlin.ShortArray",
+        "kotlin.IntArray",
+        "kotlin.LongArray",
+        "kotlin.FloatArray",
+        "kotlin.DoubleArray",
+        "kotlin.BooleanArray"
+)
 
 internal val IrClass.isArray: Boolean
-    get() = this.fqNameSafe.asString() in arrayTypes
+    get() = this.fqNameForIrSerialization.asString() in arrayTypes
 
-
-internal val IrClass.isInterface: Boolean
-    get() = (this.kind == ClassKind.INTERFACE)
+internal val IrClass.isArrayWithFixedSizeItems: Boolean
+    get() = this.fqNameForIrSerialization.asString() in arraysWithFixedSizeItems
 
 fun IrClass.isAbstract() = this.modality == Modality.SEALED || this.modality == Modality.ABSTRACT
-        || this.kind == ClassKind.ENUM_CLASS
 
 internal fun IrFunction.hasValueTypeAt(index: Int): Boolean {
     when (index) {
-        0 -> return !isSuspend && returnType.let { (it.isInlined() || it.isUnit()) }
-        1 -> return dispatchReceiverParameter.let { it != null && it.type.isInlined() }
-        2 -> return extensionReceiverParameter.let { it != null && it.type.isInlined() }
-        else -> return this.valueParameters[index - 3].type.isInlined()
+        0 -> return !isSuspend && returnType.let { (it.isInlinedNative() || it.isUnit()) }
+        1 -> return dispatchReceiverParameter.let { it != null && it.type.isInlinedNative() }
+        2 -> return extensionReceiverParameter.let { it != null && it.type.isInlinedNative() }
+        else -> return this.valueParameters[index - 3].type.isInlinedNative()
     }
 }
 
 internal fun IrFunction.hasReferenceAt(index: Int): Boolean {
     when (index) {
-        0 -> return isSuspend || returnType.let { !it.isInlined() && !it.isUnit() }
-        1 -> return dispatchReceiverParameter.let { it != null && !it.type.isInlined() }
-        2 -> return extensionReceiverParameter.let { it != null && !it.type.isInlined() }
-        else -> return !this.valueParameters[index - 3].type.isInlined()
+        0 -> return isSuspend || returnType.let { !it.isInlinedNative() && !it.isUnit() }
+        1 -> return dispatchReceiverParameter.let { it != null && !it.type.isInlinedNative() }
+        2 -> return extensionReceiverParameter.let { it != null && !it.type.isInlinedNative() }
+        else -> return !this.valueParameters[index - 3].type.isInlinedNative()
     }
 }
 
@@ -125,16 +98,6 @@ private fun IrFunction.needBridgeToAt(target: IrFunction, index: Int)
 
 internal fun IrFunction.needBridgeTo(target: IrFunction)
         = (0..this.valueParameters.size + 2).any { needBridgeToAt(target, it) }
-
-internal val IrSimpleFunction.target: IrSimpleFunction
-    get() = (if (modality == Modality.ABSTRACT) this else resolveFakeOverride())
-
-internal val IrFunction.target: IrFunction
-    get() = when (this) {
-    is IrSimpleFunction -> this.target
-    is IrConstructor -> this
-    else -> error(this)
-}
 
 internal enum class BridgeDirection {
     NOT_NEEDED,
@@ -220,14 +183,14 @@ internal tailrec fun IrDeclaration.findPackage(): IrPackageFragment {
             ?: (parent as IrDeclaration).findPackage()
 }
 
-fun IrFunction.isComparisonFunction(map: Map<SimpleType, IrSimpleFunction>): Boolean =
+fun IrFunctionSymbol.isComparisonFunction(map: Map<IrClassifierSymbol, IrSimpleFunctionSymbol>): Boolean =
         this in map.values
 
 val IrDeclaration.isPropertyAccessor get() =
-    this is IrSimpleFunction && this.correspondingProperty != null
+    this is IrSimpleFunction && this.correspondingPropertySymbol != null
 
 val IrDeclaration.isPropertyField get() =
-    this is IrField && this.correspondingProperty != null
+    this is IrField && this.correspondingPropertySymbol != null
 
 val IrDeclaration.isTopLevelDeclaration get() =
     parent !is IrDeclaration && !this.isPropertyAccessor && !this.isPropertyField
@@ -236,9 +199,47 @@ fun IrDeclaration.findTopLevelDeclaration(): IrDeclaration = when {
     this.isTopLevelDeclaration ->
         this
     this.isPropertyAccessor ->
-        (this as IrSimpleFunction).correspondingProperty!!.findTopLevelDeclaration()
+        (this as IrSimpleFunction).correspondingPropertySymbol!!.owner.findTopLevelDeclaration()
     this.isPropertyField ->
-        (this as IrField).correspondingProperty!!.findTopLevelDeclaration()
+        (this as IrField).correspondingPropertySymbol!!.owner.findTopLevelDeclaration()
     else ->
         (this.parent as IrDeclaration).findTopLevelDeclaration()
 }
+
+internal val IrClass.isFrozen: Boolean
+    get() = annotations.hasAnnotation(KonanFqNames.frozen) ||
+            // RTTI is used for non-reference type box:
+            !this.defaultType.binaryTypeIsReference()
+
+fun IrConstructorCall.getAnnotationStringValue() = getValueArgument(0).safeAs<IrConst<String>>()?.value
+
+fun IrConstructorCall.getAnnotationStringValue(name: String): String {
+    val parameter = symbol.owner.valueParameters.single { it.name.asString() == name }
+    return getValueArgument(parameter.index).cast<IrConst<String>>().value
+}
+
+fun AnnotationDescriptor.getAnnotationStringValue(name: String): String {
+    return argumentValue(name)?.safeAs<StringValue>()?.value ?: error("Expected value $name at annotation $this")
+}
+
+fun <T> IrConstructorCall.getAnnotationValueOrNull(name: String): T? {
+    val parameter = symbol.owner.valueParameters.atMostOne { it.name.asString() == name }
+    return parameter?.let { getValueArgument(it.index)?.let { (it.cast<IrConst<T>>()).value } }
+}
+
+fun IrFunction.externalSymbolOrThrow(): String? {
+    annotations.findAnnotation(RuntimeNames.symbolNameAnnotation)?.let { return it.getAnnotationStringValue() }
+
+    if (annotations.hasAnnotation(KonanFqNames.objCMethod)) return null
+
+    if (annotations.hasAnnotation(KonanFqNames.typedIntrinsic)) return null
+
+    if (annotations.hasAnnotation(RuntimeNames.cCall)) return null
+
+    throw Error("external function ${this.longName} must have @TypedIntrinsic, @SymbolName or @ObjCMethod annotation")
+}
+
+val IrFunction.isBuiltInOperator get() = origin == IrBuiltIns.BUILTIN_OPERATOR
+
+fun IrDeclaration.isFromMetadataInteropLibrary() =
+        descriptor.module.isFromInteropLibrary()

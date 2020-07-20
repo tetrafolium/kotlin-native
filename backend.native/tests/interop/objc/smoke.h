@@ -66,3 +66,52 @@ typedef NS_ENUM(int32_t, ForwardDeclaredEnum);
 typedef NS_ENUM(int32_t, ForwardDeclaredEnum) {
     ZERO, ONE, TWO,
 };
+
+@protocol ObjectFactory
+@required
+-(id)create;
+@end;
+
+id createObjectWithFactory(id<ObjectFactory> factory) {
+  return [factory create];
+}
+
+@protocol CustomRetainMethods
+@required
+-(id)returnRetained:(id)obj __attribute__((ns_returns_retained));
+-(void)consume:(id) __attribute__((ns_consumed)) obj;
+-(void)consumeSelf __attribute__((ns_consumes_self));
+-(void (^)(void))returnRetainedBlock:(void (^)(void))block __attribute__((ns_returns_retained));
+@end;
+
+extern BOOL unexpectedDeallocation;
+
+@interface MustNotBeDeallocated : NSObject
+@end;
+
+@interface CustomRetainMethodsImpl : MustNotBeDeallocated <CustomRetainMethods>
+@end;
+
+static MustNotBeDeallocated* retainedObj;
+static void (^retainedBlock)(void);
+
+void useCustomRetainMethods(id<CustomRetainMethods> p) {
+  MustNotBeDeallocated* obj = [MustNotBeDeallocated new];
+  retainedObj = obj; // Retain to detect possible over-release.
+  [p returnRetained:obj];
+
+  [p consume:p];
+  [p consumeSelf];
+
+  MustNotBeDeallocated* capturedObj = [MustNotBeDeallocated new];
+  retainedBlock = ^{ [capturedObj description]; }; // Retain to detect possible over-release.
+  [p returnRetainedBlock:retainedBlock]();
+}
+
+id getPrinterProtocolRaw() {
+  return @protocol(Printer);
+}
+
+Protocol* getPrinterProtocol() {
+  return @protocol(Printer);
+}

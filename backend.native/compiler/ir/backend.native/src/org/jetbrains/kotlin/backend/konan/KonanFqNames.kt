@@ -10,17 +10,24 @@ import org.jetbrains.kotlin.name.FqNameUnsafe
 import org.jetbrains.kotlin.name.Name
 
 internal const val NATIVE_PTR_NAME = "NativePtr"
+internal const val NON_NULL_NATIVE_PTR_NAME = "NonNullNativePtr"
+internal const val VECTOR128 = "Vector128"
 
 object KonanFqNames {
-
+    val function = FqName("kotlin.Function")
+    val kFunction = FqName("kotlin.reflect.KFunction")
     val packageName = FqName("kotlin.native")
     val internalPackageName = FqName("kotlin.native.internal")
     val nativePtr = internalPackageName.child(Name.identifier(NATIVE_PTR_NAME)).toUnsafe()
-    val nonNullNativePtr = FqNameUnsafe("kotlin.native.internal.NonNullNativePtr")
-    val throws = FqName("kotlin.native.Throws")
+    val nonNullNativePtr = internalPackageName.child(Name.identifier(NON_NULL_NATIVE_PTR_NAME)).toUnsafe()
+    val Vector128 = packageName.child(Name.identifier(VECTOR128))
+    val throws = FqName("kotlin.Throws")
+    val cancellationException = FqName("kotlin.coroutines.cancellation.CancellationException")
+    val threadLocal = FqName("kotlin.native.concurrent.ThreadLocal")
+    val sharedImmutable = FqName("kotlin.native.concurrent.SharedImmutable")
+    val frozen = FqName("kotlin.native.internal.Frozen")
+    val leakDetectorCandidate = FqName("kotlin.native.internal.LeakDetectorCandidate")
+    val canBePrecreated = FqName("kotlin.native.internal.CanBePrecreated")
+    val typedIntrinsic = FqName("kotlin.native.internal.TypedIntrinsic")
+    val objCMethod = FqName("kotlinx.cinterop.ObjCMethod")
 }
-
-/**
- * Maximum number of parameters supported in function types (e.g. `FunctionXX`, `KFunctionXX`, `SuspendFunctionXX`).
- */
-internal const val KONAN_FUNCTION_INTERFACES_MAX_PARAMETERS = 22

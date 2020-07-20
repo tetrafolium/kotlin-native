@@ -15,7 +15,7 @@
  */
 
 #ifndef KONAN_NO_THREADS
-# define WITH_WORKERS 1
+#define WITH_WORKERS 1
 #endif
 
 #include <stdlib.h>
@@ -24,7 +24,7 @@
 
 #if WITH_WORKERS
 #include <pthread.h>
-#include <sys/time.h>
+#include "PthreadUtils.h"
 #endif
 
 #include "Alloc.h"
@@ -33,6 +33,7 @@
 #include "Memory.h"
 #include "Runtime.h"
 #include "Types.h"
+#include "Worker.h"
 
 extern "C" {
 
@@ -42,9 +43,11 @@ OBJ_GETTER(WorkerLaunchpad, KRef);
 
 }  // extern "C"
 
+#if WITH_WORKERS
+
 namespace {
 
-#if WITH_WORKERS
+class Future;
 
 enum {
   INVALID = 0,
@@ -59,21 +62,130 @@ enum {
   UNCHECKED = 1
 };
 
-THREAD_LOCAL_VARIABLE KInt g_currentWorkerId = 0;
+enum JobKind {
+  JOB_NONE = 0,
+  JOB_TERMINATE = 1,
+  // Order is important in sense that all job kinds after this one is considered
+  // processed for APIs returning request process status.
+  JOB_REGULAR = 2,
+  JOB_EXECUTE_AFTER = 3
+};
 
-KNativePtr transfer(KRef object, KInt mode) {
-  switch (mode) {
-    case CHECKED:
-    case UNCHECKED:
-      if (!ClearSubgraphReferences(object, mode == CHECKED)) {
-        // Release reference to the object, as it is not being managed by ObjHolder.
-        UpdateRef(&object, nullptr);
-        ThrowWorkerInvalidState();
-        return nullptr;
-      }
-      return object;
+enum class WorkerKind {
+  kNative,  // Workers created using Worker.start public API.
+  kOther,   // Any other kind of workers.
+};
+
+struct Job {
+  enum JobKind kind;
+  union {
+    struct {
+      KRef (*function)(KRef, ObjHeader**);
+      KNativePtr argument;
+      Future* future;
+      KInt transferMode;
+    } regularJob;
+
+    struct {
+      Future* future;
+      bool waitDelayed;
+    } terminationRequest;
+
+    struct {
+      KNativePtr operation;
+      KLong whenExecute;
+    } executeAfter;
+  };
+};
+
+struct JobCompare {
+  bool operator() (const Job& lhs, const Job& rhs) const {
+    RuntimeAssert(lhs.kind == JOB_EXECUTE_AFTER && rhs.kind == JOB_EXECUTE_AFTER, "Must be delayed jobs");
+    return lhs.executeAfter.whenExecute < rhs.executeAfter.whenExecute;
   }
-  return nullptr;
+};
+
+typedef KStdOrderedSet<Job, JobCompare> DelayedJobSet;
+
+}  // namespace
+
+class Worker {
+ public:
+  Worker(KInt id, bool errorReporting, KRef customName, WorkerKind kind)
+      : id_(id),
+        kind_(kind),
+        errorReporting_(errorReporting) {
+    name_ = customName != nullptr ? CreateStablePointer(customName) : nullptr;
+    pthread_mutex_init(&lock_, nullptr);
+    pthread_cond_init(&cond_, nullptr);
+  }
+
+  ~Worker();
+
+  void startEventLoop();
+
+  void putJob(Job job, bool toFront);
+  void putDelayedJob(Job job);
+
+  bool waitDelayed(bool blocking);
+
+  Job getJob(bool blocking);
+
+  KLong checkDelayedLocked();
+
+  bool waitForQueueLocked(KLong timeoutMicroseconds, KLong* remaining);
+
+  JobKind processQueueElement(bool blocking);
+
+  bool park(KLong timeoutMicroseconds, bool process);
+
+  KInt id() const { return id_; }
+
+  bool errorReporting() const { return errorReporting_; }
+
+  KNativePtr name() const { return name_; }
+
+  WorkerKind kind() const { return kind_; }
+
+  pthread_t thread() const { return thread_; }
+
+ private:
+  KInt id_;
+  WorkerKind kind_;
+  KStdDeque<Job> queue_;
+  DelayedJobSet delayed_;
+  // Stable pointer with worker's name.
+  KNativePtr name_;
+  // Lock and condition for waiting on the queue.
+  pthread_mutex_t lock_;
+  pthread_cond_t cond_;
+  // If errors to be reported on console.
+  bool errorReporting_;
+  bool terminated_ = false;
+  pthread_t thread_ = 0;
+};
+
+#else  // WITH_WORKERS
+class Worker {
+  KInt id;
+};
+
+#endif  // WITH_WORKERS
+
+namespace {
+
+#if WITH_WORKERS
+
+THREAD_LOCAL_VARIABLE Worker* g_worker = nullptr;
+
+KNativePtr transfer(ObjHolder* holder, KInt mode) {
+  void* result = CreateStablePointer(holder->obj());
+  if (!ClearSubgraphReferences(holder->obj(), mode == CHECKED)) {
+    DisposeStablePointer(result);
+    ThrowWorkerInvalidState();
+  }
+  holder->clear();
+  return result;
 }
 
 class Locker {
@@ -97,8 +209,18 @@ class Future {
   }
 
   ~Future() {
+    clear();
     pthread_mutex_destroy(&lock_);
     pthread_cond_destroy(&cond_);
+  }
+
+  void clear() {
+    Locker locker(&lock_);
+    if (result_ != nullptr) {
+      // No one cared to consume result - dispose it.
+      DisposeStablePointer(result_);
+      result_ = nullptr;
+    }
   }
 
   OBJ_GETTER0(consumeResultUnlocked) {
@@ -134,63 +256,6 @@ class Future {
   pthread_cond_t cond_;
 };
 
-struct Job {
-  KRef (*function)(KRef, ObjHeader**);
-  KNativePtr argument;
-  Future* future;
-  KInt transferMode;
-};
-
-class Worker {
- public:
-  Worker(KInt id, bool errorReporting) : id_(id), errorReporting_(errorReporting) {
-    pthread_mutex_init(&lock_, nullptr);
-    pthread_cond_init(&cond_, nullptr);
-  }
-
-  ~Worker() {
-    // Cleanup jobs in queue.
-    for (auto job : queue_) {
-      DisposeStablePointer(job.argument);
-      job.future->cancelUnlocked();
-    }
-
-    pthread_mutex_destroy(&lock_);
-    pthread_cond_destroy(&cond_);
-  }
-
-  void putJob(Job job, bool toFront) {
-    Locker locker(&lock_);
-    if (toFront)
-       queue_.push_front(job);
-    else
-       queue_.push_back(job);
-    pthread_cond_signal(&cond_);
-  }
-
-  Job getJob() {
-    Locker locker(&lock_);
-    while (queue_.size() == 0) {
-      pthread_cond_wait(&cond_, &lock_);
-    }
-    auto result = queue_.front();
-    queue_.pop_front();
-    return result;
-  }
-
-  KInt id() const { return id_; }
-
-  bool errorReporting() const { return errorReporting_; }
-
- private:
-  KInt id_;
-  KStdDeque<Job> queue_;
-  // Lock and condition for waiting on the queue.
-  pthread_mutex_t lock_;
-  pthread_cond_t cond_;
-  bool errorReporting_;
-};
-
 class State {
  public:
   State() {
@@ -208,11 +273,15 @@ class State {
     pthread_cond_destroy(&cond_);
   }
 
-  Worker* addWorkerUnlocked(bool errorReporting) {
-    Locker locker(&lock_);
-    Worker* worker = konanConstructInstance<Worker>(nextWorkerId(), errorReporting);
-    if (worker == nullptr) return nullptr;
-    workers_[worker->id()] = worker;
+  Worker* addWorkerUnlocked(bool errorReporting, KRef customName, WorkerKind kind) {
+    Worker* worker = nullptr;
+    {
+      Locker locker(&lock_);
+      worker = konanConstructInstance<Worker>(nextWorkerId(), errorReporting, customName, kind);
+      if (worker == nullptr) return nullptr;
+      workers_[worker->id()] = worker;
+    }
+    GC_RegisterWorker(worker);
     return worker;
   }
 
@@ -220,33 +289,90 @@ class State {
     Locker locker(&lock_);
     auto it = workers_.find(id);
     if (it == workers_.end()) return;
+    Worker* worker = it->second;
+    if (worker->kind() == WorkerKind::kNative) {
+      terminating_native_workers_[id] = worker->thread();
+    }
     workers_.erase(it);
+  }
+
+  void destroyWorkerUnlocked(Worker* worker) {
+    {
+      Locker locker(&lock_);
+      auto id = worker->id();
+      auto it = workers_.find(id);
+      if (it != workers_.end()) {
+        workers_.erase(it);
+      }
+    }
+    GC_UnregisterWorker(worker);
+    konanDestructInstance(worker);
   }
 
   Future* addJobToWorkerUnlocked(
       KInt id, KNativePtr jobFunction, KNativePtr jobArgument, bool toFront, KInt transferMode) {
     Future* future = nullptr;
     Worker* worker = nullptr;
-    {
-      Locker locker(&lock_);
+    Locker locker(&lock_);
 
-      auto it = workers_.find(id);
-      if (it == workers_.end()) return nullptr;
-      worker = it->second;
+    auto it = workers_.find(id);
+    if (it == workers_.end()) return nullptr;
+    worker = it->second;
 
-      future = konanConstructInstance<Future>(nextFutureId());
-      futures_[future->id()] = future;
-    }
+    future = konanConstructInstance<Future>(nextFutureId());
+    futures_[future->id()] = future;
 
     Job job;
-    job.function = reinterpret_cast<KRef (*)(KRef, ObjHeader**)>(jobFunction);
-    job.argument = jobArgument;
-    job.future = future;
-    job.transferMode = transferMode;
+    if (jobFunction == nullptr) {
+      job.kind = JOB_TERMINATE;
+      job.terminationRequest.future = future;
+      job.terminationRequest.waitDelayed = !toFront;
+    } else {
+      job.kind = JOB_REGULAR;
+      job.regularJob.function = reinterpret_cast<KRef (*)(KRef, ObjHeader**)>(jobFunction);
+      job.regularJob.argument = jobArgument;
+      job.regularJob.future = future;
+      job.regularJob.transferMode = transferMode;
+    }
 
     worker->putJob(job, toFront);
 
     return future;
+  }
+
+  bool executeJobAfterInWorkerUnlocked(KInt id, KRef operation, KLong afterMicroseconds) {
+    Worker* worker = nullptr;
+    Locker locker(&lock_);
+
+    auto it = workers_.find(id);
+    if (it == workers_.end()) {
+      return false;
+    }
+    worker = it->second;
+    Job job;
+    job.kind = JOB_EXECUTE_AFTER;
+    job.executeAfter.operation = CreateStablePointer(operation);
+    if (afterMicroseconds == 0) {
+      worker->putJob(job, false);
+    } else {
+      job.executeAfter.whenExecute = konan::getTimeMicros() + afterMicroseconds;
+      worker->putDelayedJob(job);
+    }
+    return true;
+  }
+
+  // Returns `true` if something was indeed processed.
+  bool processQueueUnlocked(KInt id) {
+    // Can only process queue of the current worker.
+    if (::g_worker == nullptr || id != ::g_worker->id()) ThrowWorkerInvalidState();
+    JobKind kind = ::g_worker->processQueueElement(false);
+    return kind != JOB_NONE && kind != JOB_TERMINATE;
+  }
+
+  bool parkUnlocked(KInt id, KLong timeoutMicroseconds, KBoolean process) {
+      // Can only park current worker.
+      if (::g_worker == nullptr || id != ::g_worker->id()) ThrowWorkerInvalidState();
+      return ::g_worker->park(timeoutMicroseconds, process);
   }
 
   KInt stateOfFutureUnlocked(KInt id) {
@@ -263,6 +389,7 @@ class State {
       auto it = futures_.find(id);
       if (it == futures_.end()) ThrowWorkerInvalidState();
       future = it->second;
+
     }
 
     KRef result = future->consumeResultUnlocked(OBJ_RESULT);
@@ -279,6 +406,20 @@ class State {
     return result;
   }
 
+  OBJ_GETTER(getWorkerNameUnlocked, KInt id) {
+    Worker* worker = nullptr;
+    ObjHolder nameHolder;
+    {
+      Locker locker(&lock_);
+      auto it = workers_.find(id);
+      if (it == workers_.end()) {
+        ThrowWorkerInvalidState();
+      }
+      DerefStablePointer(it->second->name(), nameHolder.slot());
+    }
+    RETURN_OBJ(nameHolder.obj());
+  }
+
   KBoolean waitForAnyFuture(KInt version, KInt millis) {
     Locker locker(&lock_);
     if (version != currentVersion_) return false;
@@ -287,13 +428,9 @@ class State {
       pthread_cond_wait(&cond_, &lock_);
       return true;
     }
-    struct timeval tv;
-    struct timespec ts;
-    gettimeofday(&tv, nullptr);
-    KLong nsDelta = millis * 1000000LL;
-    ts.tv_nsec = (tv.tv_usec * 1000LL + nsDelta) % 1000000000LL;
-    ts.tv_sec =  (tv.tv_sec * 1000000000LL + nsDelta) / 1000000000LL;
-    pthread_cond_timedwait(&cond_, &lock_, &ts);
+
+    uint64_t nsDelta = millis * 1000000LL;
+    WaitOnCondVar(&cond_, &lock_, nsDelta);
     return true;
   }
 
@@ -314,11 +451,58 @@ class State {
   KInt nextWorkerId() { return currentWorkerId_++; }
   KInt nextFutureId() { return currentFutureId_++; }
 
+  void destroyWorkerThreadDataUnlocked(KInt id) {
+    Locker locker(&lock_);
+    auto it = terminating_native_workers_.find(id);
+    if (it == terminating_native_workers_.end()) return;
+    // If this worker was not joined, detach it to free resources.
+    pthread_detach(it->second);
+    terminating_native_workers_.erase(it);
+  }
+
+  void waitNativeWorkersTerminationUnlocked() {
+    std::vector<pthread_t> threadsToWait;
+    {
+      Locker locker(&lock_);
+
+      checkNativeWorkersLeakLocked();
+
+      for (auto& kvp : terminating_native_workers_) {
+        RuntimeAssert(!pthread_equal(kvp.second, pthread_self()), "Native worker is joining with itself");
+        threadsToWait.push_back(kvp.second);
+      }
+      terminating_native_workers_.clear();
+    }
+
+    for (auto thread : threadsToWait) {
+      pthread_join(thread, nullptr);
+    }
+  }
+
+  void checkNativeWorkersLeakLocked() {
+    size_t remainingNativeWorkers = 0;
+    for (const auto& kvp : workers_) {
+      Worker* worker = kvp.second;
+      if (worker->kind() == WorkerKind::kNative) {
+        ++remainingNativeWorkers;
+      }
+    }
+
+    if (remainingNativeWorkers != 0) {
+      konan::consoleErrorf(
+        "Unfinished workers detected, %lu workers leaked!\n"
+        "Use `Platform.isMemoryLeakCheckerActive = false` to avoid this check.\n",
+        remainingNativeWorkers);
+      konan::abort();
+    }
+  }
+
  private:
   pthread_mutex_t lock_;
   pthread_cond_t cond_;
   KStdUnorderedMap<KInt, Future*> futures_;
   KStdUnorderedMap<KInt, Worker*> workers_;
+  KStdUnorderedMap<KInt, pthread_t> terminating_native_workers_;
   KInt currentWorkerId_;
   KInt currentFutureId_;
   KInt currentVersion_;
@@ -347,10 +531,10 @@ void Future::storeResultUnlocked(KNativePtr result, bool ok) {
     Locker locker(&lock_);
     state_ = ok ? COMPUTED : THROWN;
     result_ = result;
-    // Beware here: although manual clearly says that pthread_cond_signal() could be called outside
+    // Beware here: although manual clearly says that pthread_cond_broadcast() could be called outside
     // of the taken lock, it's not on macOS (as of 10.13.1). If moved outside of the lock,
     // some notifications are missing.
-    pthread_cond_signal(&cond_);
+    pthread_cond_broadcast(&cond_);
   }
   theState()->signalAnyFuture();
 }
@@ -360,7 +544,7 @@ void Future::cancelUnlocked() {
     Locker locker(&lock_);
     state_ = CANCELLED;
     result_ = nullptr;
-    pthread_cond_signal(&cond_);
+    pthread_cond_broadcast(&cond_);
   }
   theState()->signalAnyFuture();
 }
@@ -368,71 +552,39 @@ void Future::cancelUnlocked() {
 // Defined in RuntimeUtils.kt.
 extern "C" void ReportUnhandledException(KRef e);
 
-void* workerRoutine(void* argument) {
-  Worker* worker = reinterpret_cast<Worker*>(argument);
-
-  g_currentWorkerId = worker->id();
-  Kotlin_initRuntimeIfNeeded();
-
-  while (true) {
-    Job job = worker->getJob();
-    if (job.function == nullptr) {
-       // Termination request, notify the future.
-      job.future->storeResultUnlocked(nullptr, true);
-      theState()->removeWorkerUnlocked(worker->id());
-      break;
-    }
-    ObjHolder argumentHolder;
-    KRef argument = AdoptStablePointer(job.argument, argumentHolder.slot());
-    // Note that this is a bit hacky, as we must not auto-release resultRef,
-    // so we don't use ObjHolder.
-    // It is so, as ownership is transferred.
-    KRef resultRef = nullptr;
-    KNativePtr result = nullptr;
-    bool ok = true;
-    try {
-        job.function(argument, &resultRef);
-        argumentHolder.clear();
-        // Transfer the result.
-        result = transfer(resultRef, job.transferMode);
-    } catch (ObjHolder& e) {
-        ok = false;
-        if (worker->errorReporting())
-            ReportUnhandledException(e.obj());
-    }
-    // Notify the future.
-    job.future->storeResultUnlocked(result, ok);
-  }
-
-  Kotlin_deinitRuntimeIfNeeded();
-
-  konanDestructInstance(worker);
-
-  return nullptr;
-}
-
-KInt startWorker(KBoolean errorReporting) {
-  Worker* worker = theState()->addWorkerUnlocked(errorReporting != 0);
+KInt startWorker(KBoolean errorReporting, KRef customName) {
+  Worker* worker = theState()->addWorkerUnlocked(errorReporting != 0, customName, WorkerKind::kNative);
   if (worker == nullptr) return -1;
-  pthread_t thread = 0;
-  pthread_create(&thread, nullptr, workerRoutine, worker);
+  worker->startEventLoop();
   return worker->id();
 }
 
 KInt currentWorker() {
-  return g_currentWorkerId;
+  if (g_worker == nullptr) ThrowWorkerInvalidState();
+  return ::g_worker->id();
 }
 
-KInt schedule(KInt id, KInt transferMode, KRef producer, KNativePtr jobFunction) {
+KInt execute(KInt id, KInt transferMode, KRef producer, KNativePtr jobFunction) {
   Job job;
-  // Note that this is a bit hacky, as we must not auto-release jobArgumentRef,
-  // so we don't use ObjHolder.
-  KRef jobArgumentRef = nullptr;
-  WorkerLaunchpad(producer, &jobArgumentRef);
-  KNativePtr jobArgument = transfer(jobArgumentRef, transferMode);
+  ObjHolder holder;
+  WorkerLaunchpad(producer, holder.slot());
+  KNativePtr jobArgument = transfer(&holder, transferMode);
   Future* future = theState()->addJobToWorkerUnlocked(id, jobFunction, jobArgument, false, transferMode);
   if (future == nullptr) ThrowWorkerInvalidState();
   return future->id();
+}
+
+void executeAfter(KInt id, KRef job, KLong afterMicroseconds) {
+  if (!theState()->executeJobAfterInWorkerUnlocked(id, job, afterMicroseconds))
+    ThrowWorkerInvalidState();
+}
+
+KBoolean processQueue(KInt id) {
+   return theState()->processQueueUnlocked(id);
+}
+
+KBoolean park(KInt id, KLong timeoutMicroseconds, KBoolean process) {
+   return theState()->parkUnlocked(id, timeoutMicroseconds, process);
 }
 
 KInt stateOfFuture(KInt id) {
@@ -441,6 +593,10 @@ KInt stateOfFuture(KInt id) {
 
 OBJ_GETTER(consumeFuture, KInt id) {
   RETURN_RESULT_OF(theState()->consumeFutureUnlocked, id);
+}
+
+OBJ_GETTER(getWorkerName, KInt id) {
+  RETURN_RESULT_OF(theState()->getWorkerNameUnlocked, id);
 }
 
 KInt requestTermination(KInt id, KBoolean processScheduledJobs) {
@@ -463,74 +619,362 @@ OBJ_GETTER(attachObjectGraphInternal, KNativePtr stable) {
 }
 
 KNativePtr detachObjectGraphInternal(KInt transferMode, KRef producer) {
-   KRef ref = nullptr;
-   WorkerLaunchpad(producer, &ref);
-   if (ref != nullptr) {
-     return transfer(ref, transferMode);
-   } else
+   ObjHolder result;
+   WorkerLaunchpad(producer, result.slot());
+   if (result.obj() != nullptr) {
+     return transfer(&result, transferMode);
+   } else {
      return nullptr;
+   }
 }
 
 #else
 
-KInt startWorker(KBoolean errorReporting) {
+KInt startWorker(KBoolean errorReporting, KRef customName) {
   ThrowWorkerUnsupported();
-  return -1;
 }
 
 KInt stateOfFuture(KInt id) {
   ThrowWorkerUnsupported();
-  return 0;
 }
 
-KInt schedule(KInt id, KInt transferMode, KRef producer, KNativePtr jobFunction) {
+KInt execute(KInt id, KInt transferMode, KRef producer, KNativePtr jobFunction) {
   ThrowWorkerUnsupported();
-  return 0;
+}
+
+void executeAfter(KInt id, KRef job, KLong afterMicroseconds) {
+  ThrowWorkerUnsupported();
+}
+
+KBoolean processQueue(KInt id) {
+  ThrowWorkerUnsupported();
+}
+
+KBoolean park(KInt id, KLong timeoutMicroseconds, KBoolean process) {
+   ThrowWorkerUnsupported();
 }
 
 KInt currentWorker() {
   ThrowWorkerUnsupported();
-  return 0;
 }
 
 OBJ_GETTER(consumeFuture, KInt id) {
   ThrowWorkerUnsupported();
-  RETURN_OBJ(nullptr);
+}
+
+OBJ_GETTER(getWorkerName, KInt id) {
+  ThrowWorkerUnsupported();
 }
 
 KInt requestTermination(KInt id, KBoolean processScheduledJobs) {
   ThrowWorkerUnsupported();
-  return -1;
 }
 
 KBoolean waitForAnyFuture(KInt versionToken, KInt millis) {
   ThrowWorkerUnsupported();
-  return false;
 }
 
 KInt versionToken() {
   ThrowWorkerUnsupported();
-  return 0;
 }
 
 OBJ_GETTER(attachObjectGraphInternal, KNativePtr stable) {
   ThrowWorkerUnsupported();
-  return nullptr;
 }
 
 KNativePtr detachObjectGraphInternal(KInt transferMode, KRef producer) {
    ThrowWorkerUnsupported();
-   return nullptr;
 }
 
 #endif  // WITH_WORKERS
 
 }  // namespace
 
+KInt GetWorkerId(Worker* worker) {
+#if WITH_WORKERS
+  return worker->id();
+#else
+  return 0;
+#endif  // WITH_WORKERS
+}
+
+Worker* WorkerInit(KBoolean errorReporting) {
+#if WITH_WORKERS
+  if (::g_worker != nullptr) return ::g_worker;
+  Worker* worker = theState()->addWorkerUnlocked(errorReporting != 0, nullptr, WorkerKind::kOther);
+  ::g_worker = worker;
+  return worker;
+#else
+  return nullptr;
+#endif  // WITH_WORKERS
+}
+
+void WorkerDeinit(Worker* worker) {
+#if WITH_WORKERS
+  ::g_worker = nullptr;
+  theState()->destroyWorkerUnlocked(worker);
+#endif  // WITH_WORKERS
+}
+
+void WorkerDestroyThreadDataIfNeeded(KInt id) {
+#if WITH_WORKERS
+  theState()->destroyWorkerThreadDataUnlocked(id);
+#endif
+}
+
+void WaitNativeWorkersTermination() {
+#if WITH_WORKERS
+  theState()->waitNativeWorkersTerminationUnlocked();
+#endif
+}
+
+Worker* WorkerSuspend() {
+#if WITH_WORKERS
+  auto* result = ::g_worker;
+  ::g_worker = nullptr;
+  return result;
+#else
+  return nullptr;
+#endif  // WITH_WORKERS
+}
+
+void WorkerResume(Worker* worker) {
+#if WITH_WORKERS
+  ::g_worker = worker;
+#endif  // WITH_WORKERS
+}
+
+#if WITH_WORKERS
+
+Worker::~Worker() {
+  // Cleanup jobs in the queue.
+  for (auto job : queue_) {
+    switch (job.kind) {
+      case JOB_REGULAR:
+        DisposeStablePointer(job.regularJob.argument);
+        job.regularJob.future->cancelUnlocked();
+        break;
+      case JOB_EXECUTE_AFTER: {
+        // TODO: what do we do here? Shall we execute them?
+        DisposeStablePointer(job.executeAfter.operation);
+        break;
+      }
+      case JOB_TERMINATE: {
+        // TODO: any more processing here?
+        job.terminationRequest.future->cancelUnlocked();
+        break;
+      }
+      case JOB_NONE: {
+        RuntimeCheck(false, "Cannot be in queue");
+        break;
+      }
+    }
+  }
+
+  for (auto job : delayed_) {
+    RuntimeAssert(job.kind == JOB_EXECUTE_AFTER, "Must be delayed");
+    DisposeStablePointer(job.executeAfter.operation);
+  }
+
+  if (name_ != nullptr) DisposeStablePointer(name_);
+
+  pthread_mutex_destroy(&lock_);
+  pthread_cond_destroy(&cond_);
+}
+
+namespace {
+
+void* workerRoutine(void* argument) {
+  Worker* worker = reinterpret_cast<Worker*>(argument);
+
+  WorkerResume(worker);
+  Kotlin_initRuntimeIfNeeded();
+
+  do {
+    if (worker->processQueueElement(true) == JOB_TERMINATE) break;
+  } while (true);
+
+  // Runtime deinit callback could be called when TLS is already zeroed out, so clear memory
+  // here explicitly. to make sure leak detector properly works.
+  Kotlin_zeroOutTLSGlobals();
+
+  return nullptr;
+}
+
+}  // namespace
+
+void Worker::startEventLoop() {
+  pthread_create(&thread_, nullptr, workerRoutine, this);
+}
+
+void Worker::putJob(Job job, bool toFront) {
+  Locker locker(&lock_);
+  if (toFront)
+    queue_.push_front(job);
+  else
+    queue_.push_back(job);
+  pthread_cond_signal(&cond_);
+}
+
+void Worker::putDelayedJob(Job job) {
+  Locker locker(&lock_);
+  delayed_.insert(job);
+  pthread_cond_signal(&cond_);
+}
+
+bool Worker::waitDelayed(bool blocking) {
+  Locker locker(&lock_);
+  if (delayed_.size() == 0) return false;
+  if (blocking) waitForQueueLocked(-1, nullptr);
+  return true;
+}
+
+Job Worker::getJob(bool blocking) {
+  Locker locker(&lock_);
+  RuntimeAssert(!terminated_, "Must not be terminated");
+  if (queue_.size() == 0 && !blocking) return Job { .kind = JOB_NONE };
+  waitForQueueLocked(-1, nullptr);
+  auto result = queue_.front();
+  queue_.pop_front();
+  return result;
+}
+
+KLong Worker::checkDelayedLocked() {
+  if (delayed_.size() == 0) {
+    return -1;
+  }
+  auto it = delayed_.begin();
+  auto job = *it;
+  RuntimeAssert(job.kind == JOB_EXECUTE_AFTER, "Must be delayed job");
+  auto now = konan::getTimeMicros();
+  if (job.executeAfter.whenExecute <= now) {
+    delayed_.erase(it);
+    queue_.push_back(job);
+    return 0;
+  } else {
+    return job.executeAfter.whenExecute - now;
+  }
+}
+
+bool Worker::waitForQueueLocked(KLong timeoutMicroseconds, KLong* remaining) {
+  while (queue_.size() == 0) {
+    KLong closestToRunMicroseconds = checkDelayedLocked();
+    if (closestToRunMicroseconds == 0) {
+        continue;
+    }
+    if (timeoutMicroseconds >= 0) {
+        closestToRunMicroseconds = (timeoutMicroseconds < closestToRunMicroseconds || closestToRunMicroseconds < 0)
+          ? timeoutMicroseconds
+          : closestToRunMicroseconds;
+    }
+    if (closestToRunMicroseconds == 0) {
+      // Just no wait at all here.
+    } else if (closestToRunMicroseconds > 0) {
+      // Protect from potential overflow, cutting at 10_000_000 seconds, aka 115 days.
+      if (closestToRunMicroseconds > 10LL * 1000 * 1000 * 1000 * 1000)
+        closestToRunMicroseconds = 10LL * 1000 * 1000 * 1000 * 1000;
+      uint64_t nsDelta = closestToRunMicroseconds * 1000LL;
+      uint64_t microsecondsPassed = 0;
+      WaitOnCondVar(&cond_, &lock_, nsDelta, remaining ? &microsecondsPassed : nullptr);
+      if (remaining) {
+        *remaining = timeoutMicroseconds - microsecondsPassed;
+      }
+    } else {
+      pthread_cond_wait(&cond_, &lock_);
+      if (remaining) *remaining = 0;
+    }
+    if (timeoutMicroseconds >= 0) return queue_.size() != 0;
+  }
+  return true;
+}
+
+bool Worker::park(KLong timeoutMicroseconds, bool process) {
+  {
+    Locker locker(&lock_);
+    if (terminated_) {
+      return false;
+    }
+    auto arrived = false;
+    KLong remaining = timeoutMicroseconds;
+    do {
+      arrived = waitForQueueLocked(remaining, &remaining);
+    } while (remaining > 0 && !arrived);
+    if (!process) {
+      return arrived;
+    }
+    if (!arrived) {
+      return false;
+    }
+  }
+  return processQueueElement(false) >= JOB_REGULAR;
+}
+
+JobKind Worker::processQueueElement(bool blocking) {
+  GC_CollectorCallback(this);
+  ObjHolder argumentHolder;
+  ObjHolder resultHolder;
+  if (terminated_) return JOB_TERMINATE;
+  Job job = getJob(blocking);
+  switch (job.kind) {
+    case JOB_NONE: {
+      break;
+    }
+    case JOB_TERMINATE: {
+      if (job.terminationRequest.waitDelayed) {
+        if (waitDelayed(blocking)) {
+          putJob(job, false);
+          return JOB_NONE;
+        }
+      }
+      terminated_ = true;
+      // Termination request, remove the worker and notify the future.
+      theState()->removeWorkerUnlocked(id());
+      job.terminationRequest.future->storeResultUnlocked(nullptr, true);
+      break;
+    }
+    case JOB_EXECUTE_AFTER: {
+      ObjHolder operationHolder, dummyHolder;
+      KRef obj = DerefStablePointer(job.executeAfter.operation, operationHolder.slot());
+      try {
+        WorkerLaunchpad(obj, dummyHolder.slot());
+      } catch (ExceptionObjHolder& e) {
+        if (errorReporting())
+          ReportUnhandledException(e.obj());
+      }
+      DisposeStablePointer(job.executeAfter.operation);
+      break;
+    }
+    case JOB_REGULAR: {
+      KRef argument = AdoptStablePointer(job.regularJob.argument, argumentHolder.slot());
+      KNativePtr result = nullptr;
+      bool ok = true;
+      try {
+        job.regularJob.function(argument, resultHolder.slot());
+        argumentHolder.clear();
+        // Transfer the result.
+        result = transfer(&resultHolder, job.regularJob.transferMode);
+       } catch (ExceptionObjHolder& e) {
+         ok = false;
+         if (errorReporting())
+           ReportUnhandledException(e.obj());
+       }
+       // Notify the future.
+       job.regularJob.future->storeResultUnlocked(result, ok);
+       break;
+    }
+    default: {
+      RuntimeCheck(false, "Must be exhaustive");
+    }
+  }
+  return job.kind;
+}
+
+#endif  // WITH_WORKERS
+
 extern "C" {
 
-KInt Kotlin_Worker_startInternal(KBoolean noErrorReporting) {
-  return startWorker(noErrorReporting);
+KInt Kotlin_Worker_startInternal(KBoolean noErrorReporting, KRef customName) {
+  return startWorker(noErrorReporting, customName);
 }
 
 KInt Kotlin_Worker_currentInternal() {
@@ -538,11 +982,27 @@ KInt Kotlin_Worker_currentInternal() {
 }
 
 KInt Kotlin_Worker_requestTerminationWorkerInternal(KInt id, KBoolean processScheduledJobs) {
-    return requestTermination(id, processScheduledJobs);
+  return requestTermination(id, processScheduledJobs);
 }
 
 KInt Kotlin_Worker_executeInternal(KInt id, KInt transferMode, KRef producer, KNativePtr job) {
-  return schedule(id, transferMode, producer, job);
+  return execute(id, transferMode, producer, job);
+}
+
+void Kotlin_Worker_executeAfterInternal(KInt id, KRef job, KLong afterMicroseconds) {
+  executeAfter(id, job, afterMicroseconds);
+}
+
+KBoolean Kotlin_Worker_processQueueInternal(KInt id) {
+  return processQueue(id);
+}
+
+KBoolean Kotlin_Worker_parkInternal(KInt id, KLong timeoutMicroseconds, KBoolean process) {
+  return park(id, timeoutMicroseconds, process);
+}
+
+OBJ_GETTER(Kotlin_Worker_getNameInternal, KInt id) {
+  RETURN_RESULT_OF(getWorkerName, id);
 }
 
 KInt Kotlin_Worker_stateOfFuture(KInt id) {
@@ -575,7 +1035,7 @@ void Kotlin_Worker_freezeInternal(KRef object) {
 }
 
 KBoolean Kotlin_Worker_isFrozenInternal(KRef object) {
-  return object == nullptr || PermanentOrFrozen(object);
+  return object == nullptr || isPermanentOrFrozen(object);
 }
 
 void Kotlin_Worker_ensureNeverFrozen(KRef object) {

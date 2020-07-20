@@ -20,9 +20,8 @@ import kotlin.native.internal.Intrinsic
 import kotlin.native.internal.TypedIntrinsic
 import kotlin.native.internal.IntrinsicType
 
-internal fun decodeFromUtf8(bytes: ByteArray): String = bytes.stringFromUtf8()
-
-fun encodeToUtf8(str: String): ByteArray = str.toUtf8()
+internal fun decodeFromUtf8(bytes: ByteArray): String = bytes.decodeToString()
+internal fun encodeToUtf8(str: String): ByteArray = str.encodeToByteArray()
 
 @TypedIntrinsic(IntrinsicType.INTEROP_BITS_TO_FLOAT)
 external fun bitsToFloat(bits: Int): Float
@@ -32,20 +31,20 @@ external fun bitsToDouble(bits: Long): Double
 
 // TODO: deprecate.
 @TypedIntrinsic(IntrinsicType.INTEROP_SIGN_EXTEND)
-external fun <R : Number> Number.signExtend(): R
+external inline fun <reified R : Number> Number.signExtend(): R
 
 // TODO: deprecate.
 @TypedIntrinsic(IntrinsicType.INTEROP_NARROW)
-external fun <R : Number> Number.narrow(): R
+external inline fun <reified R : Number> Number.narrow(): R
 
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> Byte.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> Short.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> Int.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> Long.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> UByte.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> UShort.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> UInt.convert(): R
-@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external fun <R : Any> ULong.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> Byte.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> Short.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> Int.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> Long.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> UByte.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> UShort.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> UInt.convert(): R
+@TypedIntrinsic(IntrinsicType.INTEROP_CONVERT) external inline fun <reified R : Any> ULong.convert(): R
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.FILE)
 @Retention(AnnotationRetention.SOURCE)

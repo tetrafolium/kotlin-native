@@ -57,7 +57,22 @@ interface Compilation {
     val language: Language
 }
 
-// TODO: consider replacing inheritance by composition and turning Compilation into final class.
+data class CompilationWithPCH(
+        override val compilerArgs: List<String>,
+        override val language: Language
+) : Compilation {
+
+    constructor(compilerArgs: List<String>, precompiledHeader: String, language: Language)
+            : this(compilerArgs + listOf("-include-pch", precompiledHeader), language)
+
+    override val includes: List<String>
+        get() = emptyList()
+
+    override val additionalPreambleLines: List<String>
+        get() = emptyList()
+}
+
+// TODO: Compilation hierarchy seems to require some refactoring.
 
 data class NativeLibrary(override val includes: List<String>,
                          override val additionalPreambleLines: List<String>,
@@ -68,10 +83,12 @@ data class NativeLibrary(override val includes: List<String>,
                          val headerExclusionPolicy: HeaderExclusionPolicy,
                          val headerFilter: NativeLibraryHeaderFilter) : Compilation
 
+data class IndexerResult(val index: NativeIndex, val compilation: CompilationWithPCH)
+
 /**
  * Retrieves the definitions from given C header file using given compiler arguments (e.g. defines).
  */
-fun buildNativeIndex(library: NativeLibrary, verbose: Boolean): NativeIndex = buildNativeIndexImpl(library, verbose)
+fun buildNativeIndex(library: NativeLibrary, verbose: Boolean): IndexerResult = buildNativeIndexImpl(library, verbose)
 
 /**
  * This class describes the IR of definitions from C header file(s).
@@ -174,7 +191,7 @@ sealed class ObjCClassOrProtocol(val name: String) : ObjCContainer(), TypeDeclar
 
 data class ObjCMethod(
         val selector: String, val encoding: String, val parameters: List<Parameter>, private val returnType: Type,
-        val isClass: Boolean, val nsConsumesSelf: Boolean, val nsReturnsRetained: Boolean,
+        val isVariadic: Boolean, val isClass: Boolean, val nsConsumesSelf: Boolean, val nsReturnsRetained: Boolean,
         val isOptional: Boolean, val isInit: Boolean, val isExplicitlyDesignatedInitializer: Boolean
 ) {
 
@@ -242,12 +259,19 @@ interface PrimitiveType : Type
 
 object CharType : PrimitiveType
 
-object BoolType : PrimitiveType
+open class BoolType: PrimitiveType
 
+object CBoolType : BoolType()
+
+object ObjCBoolType : BoolType()
+// We omit `const` qualifier for IntegerType and FloatingType to make `CBridgeGen` simpler.
+// See KT-28102.
 data class IntegerType(val size: Int, val isSigned: Boolean, val spelling: String) : PrimitiveType
 
 // TODO: floating type is not actually defined entirely by its size.
 data class FloatingType(val size: Int, val spelling: String) : PrimitiveType
+
+data class VectorType(val elementType: Type, val elementCount: Int, val spelling: String) : PrimitiveType
 
 object VoidType : Type
 
@@ -266,6 +290,7 @@ interface ArrayType : Type {
 
 data class ConstArrayType(override val elemType: Type, val length: Long) : ArrayType
 data class IncompleteArrayType(override val elemType: Type) : ArrayType
+data class VariableArrayType(override val elemType: Type) : ArrayType
 
 data class Typedef(val def: TypedefDef) : Type
 

@@ -30,6 +30,12 @@ object GC {
     external fun collect()
 
     /**
+     * Request global cyclic collector, operation is async and just triggers the collection.
+     */
+    @SymbolName("Kotlin_native_internal_GC_collectCyclic")
+    external fun collectCyclic()
+
+    /**
      * Suspend garbage collection. Release candidates are still collected, but
      * GC algorithm is not executed.
      */
@@ -63,9 +69,64 @@ object GC {
         get() = getThreshold()
         set(value) = setThreshold(value)
 
+    /**
+     * GC allocation threshold, controlling how frequenly GC collect cycles, and how much time
+     * this process takes. Bigger values lead to longer GC pauses, but less GCs.
+     */
+    var collectCyclesThreshold: Long
+        get() = getCollectCyclesThreshold()
+        set(value) = setCollectCyclesThreshold(value)
+
+    /**
+     * GC allocation threshold, controlling how many bytes allocated since last
+     * collection will trigger new GC.
+     */
+    var thresholdAllocations: Long
+        get() = getThresholdAllocations()
+        set(value) = setThresholdAllocations(value)
+
+    /**
+     * If GC shall auto-tune thresholds, depending on how much time is spent in collection.
+     */
+    var autotune: Boolean
+        get() = getTuneThreshold()
+        set(value) = setTuneThreshold(value)
+
+
+    /**
+     * If cyclic collector for atomic references to be deployed.
+     */
+    var cyclicCollectorEnabled: Boolean
+        get() = getCyclicCollectorEnabled()
+        set(value) = setCyclicCollectorEnabled(value)
+
     @SymbolName("Kotlin_native_internal_GC_getThreshold")
     private external fun getThreshold(): Int
 
     @SymbolName("Kotlin_native_internal_GC_setThreshold")
     private external fun setThreshold(value: Int)
+
+    @SymbolName("Kotlin_native_internal_GC_getCollectCyclesThreshold")
+    private external fun getCollectCyclesThreshold(): Long
+
+    @SymbolName("Kotlin_native_internal_GC_setCollectCyclesThreshold")
+    private external fun setCollectCyclesThreshold(value: Long)
+
+    @SymbolName("Kotlin_native_internal_GC_getThresholdAllocations")
+    private external fun getThresholdAllocations(): Long
+
+    @SymbolName("Kotlin_native_internal_GC_setThresholdAllocations")
+    private external fun setThresholdAllocations(value: Long)
+
+    @SymbolName("Kotlin_native_internal_GC_getTuneThreshold")
+    private external fun getTuneThreshold(): Boolean
+
+    @SymbolName("Kotlin_native_internal_GC_setTuneThreshold")
+    private external fun setTuneThreshold(value: Boolean)
+
+    @SymbolName("Kotlin_native_internal_GC_getCyclicCollector")
+    private external fun getCyclicCollectorEnabled(): Boolean
+
+    @SymbolName("Kotlin_native_internal_GC_setCyclicCollector")
+    private external fun setCyclicCollectorEnabled(value: Boolean)
 }

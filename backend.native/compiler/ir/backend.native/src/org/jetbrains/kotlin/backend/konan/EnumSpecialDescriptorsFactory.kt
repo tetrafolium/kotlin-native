@@ -5,10 +5,9 @@
 
 package org.jetbrains.kotlin.backend.konan
 
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedClassDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedFieldDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.backend.common.ir.addFakeOverridesViaIncorrectHeuristic
 import org.jetbrains.kotlin.backend.common.ir.addSimpleDelegatingConstructor
+import org.jetbrains.kotlin.backend.common.ir.createParameterDeclarations
 import org.jetbrains.kotlin.backend.konan.descriptors.synthesizedName
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.Modality
@@ -17,6 +16,9 @@ import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFieldImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
+import org.jetbrains.kotlin.ir.descriptors.WrappedClassDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedFieldDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrFieldSymbolImpl
@@ -54,7 +56,9 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
                     isInner = false,
                     isData = false,
                     isExternal = false,
-                    isInline = false
+                    isInline = false,
+                    isExpect = false,
+                    isFun = false
             ).apply {
                 it.bind(this)
                 parent = enumClass
@@ -73,7 +77,7 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
                     Visibilities.PRIVATE,
                     isFinal = true,
                     isExternal = false,
-                    isStatic = false
+                    isStatic = false,
             ).apply {
                 it.bind(this)
                 parent = implObject
@@ -92,7 +96,10 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
                     isInline = false,
                     isExternal = false,
                     isTailrec = false,
-                    isSuspend = false
+                    isSuspend = false,
+                    isExpect = false,
+                    isFakeOverride = false,
+                    isOperator = false
             ).apply {
                 it.bind(this)
                 parent = implObject
@@ -107,7 +114,7 @@ internal class EnumSpecialDeclarationsFactory(val context: Context) {
         )
 
         implObject.superTypes += context.irBuiltIns.anyType
-        implObject.addFakeOverrides()
+        implObject.addFakeOverridesViaIncorrectHeuristic()
 
         val itemGetterSymbol = symbols.array.functions.single { it.descriptor.name == Name.identifier("get") }
         val enumEntriesMap = enumClass.declarations

@@ -5,7 +5,9 @@
 
 package kotlin.native.concurrent
 
+import kotlin.native.internal.ExportTypeInfo
 import kotlin.native.internal.Frozen
+import kotlin.native.internal.LeakDetectorCandidate
 import kotlin.native.internal.NoReorderFields
 import kotlin.native.SymbolName
 import kotlinx.cinterop.NativePtr
@@ -203,23 +205,38 @@ public class AtomicNativePtr(private var value_: NativePtr) {
     private external fun getImpl(): NativePtr
 }
 
+
+private fun idString(value: Any) = "${value.hashCode().toUInt().toString(16)}"
+
+private fun debugString(value: Any?): String {
+    if (value == null) return "null"
+    return "${value::class.qualifiedName}: ${idString(value)}"
+}
+
 /**
  * An atomic reference to a frozen Kotlin object. Can be used in concurrent scenarious
- * but frequently shall be of nullable type and be zeroed out (with `compareAndSwap(get(), null)`)
- * once no longer needed. Otherwise memory leak could happen.
+ * but frequently shall be of nullable type and be zeroed out once no longer needed.
+ * Otherwise memory leak could happen if the atomic reference is a part of a reference cycle.
  */
 @Frozen
+@LeakDetectorCandidate
 @NoReorderFields
-public class AtomicReference<T>(private var value_: T) {
+public class AtomicReference<T> {
+    private var value_: T
+
     // A spinlock to fix potential ARC race.
     private var lock: Int = 0
+
+    // Optimization for speeding up access.
+    private var cookie: Int = 0
 
     /**
      * Creates a new atomic reference pointing to given [ref].
      * @throws InvalidMutabilityException if reference is not frozen.
      */
-    init {
+    constructor(value: T) {
         checkIfFrozen(value)
+        value_ = value
     }
 
     /**
@@ -235,6 +252,7 @@ public class AtomicReference<T>(private var value_: T) {
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
+     * Note that comparison is identity-based, not value-based.
      * If [new] value is not null, it must be frozen or permanent object.
      *
      * @param expected the expected value
@@ -247,6 +265,7 @@ public class AtomicReference<T>(private var value_: T) {
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
+     * Note that comparison is identity-based, not value-based.
      *
      * @param expected the expected value
      * @param new the new value
@@ -260,7 +279,91 @@ public class AtomicReference<T>(private var value_: T) {
      *
      * @return string representation of this object
      */
-    public override fun toString(): String = "Atomic reference to $value"
+    public override fun toString(): String =
+            "${debugString(this)} -> ${debugString(value)}"
+
+    // Implementation details.
+    @SymbolName("Kotlin_AtomicReference_set")
+    private external fun setImpl(new: Any?): Unit
+
+    @SymbolName("Kotlin_AtomicReference_get")
+    private external fun getImpl(): Any?
+}
+
+/**
+ * An atomic reference to a Kotlin object. Can be used in concurrent scenarious, but must be frozen first,
+ * otherwise behaves as regular box for the value. If frozen, shall be zeroed out once no longer needed.
+ * Otherwise memory leak could happen if atomic reference is a part of a reference cycle.
+ */
+@NoReorderFields
+@LeakDetectorCandidate
+@ExportTypeInfo("theFreezableAtomicReferenceTypeInfo")
+public class FreezableAtomicReference<T>(private var value_: T) {
+    // A spinlock to fix potential ARC race.
+    private var lock: Int = 0
+
+    // Optimization for speeding up access.
+    private var cookie: Int = 0
+
+    /**
+     * The referenced value.
+     * Gets the value or sets the [new] value. If [new] value is not null,
+     * and `this` is frozen - it must be frozen or permanent object.
+     *
+     * @throws InvalidMutabilityException if the value is not frozen or a permanent object
+     */
+    public var value: T
+        get() = @Suppress("UNCHECKED_CAST")(getImpl() as T)
+        set(new) {
+            if (this.isFrozen)
+                setImpl(new)
+            else
+                value_ = new
+        }
+
+    /**
+     * Compares value with [expected] and replaces it with [new] value if values matches.
+     * If [new] value is not null and object is frozen, it must be frozen or permanent object.
+     *
+     * @param expected the expected value
+     * @param new the new value
+     * @throws InvalidMutabilityException if the value is not frozen or a permanent object
+     * @return the old value
+     */
+     public fun compareAndSwap(expected: T, new: T): T {
+        return if (this.isFrozen) @Suppress("UNCHECKED_CAST")(compareAndSwapImpl(expected, new) as T) else {
+            val old = value_
+            if (old === expected) value_ = new
+            old
+        }
+    }
+
+    /**
+     * Compares value with [expected] and replaces it with [new] value if values matches.
+     * Note that comparison is identity-based, not value-based.
+     *
+     * @param expected the expected value
+     * @param new the new value
+     * @return true if successful
+     */
+    public fun compareAndSet(expected: T, new: T): Boolean {
+        if (this.isFrozen) return compareAndSetImpl(expected, new)
+        val old = value_
+        if (old === expected) {
+            value_ = new
+            return true
+        } else {
+            return false
+        }
+    }
+
+    /**
+     * Returns the string representation of this object.
+     *
+     * @return string representation of this object
+     */
+    public override fun toString(): String =
+            "${debugString(this)} -> ${debugString(value)}"
 
     // Implementation details.
     @SymbolName("Kotlin_AtomicReference_set")
@@ -269,4 +372,9 @@ public class AtomicReference<T>(private var value_: T) {
     @SymbolName("Kotlin_AtomicReference_get")
     private external fun getImpl(): Any?
 
+    @SymbolName("Kotlin_AtomicReference_compareAndSwap")
+    private external fun compareAndSwapImpl(expected: Any?, new: Any?): Any?
+
+    @SymbolName("Kotlin_AtomicReference_compareAndSet")
+    private external fun compareAndSetImpl(expected: Any?, new: Any?): Boolean
 }

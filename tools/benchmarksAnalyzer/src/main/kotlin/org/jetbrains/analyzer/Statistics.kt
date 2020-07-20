@@ -40,15 +40,22 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
                 other.varianceBenchmark.score >= 0 &&
                 other.meanBenchmark.score - other.varianceBenchmark.score != 0.0,
                 { "Mean and variance should be positive and not equal!" })
-        val mean = (meanBenchmark.score - other.meanBenchmark.score) / other.meanBenchmark.score
-        val maxValueChange = abs(meanBenchmark.score + varianceBenchmark.score -
-                        other.meanBenchmark.score + other.varianceBenchmark.score) /
-                        abs(other.meanBenchmark.score + other.varianceBenchmark.score)
+        val exactMean = (meanBenchmark.score - other.meanBenchmark.score) / other.meanBenchmark.score
+        // Analyze intervals. Calculate difference between border points.
+        val (bigValue, smallValue) = if (meanBenchmark.score > other.meanBenchmark.score) Pair(this, other) else Pair(other, this)
+        val bigValueIntervalStart = bigValue.meanBenchmark.score - bigValue.varianceBenchmark.score
+        val bigValueIntervalEnd = bigValue.meanBenchmark.score + bigValue.varianceBenchmark.score
+        val smallValueIntervalStart = smallValue.meanBenchmark.score - smallValue.varianceBenchmark.score
+        val smallValueIntervalEnd = smallValue.meanBenchmark.score + smallValue.varianceBenchmark.score
+        if (smallValueIntervalEnd > bigValueIntervalStart) {
+            // Interval intersect.
+            return MeanVariance(0.0, 0.0)
+        }
+        val mean = ((smallValueIntervalEnd - bigValueIntervalStart) / bigValueIntervalStart) *
+                (if (meanBenchmark.score > other.meanBenchmark.score) -1 else 1)
 
-        val minValueChange = abs(meanBenchmark.score - varianceBenchmark.score -
-                        other.meanBenchmark.score - other.varianceBenchmark.score) /
-                        abs(other.meanBenchmark.score - other.varianceBenchmark.score)
-
+        val maxValueChange = ((bigValueIntervalEnd - smallValueIntervalEnd) / bigValueIntervalEnd)
+        val minValueChange =  ((bigValueIntervalStart - smallValueIntervalStart) / bigValueIntervalStart)
         val variance = abs(abs(mean) - max(minValueChange, maxValueChange))
         return MeanVariance(mean * 100, variance * 100)
     }
@@ -71,10 +78,17 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
 
 }
 
-fun geometricMean(values: List<Double>) = values.map { it.pow(1.0 / values.size) }.reduce { a, b -> a * b }
+fun geometricMean(values: Collection<Double>, totalNumber: Int = values.size) =
+    with(values.asSequence().filter { it != 0.0 }) {
+        if (count() == 0) {
+            0.0
+        } else {
+            map { it.pow(1.0 / totalNumber) }.reduce { a, b -> a * b }
+        }
+    }
 
 fun computeMeanVariance(samples: List<Double>): MeanVariance {
-    val zStar = 1.96    // Critical point for 90% confidence of normal distribution.
+    val zStar = 1.67    // Critical point for 90% confidence of normal distribution.
     val mean = samples.sum() / samples.size
     val variance = samples.indices.sumByDouble { (samples[it] - mean) * (samples[it] - mean) } / samples.size
     val confidenceInterval = sqrt(variance / samples.size) * zStar
@@ -85,6 +99,7 @@ fun computeMeanVariance(samples: List<Double>): MeanVariance {
 fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): BenchmarksTable {
     return benchmarks.map {(name, resultsSet) ->
         val repeatedSequence = IntArray(resultsSet.size)
+        var metric = BenchmarkResult.Metric.EXECUTION_TIME
         var currentStatus = BenchmarkResult.Status.PASSED
         var currentWarmup = -1
 
@@ -99,6 +114,7 @@ fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): Benchmar
                 if (result.warmup != currentWarmup)
                     println("Check data consistency. Warmup value for benchmark '${result.name}' differs.")
             currentWarmup = result.warmup
+            metric = result.metric
         }
 
         repeatedSequence.sort()
@@ -113,10 +129,10 @@ fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): Benchmar
         // Create mean and variance benchmarks result.
         val scoreMeanVariance = computeMeanVariance(resultsSet.map { it.score })
         val runtimeInUsMeanVariance = computeMeanVariance(resultsSet.map { it.runtimeInUs })
-        val meanBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.mean,
+        val meanBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.mean, metric,
                 runtimeInUsMeanVariance.mean, repeatedSequence[resultsSet.size - 1],
                 currentWarmup)
-        val varianceBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.variance,
+        val varianceBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.variance, metric,
                 runtimeInUsMeanVariance.variance, repeatedSequence[resultsSet.size - 1],
                 currentWarmup)
         name to MeanVarianceBenchmark(meanBenchmark, varianceBenchmark)

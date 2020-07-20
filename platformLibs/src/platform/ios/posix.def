@@ -1,6 +1,6 @@
 depends =
 package = platform.posix
-headers = alloca.h assert.h complex.h dirent.h dlfcn.h err.h errno.h fcntl.h \
+headers = alloca.h assert.h complex.h ctype.h dirent.h dlfcn.h err.h errno.h fcntl.h \
     fenv.h float.h fnmatch.h fts.h ftw.h getopt.h grp.h inttypes.h libgen.h limits.h \
     locale.h math.h memory.h netdb.h paths.h poll.h \
     pthread.h pwd.h regex.h resolv.h sched.h search.h semaphore.h setjmp.h signal.h \
@@ -13,8 +13,13 @@ headers = alloca.h assert.h complex.h dirent.h dlfcn.h err.h errno.h fcntl.h \
     sys/queue.h sys/select.h sys/shm.h sys/stat.h \
     sys/syslimits.h sys/time.h sys/times.h sys/utsname.h sys/wait.h
 
-compilerOpts = -D_XOPEN_SOURCE
-linkerOpts = -ldl
+compilerOpts = -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE
+linkerOpts = -ldl -lresolv
+excludedFunctions = acl_valid_link_np add_profil pfctlinput profil unwhiteout zopen getdirentries \
+                    uuid_generate_early_random setgrfile \
+                    in6addr_linklocal_allv2routers
+excludedFunctions.ios_arm32 = longjmperror
+excludedFunctions.ios_arm64 = longjmperror
 
 ---
 // Wrapper to access errno variable.

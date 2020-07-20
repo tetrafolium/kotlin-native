@@ -12,6 +12,7 @@ external fun getNativeNullPtr(): NativePtr
 
 class NativePtr @PublishedApi internal constructor(private val value: NonNullNativePtr?) {
     companion object {
+        // TODO: make it properly precreated, maybe use an intrinsic for that.
         val NULL = getNativeNullPtr()
     }
 
@@ -26,6 +27,8 @@ class NativePtr @PublishedApi internal constructor(private val value: NonNullNat
     override fun hashCode() = this.toLong().hashCode()
 
     override fun toString() = "0x${this.toLong().toString(16)}"
+
+    internal fun isNull(): Boolean = (value == null)
 }
 
 @PublishedApi
@@ -49,6 +52,9 @@ internal class NativePtrArray {
 
     @SymbolName("Kotlin_NativePtrArray_set")
     external public operator fun set(index: Int, value: NativePtr): Unit
+
+    val size: Int
+        get() = getArrayLength()
 
     @SymbolName("Kotlin_NativePtrArray_getArrayLength")
     external private fun getArrayLength(): Int

@@ -19,6 +19,7 @@
 #include "Runtime.h"
 #include "KString.h"
 #include "Types.h"
+#include "Worker.h"
 
 #ifndef KONAN_ANDROID
 
@@ -29,8 +30,9 @@ OBJ_GETTER(setupArgs, int argc, const char** argv) {
   ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, argc - 1, OBJ_RESULT);
   ArrayHeader* array = result->array();
   for (int index = 1; index < argc; index++) {
-    CreateStringFromCString(
-      argv[index], ArrayAddressOfElementAt(array, index - 1));
+    ObjHolder result;
+    CreateStringFromCString(argv[index], result.slot());
+    UpdateHeapRef(ArrayAddressOfElementAt(array, index - 1), result.obj());
   }
   return result;
 }
@@ -54,7 +56,11 @@ extern "C" RUNTIME_USED int Init_and_run_start(int argc, const char** argv, int 
 
   KInt exitStatus = Konan_run_start(argc, argv);
 
-  if (memoryDeInit) Kotlin_deinitRuntimeIfNeeded();
+  if (memoryDeInit) {
+    if (Kotlin_memoryLeakCheckerEnabled())
+      WaitNativeWorkersTermination();
+    Kotlin_deinitRuntimeIfNeeded();
+  }
 
   return exitStatus;
 }

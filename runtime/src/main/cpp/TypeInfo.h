@@ -27,6 +27,7 @@ struct WritableTypeInfo;
 #endif
 
 struct ObjHeader;
+struct AssociatedObjectTableRecord;
 
 // An element of sorted by hash in-place array representing methods.
 // For systems where introspection is not needed - only open methods are in
@@ -48,17 +49,23 @@ enum Konan_RuntimeType {
   RT_FLOAT32    = 6,
   RT_FLOAT64    = 7,
   RT_NATIVE_PTR = 8,
-  RT_BOOLEAN    = 9
+  RT_BOOLEAN    = 9,
+  RT_VECTOR128  = 10
 };
 
+// Flags per type.
 enum Konan_TypeFlags {
   TF_IMMUTABLE = 1 << 0,
   TF_ACYCLIC   = 1 << 1,
-  TF_INTERFACE = 1 << 2
+  TF_INTERFACE = 1 << 2,
+  TF_OBJC_DYNAMIC = 1 << 3,
+  TF_LEAK_DETECTOR_CANDIDATE = 1 << 4
 };
 
+// Flags per object instance.
 enum Konan_MetaFlags {
-  MF_NEVER_FROZEN = 1 << 0
+  // If freeze attempt happens on such an object - throw an exception.
+  MF_NEVER_FROZEN = 1 << 0,
 };
 
 // Extended information about a type.
@@ -71,7 +78,22 @@ struct ExtendedTypeInfo {
   const uint8_t* fieldTypes_;
   // Names of all fields.
   const char** fieldNames_;
-  // TODO: do we want any other info here?
+  // Number of supported debug operations.
+  int32_t debugOperationsCount_;
+  // Table of supported debug operations functions.
+  void** debugOperations_;
+};
+
+typedef void const* VTableElement;
+
+typedef int32_t ClassId;
+
+const ClassId kInvalidInterfaceId = 0;
+
+struct InterfaceTableRecord {
+    ClassId id;
+    uint32_t vtableSize;
+    VTableElement const* vtable;
 };
 
 // This struct represents runtime type information and by itself is the compile time
@@ -81,8 +103,8 @@ struct TypeInfo {
     const TypeInfo* typeInfo_;
     // Extended RTTI, to retain cross-version debuggability, since ABI version 5 shall always be at the second position.
     const ExtendedTypeInfo* extendedInfo_;
-    // ABI version.
-    uint32_t abiVersion_;
+    // Unused field.
+    uint32_t unused_;
     // Negative value marks array class/string, and it is negated element size.
     int32_t instanceSize_;
     // Must be pointer to Any for array classes, and null for Any.
@@ -97,6 +119,8 @@ struct TypeInfo {
     // Null for abstract classes and interfaces.
     const MethodTableRecord* openMethods_;
     uint32_t openMethodsCount_;
+    int32_t interfaceTableSize_;
+    InterfaceTableRecord const* interfaceTable_;
 
     // String for the fully qualified dot-separated name of the package containing class,
     // or `null` if the class is local or anonymous.
@@ -110,19 +134,25 @@ struct TypeInfo {
     // Various flags.
     int32_t flags_;
 
+    // Class id built with the whole class hierarchy taken into account. The details are in ClassLayoutBuilder.
+    ClassId classId_;
+
 #if KONAN_TYPE_INFO_HAS_WRITABLE_PART
     WritableTypeInfo* writableInfo_;
 #endif
 
+    // Null-terminated array.
+    const AssociatedObjectTableRecord* associatedObjects;
+
     // vtable starts just after declared contents of the TypeInfo:
     // void* const vtable_[];
 #ifdef __cplusplus
-    inline const void* const * vtable() const {
-      return reinterpret_cast<void * const *>(this + 1);
+    inline VTableElement const* vtable() const {
+      return reinterpret_cast<VTableElement const*>(this + 1);
     }
 
-    inline const void** vtable() {
-      return reinterpret_cast<const void**>(this + 1);
+    inline VTableElement* vtable() {
+      return reinterpret_cast<VTableElement*>(this + 1);
     }
 #endif
 };
@@ -137,6 +167,9 @@ extern "C" {
 // and 'hash' numeric values and doesn't really depends on global memory state
 // (as TypeInfo is compile time constant and type info pointers are stable).
 void* LookupOpenMethod(const TypeInfo* info, MethodNameHash nameSignature) RUNTIME_CONST;
+
+InterfaceTableRecord const* LookupInterfaceTableRecord(InterfaceTableRecord const* interfaceTable,
+                                                       int interfaceTableSize, ClassId interfaceId) RUNTIME_CONST;
 
 #ifdef __cplusplus
 } // extern "C"

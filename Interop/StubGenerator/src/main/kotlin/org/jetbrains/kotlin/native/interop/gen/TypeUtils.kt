@@ -31,13 +31,16 @@ val StructDecl.isAnonymous: Boolean
  * TODO: use libclang to implement?
  */
 fun Type.getStringRepresentation(): String = when (this) {
-    is VoidType -> "void"
-    is CharType -> "char"
-    is BoolType -> "BOOL"
+    VoidType -> "void"
+    CharType -> "char"
+    CBoolType -> "_Bool"
+    ObjCBoolType -> "BOOL"
     is IntegerType -> this.spelling
     is FloatingType -> this.spelling
 
-    is PointerType, is ArrayType -> "void*"
+    is VectorType -> this.spelling
+    is PointerType -> getPointerTypeStringRepresentation(this.pointeeType)
+    is ArrayType -> getPointerTypeStringRepresentation(this.elemType)
 
     is RecordType -> this.decl.spelling
 
@@ -57,7 +60,7 @@ fun Type.getStringRepresentation(): String = when (this) {
         is ObjCBlockPointer -> "id"
     }
 
-    else -> throw kotlin.NotImplementedError()
+    else -> throw NotImplementedError()
 }
 
 fun getPointerTypeStringRepresentation(pointee: Type): String =

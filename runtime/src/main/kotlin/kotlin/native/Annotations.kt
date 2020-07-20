@@ -24,30 +24,22 @@ public annotation class SymbolName(val name: String)
 @Retention(AnnotationRetention.BINARY)
 public annotation class Retain
 
-// TODO: merge with [kotlin.jvm.Throws]
 /**
- * This annotation indicates what exceptions should be declared by a function when compiled to a platform method.
- *
- * When compiling to Objective-C/Swift framework, methods having or inheriting this annotation are represented as
- * `NSError*`-producing methods in Objective-C and as `throws` methods in Swift.
- * When such a method called through framework API throws an exception, it is either propagated as
- * `NSError` or considered unhandled (if exception `is` [kotlin.Error] or [kotlin.RuntimeException]).
- * In any case exception is not checked to be instance of one of the [exceptionClasses].
- *
- * @property exceptionClasses the list of checked exception classes that may be thrown by the function.
+ * Preserve the function entry point during global optimizations, only for the given target.
  */
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CONSTRUCTOR)
-@Retention(AnnotationRetention.SOURCE)
-public annotation class Throws(vararg val exceptionClasses: KClass<out Throwable>)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+public annotation class RetainForTarget(val target: String)
 
-@Deprecated("ThreadLocal was moved to kotlin.native.concurrent package " +
-        "and became available in Kotlin Common as optional annotation",
-        ReplaceWith("kotlin.native.concurrent.ThreadLocal"))
+
+/** @suppress */
+@Deprecated("Use common kotlin.Throws annotation instead.", ReplaceWith("kotlin.Throws"), DeprecationLevel.WARNING)
+public typealias Throws = kotlin.Throws
+
+/** @suppress */
 public typealias ThreadLocal = kotlin.native.concurrent.ThreadLocal
 
-@Deprecated("SharedImmutable was moved to kotlin.native.concurrent package " +
-        "and became available in Kotlin Common as optional annotation",
-        ReplaceWith("kotlin.native.concurrent.SharedImmutable"))
+/** @suppress */
 public typealias SharedImmutable = kotlin.native.concurrent.SharedImmutable
 
 /**
@@ -59,3 +51,4 @@ public typealias SharedImmutable = kotlin.native.concurrent.SharedImmutable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 public annotation class CName(val externName: String = "", val shortName: String = "")
+

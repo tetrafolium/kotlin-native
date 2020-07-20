@@ -3,9 +3,12 @@
  * that can be found in the LICENSE file.
  */
 
+// FILE: hello.kt
+
 import kotlinx.cinterop.*
 
 import kotlin.native.CName
+import kotlin.native.concurrent.freeze
 
 // Top level functions.
 fun hello() {
@@ -14,11 +17,16 @@ fun hello() {
 
 fun getString() = "Kotlin/Native"
 
+data class Data(var string: String)
+
+fun getMutable() = Data("foo")
+
 // Class with inheritance.
 open class Base {
     open fun foo() = println("Base.foo")
 
-    open fun fooParam(arg0: String, arg1: Int) = println("Base.fooParam: $arg0 $arg1")
+    open fun fooParam(arg0: String, arg1: Int, arg2: String?) =
+            println("Base.fooParam: $arg0 $arg1 ${arg2 ?: "null"}")
 
     @CName(externName = "", shortName = "strangeName") fun странноеИмя() = 111
 
@@ -29,8 +37,10 @@ open class Base {
 fun topLevelFunction(x1: Int, x2: Int) = x1 - x2
 
 @CName("topLevelFunctionVoidFromC")
-fun topLevelFunctionVoid(x1: Int, pointer: COpaquePointer?) {
+fun topLevelFunctionVoid(x1: Int, x2: Int?, x3: Unit?, pointer: COpaquePointer?) {
     assert(x1 == 42)
+    assert(x2 == 77)
+    assert(x3 != null)
     assert(pointer == null)
 }
 
@@ -39,6 +49,17 @@ enum class Enum(val code: Int) {
     ONE(1),
     TWO(2),
     HUNDRED(100)
+}
+
+
+interface Interface {
+    fun foo(): Int
+}
+
+enum class EnumWithInterface : Interface {
+    ZERO
+    ;
+    override fun foo(): Int = 42
 }
 
 // Object.
@@ -55,7 +76,8 @@ object Singleton {
 }
 
 class Child : Base() {
-    override fun fooParam(arg0: String, arg1: Int) = println("Child.fooParam: $arg0 $arg1")
+    override fun fooParam(arg0: String, arg1: Int, arg2: String?) =
+            println("Child.fooParam: $arg0 $arg1 ${arg2 ?: "null"}")
 
     val roProperty: Int
         get() = 42
@@ -92,3 +114,44 @@ fun useInlineClasses(ic1: IC1, ic2: IC2, ic3: IC3) {
     assert(ic2.value == "bar")
     assert(ic3.value is Base)
 }
+
+fun testNullableWithNulls(arg1: Int?, arg2: Unit?) {
+    assert(arg1 == null)
+    assert(arg2 == null)
+}
+
+fun setCErrorHandler(callback: CPointer<CFunction<(CPointer<ByteVar>) -> Unit>>?) {
+    setUnhandledExceptionHook({
+        throwable: Throwable ->
+        memScoped {
+            callback!!(throwable.toString().cstr.ptr)
+        }
+        kotlin.system.exitProcess(0)
+    }.freeze())
+}
+
+fun throwException() {
+    throw Error("Expected error")
+}
+
+fun getNullableString(param: Int) : String? {
+    if (param == 0) {
+        return "Hi"
+    } else {
+        return null
+    }
+}
+
+fun getVector128() = vectorOf(1, 2, 3, 4)
+
+// FILE: gh3952.sync.kt
+
+package gh3952.sync
+
+class PlainSync {}
+
+// FILE: gh3952.nested.sync.kt
+
+package gh3952.nested.sync
+
+class NestedSync {}

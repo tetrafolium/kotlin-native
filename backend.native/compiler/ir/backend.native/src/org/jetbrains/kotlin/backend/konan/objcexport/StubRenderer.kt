@@ -10,6 +10,14 @@ import org.jetbrains.kotlin.descriptors.ClassDescriptor
 object StubRenderer {
     fun render(stub: Stub<*>): List<String> = collect {
         stub.run {
+            this.comment?.let { comment ->
+                +"" // Probably makes the output more readable.
+                +"/**"
+                comment.contentLines.forEach {
+                    +" $it"
+                }
+                +"*/"
+            }
             when (this) {
                 is ObjCProtocol -> {
                     attributes.forEach {
@@ -46,9 +54,9 @@ object StubRenderer {
         }
 
         fun ObjCProperty.getAllAttributes(): List<String> {
-            if (getterName == null && setterName == null) return attributes
+            if (getterName == null && setterName == null) return propertyAttributes
 
-            val allAttributes = attributes.toMutableList()
+            val allAttributes = propertyAttributes.toMutableList()
             getterName?.let { allAttributes += "getter=$it" }
             setterName?.let { allAttributes += "setter=$it" }
             return allAttributes
@@ -65,6 +73,7 @@ object StubRenderer {
         append("@property")
         appendAttributes()
         appendTypeAndName()
+        appendPostfixDeclarationAttributes(property.declarationAttributes)
         append(';')
     }
 
@@ -105,8 +114,7 @@ object StubRenderer {
         }
 
         fun appendAttributes() {
-            if (method.attributes.isNotEmpty()) append(' ')
-            method.attributes.joinTo(this, separator = " ", transform = ::renderAttribute)
+            appendPostfixDeclarationAttributes(method.attributes)
         }
 
         appendStaticness()
@@ -114,6 +122,11 @@ object StubRenderer {
         appendParameters()
         appendAttributes()
         append(';')
+    }
+
+    private fun Appendable.appendPostfixDeclarationAttributes(attributes: List<kotlin.String>) {
+        if (attributes.isNotEmpty()) this.append(' ')
+        attributes.joinTo(this, separator = " ", transform = this@StubRenderer::renderAttribute)
     }
 
     private fun ObjCProtocol.renderProtocolHeader() = buildString {
@@ -132,13 +145,11 @@ object StubRenderer {
     private fun ObjCInterface.renderInterfaceHeader() = buildString {
         fun appendSuperClass() {
             if (superClass != null) append(" : $superClass")
+            formatGenerics(this, superClassGenerics.map { it.render() })
         }
 
         fun appendGenerics() {
-            val generics = generics
-            if (generics.isNotEmpty()) {
-                generics.joinTo(this, separator = ", ", prefix = "<", postfix = ">")
-            }
+            formatGenerics(this, generics)
         }
 
         fun appendCategoryName() {
@@ -182,6 +193,12 @@ object StubRenderer {
         operator fun List<String>.unaryPlus() {
             collection += this
         }
+    }
+}
+
+internal fun formatGenerics(buffer: Appendable, generics:List<String>) {
+    if (generics.isNotEmpty()) {
+        generics.joinTo(buffer, separator = ", ", prefix = "<", postfix = ">")
     }
 }
 

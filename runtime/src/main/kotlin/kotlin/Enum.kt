@@ -5,9 +5,12 @@
 
 package kotlin
 
+import kotlin.native.internal.enumValueOfIntrinsic
+import kotlin.native.internal.enumValuesIntrinsic
+
 /**
  * The common base class of all enum classes.
- * See the [Kotlin language documentation](http://kotlinlang.org/docs/reference/enum-classes.html) for more
+ * See the [Kotlin language documentation](https://kotlinlang.org/docs/reference/enum-classes.html) for more
  * information on enum classes.
  */
 public abstract class Enum<E: Enum<E>>(public val name: String, public val ordinal: Int): Comparable<E> {
@@ -30,11 +33,12 @@ public abstract class Enum<E: Enum<E>>(public val name: String, public val ordin
     }
 }
 
-@Suppress("UNUSED_PARAMETER")
-public fun <T: Enum<T>> enumValueOf(name: String): T {
-    throw Exception("Call to this function should've been lowered")
-}
+/**
+ * Returns an enum entry with specified name.
+ */
+public inline fun <reified T: Enum<T>> enumValueOf(name: String): T = enumValueOfIntrinsic<T>(name)
 
-public fun <T: Enum<T>> enumValues(): Array<T> {
-    throw Exception("Call to this function should've been lowered")
-}
+/**
+ * Returns an array containing enum T entries.
+ */
+public inline fun <reified T: Enum<T>> enumValues(): Array<T> = enumValuesIntrinsic<T>()

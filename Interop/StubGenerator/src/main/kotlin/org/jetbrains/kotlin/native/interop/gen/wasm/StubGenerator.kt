@@ -3,8 +3,8 @@ package org.jetbrains.kotlin.native.interop.gen.wasm
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.native.interop.gen.argsToCompiler
 import org.jetbrains.kotlin.native.interop.gen.wasm.idl.*
-import org.jetbrains.kotlin.native.interop.tool.CommonInteropArguments
-import org.jetbrains.kotlin.native.interop.tool.parseCommandLine
+import org.jetbrains.kotlin.native.interop.gen.jvm.InternalInteropOptions
+import org.jetbrains.kotlin.native.interop.tool.JSInteropArguments
 
 fun kotlinHeader(packageName: String): String {
     return  "package $packageName\n" +
@@ -215,7 +215,7 @@ val Operation.wasmTypedReturnMapping get() = returnType.wasmTypedReturnMapping()
 
 val Attribute.wasmTypedReturnMapping get() = type.wasmTypedReturnMapping()
 
-fun List<Arg>.wasmTypedMapping()
+fun List<Arg>.wasmTypedMapping():List<String>
     = this.map(Arg::wasmTypedMapping)
 
 // TODO: more complex return types, such as returning a pair of Ints
@@ -391,21 +391,20 @@ fun generateJs(interfaces: List<Interface>): String =
 const val idlMathPackage = "kotlinx.interop.wasm.math"
 const val idlDomPackage = "kotlinx.interop.wasm.dom"
 
-fun processIdlLib(args: Array<String>): Array<String> {
-    val arguments = parseCommandLine(args, CommonInteropArguments())
+fun processIdlLib(args: Array<String>, additionalArgs: InternalInteropOptions): Array<String> {
+    val jsInteropArguments = JSInteropArguments()
+    jsInteropArguments.argParser.parse(args)
     // TODO: Refactor me.
-    val userDir = System.getProperty("user.dir")
-    val ktGenRoot = File(arguments.generated ?: userDir).mkdirs()
-    val nativeLibsDir = File(arguments.natives ?: userDir).mkdirs()
+    val ktGenRoot = File(additionalArgs.generated).mkdirs()
+    val nativeLibsDir = File(additionalArgs.natives).mkdirs()
 
-    val idl = when (arguments.pkg) {
-        idlMathPackage-> idlMath
+    val idl = when (jsInteropArguments.pkg) {
+        idlMathPackage -> idlMath
         idlDomPackage -> idlDom
         else -> throw IllegalArgumentException("Please choose either $idlMathPackage or $idlDomPackage for -pkg argument")
     }
-
-    File(ktGenRoot, "kotlin_stubs.kt").writeText(generateKotlin(arguments.pkg!!, idl))
+    File(ktGenRoot, "kotlin_stubs.kt").writeText(generateKotlin(jsInteropArguments.pkg!!, idl))
     File(nativeLibsDir, "js_stubs.js").writeText(generateJs(idl))
-    File(arguments.manifest!!).writeText("") // The manifest is currently unused for wasm.
-    return argsToCompiler(arguments.staticLibrary, arguments.libraryPath)
+    File((additionalArgs.manifest)!!).writeText("") // The manifest is currently unused for wasm.
+    return argsToCompiler(jsInteropArguments.staticLibrary.toTypedArray(), jsInteropArguments.libraryPath.toTypedArray())
 }

@@ -6,8 +6,9 @@
 package kotlin.native.ref
 
 import kotlinx.cinterop.COpaquePointer
-import kotlin.native.internal.NoReorderFields
 import kotlin.native.internal.ExportForCppRuntime
+import kotlin.native.internal.Frozen
+import kotlin.native.internal.NoReorderFields
 
 /**
  *   Theory of operations:
@@ -33,9 +34,13 @@ import kotlin.native.internal.ExportForCppRuntime
 
 // Clear holding the counter object, which refers to the actual object.
 @NoReorderFields
+@Frozen
 internal class WeakReferenceCounter(var referred: COpaquePointer?) : WeakReferenceImpl() {
     // Spinlock, potentially taken when materializing or removing 'referred' object.
     var lock: Int = 0
+
+    // Optimization for concurrent access.
+    var cookie: Int = 0
 
     @SymbolName("Konan_WeakReferenceCounter_get")
     external override fun get(): Any?
@@ -54,3 +59,10 @@ external internal fun getWeakReferenceImpl(referent: Any): WeakReferenceImpl
 @ExportForCppRuntime
 internal fun makeWeakReferenceCounter(referred: COpaquePointer) = WeakReferenceCounter(referred)
 
+internal class PermanentWeakReferenceImpl(val referred: Any): kotlin.native.ref.WeakReferenceImpl() {
+    override fun get(): Any? = referred
+}
+
+// Create a reference to the permanent object.
+@ExportForCppRuntime
+internal fun makePermanentWeakReferenceImpl(referred: Any) = PermanentWeakReferenceImpl(referred)

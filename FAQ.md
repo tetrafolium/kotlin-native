@@ -15,14 +15,20 @@ garbage.
 
 ### Q: How do I create a shared library?
 
-A: Use the `-produce dynamic` compiler switch, or `compilations.main.outputKinds 'DYNAMIC'` in Gradle, i.e.
-```groovy
-targets {
-    fromPreset(presets.iosArm64, 'mylib') {
-       compilations.main.outputKinds 'DYNAMIC'
+A: Use the `-produce dynamic` compiler switch, or `binaries.sharedLib()` in Gradle, i.e.
+
+<div class="sample" markdown="1" theme="idea" mode="kotlin" data-highlight-only>
+
+```kotlin
+kotlin {
+    iosArm64("mylib") {
+        binaries.sharedLib()
     }
 }
 ```
+
+</div>
+
 It will produce a platform-specific shared object (.so on Linux, .dylib on macOS, and .dll on Windows targets) and a
 C language header, allowing the use of all public APIs available in your Kotlin/Native program from C/C++ code.
 See `samples/python_extension` for an example of using such a shared object to provide a bridge between Python and
@@ -31,14 +37,20 @@ Kotlin/Native.
 
 ### Q: How do I create a static library or an object file?
 
-A: Use the `-produce static` compiler switch, or `compilations.main.outputKinds 'STATIC'` in Gradle, i.e.
-```groovy
-targets {
-    fromPreset(presets.iosArm64, 'mylib') {
-       compilations.main.outputKinds 'STATIC'
+A: Use the `-produce static` compiler switch, or `binaries.staticLib()` in Gradle, i.e.
+
+<div class="sample" markdown="1" theme="idea" mode="kotlin" data-highlight-only>
+
+```kotlin
+kotlin {
+    iosArm64("mylib") {
+        binaries.staticLib()
     }
 }
 ```
+
+</div>
+
 It will produce a platform-specific static object (.a library format) and a C language header, allowing you to
 use all the public APIs available in your Kotlin/Native program from C/C++ code.
 
@@ -54,13 +66,52 @@ or set it via the `JAVA_OPTS` environment variable.
 
 A: Use the `-module-name` compiler option or matching Gradle DSL statement, i.e.
 
+<div class="multi-language-sample" data-lang="kotlin">
+<div class="sample" markdown="1" theme="idea" mode="kotlin" data-highlight-only>
+
+```kotlin
+kotlin {
+    iosArm64("myapp") {
+        binaries.framework {
+            freeCompilerArgs += listOf("-module-name", "TheName")
+        }
+    }
+}
+```
+
+</div>
+</div>
+
+<div class="multi-language-sample" data-lang="groovy">
 <div class="sample" markdown="1" theme="idea" mode="groovy">
 
 ```groovy
-targets {
-    fromPreset(presets.iosArm64, 'myapp') {
-       compilations.main.outputKinds 'FRAMEWORK'
-       compilations.main.extraOpts '-module-name', 'TheName'
+kotlin {
+    iosArm64("myapp") {
+        binaries.framework {
+            freeCompilerArgs += ["-module-name", "TheName"]
+        }
+    }
+}
+```
+
+</div>
+</div>
+
+### Q: How do I rename the iOS framework? (default name is _\<project name\>_.framework)
+
+A: Use the `baseName` option. This will also set the module name.
+
+<div class="sample" markdown="1" theme="idea" mode="kotlin" data-highlight-only>
+
+```kotlin
+kotlin {
+    iosArm64("myapp") {
+       binaries {
+          framework {
+              baseName = "TheName"
+          }
+       }
     }
 }
 ```
@@ -76,22 +127,26 @@ A: By default gradle plugin adds it on iOS target.
 Or commandline arguments: `-Xembed-bitcode` (for release) and `-Xembed-bitcode-marker` (debug)
 
 Setting this in a Gradle DSL: 
-<div class="sample" markdown="1" theme="idea" mode="groovy">
+<div class="sample" markdown="1" theme="idea" mode="kotlin" data-highlight-only>
 
-```groovy
-targets {
-    fromPreset(presets.iosArm64, 'myapp') {
-        compilations.main.outputKinds 'FRAMEWORK'
-        compilations.main.embedBitcode BitcodeEmbeddingMode.BITCODE // for release binaries
-        // or BitcodeEmbeddingMode.MARKER for debug binaries
+```kotlin
+kotlin {
+    iosArm64("myapp") {
+        binaries {
+            framework {
+                // Use "marker" to embed the bitcode marker (for debug builds).
+                // Use "disable" to disable embedding.
+                embedBitcode("bitcode") // for release binaries.
+            }
+        }
     }
 }
 ```
 
+</div>
+
 These options have nearly the same effect as clang's `-fembed-bitcode`/`-fembed-bitcode-marker`
 and swiftc's `-embed-bitcode`/`-embed-bitcode-marker`.
-
-</div>
 
 ### Q: Why do I see `InvalidMutabilityException`?
 
@@ -142,8 +197,8 @@ export KONAN_REPO=$PWD/../kotlin-native
 # Run this once since it is costly, you can remove the `clean` task if not big changes were made from the last time you did this
 pushd $KONAN_REPO && git pull && ./gradlew clean dependencies:update dist distPlatformLibs && popd
 
-# In your project, you set have to the konan.home property, and include as composite the shared and gradle-plugin builds
-./gradlew check -Pkonan.home=$KONAN_REPO/dist --include-build $KONAN_REPO/shared --include-build $KONAN_REPO/tools/kotlin-native-gradle-plugin
+# In your project, you set have to the org.jetbrains.kotlin.native.home property, and include as composite the shared and gradle-plugin builds
+./gradlew check -Porg.jetbrains.kotlin.native.home=$KONAN_REPO/dist --include-build $KONAN_REPO/shared --include-build $KONAN_REPO/tools/kotlin-native-gradle-plugin
 ```
 
 </div>

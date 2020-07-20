@@ -33,6 +33,7 @@ class IntrinsicType {
         const val UNSIGNED_COMPARE_TO   = "UNSIGNED_COMPARE_TO"
         const val NOT                   = "NOT"
         const val REINTERPRET           = "REINTERPRET"
+        const val EXTRACT_ELEMENT       = "EXTRACT_ELEMENT"
         const val ARE_EQUAL_BY_VALUE    = "ARE_EQUAL_BY_VALUE"
         const val IEEE_754_EQUALS       = "IEEE_754_EQUALS"
 
@@ -40,8 +41,9 @@ class IntrinsicType {
         const val OBJC_GET_MESSENGER            = "OBJC_GET_MESSENGER"
         const val OBJC_GET_MESSENGER_STRET      = "OBJC_GET_MESSENGER_STRET"
         const val OBJC_GET_OBJC_CLASS           = "OBJC_GET_OBJC_CLASS"
-        const val OBJC_GET_RECEIVER_OR_SUPER    = "OBJC_GET_RECEIVER_OR_SUPER"
+        const val OBJC_CREATE_SUPER_STRUCT      = "OBJC_CREATE_SUPER_STRUCT"
         const val OBJC_INIT_BY                  = "OBJC_INIT_BY"
+        const val OBJC_GET_SELECTOR             = "OBJC_GET_SELECTOR"
 
         // Other
         const val GET_CLASS_TYPE_INFO           = "GET_CLASS_TYPE_INFO"
@@ -53,8 +55,14 @@ class IntrinsicType {
         const val IMMUTABLE_BLOB                = "IMMUTABLE_BLOB"
         const val INIT_INSTANCE                 = "INIT_INSTANCE"
 
+        // Enums
+        const val ENUM_VALUES                   = "ENUM_VALUES"
+        const val ENUM_VALUE_OF                 = "ENUM_VALUE_OF"
+
+        // Coroutines
         const val GET_CONTINUATION              = "GET_CONTINUATION"
-        const val RETURN_IF_SUSPEND             = "RETURN_IF_SUSPEND"
+        const val RETURN_IF_SUSPENDED           = "RETURN_IF_SUSPENDED"
+        const val COROUTINE_LAUNCHPAD           = "COROUTINE_LAUNCHPAD"
 
         // Interop
         const val INTEROP_READ_PRIMITIVE        = "INTEROP_READ_PRIMITIVE"

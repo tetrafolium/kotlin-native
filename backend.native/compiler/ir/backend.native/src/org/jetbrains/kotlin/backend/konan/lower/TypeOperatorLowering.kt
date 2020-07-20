@@ -11,8 +11,8 @@ import org.jetbrains.kotlin.backend.common.lower.at
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlock
 import org.jetbrains.kotlin.ir.util.isSimpleTypeWithQuestionMark
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.containsNull
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.isSubtypeOf
+import org.jetbrains.kotlin.backend.konan.ir.containsNull
+import org.jetbrains.kotlin.backend.konan.ir.isSubtypeOf
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -47,7 +47,7 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
 
     private val builder = context.createIrBuilder(function)
 
-    val throwTypeCastException = context.ir.symbols.ThrowTypeCastException
+    val throwNullPointerException = context.ir.symbols.ThrowNullPointerException
 
     override fun visitFunction(declaration: IrFunction): IrStatement {
         // ignore inner functions during this pass
@@ -61,7 +61,7 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
         return when (classifier) {
             is IrClassSymbol -> this
             is IrTypeParameterSymbol -> {
-                val upperBound = classifier.owner.superTypes.singleOrNull() ?:
+                val upperBound = classifier.owner.superTypes.firstOrNull() ?:
                         TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
 
                 if (this.hasQuestionMark) {
@@ -96,7 +96,7 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
                                 thenPart = if (typeOperand.isSimpleTypeWithQuestionMark)
                                     irNull()
                                 else
-                                    irCall(throwTypeCastException.owner),
+                                    irCall(throwNullPointerException.owner),
 
                                 elsePart = irAs(irGet(argument.owner), typeOperand.makeNotNull())
                         )

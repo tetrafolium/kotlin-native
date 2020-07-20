@@ -24,13 +24,19 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanArtifactWithLibrariesTask
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanBuildingTask
-import org.jetbrains.kotlin.konan.library.SearchPathResolver
+import org.jetbrains.kotlin.konan.*
+import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.library.defaultResolver
+import org.jetbrains.kotlin.konan.library.impl.KonanLibraryImpl
 import org.jetbrains.kotlin.konan.target.Distribution
 import org.jetbrains.kotlin.konan.target.KonanTarget
+import org.jetbrains.kotlin.library.SearchPathResolver
 import java.io.File
 
-open class KonanLibrariesSpec(val task: KonanArtifactWithLibrariesTask, val project: Project) {
+open class KonanLibrariesSpec(
+        @Internal val task: KonanArtifactWithLibrariesTask,
+        @Internal val project: Project
+) {
 
     @InputFiles val files = mutableSetOf<FileCollection>()
 
@@ -47,6 +53,7 @@ open class KonanLibrariesSpec(val task: KonanArtifactWithLibrariesTask, val proj
         @Input get() = mutableSetOf<File>().apply {
             addAll(explicitRepos)
             add(task.destinationDir) // TODO: Check if task is a library - create a Library interface
+            add(task.destinationDir) // TODO: Check if task is a library - create a Library interface
             add(task.project.konanLibsBaseDir.targetSubdir(target))
             addAll(artifacts.flatMap { it.libraries.repos })
             addAll(task.platformConfiguration.files.map { it.parentFile })
@@ -56,7 +63,9 @@ open class KonanLibrariesSpec(val task: KonanArtifactWithLibrariesTask, val proj
         @Internal get() = task.konanTarget
 
     private val friendsTasks = mutableSetOf<KonanBuildingTask>()
-    val friends:Set<File> get() = mutableSetOf<File>().apply {
+
+    @get:Internal // Taken into account by tasks's dependOn.
+    val friends: Set<File> get() = mutableSetOf<File>().apply {
         addAll(friendsTasks.map { it.artifact })
     }
 
@@ -143,14 +152,14 @@ open class KonanLibrariesSpec(val task: KonanArtifactWithLibrariesTask, val proj
     }
 
     fun asFiles(): List<File> = asFiles(
-            defaultResolver(
-                    repos.map { it.absolutePath },
-                    task.konanTarget,
-                    Distribution(konanHomeOverride = project.konanHome)
-            )
+        defaultResolver(
+            repos.map { it.absolutePath },
+            task.konanTarget,
+            Distribution(project.konanHome)
+        )
     )
 
-    fun asFiles(resolver: SearchPathResolver): List<File> = mutableListOf<File>().apply {
+    fun asFiles(resolver: SearchPathResolver<*>): List<File> = mutableListOf<File>().apply {
         files.flatMapTo(this) { it.files }
         addAll(artifactFiles)
         addAll(task.platformConfiguration.files)

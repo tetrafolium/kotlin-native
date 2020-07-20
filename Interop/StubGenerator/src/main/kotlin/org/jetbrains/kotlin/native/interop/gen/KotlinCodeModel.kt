@@ -33,7 +33,7 @@ interface KotlinScope {
      * @return the string to be used as a name in the declaration of the property in current scope,
      * or `null` if the property with given name can't be declared.
      */
-    fun declareProperty(name: String): String?
+    fun declareProperty(receiver: String?, name: String): String?
 
     val mappingBridgeGenerator: MappingBridgeGenerator
 }
@@ -60,11 +60,11 @@ data class Classifier(
         return this.copy(nestedNames = nestedNames + name)
     }
 
-    val relativeFqName: String get() = buildString {
-        append(topLevelName.asSimpleName())
+    fun getRelativeFqName(asSimpleName: Boolean = true): String = buildString {
+        append(topLevelName.run { if (asSimpleName) asSimpleName() else this })
         nestedNames.forEach {
             append('.')
-            append(it.asSimpleName())
+            append(it.run { if (asSimpleName) asSimpleName() else this })
         }
     }
 
@@ -73,15 +73,18 @@ data class Classifier(
             append(pkg)
             append('.')
         }
-        append(relativeFqName)
+        append(getRelativeFqName())
     }
 }
 
 val Classifier.type
-    get() = KotlinClassifierType(this, arguments = emptyList(), nullable = false)
+    get() = KotlinClassifierType(this, arguments = emptyList(), nullable = false, underlyingType = null)
 
 fun Classifier.typeWith(vararg arguments: KotlinTypeArgument) =
-        KotlinClassifierType(this, arguments.toList(), nullable = false)
+        KotlinClassifierType(this, arguments.toList(), nullable = false, underlyingType = null)
+
+fun Classifier.typeAbbreviation(expandedType: KotlinType) =
+        KotlinClassifierType(this, arguments = emptyList(), nullable = false, underlyingType = expandedType)
 
 interface KotlinTypeArgument {
     /**
@@ -99,10 +102,14 @@ interface KotlinType : KotlinTypeArgument {
     fun makeNullableAsSpecified(nullable: Boolean): KotlinType
 }
 
+/**
+ * @property underlyingType is non-null if this type is an alias to another type.
+ */
 data class KotlinClassifierType(
         override val classifier: Classifier,
         val arguments: List<KotlinTypeArgument>,
-        val nullable: Boolean
+        val nullable: Boolean,
+        val underlyingType: KotlinType?
 ) : KotlinType {
 
     override fun makeNullableAsSpecified(nullable: Boolean) = if (this.nullable == nullable) {
@@ -157,6 +164,8 @@ data class KotlinFunctionType(
 internal val cnamesStructsPackageName = "cnames.structs"
 
 object KotlinTypes {
+    val independent = Classifier.topLevel("kotlin.native.internal", "Independent")
+
     val boolean by BuiltInType
     val byte by BuiltInType
     val short by BuiltInType
@@ -178,6 +187,7 @@ object KotlinTypes {
     val map by CollectionClassifier
 
     val nativePtr by InteropType
+    val vector128 by KotlinNativeType
 
     val cOpaque by InteropType
     val cOpaquePointer by InteropType
@@ -189,9 +199,11 @@ object KotlinTypes {
     val objCObjectMeta by InteropClassifier
     val objCClass by InteropClassifier
     val objCClassOf by InteropClassifier
+    val objCProtocol by InteropClassifier
 
     val cValuesRef by InteropClassifier
 
+    val cPointed by InteropClassifier
     val cPointer by InteropClassifier
     val cPointerVar by InteropClassifier
     val cArrayPointer by InteropClassifier
@@ -204,6 +216,9 @@ object KotlinTypes {
 
     val objCObjectBase by InteropClassifier
     val objCObjectBaseMeta by InteropClassifier
+
+    val objCBlockVar by InteropClassifier
+    val objCNotImplementedVar by InteropClassifier
 
     val cValue by InteropClassifier
 
@@ -222,7 +237,7 @@ object KotlinTypes {
 
     private object InteropClassifier : ClassifierAtPackage("kotlinx.cinterop")
     private object InteropType : TypeAtPackage("kotlinx.cinterop")
-
+    private object KotlinNativeType : TypeAtPackage("kotlin.native")
 }
 
 abstract class KotlinFile(
@@ -251,7 +266,7 @@ abstract class KotlinFile(
 
     override fun reference(classifier: Classifier): String = if (classifier.topLevelName in namesToBeDeclared) {
         if (classifier.pkg == this.pkg) {
-            classifier.relativeFqName
+            classifier.getRelativeFqName()
         } else {
             // Don't import if would clash with own declaration:
             classifier.fqName
@@ -263,7 +278,7 @@ abstract class KotlinFile(
     } else {
         if (tryImport(classifier)) {
             // Is successfully imported:
-            classifier.relativeFqName
+            classifier.getRelativeFqName()
         } else {
             classifier.fqName
         }
@@ -281,12 +296,12 @@ abstract class KotlinFile(
 
     override fun declare(classifier: Classifier): String {
         if (classifier.pkg != this.pkg) {
-            throw IllegalArgumentException("wrong package; expected '$pkg', got '${classifier.pkg}'")
+            throw IllegalArgumentException("wrong package for classifier ${classifier.fqName}; expected '$pkg', got '${classifier.pkg}'")
         }
 
         if (!classifier.isTopLevel) {
             throw IllegalArgumentException(
-                    "'${classifier.relativeFqName}' is not top-level thus can't be declared at file scope"
+                    "'${classifier.getRelativeFqName()}' is not top-level thus can't be declared at file scope"
             )
         }
 
@@ -296,17 +311,19 @@ abstract class KotlinFile(
         }
         alreadyDeclared.add(topLevelName)
 
-        return topLevelName.asSimpleName()
+        return topLevelName
     }
 
-    override fun declareProperty(name: String): String? =
-            if (name in declaredProperties || name in namesToBeDeclared || name in importedNameToPkg) {
-                null
-                // TODO: using original global name should be preferred to importing the clashed name.
-            } else {
-                declaredProperties.add(name)
-                name.asSimpleName()
-            }
+    override fun declareProperty(receiver: String?, name: String): String? {
+        val fullName = receiver?.let { "$it.${name}" } ?: name
+        return if (fullName in declaredProperties || name in namesToBeDeclared || name in importedNameToPkg) {
+            null
+            // TODO: using original global name should be preferred to importing the clashed name.
+        } else {
+            declaredProperties.add(fullName)
+            name
+        }
+    }
 
     fun buildImports(): List<String> = importedNameToPkg.mapNotNull { (name, pkg) ->
         if (pkg == "kotlin" || pkg == "kotlinx.cinterop") {
@@ -319,6 +336,11 @@ abstract class KotlinFile(
 
 }
 
-data class KotlinParameter(val name: String, val type: KotlinType) {
-    fun render(scope: KotlinScope) = "${name.asSimpleName()}: ${type.render(scope)}"
+internal fun getTopLevelPropertyDeclarationName(scope: KotlinScope, property: PropertyStub): String {
+    val receiverName = property.receiverType?.underlyingTypeFqName
+    return getTopLevelPropertyDeclarationName(scope, receiverName, property.name)
 }
+
+// Try to use the provided name. If failed, mangle it with underscore and try again:
+private tailrec fun getTopLevelPropertyDeclarationName(scope: KotlinScope, receiver: String?, name: String): String =
+        scope.declareProperty(receiver, name) ?: getTopLevelPropertyDeclarationName(scope, receiver, name + "_")

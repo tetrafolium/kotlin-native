@@ -5,19 +5,15 @@
 
 package org.jetbrains.kotlin.backend.konan.lower
 
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedClassConstructorDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedClassDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
-import org.jetbrains.kotlin.backend.common.lower.SymbolWithIrBuilder
+import org.jetbrains.kotlin.backend.common.ir.*
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.reportWarning
-import org.jetbrains.kotlin.backend.konan.KonanBackendContext
+import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.descriptors.isAbstract
 import org.jetbrains.kotlin.backend.konan.descriptors.synthesizedName
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.fqNameSafe
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.typeWithStarProjections
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.typeWithoutArguments
-import org.jetbrains.kotlin.backend.konan.SYNTHETIC_OFFSET
+import org.jetbrains.kotlin.backend.konan.getIncludedLibraryDescriptors
+import org.jetbrains.kotlin.backend.konan.ir.typeWithStarProjections
+import org.jetbrains.kotlin.backend.konan.ir.typeWithoutArguments
 import org.jetbrains.kotlin.backend.konan.reportCompilationError
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.ir.IrElement
@@ -26,6 +22,9 @@ import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrConstructorImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
+import org.jetbrains.kotlin.ir.descriptors.WrappedClassConstructorDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedClassDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.*
 import org.jetbrains.kotlin.ir.symbols.impl.IrClassSymbolImpl
@@ -33,16 +32,16 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrConstructorSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.ir.util.addChild
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
 import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
-import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 
-internal class TestProcessor (val context: KonanBackendContext) {
+internal class TestProcessor (val context: Context) {
 
     object TEST_SUITE_CLASS: IrDeclarationOriginImpl("TEST_SUITE_CLASS")
     object TEST_SUITE_GENERATED_MEMBER: IrDeclarationOriginImpl("TEST_SUITE_GENERATED_MEMBER")
@@ -105,9 +104,9 @@ internal class TestProcessor (val context: KonanBackendContext) {
                             it.function.endOffset,
                             registerTestCase.valueParameters[1].type,
                             it.function.symbol,
-                            it.function.descriptor,
                             typeArgumentsCount = 0,
-                            valueArgumentsCount = 0))
+                            valueArgumentsCount = 0,
+                            reflectionTarget = null))
                     putValueArgument(2, irBoolean(it.ignored))
                 }
             } else {
@@ -126,9 +125,9 @@ internal class TestProcessor (val context: KonanBackendContext) {
                             it.function.endOffset,
                             registerFunction.valueParameters[1].type,
                             it.function.symbol,
-                            it.function.descriptor,
                             typeArgumentsCount = 0,
-                            valueArgumentsCount = 0))
+                            valueArgumentsCount = 0,
+                            reflectionTarget = null))
                 }
             }
         }
@@ -136,18 +135,14 @@ internal class TestProcessor (val context: KonanBackendContext) {
     // endregion
 
     // region Classes for annotation collection.
-    internal enum class FunctionKind(annotationNameString: String, runtimeKindString: String) {
-        TEST("kotlin.test.Test", "") {
-            override val runtimeKindName: Name get() = throw NotImplementedError()
-        },
-
+    internal enum class FunctionKind(annotationNameString: String, val runtimeKindString: String) {
+        TEST("kotlin.test.Test", ""),
         BEFORE_TEST("kotlin.test.BeforeTest", "BEFORE_TEST"),
         AFTER_TEST("kotlin.test.AfterTest", "AFTER_TEST"),
         BEFORE_CLASS("kotlin.test.BeforeClass", "BEFORE_CLASS"),
         AFTER_CLASS("kotlin.test.AfterClass", "AFTER_CLASS");
 
         val annotationFqName = FqName(annotationNameString)
-        open val runtimeKindName = Name.identifier(runtimeKindString)
 
         companion object {
             val INSTANCE_KINDS = listOf(TEST, BEFORE_TEST, AFTER_TEST)
@@ -239,7 +234,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
                                 warn("Annotation $annotation is not allowed for methods of a companion object")
 
                             constructors.none { it.valueParameters.size == 0 } ->
-                                warn("Test class has no default constructor: $fqNameSafe")
+                                warn("Test class has no default constructor: $fqNameForIrSerialization")
 
                             else ->
                                 testClasses.getTestClass(irClass).registerFunction(function, kind, ignored)
@@ -270,12 +265,12 @@ internal class TestProcessor (val context: KonanBackendContext) {
             // Test runner requires test functions to have the following signature: () -> Unit.
             if (!returnType.isUnit()) {
                 context.reportCompilationError(
-                        "Test function must return Unit: $fqNameSafe", irFile, this
+                        "Test function must return Unit: $fqNameForIrSerialization", irFile, this
                 )
             }
             if (valueParameters.isNotEmpty()) {
                 context.reportCompilationError(
-                        "Test function must have no arguments: $fqNameSafe", irFile, this
+                        "Test function must have no arguments: $fqNameForIrSerialization", irFile, this
                 )
             }
         }
@@ -340,7 +335,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
      */
     private fun buildObjectGetter(objectSymbol: IrClassSymbol,
                                   owner: IrClass,
-                                  getterName: Name) = WrappedSimpleFunctionDescriptor().let { descriptor ->
+                                  getterName: Name): IrSimpleFunction = WrappedSimpleFunctionDescriptor().let { descriptor ->
         IrFunctionImpl(
                 owner.startOffset, owner.endOffset,
                 TEST_SUITE_GENERATED_MEMBER,
@@ -352,7 +347,10 @@ internal class TestProcessor (val context: KonanBackendContext) {
                 isInline = false,
                 isExternal = false,
                 isTailrec = false,
-                isSuspend = false
+                isSuspend = false,
+                isExpect = false,
+                isFakeOverride = false,
+                isOperator = false
         ).apply {
             descriptor.bind(this)
             parent = owner
@@ -376,7 +374,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
      */
     private fun buildInstanceGetter(classSymbol: IrClassSymbol,
                                     owner: IrClass,
-                                    getterName: Name) = WrappedSimpleFunctionDescriptor().let { descriptor ->
+                                    getterName: Name): IrSimpleFunction = WrappedSimpleFunctionDescriptor().let { descriptor ->
         IrFunctionImpl(
                 owner.startOffset, owner.endOffset,
                 TEST_SUITE_GENERATED_MEMBER,
@@ -388,7 +386,10 @@ internal class TestProcessor (val context: KonanBackendContext) {
                 isInline = false,
                 isExternal = false,
                 isTailrec = false,
-                isSuspend = false
+                isSuspend = false,
+                isExpect = false,
+                isFakeOverride = false,
+                isOperator = false
         ).apply {
             descriptor.bind(this)
             parent = owner
@@ -423,7 +424,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
                                            testSuite: IrClassSymbol,
                                            owner: IrClass,
                                            functions: Collection<TestFunction>,
-                                           ignored: Boolean) = WrappedClassConstructorDescriptor().let { descriptor ->
+                                           ignored: Boolean): IrConstructor = WrappedClassConstructorDescriptor().let { descriptor ->
         IrConstructorImpl(
                 testSuite.owner.startOffset, testSuite.owner.endOffset,
                 TEST_SUITE_GENERATED_MEMBER,
@@ -433,7 +434,8 @@ internal class TestProcessor (val context: KonanBackendContext) {
                 testSuite.typeWithStarProjections,
                 isInline = false,
                 isExternal = false,
-                isPrimary = true
+                isPrimary = true,
+                isExpect = false
         ).apply {
             descriptor.bind(this)
             parent = owner
@@ -467,7 +469,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
         }
     }
 
-    private val IrClass.ignored: Boolean get() = descriptor.annotations.hasAnnotation(IGNORE_FQ_NAME)
+    private val IrClass.ignored: Boolean get() = annotations.hasAnnotation(IGNORE_FQ_NAME)
 
     /**
      * Builds a test suite class representing a test class (any class in the original IrFile with method(s)
@@ -475,7 +477,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
      */
     private fun buildClassSuite(testClass: IrClass,
                                 testCompanion: IrClass?,
-                                functions: Collection<TestFunction>) = WrappedClassDescriptor().let { descriptor ->
+                                functions: Collection<TestFunction>): IrClass = WrappedClassDescriptor().let { descriptor ->
         IrClassImpl(
                 testClass.startOffset, testClass.endOffset,
                 TEST_SUITE_CLASS,
@@ -488,7 +490,9 @@ internal class TestProcessor (val context: KonanBackendContext) {
                 isInner = false,
                 isData = false,
                 isExternal = false,
-                isInline = false
+                isInline = false,
+                isExpect = false,
+                isFun = false
         ).apply {
             descriptor.bind(this)
             createParameterDeclarations()
@@ -501,7 +505,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
             }
 
             val constructor = buildClassSuiteConstructor(
-                    testClass.fqNameSafe.toString(), testClassType, testCompanionType,
+                    testClass.fqNameForIrSerialization.toString(), testClassType, testCompanionType,
                     symbol, this, functions, testClass.ignored
             )
 
@@ -523,7 +527,7 @@ internal class TestProcessor (val context: KonanBackendContext) {
             companionGetter?.let { declarations += it }
 
             superTypes += symbols.baseClassSuite.typeWith(listOf(testClassType, testCompanionType))
-            addFakeOverrides()
+            addFakeOverridesViaIncorrectHeuristic()
         }
     }
     //endregion
@@ -604,11 +608,19 @@ internal class TestProcessor (val context: KonanBackendContext) {
     }
     // endregion
 
-    fun process(irModuleFragment: IrModuleFragment) {
-        irModuleFragment.files.forEach {
-            val annotationCollector = AnnotationCollector(it)
-            it.acceptChildrenVoid(annotationCollector)
-            createTestSuites(it, annotationCollector)
+    private fun shouldProcessFile(irFile: IrFile): Boolean = irFile.packageFragmentDescriptor.module.let {
+        // Process test annotations in source libraries too.
+        it == context.moduleDescriptor || it in context.getIncludedLibraryDescriptors()
+    }
+
+    fun process(irFile: IrFile) {
+        // TODO: uses descriptors.
+        if (!shouldProcessFile(irFile)) {
+            return
         }
+
+        val annotationCollector = AnnotationCollector(irFile)
+        irFile.acceptChildrenVoid(annotationCollector)
+        createTestSuites(irFile, annotationCollector)
     }
 }

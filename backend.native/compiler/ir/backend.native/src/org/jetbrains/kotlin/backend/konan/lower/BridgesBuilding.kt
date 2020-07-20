@@ -7,8 +7,7 @@ package org.jetbrains.kotlin.backend.konan.lower
 
 import org.jetbrains.kotlin.backend.common.ClassLoweringPass
 import org.jetbrains.kotlin.backend.common.DeclarationContainerLoweringPass
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedValueParameterDescriptor
+import org.jetbrains.kotlin.backend.common.ir.simpleFunctions
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
@@ -20,6 +19,8 @@ import org.jetbrains.kotlin.ir.builders.*
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedValueParameterDescriptor
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -29,7 +30,6 @@ import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.isNullableAny
-import org.jetbrains.kotlin.ir.util.simpleFunctions
 import org.jetbrains.kotlin.ir.util.transformFlat
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
@@ -37,9 +37,7 @@ import org.jetbrains.kotlin.load.java.BuiltinMethodsWithSpecialGenericSignature
 
 internal class WorkersBridgesBuilding(val context: Context) : DeclarationContainerLoweringPass, IrElementTransformerVoid() {
 
-    val interop = context.interopBuiltIns
     val symbols = context.ir.symbols
-    val nullableAnyType = context.builtIns.nullableAnyType
     lateinit var runtimeJobFunction: IrSimpleFunction
 
     override fun lower(irDeclarationContainer: IrDeclarationContainer) {
@@ -59,8 +57,7 @@ internal class WorkersBridgesBuilding(val context: Context) : DeclarationContain
             override fun visitCall(expression: IrCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
-                val descriptor = expression.descriptor.original
-                if (descriptor != interop.executeImplFunction)
+                if (expression.symbol != symbols.executeImpl)
                     return expression
 
                 val job = expression.getValueArgument(3) as IrFunctionReference
@@ -82,7 +79,10 @@ internal class WorkersBridgesBuilding(val context: Context) : DeclarationContain
                                 isExternal = false,
                                 isTailrec = false,
                                 isSuspend = false,
-                                returnType = context.irBuiltIns.anyNType
+                                returnType = context.irBuiltIns.anyNType,
+                                isExpect = false,
+                                isFakeOverride = false,
+                                isOperator = false
                     ).apply {
                             it.bind(this)
                         }
@@ -116,8 +116,8 @@ internal class WorkersBridgesBuilding(val context: Context) : DeclarationContain
                         endOffset     = job.endOffset,
                         type          = job.type,
                         symbol        = bridge.symbol,
-                        descriptor    = bridge.descriptor,
-                        typeArgumentsCount = 0)
+                        typeArgumentsCount = 0,
+                        reflectionTarget = null)
                 )
                 return expression
             }
@@ -236,7 +236,6 @@ private fun Context.buildBridge(startOffset: Int, endOffset: Int,
                 endOffset,
                 targetSymbol.owner.returnType,
                 targetSymbol,
-                targetSymbol.descriptor,
                 superQualifierSymbol = superQualifierSymbol /* Call non-virtually */
         ).apply {
             bridge.dispatchReceiverParameter?.let {

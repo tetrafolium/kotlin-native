@@ -5,6 +5,7 @@
 
 import kotlinx.cinterop.*
 import objcSmoke.*
+import kotlin.native.concurrent.*
 import kotlin.native.ref.*
 import kotlin.test.*
 
@@ -15,9 +16,11 @@ fun main(args: Array<String>) {
 }
 
 fun run() {
+    // TODO: migrate remaining tests to interop/objc/tests/
     testTypeOps()
-    testConversions()
-    testWeakRefs()
+    testCustomRetain()
+    testExportObjCClass()
+    testLocalizedStrings()
 
     assertEquals(2, ForwardDeclaredEnum.TWO.value)
 
@@ -61,11 +64,21 @@ fun run() {
     }
 
     // hashCode (directly):
-    if (foo.hashCode() == foo.hash().let { it.toInt() xor (it shr 32).toInt() }) {
-        // toString (virtually):
-        println(map.keys.map { it.toString() }.min() == foo.description())
+    // hash() returns value of NSUInteger type.
+    val hash = when (Platform.osFamily) {
+        // `typedef unsigned int NSInteger` on watchOS.
+        OsFamily.WATCHOS -> foo.hash().toInt()
+        // `typedef unsigned long NSUInteger` on iOS, macOS, tvOS.
+        else -> foo.hash().let { it.toInt() xor (it shr 32).toInt() }
     }
-
+    if (foo.hashCode() == hash) {
+        // toString (virtually):
+        if (Platform.memoryModel == MemoryModel.STRICT)
+            println(map.keys.map { it.toString() }.min() == foo.description())
+        else
+            // TODO: hack until proper cycle collection in maps.
+            println(true)
+    }
     println(globalString)
     autoreleasepool {
         globalString = "Another global string"
@@ -77,11 +90,18 @@ fun run() {
         override fun description() = "global object"
     }
     println(globalObject)
+    globalObject = null // Prevent Kotlin object above from leaking.
 
     println(formatStringLength("%d %d", 42, 17))
 
     println(STRING_MACRO)
     println(CFSTRING_MACRO)
+
+    // Ensure that overriding method bridge has retain-autorelease sequence:
+    createObjectWithFactory(object : NSObject(), ObjectFactoryProtocol {
+        override fun create() = autoreleasepool { NSObject() }
+    })
+
 }
 
 fun MutablePairProtocol.swap() {
@@ -115,6 +135,8 @@ class MutablePairImpl(first: Int, second: Int) : NSObject(), MutablePairProtocol
     constructor() : this(123, 321)
 }
 
+interface Zzz
+
 fun testTypeOps() {
     assertTrue(99.asAny() is NSNumber)
     assertTrue(null.asAny() is NSNumber?)
@@ -123,6 +145,7 @@ fun testTypeOps() {
     assertTrue("bar".asAny() is NSString)
 
     assertTrue(Foo.asAny() is FooMeta)
+    assertFalse(Foo.asAny() is Zzz)
     assertTrue(Foo.asAny() is NSObjectMeta)
     assertTrue(Foo.asAny() is NSObject)
     assertFalse(Foo.asAny() is Foo)
@@ -130,6 +153,18 @@ fun testTypeOps() {
     assertFalse(NSString.asAny() is NSCopyingProtocol)
     assertTrue(NSValue.asAny() is NSObjectProtocolMeta)
     assertFalse(NSValue.asAny() is NSObjectProtocol) // Must be true, but not implemented properly yet.
+
+    assertFalse(Any() is ObjCClass)
+    assertFalse(Any() is ObjCClassOf<*>)
+    assertFalse(NSObject().asAny() is ObjCClass)
+    assertFalse(NSObject().asAny() is ObjCClassOf<*>)
+    assertTrue(NSObject.asAny() is ObjCClass)
+    assertTrue(NSObject.asAny() is ObjCClassOf<*>)
+
+    assertFalse(Any() is ObjCProtocol)
+    assertTrue(getPrinterProtocolRaw() is ObjCProtocol)
+    val printerProtocol = getPrinterProtocol()!!
+    assertTrue(printerProtocol.asAny() is ObjCProtocol)
 
     assertEquals(3u, ("foo" as NSString).length())
     assertEquals(4u, ((1..4).joinToString("") as NSString).length())
@@ -146,53 +181,59 @@ fun testTypeOps() {
     assertFails { MutablePairImpl(1, 2).asAny() as Foo }
 }
 
-fun testConversions() {
-    testMethodsOfAny(emptyList<Nothing>(), NSArray())
-    testMethodsOfAny(listOf(1, "foo"), nsArrayOf(1, "foo"))
-    testMethodsOfAny(42, NSNumber.numberWithInt(42), 17)
-}
+private lateinit var retainedMustNotBeDeallocated: MustNotBeDeallocated
 
-fun testMethodsOfAny(kotlinObject: Any, equalNsObject: NSObject, otherObject: Any = Any()) {
-    assertEquals(kotlinObject.hashCode(), equalNsObject.hashCode())
-    assertEquals(kotlinObject.toString(), equalNsObject.toString())
-    assertEquals(kotlinObject, equalNsObject)
-    assertEquals(equalNsObject, kotlinObject)
-    assertNotEquals(equalNsObject, otherObject)
-}
+fun testCustomRetain() {
+    fun test() {
+        useCustomRetainMethods(object : Foo(), CustomRetainMethodsProtocol {
+            override fun returnRetained(obj: Any?) = obj
+            override fun consume(obj: Any?) {}
+            override fun consumeSelf() {}
+            override fun returnRetainedBlock(block: (() -> Unit)?) = block
+        })
 
-fun testWeakRefs() {
-    testWeakReference({ NSObject.new()!! })
-
-    createAndAbandonWeakRef(NSObject())
-
-    testWeakReference({ NSArray.arrayWithArray(listOf(42)) as NSArray })
-}
-
-fun testWeakReference(block: () -> NSObject) {
-    val ref = autoreleasepool {
-        createAndTestWeakReference(block)
+        CustomRetainMethodsImpl().let {
+            it.returnRetained(Any())
+            retainedMustNotBeDeallocated = MustNotBeDeallocated() // Retain to detect possible over-release.
+            it.consume(retainedMustNotBeDeallocated)
+            it.consumeSelf()
+            it.returnRetainedBlock({})!!()
+        }
     }
 
-    assertNull(ref.get())
-}
-
-fun createAndTestWeakReference(block: () -> NSObject): WeakReference<NSObject> {
-    val ref = createWeakReference(block)
-    assertNotNull(ref.get())
-    assertEquals(ref.get()!!.hash(), ref.get()!!.hash())
-    return ref
-}
-
-fun createWeakReference(block: () -> NSObject) = WeakReference(block())
-
-fun createAndAbandonWeakRef(obj: NSObject) {
-    WeakReference(obj)
-}
-
-fun nsArrayOf(vararg elements: Any): NSArray = NSMutableArray().apply {
-    elements.forEach {
-        this.addObject(it as ObjCObject)
+    autoreleasepool {
+        test()
+        kotlin.native.internal.GC.collect()
     }
+
+    assertFalse(unexpectedDeallocation)
 }
+
+private const val TestExportObjCClass1Name = "TestExportObjCClass"
+@ExportObjCClass(TestExportObjCClass1Name) class TestExportObjCClass1 : NSObject()
+
+@ExportObjCClass class TestExportObjCClass2 : NSObject()
+
+const val TestExportObjCClass34Name = "TestExportObjCClass34"
+@ExportObjCClass(TestExportObjCClass34Name) class TestExportObjCClass3 : NSObject()
+@ExportObjCClass(TestExportObjCClass34Name) class TestExportObjCClass4 : NSObject()
+
+fun testExportObjCClass() {
+    assertEquals(TestExportObjCClass1Name, TestExportObjCClass1().objCClassName)
+    assertEquals("TestExportObjCClass2", TestExportObjCClass2().objCClassName)
+
+    assertTrue((TestExportObjCClass3().objCClassName == TestExportObjCClass34Name)
+            xor (TestExportObjCClass4().objCClassName == TestExportObjCClass34Name))
+}
+
+fun testLocalizedStrings() {
+    val key = "screen_main_plural_string"
+    val localizedString = NSBundle.mainBundle.localizedStringForKey(key, value = "", table = "Localizable")
+    val string = NSString.localizedStringWithFormat(localizedString, 5)
+    assertEquals("Plural: 5 apples", string)
+}
+
+private val Any.objCClassName: String
+    get() = object_getClassName(this)!!.toKString()
 
 fun Any?.asAny(): Any? = this

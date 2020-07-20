@@ -11,11 +11,9 @@ import kotlin.random.*
 
 /** Copies typed varargs array to an array of objects */
 internal actual fun <T> Array<out T>.copyToArrayOfAny(isVarargs: Boolean): Array<out Any?> =
-        if (isVarargs)
-            // if the array came from varargs and already is array of Any, copying isn't required.
-            @Suppress("UNCHECKED_CAST") (this as Array<out Any?>)
-        else
-            @Suppress("UNCHECKED_CAST") (this.copyOfUninitializedElements(this.size) as Array<out Any?>)
+        // if the array came from varargs and already is array of Any, copying isn't required.
+        if (isVarargs) this
+        else this.copyOfUninitializedElements(this.size)
 
 
 /**
@@ -43,6 +41,23 @@ public interface MutableIterable<out T> : Iterable<T> {
 }
 
 
+@PublishedApi
+@SinceKotlin("1.3")
+@ExperimentalStdlibApi
+@kotlin.internal.InlineOnly
+internal actual inline fun <E> buildListInternal(builderAction: MutableList<E>.() -> Unit): List<E> {
+    return ArrayList<E>().apply(builderAction).build()
+}
+
+@PublishedApi
+@SinceKotlin("1.3")
+@ExperimentalStdlibApi
+@kotlin.internal.InlineOnly
+internal actual inline fun <E> buildListInternal(capacity: Int, builderAction: MutableList<E>.() -> Unit): List<E> {
+    return ArrayList<E>(capacity).apply(builderAction).build()
+}
+
+
 /**
  * Replaces each element in the list with a result of a transformation specified.
  */
@@ -59,7 +74,7 @@ public fun <T> MutableList<T>.replaceAll(transformation: (T) -> T) {
  *
  * @return a [Map] associating the key of each group with the count of elements in the group.
  *
- * @sample samples.collections.Collections.Transformations.groupingByEachCount
+ * @sample samples.collections.Grouping.groupingByEachCount
  */
 @SinceKotlin("1.1")
 public actual fun <T, K> Grouping<T, K>.eachCount(): Map<K, Int> = eachCountTo(mutableMapOf<K, Int>())

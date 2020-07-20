@@ -1,27 +1,32 @@
 package org.jetbrains.kotlin.backend.konan.cgen
 
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedValueParameterDescriptor
+import org.jetbrains.kotlin.backend.common.ir.simpleFunctions
 import org.jetbrains.kotlin.backend.common.lower.irBlock
 import org.jetbrains.kotlin.backend.common.lower.irThrow
-import org.jetbrains.kotlin.backend.konan.descriptors.createAnnotation
 import org.jetbrains.kotlin.backend.konan.ir.KonanSymbols
+import org.jetbrains.kotlin.backend.konan.ir.buildSimpleAnnotation
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
-import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.*
-import org.jetbrains.kotlin.ir.declarations.*
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
+import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
-import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.ir.descriptors.WrappedValueParameterDescriptor
 import org.jetbrains.kotlin.ir.expressions.IrExpression
+import org.jetbrains.kotlin.ir.expressions.IrMemberAccessExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrTryImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrValueParameterSymbolImpl
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.impl.IrUninitializedType
-import org.jetbrains.kotlin.ir.util.*
+import org.jetbrains.kotlin.ir.types.impl.*
+import org.jetbrains.kotlin.ir.util.constructors
+import org.jetbrains.kotlin.ir.util.irBuilder
+import org.jetbrains.kotlin.ir.util.irCatch
 import org.jetbrains.kotlin.name.Name
 
 internal class CFunctionBuilder {
@@ -69,7 +74,7 @@ internal class KotlinBridgeBuilder(
         isExternal: Boolean
 ) {
     private var counter = 0
-    private val bridge: IrFunction = createKotlinBridge(startOffset, endOffset, cName, stubs.symbols, isExternal)
+    private val bridge: IrFunction = createKotlinBridge(startOffset, endOffset, cName, stubs, isExternal)
     val irBuilder: IrBuilderWithScope = irBuilder(stubs.irBuiltIns, bridge.symbol).at(startOffset, endOffset)
 
     fun addParameter(type: IrType): IrValueParameter {
@@ -99,20 +104,11 @@ private fun createKotlinBridge(
         startOffset: Int,
         endOffset: Int,
         cBridgeName: String,
-        symbols: KonanSymbols,
+        stubs: KotlinStubs,
         isExternal: Boolean
-): IrFunctionImpl {
-    val bridgeAnnotations = Annotations.create(
-            listOf(
-                    if (isExternal) {
-                        createAnnotation(symbols.symbolName.descriptor, "value" to cBridgeName)
-                    } else {
-                        createAnnotation(symbols.exportForCppRuntime.descriptor, "name" to cBridgeName)
-                    }
-            )
-    )
-    val bridgeDescriptor = WrappedSimpleFunctionDescriptor(bridgeAnnotations)
-    val bridge = IrFunctionImpl(
+): IrFunction {
+    val bridgeDescriptor = WrappedSimpleFunctionDescriptor()
+    @Suppress("DEPRECATION") val bridge = IrFunctionImpl(
             startOffset,
             endOffset,
             IrDeclarationOrigin.DEFINED,
@@ -124,9 +120,21 @@ private fun createKotlinBridge(
             isInline = false,
             isExternal = isExternal,
             isTailrec = false,
-            isSuspend = false
+            isSuspend = false,
+            isExpect = false,
+            isFakeOverride = false,
+            isOperator = false
     )
     bridgeDescriptor.bind(bridge)
+    if (isExternal) {
+        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
+                stubs.symbols.symbolName.owner, cBridgeName)
+        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
+                stubs.symbols.filterExceptions.owner)
+    } else {
+        bridge.annotations += buildSimpleAnnotation(stubs.irBuiltIns, startOffset, endOffset,
+                stubs.symbols.exportForCppRuntime.owner, cBridgeName)
+    }
     return bridge
 }
 
@@ -159,7 +167,7 @@ internal class KotlinCBridgeBuilder(
 internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, private val symbols: KonanSymbols) {
     val prepare = mutableListOf<IrStatement>()
     val arguments = mutableListOf<IrExpression>()
-    val cleanup = mutableListOf<IrStatement>()
+    val cleanup = mutableListOf<IrBuilderWithScope.() -> IrStatement>()
 
     private var memScope: IrVariable? = null
 
@@ -172,8 +180,10 @@ internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, priv
         prepare += newMemScope
 
         val clearImpl = symbols.interopMemScope.owner.simpleFunctions().single { it.name.asString() == "clearImpl" }
-        cleanup += irCall(clearImpl).apply {
-            dispatchReceiver = irGet(memScope!!)
+        cleanup += {
+            irCall(clearImpl).apply {
+                dispatchReceiver = irGet(memScope!!)
+            }
         }
 
         irGet(newMemScope)
@@ -181,7 +191,7 @@ internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, priv
 
     fun build(
             function: IrFunction,
-            transformCall: (IrCall) -> IrExpression = { it }
+            transformCall: (IrMemberAccessExpression<*>) -> IrExpression = { it }
     ): IrExpression {
         val arguments = this.arguments.toMutableList()
 
@@ -207,15 +217,18 @@ internal class KotlinCallBuilder(private val irBuilder: IrBuilderWithScope, priv
                     +kotlinCall
                 } else {
                     // Note: generating try-catch as finally blocks are already lowered.
-                    +IrTryImpl(startOffset, endOffset, kotlinCall.type).apply {
+                    val result = irTemporary(IrTryImpl(startOffset, endOffset, kotlinCall.type).apply {
                         tryResult = kotlinCall
                         catches += irCatch(context.irBuiltIns.throwableType).apply {
                             result = irBlock(kotlinCall) {
-                                cleanup.forEach { +it }
+                                cleanup.forEach { +it() }
                                 +irThrow(irGet(catchParameter))
                             }
                         }
-                    }
+                    })
+                    // TODO: consider handling a cleanup failure properly.
+                    cleanup.forEach { +it() }
+                    +irGet(result)
                 }
             }
         }

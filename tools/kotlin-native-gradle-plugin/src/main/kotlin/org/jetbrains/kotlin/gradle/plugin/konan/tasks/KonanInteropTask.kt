@@ -22,11 +22,15 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import org.gradle.util.ConfigureUtil
 import org.gradle.workers.IsolationMode
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
 import org.jetbrains.kotlin.gradle.plugin.konan.*
 import org.jetbrains.kotlin.gradle.plugin.konan.KonanInteropSpec.IncludeDirectoriesSpec
 import org.jetbrains.kotlin.gradle.plugin.model.KonanModelArtifact
 import org.jetbrains.kotlin.gradle.plugin.model.KonanModelArtifactImpl
+import org.jetbrains.kotlin.konan.CURRENT
+import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.library.defaultResolver
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.Distribution
@@ -39,10 +43,10 @@ import javax.inject.Inject
  * A task executing cinterop tool with the given args and compiling the stubs produced by this tool.
  */
 
-open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecutor) : KonanBuildingTask(), KonanInteropSpec {
+open class KonanInteropTask @Inject constructor(@Internal val workerExecutor: WorkerExecutor) : KonanBuildingTask(), KonanInteropSpec {
 
-    @Internal override val toolRunner: KonanToolRunner =
-        KonanInteropRunner(project, project.konanExtension.jvmArgs)
+    @get:Internal
+    override val toolRunner: KonanToolRunner = KonanInteropRunner(project, project.konanExtension.jvmArgs)
 
     override fun init(config: KonanBuildingConfig<*>, destinationDir: File, artifactName: String, target: KonanTarget) {
         super.init(config, destinationDir, artifactName, target)
@@ -73,17 +77,17 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
     @InputFiles val headers   = mutableSetOf<FileCollection>()
     @InputFiles val linkFiles = mutableSetOf<FileCollection>()
 
-    override fun buildArgs() = mutableListOf<String>().apply {
+    fun buildArgs() = mutableListOf<String>().apply {
         addArg("-o", artifact.canonicalPath)
 
         addArgIfNotNull("-target", konanTarget.visibleName)
         addArgIfNotNull("-def", defFile.canonicalPath)
         addArgIfNotNull("-pkg", packageName)
 
-        addFileArgs("-h", headers)
+        addFileArgs("-header", headers)
 
         compilerOpts.forEach {
-            addArg("-copt", it)
+            addArg("-compiler-option", it)
         }
 
         val linkerOpts = mutableListOf<String>().apply { addAll(linkerOpts) }
@@ -91,10 +95,10 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
             linkerOpts.addAll(it.files.map { it.canonicalPath })
         }
         linkerOpts.forEach {
-            addArg("-lopt", it)
+            addArg("-linker-option", it)
         }
 
-        addArgs("-copt", includeDirs.allHeadersDirs.map { "-I${it.absolutePath}" })
+        addArgs("-compiler-option", includeDirs.allHeadersDirs.map { "-I${it.absolutePath}" })
         addArgs("-headerFilterAdditionalSearchPrefix", includeDirs.headerFilterDirs.map { it.absolutePath })
 
         addArgs("-repo", libraries.repos.map { it.canonicalPath })
@@ -103,7 +107,8 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
         addArgs("-library", libraries.namedKlibs)
         addArgs("-library", libraries.artifacts.map { it.artifact.canonicalPath })
 
-        addKey("-nodefaultlibs", noDefaultLibs)
+        addKey("-no-default-libs", noDefaultLibs)
+        addKey("-no-endorsed-libs", noEndorsedLibs)
 
         addAll(extraOpts)
     }
@@ -169,9 +174,9 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
     override fun toModelArtifact(): KonanModelArtifact {
         val repos = libraries.repos
         val resolver = defaultResolver(
-                repos.map { it.absolutePath },
-                konanTarget,
-                Distribution(konanHomeOverride = project.konanHome)
+            repos.map { it.absolutePath },
+            konanTarget,
+            Distribution(project.konanHome)
         )
 
         return KonanModelArtifactImpl(
@@ -188,15 +193,15 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
     }
     // endregion
 
-    internal class RunTool @Inject constructor(
-            val taskName: String,
-            val args: List<String>
-    ) : Runnable {
+    internal interface RunToolParameters: WorkParameters {
+        var taskName: String
+        var args: List<String>
+    }
 
-
-        override fun run() {
-            val toolRunner = interchangeBox.remove(taskName) ?: error(":(")
-            toolRunner.run(args)
+    internal abstract class RunTool @Inject constructor() : WorkAction<RunToolParameters> {
+        override fun execute() {
+            val toolRunner = interchangeBox.remove(parameters.taskName) ?: error(":(")
+            toolRunner.run(parameters.args)
         }
     }
 
@@ -207,10 +212,11 @@ open class KonanInteropTask @Inject constructor(val workerExecutor: WorkerExecut
         }
         val args = buildArgs()
         if (enableParallel) {
+            val workQueue = workerExecutor.noIsolation()
             interchangeBox[this.path] = toolRunner
-            workerExecutor.submit(RunTool::class.java) {
-                it.isolationMode = IsolationMode.NONE
-                it.params(this.path, args)
+            workQueue.submit(RunTool::class.java) {
+                it.taskName = this.path
+                it.args = args
             }
         } else {
             toolRunner.run(args)

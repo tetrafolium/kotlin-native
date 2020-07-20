@@ -15,8 +15,10 @@ external public fun initRuntimeIfNeeded(): Unit
 
 /**
  * Deinitializes Kotlin runtime for the current thread, if was inited.
+ * Cannot be called from Kotlin frames holding references, thus deprecated.
  */
 @SymbolName("Kotlin_deinitRuntimeIfNeeded")
+@Deprecated("Deinit runtime can not be called from Kotlin", level = DeprecationLevel.ERROR)
 external public fun deinitRuntimeIfNeeded(): Unit
 
 /**
@@ -50,3 +52,10 @@ public fun setUnhandledExceptionHook(hook: ReportUnhandledExceptionHook): Report
 
 @SymbolName("Kotlin_setUnhandledExceptionHook")
 external private fun setUnhandledExceptionHook0(hook: ReportUnhandledExceptionHook): ReportUnhandledExceptionHook?
+
+/**
+ * Compute stable wrt potential object relocations by the memory manager identity hash code.
+ * @return 0 for `null` object, identity hash code otherwise.
+ */
+@SymbolName("Kotlin_Any_hashCode")
+public external fun Any?.identityHashCode(): Int

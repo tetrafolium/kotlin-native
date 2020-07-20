@@ -42,28 +42,17 @@
 #include "SourceInfo.h"
 #include "Types.h"
 #include "Utils.h"
+#include "ObjCExceptions.h"
 
 namespace {
 
-// TODO: it seems to be very common case; does C++ std library provide something like this?
-class AutoFree {
- private:
-  void* mem_;
-
- public:
-  AutoFree(void* mem): mem_(mem) {}
-
-  ~AutoFree() {
-    konan::free(mem_);
-  }
-};
-
-// RuntimeUtiks.kt
+// RuntimeUtils.kt
 extern "C" void ReportUnhandledException(KRef throwable);
 extern "C" void ExceptionReporterLaunchpad(KRef reporter, KRef throwable);
 
 KRef currentUnhandledExceptionHook = nullptr;
 int32_t currentUnhandledExceptionHookLock = 0;
+int32_t currentUnhandledExceptionHookCookie = 0;
 
 #if USE_GCC_UNWIND
 struct Backtrace {
@@ -114,18 +103,26 @@ _Unwind_Reason_Code unwindCallback(
 }
 #endif
 
+THREAD_LOCAL_VARIABLE bool disallowSourceInfo = false;
+
+SourceInfo getSourceInfo(KConstRef stackTrace, int index) {
+  return disallowSourceInfo
+      ? SourceInfo { .fileName = nullptr, .lineNumber = -1, .column = -1 }
+      : Kotlin_getSourceInfo(*PrimitiveArrayAddressOfElementAt<KNativePtr>(stackTrace->array(), index));
+}
+
 }  // namespace
 
 extern "C" {
 
 // TODO: this implementation is just a hack, e.g. the result is inexact;
 // however it is better to have an inexact stacktrace than not to have any.
-OBJ_GETTER0(GetCurrentStackTrace) {
+NO_INLINE OBJ_GETTER0(Kotlin_getCurrentStackTrace) {
 #if OMIT_BACKTRACE
   return AllocArrayInstance(theNativePtrArrayTypeInfo, 0, OBJ_RESULT);
 #else
-  // Skips first 3 elements as irrelevant.
-  constexpr int kSkipFrames = 3;
+  // Skips first 2 elements as irrelevant: this function and primary Throwable constructor.
+  constexpr int kSkipFrames = 2;
 #if USE_GCC_UNWIND
   int depth = 0;
   _Unwind_Backtrace(depthCountCallback, &depth);
@@ -155,7 +152,9 @@ OBJ_GETTER0(GetCurrentStackTrace) {
 OBJ_GETTER(GetStackTraceStrings, KConstRef stackTrace) {
 #if OMIT_BACKTRACE
   ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, 1, OBJ_RESULT);
-  CreateStringFromCString("<UNIMPLEMENTED>", ArrayAddressOfElementAt(result->array(), 0));
+  ObjHolder holder;
+  CreateStringFromCString("<UNIMPLEMENTED>", holder.slot());
+  UpdateHeapRef(ArrayAddressOfElementAt(result->array(), 0), holder.obj());
   return result;
 #else
   uint32_t size = stackTrace->array()->count_;
@@ -171,15 +170,17 @@ OBJ_GETTER(GetStackTraceStrings, KConstRef stackTrace) {
     }
     char line[512];
     konan::snprintf(line, sizeof(line) - 1, "%s (%p)", symbol, (void*)(intptr_t)address);
-    CreateStringFromCString(line, ArrayAddressOfElementAt(strings->array(), index));
+    ObjHolder holder;
+    CreateStringFromCString(line, holder.slot());
+    UpdateHeapRef(ArrayAddressOfElementAt(strings->array(), index), holder.obj());
   }
 #else
   if (size > 0) {
     char **symbols = backtrace_symbols(PrimitiveArrayAddressOfElementAt<KNativePtr>(stackTrace->array(), 0), size);
     RuntimeCheck(symbols != nullptr, "Not enough memory to retrieve the stacktrace");
-    AutoFree autoFree(symbols);
+
     for (int index = 0; index < size; ++index) {
-      auto sourceInfo = Kotlin_getSourceInfo(*PrimitiveArrayAddressOfElementAt<KNativePtr>(stackTrace->array(), index));
+      auto sourceInfo = getSourceInfo(stackTrace, index);
       const char* symbol = symbols[index];
       const char* result;
       char line[1024];
@@ -194,8 +195,12 @@ OBJ_GETTER(GetStackTraceStrings, KConstRef stackTrace) {
       } else {
         result = symbol;
       }
-      CreateStringFromCString(result, ArrayAddressOfElementAt(strings->array(), index));
+      ObjHolder holder;
+      CreateStringFromCString(result, holder.slot());
+      UpdateHeapRef(ArrayAddressOfElementAt(strings->array(), index), holder.obj());
     }
+    // Not konan::free. Used to free memory allocated in backtrace_symbols where malloc is used.
+    free(symbols);
   }
 #endif
   RETURN_OBJ(strings);
@@ -209,19 +214,20 @@ void ThrowException(KRef exception) {
   PrintThrowable(exception);
   RuntimeCheck(false, "Exceptions unsupported");
 #else
-  throw ObjHolder(exception);
+  throw ExceptionObjHolder(exception);
 #endif
 }
 
 OBJ_GETTER(Kotlin_setUnhandledExceptionHook, KRef hook) {
-  RETURN_RESULT_OF(SwapRefLocked,
-    &currentUnhandledExceptionHook, currentUnhandledExceptionHook, hook, &currentUnhandledExceptionHookLock);
+  RETURN_RESULT_OF(SwapHeapRefLocked,
+    &currentUnhandledExceptionHook, currentUnhandledExceptionHook, hook, &currentUnhandledExceptionHookLock,
+    &currentUnhandledExceptionHookCookie);
 }
 
 void OnUnhandledException(KRef throwable) {
   ObjHolder handlerHolder;
-  auto* handler = SwapRefLocked(&currentUnhandledExceptionHook, currentUnhandledExceptionHook, nullptr,
-     &currentUnhandledExceptionHookLock, handlerHolder.slot());
+  auto* handler = SwapHeapRefLocked(&currentUnhandledExceptionHook, currentUnhandledExceptionHook, nullptr,
+     &currentUnhandledExceptionHookLock,  &currentUnhandledExceptionHookCookie, handlerHolder.slot());
   if (handler == nullptr) {
     ReportUnhandledException(throwable);
   } else {
@@ -229,8 +235,23 @@ void OnUnhandledException(KRef throwable) {
   }
 }
 
+#if KONAN_REPORT_BACKTRACE_TO_IOS_CRASH_LOG
+static bool terminating = false;
+static SimpleMutex terminatingMutex;
+#endif
+
 RUNTIME_NORETURN void TerminateWithUnhandledException(KRef throwable) {
   OnUnhandledException(throwable);
+
+#if KONAN_REPORT_BACKTRACE_TO_IOS_CRASH_LOG
+  {
+    LockGuard<SimpleMutex> lock(terminatingMutex);
+    if (!terminating) {
+      ReportBacktraceToIosCrashLog(throwable);
+    }
+  }
+#endif
+
   konan::abort();
 }
 
@@ -240,20 +261,31 @@ RUNTIME_NORETURN void TerminateWithUnhandledException(KRef throwable) {
 
 static void (*oldTerminateHandler)() = nullptr;
 
+static void callOldTerminateHandler() {
+#if KONAN_REPORT_BACKTRACE_TO_IOS_CRASH_LOG
+  {
+    LockGuard<SimpleMutex> lock(terminatingMutex);
+    terminating = true;
+  }
+#endif
+
+  RuntimeCheck(oldTerminateHandler != nullptr, "Underlying exception handler is not set.");
+  oldTerminateHandler();
+}
+
 static void KonanTerminateHandler() {
   auto currentException = std::current_exception();
-  RuntimeCheck(oldTerminateHandler != nullptr, "Underlying exception handler is not set.");
   if (!currentException) {
     // No current exception.
-    oldTerminateHandler();
+    callOldTerminateHandler();
   } else {
     try {
       std::rethrow_exception(currentException);
-    } catch (ObjHolder& e) {
+    } catch (ExceptionObjHolder& e) {
       TerminateWithUnhandledException(e.obj());
     } catch (...) {
       // Not a Kotlin exception.
-      oldTerminateHandler();
+      callOldTerminateHandler();
     }
   }
 }
@@ -279,3 +311,7 @@ void SetKonanTerminateHandler() {
 #endif // KONAN_OBJC_INTEROP
 
 } // extern "C"
+
+void DisallowSourceInfo() {
+  disallowSourceInfo = true;
+}

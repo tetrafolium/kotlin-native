@@ -8,13 +8,11 @@
 
 package kotlin
 
-import kotlin.collections.*
 import kotlin.internal.PureReifiable
 import kotlin.native.internal.ExportTypeInfo
-import kotlin.native.internal.InlineConstructor
-import kotlin.util.sortArray
-import kotlin.util.sortArrayComparable
-import kotlin.util.sortArrayWith
+import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
+import kotlin.native.internal.PointsTo
 
 /**
  * An array of bytes.
@@ -27,9 +25,11 @@ public final class ByteArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Byte): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -39,9 +39,19 @@ public final class ByteArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_ByteArray_get")
     external public operator fun get(index: Int): Byte
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_ByteArray_set")
     external public operator fun set(index: Int, value: Byte): Unit
 
@@ -78,9 +88,11 @@ public final class CharArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Char): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -91,9 +103,19 @@ public final class CharArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_CharArray_get")
     external public operator fun get(index: Int): Char
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_CharArray_set")
     external public operator fun set(index: Int, value: Char): Unit
 
@@ -130,9 +152,11 @@ public final class ShortArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Short): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -143,9 +167,19 @@ public final class ShortArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_ShortArray_get")
     external public operator fun get(index: Int): Short
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_ShortArray_set")
     external public operator fun set(index: Int, value: Short): Unit
 
@@ -182,9 +216,11 @@ public final class IntArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Int): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -195,9 +231,19 @@ public final class IntArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_IntArray_get")
     external public operator fun get(index: Int): Int
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_IntArray_set")
     external public operator fun set(index: Int, value: Int): Unit
 
@@ -234,9 +280,11 @@ public final class LongArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Long): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -247,9 +295,19 @@ public final class LongArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_LongArray_get")
     external public operator fun get(index: Int): Long
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_LongArray_set")
     external public operator fun set(index: Int, value: Long): Unit
 
@@ -286,9 +344,11 @@ public final class FloatArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Float): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -299,9 +359,19 @@ public final class FloatArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_FloatArray_get")
     external public operator fun get(index: Int): Float
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_FloatArray_set")
     external public operator fun set(index: Int, value: Float): Unit
 
@@ -334,9 +404,11 @@ public final class DoubleArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Double): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -347,9 +419,19 @@ public final class DoubleArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_DoubleArray_get")
     external public operator fun get(index: Int): Double
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_DoubleArray_set")
     external public operator fun set(index: Int, value: Double): Unit
 
@@ -382,9 +464,11 @@ public final class BooleanArray {
 
     /**
      * Creates a new array of the specified [size], where each element is calculated by calling the specified
-     * [init] function. The [init] function returns an array element given its index.
+     * [init] function.
+     *
+     * The function [init] is called for each array element sequentially starting from the first one.
+     * It should return the value for an array element given its index.
      */
-    @InlineConstructor
     public constructor(size: Int, init: (Int) -> Boolean): this(size) {
         for (i in 0..size - 1) {
             this[i] = init(i)
@@ -395,9 +479,19 @@ public final class BooleanArray {
     public val size: Int
         get() = getArrayLength()
 
+    /**
+     * Returns the array element at the given [index].  This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_BooleanArray_get")
     external public operator fun get(index: Int): Boolean
 
+    /**
+     * Sets the element at the given [index] to the given [value]. This method can be called using the index operator.
+     *
+     * If the [index] is out of bounds of this array, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_BooleanArray_set")
     external public operator fun set(index: Int, value: Boolean): Unit
 
@@ -433,8 +527,9 @@ public inline fun <reified @PureReifiable T> arrayOfNulls(size: Int): Array<T?> 
 /**
  * Returns an array containing the specified elements.
  */
-@Suppress("UNCHECKED_CAST")
-public inline fun <reified @PureReifiable T> arrayOf(vararg elements: T): Array<T> = elements as Array<T>
+@TypedIntrinsic(IntrinsicType.IDENTITY)
+@PointsTo(0, 1) // <return> points to <array> argument.
+public external inline fun <reified @PureReifiable T> arrayOf(vararg elements: T): Array<T>
 
 @SymbolName("Kotlin_emptyArray")
 external public fun <T> emptyArray(): Array<T>

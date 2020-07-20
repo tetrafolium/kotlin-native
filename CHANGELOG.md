@@ -1,3 +1,125 @@
+# v1.4.0-M3 (Jun 2020)
+  * Tune GC to improve execution time performance ([`KT-19076`](https://youtrack.jetbrains.com/issue/KT-19076)).
+  * Handle variadic block types in ObjC interop ([`KT-36766`](https://youtrack.jetbrains.com/issue/KT-36766))
+
+# v1.3.72 (April 2020)
+  * Fix ios_x64 platform libs cache for iOS 11 and 12 (GH-4071)
+
+# v1.3.71 (March 2020)
+  * Fix `lazy {}` memory leak regression ([`KT-37232`](https://youtrack.jetbrains.com/issue/KT-37232), GH-3944)
+  * Fix using cached Kotlin subclasses of Objective-C classes (GH-3986)
+  
+# v1.4.0-M1 (Mar 2020) milestone
+  * Experimental mimalloc allocator support (-Xallocator=mimalloc) to improve execution time performance.
+  * Improved support for -Xobjc-generics and enabled by default (GH-3778).
+  * Reworked exception handling in ObjC/Swift interop.
+
+# v1.3.70 (Dec 2019)
+  * Support compiler caches for debug mode (GH-3650)
+  * Support running Kotlin/Native compiler from Gradle daemon (GH-3442)
+  * Support multiple independent Kotlin frameworks in the same application (GH-3457)
+  * Compile-time allocation for some singleton objects (GH-3645)
+  * Native support for SIMD vector types in compiler and interop (GH-3498)
+  * API for runtime detector of cyclic garbage (GH-3616)
+  * Commonized StringBuilder (GH-3593) and Float.rangeTo (KT-35299)
+  * Fix interop with localized strings (GH-3562)
+  * Provide utility for user-side generation of platform libraries (GH-3538)
+  * On-stack allocation using local escape analysis (GH-3625)
+  * Code coverage support on Linux and Windows (GH-3403)
+  * Debugging experience improvements (GH-3561, GH-3638, GH-3606)
+
+# v1.3.60 (Oct 2019)
+  * Support XCode 11
+  * Switch to LLVM 8.0
+  * New compiler targets:
+    * watchOS targets, watchos_x86, watchos_arm64 and watchos_arm32 (GH-3323, GH-3404, GH-3344)
+    * tvOS targets tvos_x64 and tvos_arm64 (GH-3303, GH-3363)
+    * native Android targets android_x86 and android_x64 (GH-3306, GH-3314)
+  * Standard CLI library kotlinx.cli is shipped with the compiler distribution (GH-3215)
+  * Improved debug information for inline functions (KT-28929, GH-3292)
+  * Improved runtime performance of interface calls, up to 5x faster (GH-3377)
+  * Improved runtime performance of type checks, up to 50x faster (GH-3291)
+  * Produce native binaries directly from klibs, speeds up large project compilation (GH-3246)
+  * Supported arbitrary (up to 255 inclusive) function arity (GH-3253)
+  * Supported callable references to suspend functions (GH-3197)
+  * Implemented experimental -Xg0 switch, symbolication of release binaries for iOS (GH-3233, GH-3367)
+  * Interop:
+    * Allow passing untyped null as variadic function's parameter (GH-3312, KT-33525)
+  * Standard library:
+    * Allow scheduling jobs in arbitrary K/N context, not only Worker (GH-3316)
+  * Important bug fixes:
+    * Boxed negative values can lead to crashes on ios_arm64 (GH-3296)
+    * Implemented thread-safe tracking of Objective-C references to Kotlin objects (GH-3267)
+
+# v1.3.50 (Aug 2019)
+  * Kotlin/Native versioning now aligned with Kotlin versioning
+  * Exhaustive platform libraries on macOS (GH-3141)
+  * Update to Gradle 5.5 (GH-3166)
+  * Improved debug information correctness (GH-3130)
+  * Major memory manager refactoring (GH-3129)
+  * Embed actual bitcode in produced frameworks (GH-2974)
+  * Compilation speed improvements
+  * Interop:
+    * Support kotlin.Deprecated when producing framework (GH-3114)
+    * Ensure produced Objective-C header does not have warnings (GH-3101)
+    * Speed up interop stub generator (GH-3082, GH-3050)
+    * getOriginalKotlinClass() to get KClass for Kotlin classes in Objective-C (GH-3036)
+    * Supported nullable primitive types in reverse C interop (GH-3198)
+  * Standard library
+    * API for delayed job execution on worker (GH-2971)
+    * API for running via worker's job queue (GH-3078)
+    * MonoClock and Duration support (GH-3028)
+    * Support typeOf (KT-29917, KT-28625)
+    * New zero-terminated utf8 to String conversion API (GH-3116)
+    * Optimize StringBuilder for certain cases (GH-3202)
+    * Implemented Array.fill API (GH-3244)
+
+# v1.3.0 (Jun 2019)
+  * CoreLocation platform library on macOS (GH-3041)
+  * Converting Unit type to Void during producing framework for Objective-C/Swift (GH-2549, GH-1271)
+  * Support linux/arm64 targets (GH-2917)
+  * Performance improvements of memory manager (GH-2813)
+  * FreezableAtomicReference prototype (GH-2776)
+  * Logging and error messages enhancements 
+  * Interop:
+    * Support nullable String return type in reverse C interop (GH-2956)
+    * Support setting custom exception hook in reverse C interop (GH-2941)
+    * Experimental generics support for produced frameworks for Objective-C/Swift implemented by Kevin Galligan (GH-2850)
+    * Improve support for Objective-C methods clashing with methods of Any (GH-2914)
+    * Support variadic Objective-C functions (GH-2896)
+
+# v1.2.1 (Apr 2019)
+  * Fix Objective-C interop with React (GH-2872)
+  * Fix “not in vtable” compiler crash when generating frameworks (GH-2865)
+  * Implement some optimizations (GH-2854)
+  * Fix release build for 32-bit Windows (GH-2848)
+  * Fix casts to type parameters with multiple bounds (GH-2888)
+  * Fix “could not get descriptor uniq id for deserialized class FlagEnum” compiler crash when generating framework (GH-2874)
+
+# v1.2.0 (Apr 2019)
+  * New intermediate representation based library format allowing global optimizations
+  * Exception backtraces in debug mode on macOS and iOS targets contains symbolic information
+  * Support for 32-bit Windows targets (target mingw_x86)
+  * Support for cross-compilation to Linux (x86-64 and arm32) from macOS and Windows hosts
+  * Static Apple frameworks can be produced
+  * Support Gradle 5.1
+  * Fix alignment-related issues on ARM32 and MIPS platforms
+  * Write unhandled exceptions stacktrace on device to iOS crash log
+  * Fix undefined behavior in some arithmetic operations
+  * Interop:
+    * Get rid of libffi dependency
+    * Support returning struct from C callbacks
+    * Support passing Kotlin strings to C interop functions accepting UTF-32 arguments
+    * Fix bool conversion
+    * Support variable length arrays
+    * Provide Kotlin access to C compiler intrinsics via platform.builtins package
+    * Support clang modules (for Objective-C only)
+    * Experimental integration with CocoaPods
+  * IDE
+    * Kotlin/Native plugin is supported in CLion 2018.3 and AppCode/CLion 2019.1
+    * Basic highlighting support for .def files
+    * Navigation to source files from exception backtrace
+
 ## v1.1.0 (Dec 2018)
   * Performance optimizations:
     * runtime: optimization of queue of finalization

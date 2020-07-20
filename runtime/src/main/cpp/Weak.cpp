@@ -23,18 +23,17 @@ struct WeakReferenceCounter {
   ObjHeader header;
   KRef referred;
   KInt lock;
+  KInt cookie;
 };
 
 inline WeakReferenceCounter* asWeakReferenceCounter(ObjHeader* obj) {
   return reinterpret_cast<WeakReferenceCounter*>(obj);
 }
 
-constexpr int referredOffset = 0;
-constexpr int lockOffset = sizeof(void*);
-
 #if !KONAN_NO_THREADS
 
 inline void lock(int32_t* address) {
+    RuntimeAssert(*address == 0 || *address == 1, "Incorrect lock state");
     while (__sync_val_compare_and_swap(address, 0, 1) == 1);
 }
 
@@ -51,10 +50,15 @@ extern "C" {
 
 OBJ_GETTER(makeWeakReferenceCounter, void*);
 OBJ_GETTER(makeObjCWeakReferenceImpl, void*);
+OBJ_GETTER(makePermanentWeakReferenceImpl, ObjHeader*);
 
 // See Weak.kt for implementation details.
 // Retrieve link on the counter object.
 OBJ_GETTER(Konan_getWeakReferenceImpl, ObjHeader* referred) {
+  if (referred->container() == nullptr) {
+    RETURN_RESULT_OF(makePermanentWeakReferenceImpl, referred);
+  }
+
   MetaObjHeader* meta = referred->meta_object();
 
 #if KONAN_OBJC_INTEROP
@@ -63,13 +67,13 @@ OBJ_GETTER(Konan_getWeakReferenceImpl, ObjHeader* referred) {
   }
 #endif // KONAN_OBJC_INTEROP
 
-  if (meta->counter_ == nullptr) {
+  if (meta->WeakReference.counter_ == nullptr) {
      ObjHolder counterHolder;
      // Cast unneeded, just to emphasize we store an object reference as void*.
      ObjHeader* counter = makeWeakReferenceCounter(reinterpret_cast<void*>(referred), counterHolder.slot());
-     UpdateRefIfNull(&meta->counter_, counter);
+     UpdateHeapRefIfNull(&meta->WeakReference.counter_, counter);
   }
-  RETURN_OBJ(meta->counter_);
+  RETURN_OBJ(meta->WeakReference.counter_);
 }
 
 // Materialize a weak reference to either null or the real reference.
@@ -78,12 +82,8 @@ OBJ_GETTER(Konan_WeakReferenceCounter_get, ObjHeader* counter) {
 #if KONAN_NO_THREADS
   RETURN_OBJ(*referredAddress);
 #else
-  int32_t* lockAddress = &asWeakReferenceCounter(counter)->lock;
-  // Spinlock.
-  lock(lockAddress);
-  ObjHolder holder(*referredAddress);
-  unlock(lockAddress);
-  RETURN_OBJ(holder.obj());
+  auto* weakCounter = asWeakReferenceCounter(counter);
+  RETURN_RESULT_OF(ReadHeapRefLocked, referredAddress,  &weakCounter->lock,  &weakCounter->cookie);
 #endif
 }
 

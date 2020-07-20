@@ -18,11 +18,8 @@ package org.jetbrains.kotlin.konan.target
 
 import org.jetbrains.kotlin.konan.properties.*
 
-class LinuxConfigurablesImpl(target: KonanTarget, properties: Properties, baseDir: String?)
-    : LinuxConfigurables, KonanPropertiesLoader(target, properties, baseDir)
-
-class LinuxMIPSConfigurablesImpl(target: KonanTarget, properties: Properties, baseDir: String?)
-    : LinuxMIPSConfigurables, KonanPropertiesLoader(target, properties, baseDir)
+class GccConfigurablesImpl(target: KonanTarget, properties: Properties, baseDir: String?)
+    : GccConfigurables, KonanPropertiesLoader(target, properties, baseDir)
 
 class AndroidConfigurablesImpl(target: KonanTarget, properties: Properties, baseDir: String?)
     : AndroidConfigurables, KonanPropertiesLoader(target, properties, baseDir)
@@ -37,20 +34,29 @@ class ZephyrConfigurablesImpl(target: KonanTarget, properties: Properties, baseD
     : ZephyrConfigurables, KonanPropertiesLoader(target, properties, baseDir)
 
 
-fun loadConfigurables(target: KonanTarget, properties: Properties, baseDir: String?) = when (target)  {
-        KonanTarget.LINUX_X64, KonanTarget.LINUX_ARM32_HFP ->
-            LinuxConfigurablesImpl(target, properties, baseDir)
+fun loadConfigurables(target: KonanTarget, properties: Properties, baseDir: String?): Configurables = when (target)  {
+        KonanTarget.LINUX_X64, KonanTarget.LINUX_ARM32_HFP, KonanTarget.LINUX_ARM64,
         KonanTarget.LINUX_MIPS32, KonanTarget.LINUX_MIPSEL32 ->
-            LinuxMIPSConfigurablesImpl(target, properties, baseDir)
-        KonanTarget.MACOS_X64, KonanTarget.IOS_ARM32, KonanTarget.IOS_ARM64, KonanTarget.IOS_X64 ->
+            GccConfigurablesImpl(target, properties, baseDir)
+
+        KonanTarget.MACOS_X64,
+        KonanTarget.IOS_ARM32, KonanTarget.IOS_ARM64, KonanTarget.IOS_X64,
+        KonanTarget.TVOS_ARM64, KonanTarget.TVOS_X64,
+        KonanTarget.WATCHOS_ARM64, KonanTarget.WATCHOS_ARM32,
+        KonanTarget.WATCHOS_X64, KonanTarget.WATCHOS_X86 ->
             AppleConfigurablesImpl(target, properties, baseDir)
-        KonanTarget.ANDROID_ARM32, KonanTarget.ANDROID_ARM64 ->
+
+        KonanTarget.ANDROID_ARM32, KonanTarget.ANDROID_ARM64,
+        KonanTarget.ANDROID_X86, KonanTarget.ANDROID_X64 ->
             AndroidConfigurablesImpl(target, properties, baseDir)
-        KonanTarget.MINGW_X64 ->
+
+        KonanTarget.MINGW_X64, KonanTarget.MINGW_X86 ->
             MingwConfigurablesImpl(target, properties, baseDir)
+
         KonanTarget.WASM32 ->
             WasmConfigurablesImpl(target, properties, baseDir)
+
         is KonanTarget.ZEPHYR ->
-            ZephyrConfigurablesImpl(target, properties, baseDir)
-    }
+                ZephyrConfigurablesImpl(target, properties, baseDir)
+}
 

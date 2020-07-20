@@ -21,14 +21,17 @@ See [calculator sample](https://github.com/JetBrains/kotlin-native/tree/master/s
 
 The table below shows how Kotlin concepts are mapped to Swift/Objective-C and vice versa.
 
+"->" and "<-" indicate that mapping only goes one way.
+
 | Kotlin | Swift | Objective-C | Notes |
 | ------ | ----- |------------ | ----- |
 | `class` | `class` | `@interface` | [note](#name-translation) |
 | `interface` | `protocol` | `@protocol` | |
 | `constructor`/`create` | Initializer | Initializer | [note](#initializers) |
-| Property | Property | Property | [note](#top-level-functions-and-properties) |
+| Property | Property | Property | [note](#top-level-functions-and-properties) [note](#setters)|
 | Method | Method | Method | [note](#top-level-functions-and-properties) [note](#method-names-translation) |
-| `@Throws` | `throws` | `error:(NSError**)error` | [note](#errors-and-exceptions) |
+| `suspend` -> | `completionHandler:` | | [note](#errors-and-exceptions) |
+| `@Throws fun` | `throws` | `error:(NSError**)error` | [note](#errors-and-exceptions) |
 | Extension | Extension | Category member | [note](#category-members) |
 | `companion` member <- | Class method or property | Class method or property |  |
 | `null` | `nil` | `nil` | |
@@ -44,6 +47,8 @@ The table below shows how Kotlin concepts are mapped to Swift/Objective-C and vi
 | `Map` | `Dictionary` | `NSDictionary` | |
 | `MutableMap` | `NSMutableDictionary` | `NSMutableDictionary` | [note](#collections) |
 | Function type | Function type | Block pointer type | [note](#function-types) |
+| Inline classes | Unsupported| Unsupported| [note](#unsupported) |
+
 
 ### Name translation
 
@@ -63,6 +68,10 @@ named `create`. The latter happens with initializers declared in the Objective-C
 as a Swift extension, because Kotlin has no concept of extension constructors.
 
 Kotlin constructors are imported as initializers to Swift/Objective-C. 
+
+### Setters
+
+Writeable Objective-C properties overriding read-only properties of the superclass are represented as `setFoo()` method for the property `foo`. Same goes for a protocol's read-only properties that are implemented as mutable.
 
 ### Top-level functions and properties
 
@@ -122,9 +131,21 @@ player.moveTo(UP, byInches = 42)
 Kotlin has no concept of checked exceptions, all Kotlin exceptions are unchecked.
 Swift has only checked errors. So if Swift or Objective-C code calls a Kotlin method
 which throws an exception to be handled, then the Kotlin method should be marked
-with a `@Throws` annotation. In this case all Kotlin exceptions
-(except for instances of `Error`, `RuntimeException` and subclasses) are translated into
-a Swift error/`NSError`.
+with a `@Throws` annotation specifying a list of "expected" exception classes.
+
+When compiling to Objective-C/Swift framework, non-`suspend` functions having or inheriting
+`@Throws` annotation are represented as `NSError*`-producing methods in Objective-C
+and as `throws` methods in Swift. Representations for `suspend` functions always have
+`NSError*`/`Error` parameter in completion handler.
+
+When Kotlin function called from Swift/Objective-C code throws an exception
+which is an instance of one of the `@Throws`-specified classes or their subclasses,
+it is propagated as `NSError`. Other Kotlin exceptions reaching Swift/Objective-C
+are considered unhandled and cause program termination.
+
+`suspend` functions without `@Throws` propagate only
+`CancellationException` as `NSError`. Non-`suspend` functions without `@Throws`
+don't propagate Kotlin exceptions at all.
 
 Note that the opposite reversed translation is not implemented yet:
 Swift/Objective-C error-throwing methods aren't imported to Kotlin as
@@ -217,6 +238,108 @@ foo {
 
 </div>
 
+### Generics
+
+Objective-C supports "lightweight generics" defined on classes, with a relatively limited feature set. Swift can import 
+generics defined on classes to help provide additional type information to the compiler.
+
+Generic feature support for Objective-C and Swift differ from Kotlin, so the translation will inevitably lose some information,
+but the features supported retain meaningful information.
+
+#### Limitations
+
+Objective-C generics do not support all features of either Kotlin or Swift, so there will be some information lost
+in the translation.
+
+Generics can only be defined on classes, not on interfaces (protocols in Objective-C and Swift) or functions.
+
+#### Nullability
+
+Kotlin and Swift both define nullability as part of the type specification, while Objective-C defines nullability on methods
+and properties of a type. As such, the following:
+
+<div class="sample" markdown="1" theme="idea" data-highlight-only>
+
+```kotlin
+class Sample<T>() {
+  fun myVal(): T
+}
+```
+
+</div>
+
+will (logically) look like this:
+
+<div class="sample" markdown="1" theme="idea" mode="swift">
+
+```swift
+class Sample<T>() {
+  fun myVal(): T?
+}
+```
+
+</div>
+
+In order to support a potentially nullable type, the Objective-C header needs to define `myVal` with a nullable return value.
+
+To mitigate this, when defining your generic classes, if the generic type should *never* be null, provide a non-null 
+type constraint:
+
+<div class="sample" markdown="1" theme="idea" data-highlight-only>
+
+```kotlin
+class Sample<T : Any>() {
+  fun myVal(): T
+}
+```
+
+</div>
+
+That will force the Objective-C header to mark `myVal` as non-null.
+
+#### Variance
+
+Objective-C allows generics to be declared covariant or contravariant. Swift has no support for variance. Generic classes coming
+from Objective-C can be force-cast as needed.
+
+<div class="sample" markdown="1" theme="idea" data-highlight-only>
+
+```kotlin
+data class SomeData(val num: Int = 42) : BaseData()
+class GenVarOut<out T : Any>(val arg: T)
+```
+
+</div>
+
+<div class="sample" markdown="1" theme="idea" mode="swift">
+
+```swift
+let variOut = GenVarOut<SomeData>(arg: sd)
+let variOutAny : GenVarOut<BaseData> = variOut as! GenVarOut<BaseData>
+```
+
+</div>
+
+#### Constraints
+
+In Kotlin you can provide upper bounds for a generic type. Objective-C also supports this, but that support is unavailable 
+in more complex cases, and is currently not supported in the Kotlin - Objective-C interop. The exception here being a non-null
+upper bound will make Objective-C methods/properties non-null.
+
+### To disable
+
+To have the framework header written without generics, add the flag to the compiler config:
+
+<div class="sample" markdown="1" theme="idea" data-highlight-only>
+
+```kotlin
+binaries.framework {
+     freeCompilerArgs += "-Xno-objc-generics"
+}
+```
+
+</div>
+
 ## Casting between mapped types
 
 When writing Kotlin code, an object may need to be converted from a Kotlin type
@@ -239,9 +362,6 @@ val nsNumber = 42 as NSNumber
 
 Kotlin classes and interfaces can be subclassed by Swift/Objective-C classes
 and protocols.
-Currently a class that adopts the Kotlin protocol should inherit `NSObject`
-(either directly or indirectly). Note that all Kotlin classes do inherit `NSObject`,
-so a Swift/Objective-C subclass of Kotlin class can adopt the Kotlin protocol.
 
 ### Subclassing Swift/Objective-C classes and protocols from Kotlin
 
@@ -283,3 +403,11 @@ this library would disable these compiler checks.
 
 See [INTEROP.md](INTEROP.md) for an example case where the library uses some plain C features
 (e.g. unsafe pointers, structs etc.).
+
+## Unsupported
+
+Some features of Kotlin programming language are not yet mapped into respective features of Objective-C or Swift.
+Currently, following features are not properly exposed in generated framework headers:
+   * inline classes (arguments are mapped as either underlying primitive type or `id`)
+   * custom classes implementing standard Kotlin collection interfaces (`List`, `Map`, `Set`) and other special classes
+   * Kotlin subclasses of Objective-C classes

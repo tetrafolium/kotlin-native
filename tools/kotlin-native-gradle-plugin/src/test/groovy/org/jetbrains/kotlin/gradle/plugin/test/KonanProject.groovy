@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.gradle.plugin.test
 
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.util.GradleVersion
 import org.jetbrains.kotlin.konan.target.HostManager
 
 import java.nio.file.Files
@@ -49,6 +50,7 @@ class KonanProject {
     File konanBuildDir
 
     String konanHome
+    String gradleVersion
 
     File         buildFile
     File         propertiesFile
@@ -85,20 +87,21 @@ class KonanProject {
         this.targets = targets
         projectPath = projectDir.toPath()
         konanBuildDir = projectPath.resolve('build/konan').toFile()
-        def konanHome = System.getProperty("konan.home")
-        if (konanHome == null) {
-            throw new IllegalStateException("konan.home isn't specified")
-        }
-        def konanHomeDir = new File(konanHome)
+        def konanHomeDir = new File(getKonanHome())
         if (!konanHomeDir.exists() || !konanHomeDir.directory) {
             throw new IllegalStateException("konan.home doesn't exist or is not a directory: $konanHomeDir.canonicalPath")
         }
         // Escape windows path separator
         this.konanHome = escapeBackSlashes(konanHomeDir.canonicalPath)
+        this.gradleVersion = System.getProperty("gradleVersion") ?: GradleVersion.current().version
     }
 
     GradleRunner createRunner(boolean withDebug = true) {
-        return GradleRunner.create().withProjectDir(projectDir).withPluginClasspath().withDebug(withDebug)
+        return GradleRunner.create()
+                .withProjectDir(projectDir)
+                .withPluginClasspath()
+                .withDebug(withDebug)
+                .withGradleVersion(gradleVersion)
     }
 
     /** Creates a subdirectory specified by the given path. */
@@ -361,6 +364,14 @@ class KonanProject {
 
     static String escapeBackSlashes(String value) {
         return value.replace('\\', '\\\\')
+    }
+
+    static String getKonanHome() {
+        def konanHome = System.getProperty("konan.home") ?: System.getProperty("org.jetbrains.kotlin.native.home")
+        if (konanHome == null) {
+            throw new IllegalStateException("konan.home isn't specified")
+        }
+        return konanHome
     }
 
 }

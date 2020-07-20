@@ -5,7 +5,10 @@
 
 package kotlin.native.concurrent
 
+import kotlin.native.internal.DescribeObjectForDebugging
 import kotlin.native.internal.ExportForCppRuntime
+import kotlin.native.internal.debugDescription
+import kotlin.native.identityHashCode
 import kotlin.reflect.KClass
 import kotlinx.cinterop.*
 
@@ -30,7 +33,7 @@ internal fun executeImpl(worker: Worker, mode: TransferMode, producer: () -> Any
         Future<Any?>(executeInternal(worker.id, mode.value, producer, job))
 
 @SymbolName("Kotlin_Worker_startInternal")
-external internal fun startInternal(errorReporting: Boolean): Int
+external internal fun startInternal(errorReporting: Boolean, name: String?): Int
 
 @SymbolName("Kotlin_Worker_currentInternal")
 external internal fun currentInternal(): Int
@@ -41,6 +44,18 @@ external internal fun requestTerminationInternal(id: Int, processScheduledJobs: 
 @SymbolName("Kotlin_Worker_executeInternal")
 external internal fun executeInternal(
         id: Int, mode: Int, producer: () -> Any?, job: CPointer<CFunction<*>>): Int
+
+@SymbolName("Kotlin_Worker_executeAfterInternal")
+external internal fun executeAfterInternal(id: Int, operation: () -> Unit, afterMicroseconds: Long): Unit
+
+@SymbolName("Kotlin_Worker_processQueueInternal")
+external internal fun processQueueInternal(id: Int): Boolean
+
+@SymbolName("Kotlin_Worker_parkInternal")
+external internal fun parkInternal(id: Int, timeoutMicroseconds: Long, process: Boolean): Boolean
+
+@SymbolName("Kotlin_Worker_getNameInternal")
+external internal fun getWorkerNameInternal(id: Int): String?
 
 @ExportForCppRuntime
 internal fun ThrowWorkerUnsupported(): Unit =
@@ -79,16 +94,8 @@ internal fun ThrowInvalidMutabilityException(where: Any): Nothing {
 
 @ExportForCppRuntime
 internal fun ThrowIllegalObjectSharingException(typeInfo: NativePtr, address: NativePtr) {
-    val kClass = kotlin.native.internal.KClassImpl<Any>(typeInfo)
-    val description = debugDescription(kClass, address.toLong().toInt())
+    val description = DescribeObjectForDebugging(typeInfo, address)
     throw IncorrectDereferenceException("illegal attempt to access non-shared $description from other thread")
-}
-
-private fun debugDescription(kClass: KClass<*>, identity: Int): String {
-    val className = kClass.qualifiedName ?: kClass.simpleName ?: "<object>"
-    val unsignedIdentity = identity.toLong() and 0xffffffffL
-    val identityStr = unsignedIdentity.toString(16)
-    return "$className@$identityStr"
 }
 
 @SymbolName("Kotlin_AtomicReference_checkIfFrozen")

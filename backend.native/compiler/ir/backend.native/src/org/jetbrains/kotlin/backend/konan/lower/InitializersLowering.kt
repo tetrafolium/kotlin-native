@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.backend.konan.lower
 
 import org.jetbrains.kotlin.backend.common.ClassLoweringPass
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
-import org.jetbrains.kotlin.backend.common.descriptors.WrappedSimpleFunctionDescriptor
+import org.jetbrains.kotlin.backend.common.ir.createDispatchReceiverParameter
 import org.jetbrains.kotlin.backend.common.lower.createIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irBlockBody
 import org.jetbrains.kotlin.backend.konan.descriptors.synthesizedName
@@ -17,10 +17,13 @@ import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irDelegatingConstructorCall
 import org.jetbrains.kotlin.ir.declarations.*
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
+import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.*
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
+import org.jetbrains.kotlin.ir.types.isPrimitiveType
+import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
@@ -32,6 +35,7 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
     object DECLARATION_ORIGIN_ANONYMOUS_INITIALIZER : IrDeclarationOriginImpl("ANONYMOUS_INITIALIZER")
 
     override fun lower(irClass: IrClass) {
+        if (irClass.isInterface) return
         InitializersTransformer(irClass).lowerInitializers()
     }
 
@@ -62,6 +66,7 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                     val initializer = declaration.initializer ?: return declaration
                     val startOffset = initializer.startOffset
                     val endOffset = initializer.endOffset
+                    val initExpression = initializer.expression
                     initializers.add(IrBlockImpl(startOffset, endOffset,
                             context.irBuiltIns.unitType,
                             STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER,
@@ -71,11 +76,19 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                                                     startOffset, endOffset,
                                                     irClass.thisReceiver!!.type, irClass.thisReceiver!!.symbol
                                             ),
-                                            initializer.expression,
+                                            initExpression,
                                             context.irBuiltIns.unitType,
                                             STATEMENT_ORIGIN_ANONYMOUS_INITIALIZER)))
                     )
-                    declaration.initializer = null
+
+                    // We shall keep initializer for constants for compile-time instantiation.
+                    declaration.initializer =
+                            if (initExpression is IrConst<*> &&
+                                    (initExpression.type.isPrimitiveType() || initExpression.type.isString())) {
+                                IrExpressionBodyImpl(initExpression.copy())
+                            } else {
+                                null
+                            }
                     return declaration
                 }
             })
@@ -105,7 +118,10 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                         isInline = false,
                         isSuspend = false,
                         isExternal = false,
-                        isTailrec = false
+                        isTailrec = false,
+                        isExpect = false,
+                        isFakeOverride = false,
+                        isOperator = false
                 ).apply {
                     it.bind(this)
                     parent = irClass
@@ -131,7 +147,7 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                         return expression
                     }
                 })
-                initializer.patchDeclarationParents(initializeFun)
+                initializer.setDeclarationsParent(initializeFun)
             }
 
             return initializeFun.symbol
@@ -165,7 +181,7 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                                 if (initializeMethodSymbol == null) {
                                     assert(declaration.isPrimary)
                                     for (initializer in initializers)
-                                        initializer.patchDeclarationParents(declaration)
+                                        initializer.setDeclarationsParent(declaration)
                                     initializers
                                 } else {
                                     val startOffset = it.startOffset

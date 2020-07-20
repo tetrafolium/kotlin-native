@@ -6,7 +6,6 @@
 package org.jetbrains.kotlin.backend.common
 
 import org.jetbrains.kotlin.backend.konan.ir.KonanSymbols
-import org.jetbrains.kotlin.backend.konan.irasdescriptors.*
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.*
@@ -94,7 +93,7 @@ internal abstract class AbstractValueUsageTransformer(
         with(expression) {
             dispatchReceiver = dispatchReceiver?.useAsDispatchReceiver(expression)
             extensionReceiver = extensionReceiver?.useAsExtensionReceiver(expression)
-            for (index in descriptor.valueParameters.indices) {
+            for (index in symbol.owner.valueParameters.indices) {
                 val argument = getValueArgument(index) ?: continue
                 val parameter = symbol.owner.valueParameters[index]
                 putValueArgument(index, argument.useAsValueArgument(expression, parameter))

@@ -39,10 +39,6 @@ KInt Kotlin_Any_hashCode(KConstRef thiz) {
   return reinterpret_cast<uintptr_t>(thiz);
 }
 
-OBJ_GETTER0(Kotlin_getCurrentStackTrace) {
-  RETURN_RESULT_OF0(GetCurrentStackTrace);
-}
-
 OBJ_GETTER(Kotlin_getStackTraceStrings, KConstRef stackTrace) {
   RETURN_RESULT_OF(GetStackTraceStrings, stackTrace);
 }
@@ -56,8 +52,10 @@ void* Kotlin_interop_malloc(KLong size, KInt align) {
   if (size > SIZE_MAX) {
     return nullptr;
   }
+  RuntimeAssert(align > 0, "Unsupported alignment");
+  RuntimeAssert((align & (align - 1)) == 0, "Alignment must be power of two");
 
-  void* result = konan::calloc(1, size);
+  void* result = konan::calloc_aligned(1, size, align);
   if ((reinterpret_cast<uintptr_t>(result) & (align - 1)) != 0) {
     // Unaligned!
     RuntimeAssert(false, "unsupported alignment");

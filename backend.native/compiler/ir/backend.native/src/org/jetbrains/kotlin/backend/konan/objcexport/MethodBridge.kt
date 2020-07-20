@@ -6,11 +6,20 @@
 package org.jetbrains.kotlin.backend.konan.objcexport
 
 import org.jetbrains.kotlin.backend.common.descriptors.allParameters
+import org.jetbrains.kotlin.backend.konan.ir.allParameters
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.ParameterDescriptor
+import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 
 internal sealed class TypeBridge
 internal object ReferenceBridge : TypeBridge()
+
+internal data class BlockPointerBridge(
+        val numberOfParameters: Int,
+        val returnsVoid: Boolean
+) : TypeBridge()
+
 internal data class ValueTypeBridge(val objCValueType: ObjCValueType) : TypeBridge()
 
 internal sealed class MethodBridgeParameter
@@ -26,7 +35,7 @@ internal object MethodBridgeSelector : MethodBridgeParameter()
 internal sealed class MethodBridgeValueParameter : MethodBridgeParameter() {
     data class Mapped(val bridge: TypeBridge) : MethodBridgeValueParameter()
     object ErrorOutParameter : MethodBridgeValueParameter()
-    data class KotlinResultOutParameter(val bridge: TypeBridge) : MethodBridgeValueParameter()
+    object SuspendCompletion : MethodBridgeValueParameter()
 }
 
 internal data class MethodBridge(
@@ -46,8 +55,10 @@ internal data class MethodBridge(
 
         sealed class WithError : ReturnValue() {
             object Success : WithError()
-            data class RefOrNull(val successBridge: ReturnValue) : WithError()
+            data class ZeroForError(val successBridge: ReturnValue, val successMayBeZero: Boolean) : WithError()
         }
+
+        object Suspend : ReturnValue()
     }
 
     val paramBridges: List<MethodBridgeParameter> =
@@ -60,6 +71,9 @@ internal data class MethodBridge(
 
         MethodBridgeReceiver.Instance -> true
     }
+
+    val returnsError: Boolean
+        get() = returnBridge is ReturnValue.WithError
 }
 
 internal fun MethodBridge.valueParametersAssociated(
@@ -78,24 +92,24 @@ internal fun MethodBridge.valueParametersAssociated(
         when (it) {
             is MethodBridgeValueParameter.Mapped -> it to kotlinParameters.next()
 
-            is MethodBridgeValueParameter.ErrorOutParameter,
-            is MethodBridgeValueParameter.KotlinResultOutParameter -> it to null
+            MethodBridgeValueParameter.SuspendCompletion,
+            is MethodBridgeValueParameter.ErrorOutParameter -> it to null
         }
     }.also { assert(!kotlinParameters.hasNext()) }
 }
 
 internal fun MethodBridge.parametersAssociated(
-        descriptor: FunctionDescriptor
-): List<Pair<MethodBridgeParameter, ParameterDescriptor?>> {
-    val kotlinParameters = descriptor.allParameters.iterator()
+        irFunction: IrFunction
+): List<Pair<MethodBridgeParameter, IrValueParameter?>> {
+    val kotlinParameters = irFunction.allParameters.iterator()
 
     return this.paramBridges.map {
         when (it) {
             is MethodBridgeValueParameter.Mapped, MethodBridgeReceiver.Instance ->
                 it to kotlinParameters.next()
 
-            MethodBridgeReceiver.Static, MethodBridgeSelector, MethodBridgeValueParameter.ErrorOutParameter,
-            is MethodBridgeValueParameter.KotlinResultOutParameter ->
+            MethodBridgeValueParameter.SuspendCompletion,
+            MethodBridgeReceiver.Static, MethodBridgeSelector, MethodBridgeValueParameter.ErrorOutParameter ->
                 it to null
 
             MethodBridgeReceiver.Factory -> {

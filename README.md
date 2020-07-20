@@ -1,5 +1,5 @@
 [![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-
+[![version](https://img.shields.io/badge/dynamic/json.svg?color=orange&label=latest%20version&query=%24.tag_name&url=https%3A%2F%2Fgithub.com%2FJetBrains%2Fkotlin-native%2Freleases%2Flatest)](https://github.com/JetBrains/kotlin-native/releases/latest)
 # Kotlin/Native  #
 
 _Kotlin/Native_ is an LLVM backend for the Kotlin compiler, runtime
@@ -12,8 +12,9 @@ without the need to ship an additional execution runtime.
 
 Prerequisites:
 *   install JDK for your platform, instead of JRE. The build requires ```tools.jar```, which is not included in JRE;
-*   on macOS install Xcode 10.1
+*   on macOS install Xcode 11 (Xcode 11.5 is required to compile Kotlin/Native from sources)
 *   on Fedora 26+ ```yum install ncurses-compat-libs``` may be needed
+*   on recent Ubuntu ```apt install libncurses5``` is needed
 
 To compile from sources use following steps:
 
@@ -25,6 +26,8 @@ Then, build the compiler and libraries:
 
 	./gradlew bundle
 
+To build with experimental targets support compile with `-Porg.jetbrains.kotlin.native.experimentalTargets`.
+
 The build can take about an hour on a Macbook Pro.
 To run a shorter build with only the host compiler and libraries, run:
 
@@ -34,6 +37,8 @@ To include Kotlin compiler in [composite build](https://docs.gradle.org/current/
 against it, use the `kotlinProjectPath` project property:
 
     ./gradlew dist -PkotlinProjectPath=path/to/kotlin/project
+
+It's possible to include in a composite build both Kotlin compiler and Kotlin/Native Shared simultaneously.
 
 After that, you should be able to compile your programs like this:
 

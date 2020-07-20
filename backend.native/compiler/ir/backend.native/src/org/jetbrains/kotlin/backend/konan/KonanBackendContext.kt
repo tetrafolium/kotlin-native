@@ -6,6 +6,8 @@
 package org.jetbrains.kotlin.backend.konan
 
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
+import org.jetbrains.kotlin.backend.common.DefaultMapping
+import org.jetbrains.kotlin.backend.common.Mapping
 import org.jetbrains.kotlin.backend.konan.descriptors.KonanSharedVariablesManager
 import org.jetbrains.kotlin.backend.konan.descriptors.findPackage
 import org.jetbrains.kotlin.backend.konan.descriptors.kotlinNativeInternal
@@ -20,15 +22,21 @@ import org.jetbrains.kotlin.incremental.components.NoLookupLocation
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.builtins.konan.KonanBuiltIns
-import org.jetbrains.kotlin.ir.builders.IrBuilder
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
+import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.name.Name
 
-abstract internal class KonanBackendContext(val config: KonanConfig) : CommonBackendContext {
+internal abstract class KonanBackendContext(val config: KonanConfig) : CommonBackendContext {
     abstract override val builtIns: KonanBuiltIns
 
     abstract override val ir: KonanIr
+
+    override val transformedFunction: MutableMap<IrFunctionSymbol, IrSimpleFunctionSymbol>
+        get() = TODO("not implemented")
+    override val scriptMode: Boolean = false
 
     override val sharedVariablesManager by lazy {
         // Creating lazily because builtIns module seems to be incomplete during `link` test;
@@ -36,10 +44,10 @@ abstract internal class KonanBackendContext(val config: KonanConfig) : CommonBac
         KonanSharedVariablesManager(this)
     }
 
-    override fun getInternalClass(name: String): ClassDescriptor =
+    fun getKonanInternalClass(name: String): ClassDescriptor =
             builtIns.kotlinNativeInternal.getContributedClassifier(Name.identifier(name), NoLookupLocation.FROM_BACKEND) as ClassDescriptor
 
-    override fun getInternalFunctions(name: String): List<FunctionDescriptor> =
+    fun getKonanInternalFunctions(name: String): List<FunctionDescriptor> =
             builtIns.kotlinNativeInternal.getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND).toList()
 
     val messageCollector: MessageCollector
@@ -53,6 +61,11 @@ abstract internal class KonanBackendContext(val config: KonanConfig) : CommonBac
         )
     }
 
+    override val internalPackageFqn = KonanFqNames.internalPackageName
+
+    override val mapping: Mapping = DefaultMapping()
+
+    override val extractedLocalClasses: MutableSet<IrClass> = mutableSetOf()
 }
 
 internal fun IrElement.getCompilerMessageLocation(containingFile: IrFile): CompilerMessageLocation? =

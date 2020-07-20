@@ -28,6 +28,11 @@ public final class String : Comparable<String>, CharSequence {
     public override val length: Int
         get() = getStringLength()
 
+    /**
+     * Returns the character of this string at the specified [index].
+     *
+     * If the [index] is out of bounds of this string, throws an [IndexOutOfBoundsException].
+     */
     @SymbolName("Kotlin_String_get")
     external override public fun get(index: Int): Char
 
@@ -41,14 +46,14 @@ public final class String : Comparable<String>, CharSequence {
     external private fun getStringLength(): Int
 
     @SymbolName("Kotlin_String_plusImpl")
-    external private fun plusImpl(other: Any): String
+    external private fun plusImpl(other: String): String
 
     @SymbolName("Kotlin_String_equals")
     external public override fun equals(other: Any?): Boolean
 }
 
-public operator fun kotlin.String?.plus(other: kotlin.Any?): kotlin.String =
+public inline operator fun kotlin.String?.plus(other: kotlin.Any?): kotlin.String =
     (this?.toString() ?: "null").plus(other?.toString() ?: "null")
 
 
-public fun Any?.toString() = this?.toString() ?: "null"
+public inline fun Any?.toString() = this?.toString() ?: "null"

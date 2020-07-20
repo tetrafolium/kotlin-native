@@ -17,15 +17,17 @@
 package org.jetbrains.kotlin.native.interop.gen
 
 import org.jetbrains.kotlin.native.interop.gen.jvm.KotlinPlatform
+import org.jetbrains.kotlin.native.interop.indexer.CompilationWithPCH
 import org.jetbrains.kotlin.native.interop.indexer.Language
-import org.jetbrains.kotlin.native.interop.indexer.NativeLibrary
 import org.jetbrains.kotlin.native.interop.indexer.mapFragmentIsCompilable
+
+internal val INVALID_CLANG_IDENTIFIER_REGEX = "[^a-zA-Z1-9_]".toRegex()
 
 class SimpleBridgeGeneratorImpl(
         private val platform: KotlinPlatform,
         private val pkgName: String,
         private val jvmFileClassName: String,
-        private val libraryForCStubs: NativeLibrary,
+        private val libraryForCStubs: CompilationWithPCH,
         override val topLevelNativeScope: NativeScope,
         private val topLevelKotlinScope: KotlinScope
 ) : SimpleBridgeGenerator {
@@ -44,6 +46,7 @@ class SimpleBridgeGeneratorImpl(
             BridgedType.ULONG -> "jlong"
             BridgedType.FLOAT -> "jfloat"
             BridgedType.DOUBLE -> "jdouble"
+            BridgedType.VECTOR128 -> TODO()
             BridgedType.NATIVE_PTR -> "jlong"
             BridgedType.OBJC_POINTER -> TODO()
             BridgedType.VOID -> "void"
@@ -59,6 +62,7 @@ class SimpleBridgeGeneratorImpl(
             BridgedType.ULONG -> "uint64_t"
             BridgedType.FLOAT -> "float"
             BridgedType.DOUBLE -> "double"
+            BridgedType.VECTOR128 -> TODO() // "float __attribute__ ((__vector_size__ (16)))"
             BridgedType.NATIVE_PTR -> "void*"
             BridgedType.OBJC_POINTER -> "id"
             BridgedType.VOID -> "void"
@@ -71,7 +75,8 @@ class SimpleBridgeGeneratorImpl(
             nativeBacked: NativeBacked,
             returnType: BridgedType,
             kotlinValues: List<BridgeTypedKotlinValue>,
-            block: NativeCodeBuilder.(arguments: List<NativeExpression>) -> NativeExpression
+            independent: Boolean,
+            block: NativeCodeBuilder.(nativeValues: List<NativeExpression>) -> NativeExpression
     ): KotlinExpression {
 
         val kotlinLines = mutableListOf<String>()
@@ -116,6 +121,7 @@ class SimpleBridgeGeneratorImpl(
             }
             KotlinPlatform.NATIVE -> {
                 val functionName = pkgName.replace(INVALID_CLANG_IDENTIFIER_REGEX, "_") + "_$kotlinFunctionName"
+                if (independent) kotlinLines.add("@" + topLevelKotlinScope.reference(KotlinTypes.independent))
                 kotlinLines.add("@SymbolName(${functionName.quoteAsKotlinLiteral()})")
                 "$cReturnType $functionName ($joinedCParameters)"
             }
@@ -191,7 +197,7 @@ class SimpleBridgeGeneratorImpl(
                 kotlinExpr = "objc_retainAutoreleaseReturnValue($kotlinExpr)"
                 // (Objective-C does the same for returned pointers).
             }
-            out("return $kotlinExpr")
+            returnResult(kotlinExpr)
         }.forEach {
             kotlinLines.add("    $it")
         }
@@ -232,7 +238,6 @@ class SimpleBridgeGeneratorImpl(
         }
 
         // TODO: exclude unused bridges.
-
         return object : NativeBridges {
 
             override val kotlinLines: Sequence<String>
@@ -244,9 +249,5 @@ class SimpleBridgeGeneratorImpl(
             override fun isSupported(nativeBacked: NativeBacked): Boolean =
                     nativeBacked !in excludedClients
         }
-    }
-
-    companion object {
-        private val INVALID_CLANG_IDENTIFIER_REGEX = "[^a-zA-Z1-9_]".toRegex()
     }
 }

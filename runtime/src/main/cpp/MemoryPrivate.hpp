@@ -19,7 +19,25 @@
 
 #include "Memory.h"
 
-void AddRefFromAssociatedObject(const ObjHeader* object) RUNTIME_NOTHROW;
-void ReleaseRefFromAssociatedObject(const ObjHeader* object) RUNTIME_NOTHROW;
+extern "C" {
+
+bool TryAddHeapRef(const ObjHeader* object);
+
+MODEL_VARIANTS(void, ReleaseHeapRef, const ObjHeader* object);
+
+void Kotlin_ObjCExport_releaseAssociatedObject(void* associatedObject);
+
+ForeignRefContext InitLocalForeignRef(ObjHeader* object);
+
+ForeignRefContext InitForeignRef(ObjHeader* object);
+void DeinitForeignRef(ObjHeader* object, ForeignRefContext context);
+
+bool IsForeignRefAccessible(ObjHeader* object, ForeignRefContext context);
+
+// Should be used when reference is read from a possibly shared variable,
+// and there's nothing else keeping the object alive.
+void AdoptReferenceFromSharedVariable(ObjHeader* object);
+
+}  // extern "C"
 
 #endif // RUNTIME_MEMORYPRIVATE_HPP

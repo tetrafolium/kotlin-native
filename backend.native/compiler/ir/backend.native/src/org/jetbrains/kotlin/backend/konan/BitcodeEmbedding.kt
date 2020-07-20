@@ -1,9 +1,5 @@
 package org.jetbrains.kotlin.backend.konan
 
-import org.jetbrains.kotlin.backend.konan.llvm.Int8
-import org.jetbrains.kotlin.backend.konan.llvm.Llvm
-import org.jetbrains.kotlin.konan.target.CompilerOutputKind
-
 object BitcodeEmbedding {
 
     enum class Mode {
@@ -16,26 +12,11 @@ object BitcodeEmbedding {
         Mode.FULL -> listOf("-bitcode_bundle")
     }
 
-    private val KonanConfig.bitcodeEmbeddingMode get() = configuration.get(KonanConfigKeys.BITCODE_EMBEDDING_MODE)!!.also {
-        require(it == Mode.NONE || this.produce == CompilerOutputKind.FRAMEWORK) {
-            "${it.name.toLowerCase()} bitcode embedding mode is not supported when producing ${this.produce.name.toLowerCase()}"
-        }
+    internal fun getClangOptions(config: KonanConfig): List<String> = when (config.bitcodeEmbeddingMode) {
+        Mode.NONE -> listOf("-fembed-bitcode=off")
+        Mode.MARKER -> listOf("-fembed-bitcode=marker")
+        Mode.FULL -> listOf("-fembed-bitcode=all")
     }
 
-    internal fun processModule(llvm: Llvm) = when (llvm.context.config.bitcodeEmbeddingMode) {
-        Mode.NONE -> {}
-        Mode.MARKER -> {
-            addEmptyMarker(llvm, "konan_llvm_bitcode", "__LLVM,__bitcode")
-            addEmptyMarker(llvm, "konan_llvm_cmdline", "__LLVM,__cmdline")
-        }
-        Mode.FULL -> {
-            addEmptyMarker(llvm, "konan_llvm_asm", "__LLVM,__asm")
-        }
-    }
-
-    private fun addEmptyMarker(llvm: Llvm, name: String, section: String) {
-        val global = llvm.staticData.placeGlobal(name, Int8(0), isExported = false)
-        global.setSection(section)
-        llvm.usedGlobals += global.llvmGlobal
-    }
+    private val KonanConfig.bitcodeEmbeddingMode get() = configuration.get(KonanConfigKeys.BITCODE_EMBEDDING_MODE)!!
 }

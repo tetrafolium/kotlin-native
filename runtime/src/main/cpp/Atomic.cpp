@@ -26,6 +26,7 @@ struct AtomicReferenceLayout {
   ObjHeader header;
   KRef value_;
   KInt lock_;
+  KInt cookie_;
 };
 
 template<typename T> struct AtomicPrimitive {
@@ -95,14 +96,13 @@ KLong Kotlin_AtomicLong_addAndGet(KRef thiz, KLong delta) {
     return addAndGetImpl(thiz, delta);
 }
 
-#ifdef __mips
+#if KONAN_NO_64BIT_ATOMIC
 static int lock64 = 0;
 #endif
 
 KLong Kotlin_AtomicLong_compareAndSwap(KRef thiz, KLong expectedValue, KLong newValue) {
-#ifdef __mips
+#if KONAN_NO_64BIT_ATOMIC
     // Potentially huge performance penalty, but correct.
-    // TODO: reconsider, once target MIPS can do proper 64-bit CAS.
     while (compareAndSwap(&lock64, 0, 1) != 0);
     volatile KLong* address = getValueLocation<KLong>(thiz);
     KLong old = *address;
@@ -117,9 +117,8 @@ KLong Kotlin_AtomicLong_compareAndSwap(KRef thiz, KLong expectedValue, KLong new
 }
 
 KBoolean Kotlin_AtomicLong_compareAndSet(KRef thiz, KLong expectedValue, KLong newValue) {
-#ifdef __mips
+#if KONAN_NO_64BIT_ATOMIC
     // Potentially huge performance penalty, but correct.
-    // TODO: reconsider, once target MIPS can do proper 64-bit CAS.
     KBoolean result = false;
     while (compareAndSwap(&lock64, 0, 1) != 0);
     volatile KLong* address = getValueLocation<KLong>(thiz);
@@ -136,9 +135,8 @@ KBoolean Kotlin_AtomicLong_compareAndSet(KRef thiz, KLong expectedValue, KLong n
 }
 
 void Kotlin_AtomicLong_set(KRef thiz, KLong newValue) {
-#ifdef __mips
+#if KONAN_NO_64BIT_ATOMIC
     // Potentially huge performance penalty, but correct.
-    // TODO: reconsider, once target MIPS can do proper 64-bit atomic store.
     while (compareAndSwap(&lock64, 0, 1) != 0);
     volatile KLong* address = getValueLocation<KLong>(thiz);
     *address = newValue;
@@ -149,9 +147,8 @@ void Kotlin_AtomicLong_set(KRef thiz, KLong newValue) {
 }
 
 KLong Kotlin_AtomicLong_get(KRef thiz) {
-#ifdef __mips
+#if KONAN_NO_64BIT_ATOMIC
     // Potentially huge performance penalty, but correct.
-    // TODO: reconsider, once target MIPS can do proper 64-bit atomic store.
     while (compareAndSwap(&lock64, 0, 1) != 0);
     volatile KLong* address = getValueLocation<KLong>(thiz);
     KLong value = *address;
@@ -179,7 +176,7 @@ KNativePtr Kotlin_AtomicNativePtr_get(KRef thiz) {
 }
 
 void Kotlin_AtomicReference_checkIfFrozen(KRef value) {
-    if (value != nullptr && !PermanentOrFrozen(value)) {
+    if (value != nullptr && !isPermanentOrFrozen(value)) {
         ThrowInvalidMutabilityException(value);
     }
 }
@@ -188,7 +185,8 @@ OBJ_GETTER(Kotlin_AtomicReference_compareAndSwap, KRef thiz, KRef expectedValue,
     Kotlin_AtomicReference_checkIfFrozen(newValue);
     // See Kotlin_AtomicReference_get() for explanations, why locking is needed.
     AtomicReferenceLayout* ref = asAtomicReference(thiz);
-    RETURN_RESULT_OF(SwapRefLocked, &ref->value_, expectedValue, newValue, &ref->lock_);
+    RETURN_RESULT_OF(SwapHeapRefLocked, &ref->value_, expectedValue, newValue,
+        &ref->lock_, &ref->cookie_);
 }
 
 KBoolean Kotlin_AtomicReference_compareAndSet(KRef thiz, KRef expectedValue, KRef newValue) {
@@ -196,14 +194,15 @@ KBoolean Kotlin_AtomicReference_compareAndSet(KRef thiz, KRef expectedValue, KRe
     // See Kotlin_AtomicReference_get() for explanations, why locking is needed.
     AtomicReferenceLayout* ref = asAtomicReference(thiz);
     ObjHolder holder;
-    auto old = SwapRefLocked(&ref->value_, expectedValue, newValue, &ref->lock_, holder.slot());
+    auto old = SwapHeapRefLocked(&ref->value_, expectedValue, newValue,
+        &ref->lock_, &ref->cookie_, holder.slot());
     return old == expectedValue;
 }
 
 void Kotlin_AtomicReference_set(KRef thiz, KRef newValue) {
     Kotlin_AtomicReference_checkIfFrozen(newValue);
     AtomicReferenceLayout* ref = asAtomicReference(thiz);
-    SetRefLocked(&ref->value_, newValue, &ref->lock_);
+    SetHeapRefLocked(&ref->value_, newValue, &ref->lock_, &ref->cookie_);
 }
 
 OBJ_GETTER(Kotlin_AtomicReference_get, KRef thiz) {
@@ -212,7 +211,7 @@ OBJ_GETTER(Kotlin_AtomicReference_get, KRef thiz) {
     // rescheduled unluckily, between the moment value is read from the field and RC is incremented,
     // object may go away.
     AtomicReferenceLayout* ref = asAtomicReference(thiz);
-    RETURN_RESULT_OF(ReadRefLocked, &ref->value_, &ref->lock_);
+    RETURN_RESULT_OF(ReadHeapRefLocked, &ref->value_, &ref->lock_, &ref->cookie_);
 }
 
 }  // extern "C"
