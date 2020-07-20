@@ -5,10 +5,9 @@
 
 package codegen.coroutines.anonymousObject
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.test.*
 
 open class EmptyContinuation(override val context: CoroutineContext = EmptyCoroutineContext) : Continuation<Any?> {
     companion object : EmptyContinuation()
@@ -29,7 +28,7 @@ interface I {
     suspend fun bar(s: String)
 }
 
-fun create() = object: I {
+fun create() = object : I {
     var lambda: suspend (String) -> Unit = {}
 
     override suspend fun foo(lambda: suspend (String) -> Unit) {

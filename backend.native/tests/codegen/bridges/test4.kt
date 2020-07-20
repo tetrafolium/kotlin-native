@@ -20,7 +20,7 @@ open class A {
     fun foo(): Int = 42
 }
 
-open class B: A(), Z, Y
+open class B : A(), Z, Y
 
 @Test fun runTest() {
     val z: Z = B()

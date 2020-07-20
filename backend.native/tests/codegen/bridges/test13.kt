@@ -17,7 +17,7 @@ open class A<T> {
     }
 }
 
-open class B: A<Int>() {
+open class B : A<Int>() {
     override fun Int.foo() {
         println(this)
     }

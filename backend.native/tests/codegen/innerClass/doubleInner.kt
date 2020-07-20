@@ -16,7 +16,7 @@ open class Father(val param: String) {
 
     inner class Child(p: String) : Father(p) {
         inner class Child2 : Father.InClass {
-            constructor(): super()
+            constructor() : super()
         }
     }
 }

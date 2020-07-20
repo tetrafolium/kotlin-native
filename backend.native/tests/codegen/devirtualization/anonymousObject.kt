@@ -12,7 +12,7 @@ fun test() {
         override fun foo() { println("zzz") }
     }
 
-    val delegating = object: I by impl { }
+    val delegating = object : I by impl { }
 
     delegating.foo()
 }

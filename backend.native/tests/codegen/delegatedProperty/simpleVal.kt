@@ -5,9 +5,8 @@
 
 package codegen.delegatedProperty.simpleVal
 
-import kotlin.test.*
-
 import kotlin.reflect.KProperty
+import kotlin.test.*
 
 class Delegate {
     operator fun getValue(receiver: Any?, p: KProperty<*>): Int {

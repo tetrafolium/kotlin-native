@@ -19,7 +19,7 @@ class Delegate {
     }
 }
 
-open class B: A() {
+open class B : A() {
     override val x: Int by Delegate()
 
     fun bar() {

@@ -8,7 +8,7 @@ package codegen.inline.inline12
 import kotlin.test.*
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun <T> foo (): Boolean {
+inline fun <T> foo(): Boolean {
     return Any() is Any
 }
 

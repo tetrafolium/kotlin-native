@@ -22,15 +22,15 @@ annotation class MyDsl
 
 @MyDsl
 class DslMain {
-    fun <T: Any> kClass(block: KClassDsl.() -> T): T = KClassDsl().block()
+    fun <T : Any> kClass(block: KClassDsl.() -> T): T = KClassDsl().block()
 }
 
 @MyDsl
 class KClassDsl {
-    inline fun <reified T: Any> of() = T::class
+    inline fun <reified T : Any> of() = T::class
 }
 
-fun <T: Any> dsl(block: DslMain.() -> T): T = DslMain().block()
+fun <T : Any> dsl(block: DslMain.() -> T): T = DslMain().block()
 
 class TestClass
 
@@ -38,7 +38,7 @@ class App(testQualified: Boolean) {
 
     var type = dsl {
         kClass {
-            //kClass {  } // This should error if uncommented because of `@DslMarker`.
+            // kClass {  } // This should error if uncommented because of `@DslMarker`.
             of<TestClass>()
         }
     }

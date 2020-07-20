@@ -1,7 +1,7 @@
 package codegen.intrinsics.interop_convert
 
-import kotlin.test.*
 import kotlinx.cinterop.*
+import kotlin.test.*
 
 fun convertIntToShortOrNull(i: Int, b: Boolean): Short? = if (b) i.convert() else null
 fun narrowIntToShortOrNull(i: Int, b: Boolean): Short? = if (b) i.narrow() else null
@@ -31,13 +31,15 @@ fun testConvertSimple() {
 @Test
 fun convertAll() {
     val values = mutableListOf<Long>()
-    for (value in listOf(
+    for (
+        value in listOf(
             0L,
             Byte.MIN_VALUE.toLong(), Byte.MAX_VALUE.toLong(), UByte.MAX_VALUE.toLong(),
             Short.MIN_VALUE.toLong(), Short.MAX_VALUE.toLong(), UShort.MAX_VALUE.toLong(),
             Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong(), UInt.MAX_VALUE.toLong(),
             Long.MIN_VALUE.toLong(), Long.MAX_VALUE.toLong(), ULong.MAX_VALUE.toLong()
-    )) {
+        )
+    ) {
         values.add(value - 1)
         values.add(value)
         values.add(value + 1)
@@ -126,7 +128,6 @@ fun testConvertAll(value: Long) {
 
     assertEquals(value.toLong(), value.signExtend<Long>())
 }
-
 
 fun testConvertAll(value: UByte) {
     assertEquals(value.toByte(), value.convert<Byte>())

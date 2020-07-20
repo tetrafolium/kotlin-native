@@ -11,9 +11,9 @@ interface A {
     fun foo(): String
 }
 
-abstract class C: A
+abstract class C : A
 
-open class B: C() {
+open class B : C() {
     override fun foo(): String {
         return "OK"
     }

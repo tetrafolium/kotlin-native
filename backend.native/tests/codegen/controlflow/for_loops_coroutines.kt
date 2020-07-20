@@ -5,9 +5,8 @@
 
 package codegen.controlflow.for_loops_coroutines
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
+import kotlin.test.*
 
 @Test fun runTest() {
     val sq = sequence {

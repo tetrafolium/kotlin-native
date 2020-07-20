@@ -11,7 +11,7 @@ interface A {
     fun f(): String
 }
 
-enum class Zzz: A {
+enum class Zzz : A {
     Z1 {
         override fun f() = "z1"
     },

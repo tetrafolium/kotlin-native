@@ -72,4 +72,3 @@ actual fun Int.test6(arg: Int) {
 expect inline fun inlineFunction(a: String, b: Int = 0, c: () -> Double? = { null }): String
 
 actual inline fun inlineFunction(a: String, b: Int, c: () -> Double?): String = a + "," + b + "," + c()
-

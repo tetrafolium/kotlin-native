@@ -5,10 +5,9 @@
 
 package codegen.coroutines.controlFlow_inline3
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.test.*
 
 open class EmptyContinuation(override val context: CoroutineContext = EmptyCoroutineContext) : Continuation<Any?> {
     companion object : EmptyContinuation()
@@ -35,7 +34,7 @@ fun f2(): Int {
     return 1
 }
 
-inline suspend fun inline_s2(): Int {
+suspend inline fun inline_s2(): Int {
     var x = 0
     if (f1() > 0)
         x = s1()

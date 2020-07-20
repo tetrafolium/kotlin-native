@@ -5,7 +5,7 @@
 
 import a.*
 
-class B: C()
+class B : C()
 
 fun main(args: Array<String>) {
     val b = B()

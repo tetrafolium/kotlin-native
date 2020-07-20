@@ -23,7 +23,7 @@ inline fun foo1(i1: Int): Int {
 }
 
 fun bar(i0: Int): Int {
-    return foo1(i0)  + foo3(i0)
+    return foo1(i0) + foo3(i0)
 }
 
 @Test fun runTest() {

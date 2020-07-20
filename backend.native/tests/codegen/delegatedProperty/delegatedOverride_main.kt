@@ -5,7 +5,7 @@
 
 import a.*
 
-open class C: B() {
+open class C : B() {
     override val x: Int = 156
 
     fun foo() {

@@ -2,7 +2,7 @@ package codegen.controlflow.for_loops_array
 
 import kotlin.test.*
 
-fun <T : ByteArray> genericArray(data : T): Int {
+fun <T : ByteArray> genericArray(data: T): Int {
     var sum = 0
     for (element in data) {
         sum += element

@@ -7,7 +7,7 @@ package codegen.basics.const_infinity
 
 import kotlin.test.*
 
-//Original issue here https://youtrack.jetbrains.com/issue/KT-37212
+// Original issue here https://youtrack.jetbrains.com/issue/KT-37212
 @Suppress("DIVISION_BY_ZERO")
 const val fpInfConst = 1.0F / 0.0F
 @Suppress("DIVISION_BY_ZERO")

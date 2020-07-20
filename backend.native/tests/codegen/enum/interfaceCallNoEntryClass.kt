@@ -16,7 +16,7 @@ enum class Zzz(val zzz: String, val x: Int) : A {
     Z2("z2", 2),
     Z3("z3", 3);
 
-    override fun foo(): String{
+    override fun foo(): String {
         return "('$zzz', $x)"
     }
 }

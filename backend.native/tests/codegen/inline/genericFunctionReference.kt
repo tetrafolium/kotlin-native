@@ -9,7 +9,7 @@ import kotlin.test.*
 
 class Z<T>(val x: T)
 
-inline fun<T, R> foo(x: T, f: (T) -> R): R {
+inline fun <T, R> foo(x: T, f: (T) -> R): R {
     return f(x)
 }
 

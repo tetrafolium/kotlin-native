@@ -12,7 +12,7 @@ fun foo(s: String): String {
         fun f() = s
     }
 
-    open class Derived: Local() {
+    open class Derived : Local() {
         fun g() = f()
     }
 

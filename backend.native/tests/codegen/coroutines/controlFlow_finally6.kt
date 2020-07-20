@@ -5,10 +5,9 @@
 
 package codegen.coroutines.controlFlow_finally6
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.test.*
 
 open class EmptyContinuation(override val context: CoroutineContext = EmptyCoroutineContext) : Continuation<Any?> {
     companion object : EmptyContinuation()
@@ -52,8 +51,7 @@ fun builder(c: suspend () -> Unit) {
             } finally {
                 println("finally")
             }
-        }
-        catch(t: Error) {
+        } catch (t: Error) {
             println(t.message)
         }
     }

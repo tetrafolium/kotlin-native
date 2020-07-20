@@ -14,10 +14,10 @@ abstract class Father {
 }
 
 class Child : Father() {
-    val ChildInClass : InClass
+    val ChildInClass: InClass
 
     init {
-        ChildInClass =  object : Father.InClass() {
+        ChildInClass = object : Father.InClass() {
             override fun work(): String {
                 return "OK"
             }

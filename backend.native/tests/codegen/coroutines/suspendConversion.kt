@@ -3,10 +3,9 @@
  * that can be found in the LICENSE file.
  */
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.test.*
 
 open class EmptyContinuation(override val context: CoroutineContext = EmptyCoroutineContext) : Continuation<Any?> {
     companion object : EmptyContinuation()

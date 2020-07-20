@@ -12,7 +12,7 @@ inline fun foo(i3: Int, i4: Int): Int {
     return i3 + i3 + i4
 }
 
-fun quiz(i: Int) : Int {
+fun quiz(i: Int): Int {
     println("hello")
     return i + 1
 }

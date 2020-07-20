@@ -18,7 +18,6 @@ class Z : B() {
     override fun foo() = "Z"
 }
 
-
 fun box(): String {
     val z = Z()
     val b: B = z

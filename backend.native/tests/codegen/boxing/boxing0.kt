@@ -15,4 +15,3 @@ class Box<T>(t: T) {
     val box: Box<Int> = Box<Int>(17)
     println(box.value)
 }
-

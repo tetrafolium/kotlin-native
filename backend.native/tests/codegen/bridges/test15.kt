@@ -18,7 +18,7 @@ interface C {
 
 open class B : C, A<Int>()
 
-open class D: B() {
+open class D : B() {
     override var size: Int = 117
 }
 

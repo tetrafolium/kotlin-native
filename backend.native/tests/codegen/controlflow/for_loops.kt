@@ -43,7 +43,6 @@ import kotlin.test.*
     println()
     println()
 
-
     // Two steps
     for (i in 0..6 step 2 step 3) {
         print(i)

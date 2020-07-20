@@ -24,7 +24,7 @@ open class C : A() {
     override fun foo(): Int = 42
 }
 
-open class D: C(), Y, Z
+open class D : C(), Y, Z
 
 @Test fun runTest() {
     val d = D()

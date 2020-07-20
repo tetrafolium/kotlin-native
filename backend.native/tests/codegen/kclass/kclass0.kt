@@ -5,8 +5,8 @@
 
 package codegen.kclass.kclass0
 
-import kotlin.test.*
 import kotlin.reflect.KClass
+import kotlin.test.*
 
 @Test fun runTest() {
     main(emptyArray<String>())
@@ -63,9 +63,11 @@ class RootClass {
 interface Interface
 
 fun checkClass(
-        clazz: KClass<*>,
-        expectedQualifiedName: String?, expectedSimpleName: String?,
-        expectedInstance: Any, expectedNotInstance: Any?
+    clazz: KClass<*>,
+    expectedQualifiedName: String?,
+    expectedSimpleName: String?,
+    expectedInstance: Any,
+    expectedNotInstance: Any?
 ) {
     assert(clazz.qualifiedName == expectedQualifiedName)
     assert(clazz.simpleName == expectedSimpleName)

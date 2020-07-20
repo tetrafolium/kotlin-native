@@ -10,7 +10,7 @@ import kotlin.test.*
 @Test fun runTest() {
     // Negative step.
     try {
-        for (i in 0 .. 4 step -2) print(i); println()
+        for (i in 0..4 step -2) print(i); println()
         throw AssertionError()
     } catch (e: IllegalArgumentException) {}
 
@@ -26,7 +26,7 @@ import kotlin.test.*
 
     // Zero step.
     try {
-        for (i in 0 .. 4 step 0) print(i); println()
+        for (i in 0..4 step 0) print(i); println()
         throw AssertionError()
     } catch (e: IllegalArgumentException) {}
 
@@ -42,7 +42,7 @@ import kotlin.test.*
 
     // Two steps, one is negative.
     try {
-        for (i in 0 .. 4 step -2 step 3) print(i); println()
+        for (i in 0..4 step -2 step 3) print(i); println()
         throw AssertionError()
     } catch (e: IllegalArgumentException) {}
 

@@ -9,10 +9,10 @@ import kotlin.test.*
 
 open class C {
     open var p2 = "<prop:C>"
-        set(value)  { field = "<prop:C>" + value }
+        set(value) { field = "<prop:C>" + value }
 }
 
-class C1: C() {
+class C1 : C() {
     override var p2 = super<C>.p2 + "<prop:C1>"
         set(value) {
             super<C>.p2 = value
@@ -20,10 +20,9 @@ class C1: C() {
         }
 }
 
-open class C2: C() {
-}
+open class C2 : C()
 
-class C3: C2() {
+class C3 : C2() {
     override var p2 = super<C2>.p2 + "<prop:C3>"
         set(value) {
             super<C2>.p2 = value

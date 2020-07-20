@@ -20,8 +20,7 @@ fun foo(value: Any): Int? {
         } catch (e: NumberFormatException) {
             return null
         }
-    }
-    else {
+    } else {
         return null
     }
 }

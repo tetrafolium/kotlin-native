@@ -11,7 +11,7 @@ import kotlin.test.*
     main(arrayOf("arg0"))
 }
 
-fun main(args : Array<String>) {
+fun main(args: Array<String>) {
     run {
         println(args[0])
     }

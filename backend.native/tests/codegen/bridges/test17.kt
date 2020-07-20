@@ -12,11 +12,11 @@ interface A<T> {
     fun foo(): T
 }
 
-abstract class B<T>: A<T>
+abstract class B<T> : A<T>
 
-abstract class C: B<Int>()
+abstract class C : B<Int>()
 
-class D: C() {
+class D : C() {
     override fun foo(): Int {
         return 42
     }

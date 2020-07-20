@@ -19,4 +19,3 @@ fun bar(i: Int, j: Int): Int {
 @Test fun runTest() {
     println(bar(41, 2).toString())
 }
-

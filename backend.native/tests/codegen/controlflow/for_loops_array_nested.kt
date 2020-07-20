@@ -4,10 +4,10 @@ import kotlin.test.*
 
 @Test fun arrayOfArrays() {
     val metaArray = arrayOf(
-            arrayOf(1, 2, 3),
-            arrayOf("Hello"),
-            arrayOf<Any>(),
-            arrayOf(1..10)
+        arrayOf(1, 2, 3),
+        arrayOf("Hello"),
+        arrayOf<Any>(),
+        arrayOf(1..10)
     )
     for (array in metaArray) {
         inner@for (elem in array) {

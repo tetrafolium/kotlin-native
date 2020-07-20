@@ -5,9 +5,8 @@
 
 package codegen.delegatedProperty.simpleVar
 
-import kotlin.test.*
-
 import kotlin.reflect.KProperty
+import kotlin.test.*
 
 class Delegate {
     var f: Int = 42

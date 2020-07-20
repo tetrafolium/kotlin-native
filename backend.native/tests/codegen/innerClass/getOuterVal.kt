@@ -15,7 +15,6 @@ class Outer(val s: String) {
 
 fun box() = Outer("OK").Inner().box()
 
-@Test fun runTest()
-{
+@Test fun runTest() {
     println(box())
 }

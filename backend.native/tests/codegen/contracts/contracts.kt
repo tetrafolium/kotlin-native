@@ -1,5 +1,5 @@
-import kotlin.test.*
 import kotlin.contracts.*
+import kotlin.test.*
 
 open class S
 class P(val str: String = "P") : S()

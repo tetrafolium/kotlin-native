@@ -5,8 +5,8 @@
 
 package codegen.kclass.kClassEnumArgument
 
-import kotlin.test.*
 import kotlin.reflect.KClass
+import kotlin.test.*
 
 enum class E(val arg: KClass<*>?) {
     A(null as KClass<*>?),

@@ -12,8 +12,8 @@ open class A {
     open fun foo(): Any = 42
 }
 
-open class B: A() {
-    override fun foo(): Unit { }
+open class B : A() {
+    override fun foo() { }
 }
 
 @Test fun runTest() {

@@ -8,7 +8,7 @@ package codegen.inline.inline11
 import kotlin.test.*
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun <reified T> foo (i2: Any): Boolean {
+inline fun <reified T> foo(i2: Any): Boolean {
     return i2 is T
 }
 

@@ -21,7 +21,6 @@ class Outer(val s: String) {
 
         fun foo() = s
     }
-
 }
 
 @Test fun runTest() {

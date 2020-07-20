@@ -5,9 +5,8 @@
 
 package codegen.delegatedProperty.observable
 
-import kotlin.test.*
-
 import kotlin.properties.Delegates
+import kotlin.test.*
 
 class User {
     var name: String by Delegates.observable("<no name>") {

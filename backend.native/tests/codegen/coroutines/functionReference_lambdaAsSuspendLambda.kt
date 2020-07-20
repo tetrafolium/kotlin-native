@@ -5,10 +5,9 @@
 
 package codegen.coroutines.functionReference_lambdaAsSuspendLambda
 
-import kotlin.test.*
-
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.test.*
 
 fun foo(block: (Continuation<Unit>) -> Any?) {
     block as (suspend () -> Unit)

@@ -25,9 +25,9 @@ fun box(): String {
     val z1b: B = z1
 
     return when {
-        z1.foo( 0)  != "B" -> "Fail #1"
-        z1a.foo( 0) != "B" -> "Fail #2"
-        z1b.foo( 0) != "B" -> "Fail #3"
+        z1.foo(0) != "B" -> "Fail #1"
+        z1a.foo(0) != "B" -> "Fail #2"
+        z1b.foo(0) != "B" -> "Fail #3"
         else -> "OK"
     }
 }

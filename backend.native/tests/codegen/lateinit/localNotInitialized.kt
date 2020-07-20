@@ -12,8 +12,7 @@ import kotlin.test.*
 
     try {
         println(s)
-    }
-    catch (e: RuntimeException) {
+    } catch (e: RuntimeException) {
         println("OK")
         return
     }

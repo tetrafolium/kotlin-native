@@ -8,11 +8,11 @@ package codegen.inline.inline20
 import kotlin.test.*
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun bar(block: () -> String) : String {
+inline fun bar(block: () -> String): String {
     return block()
 }
 
-fun bar2() : String {
+fun bar2(): String {
     return bar { return "def" }
 }
 

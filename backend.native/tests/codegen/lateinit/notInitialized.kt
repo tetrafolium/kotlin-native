@@ -17,8 +17,7 @@ class A {
     val a = A()
     try {
         println(a.foo())
-    }
-    catch (e: RuntimeException) {
+    } catch (e: RuntimeException) {
         println("OK")
         return
     }

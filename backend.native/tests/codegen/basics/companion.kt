@@ -4,7 +4,7 @@
  */
 
 class A {
-  companion object {
-    fun foo() = "comp"
-  }
+    companion object {
+        fun foo() = "comp"
+    }
 }

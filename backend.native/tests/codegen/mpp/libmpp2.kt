@@ -7,9 +7,7 @@ expect class C {
     constructor(arg: Any?)
 }
 
-actual data class C actual constructor(val arg: Any?) {
-
-}
+actual data class C actual constructor(val arg: Any?)
 
 expect class T
 actual typealias T = C

@@ -12,7 +12,7 @@ abstract class WaitFor {
         condition()
     }
 
-    abstract fun condition(): Boolean;
+    abstract fun condition(): Boolean
 }
 
 fun box(): String {
@@ -26,7 +26,7 @@ fun box(): String {
         }
     }
 
-    return result;
+    return result
 }
 
 @Test fun runTest() {

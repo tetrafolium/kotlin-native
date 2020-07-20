@@ -5,8 +5,8 @@
 
 package codegen.associatedObjects.associatedObjects1
 
-import kotlin.test.*
 import kotlin.reflect.*
+import kotlin.test.*
 
 @Test
 @OptIn(ExperimentalAssociatedObjects::class)

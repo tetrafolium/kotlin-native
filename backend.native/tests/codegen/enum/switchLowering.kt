@@ -23,20 +23,22 @@ fun produceEntry() = EnumA.A
 
 // Check that we fail on comparison of different enum types.
 fun differentEnums() {
-    println(when (produceEntry()) {
-        EnumB.A -> "EnumB.A"
-        EnumA.A -> "EnumA.A"
-        EnumA.B -> "EnumA.B"
-        else    -> "nah"
-    })
+    println(
+        when (produceEntry()) {
+            EnumB.A -> "EnumB.A"
+            EnumA.A -> "EnumA.A"
+            EnumA.B -> "EnumA.B"
+            else -> "nah"
+        }
+    )
 }
 
 // Nullable subject shouldn't be lowered.
 fun nullable() {
     val x: EnumA? = null
-    when(x) {
+    when (x) {
         EnumA.A -> println("fail")
-        else    -> println("ok")
+        else -> println("ok")
     }
 }
 
@@ -45,9 +47,9 @@ fun operatorOverloading() {
     operator fun E.contains(other: E): Boolean = false
 
     val y = E.ONE
-    when(y) {
-        in E.ONE    -> println("Should not reach here")
-        else        -> println("ok")
+    when (y) {
+        in E.ONE -> println("Should not reach here")
+        else -> println("ok")
     }
 }
 
@@ -62,7 +64,7 @@ fun smoke1() {
 fun smoke2() {
     when (produceEntry()) {
         EnumA.B -> println("error")
-        else    -> println("ok")
+        else -> println("ok")
     }
 }
 
@@ -70,15 +72,16 @@ fun eA() = EnumA.A
 
 fun eB() = EnumA.B
 
-
 fun nestedWhen() {
-    println(when (eA()) {
-        EnumA.A, EnumA.C -> when (eB()) {
-            EnumA.B -> "ok"
+    println(
+        when (eA()) {
+            EnumA.A, EnumA.C -> when (eB()) {
+                EnumA.B -> "ok"
+                else -> "nope"
+            }
             else -> "nope"
         }
-        else -> "nope"
-    })
+    )
 }
 
 fun main() {

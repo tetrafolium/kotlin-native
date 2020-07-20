@@ -13,7 +13,7 @@ open class B {
     lateinit var a: A
 }
 
-class C: B() {
+class C : B() {
     fun foo() { a = A(42) }
 }
 

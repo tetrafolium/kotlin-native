@@ -19,5 +19,3 @@ fun bar(s1: String, s2: String, s3: String): String {
 @Test fun runTest() {
     println(bar("Hello ", "wor", "ld"))
 }
-
-
