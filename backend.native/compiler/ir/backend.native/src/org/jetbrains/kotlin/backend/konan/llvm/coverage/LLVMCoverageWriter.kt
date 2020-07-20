@@ -8,7 +8,6 @@ import kotlinx.cinterop.*
 import llvm.*
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.llvm.name
-import org.jetbrains.kotlin.backend.konan.llvm.symbolName
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.name
 import org.jetbrains.kotlin.ir.declarations.path
@@ -36,14 +35,14 @@ private fun LLVMCoverageRegion.populateFrom(region: Region, regionId: Int, files
  * See http://llvm.org/docs/CoverageMappingFormat.html for the format description.
  */
 internal class LLVMCoverageWriter(
-        private val context: Context,
-        private val filesRegionsInfo: List<FileRegionInfo>
+    private val context: Context,
+    private val filesRegionsInfo: List<FileRegionInfo>
 ) {
     fun write() {
         if (filesRegionsInfo.isEmpty()) return
 
         val module = context.llvmModule
-                ?: error("LLVM module should be initialized.")
+            ?: error("LLVM module should be initialized.")
         val filesIndex = filesRegionsInfo.mapIndexed { index, fileRegionInfo -> fileRegionInfo.file to index }.toMap()
 
         val coverageGlobal = memScoped {
@@ -53,19 +52,24 @@ internal class LLVMCoverageWriter(
                 }
                 val fileIds = functionRegions.regions.map { filesIndex.getValue(it.value.file) }.toSet().toIntArray()
                 val functionCoverage = LLVMWriteCoverageRegionMapping(
-                        fileIds.toCValues(), fileIds.size.signExtend(),
-                        regions.toCValues(), regions.size.signExtend())
+                    fileIds.toCValues(), fileIds.size.signExtend(),
+                    regions.toCValues(), regions.size.signExtend()
+                )
 
                 val functionName = context.llvmDeclarations.forFunction(functionRegions.function).llvmFunction.name
-                val functionMappingRecord = LLVMAddFunctionMappingRecord(LLVMGetModuleContext(context.llvmModule),
-                        functionName, functionRegions.structuralHash, functionCoverage)!!
+                val functionMappingRecord = LLVMAddFunctionMappingRecord(
+                    LLVMGetModuleContext(context.llvmModule),
+                    functionName, functionRegions.structuralHash, functionCoverage
+                )!!
 
                 Pair(functionMappingRecord, functionCoverage)
             }.unzip()
             val (filenames, fileIds) = filesIndex.entries.toList().map { File(it.key.path).absolutePath to it.value }.unzip()
-            val retval = LLVMCoverageEmit(module, functionMappingRecords.toCValues(), functionMappingRecords.size.signExtend(),
-                    filenames.toCStringArray(this), fileIds.toIntArray().toCValues(), fileIds.size.signExtend(),
-                    functionCoverages.map { it }.toCValues(), functionCoverages.size.signExtend())!!
+            val retval = LLVMCoverageEmit(
+                module, functionMappingRecords.toCValues(), functionMappingRecords.size.signExtend(),
+                filenames.toCStringArray(this), fileIds.toIntArray().toCValues(), fileIds.size.signExtend(),
+                functionCoverages.map { it }.toCValues(), functionCoverages.size.signExtend()
+            )!!
 
             // TODO: Is there a better way to cleanup fields of T* type in `memScoped`?
             functionCoverages.forEach { LLVMFunctionCoverageDispose(it) }

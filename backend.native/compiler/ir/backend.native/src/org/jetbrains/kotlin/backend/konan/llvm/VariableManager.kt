@@ -17,32 +17,32 @@ internal fun IrElement.needDebugInfo(context: Context) = context.shouldContainDe
 
 internal class VariableManager(val functionGenerationContext: FunctionGenerationContext) {
     internal interface Record {
-        fun load() : LLVMValueRef
+        fun load(): LLVMValueRef
         fun store(value: LLVMValueRef)
-        fun address() : LLVMValueRef
+        fun address(): LLVMValueRef
     }
 
     inner class SlotRecord(val address: LLVMValueRef, val refSlot: Boolean, val isVar: Boolean) : Record {
-        override fun load() : LLVMValueRef = functionGenerationContext.loadSlot(address, isVar)
+        override fun load(): LLVMValueRef = functionGenerationContext.loadSlot(address, isVar)
         override fun store(value: LLVMValueRef) {
             functionGenerationContext.storeAny(value, address, true)
         }
-        override fun address() : LLVMValueRef = this.address
-        override fun toString() = (if (refSlot) "refslot" else "slot") + " for ${address}"
+        override fun address(): LLVMValueRef = this.address
+        override fun toString() = (if (refSlot) "refslot" else "slot") + " for $address"
     }
 
     inner class ParameterRecord(val address: LLVMValueRef, val refSlot: Boolean) : Record {
-        override fun load() : LLVMValueRef = functionGenerationContext.loadSlot(address, false)
+        override fun load(): LLVMValueRef = functionGenerationContext.loadSlot(address, false)
         override fun store(value: LLVMValueRef) = throw Error("writing to parameter")
-        override fun address() : LLVMValueRef = this.address
-        override fun toString() = (if (refSlot) "refslot" else "slot") + " for ${address}"
+        override fun address(): LLVMValueRef = this.address
+        override fun toString() = (if (refSlot) "refslot" else "slot") + " for $address"
     }
 
     class ValueRecord(val value: LLVMValueRef, val name: Name) : Record {
-        override fun load() : LLVMValueRef = value
-        override fun store(value: LLVMValueRef) = throw Error("writing to immutable: ${name}")
-        override fun address() : LLVMValueRef = throw Error("no address for: ${name}")
-        override fun toString() = "value of ${value} from ${name}"
+        override fun load(): LLVMValueRef = value
+        override fun store(value: LLVMValueRef) = throw Error("writing to immutable: $name")
+        override fun address(): LLVMValueRef = throw Error("no address for: $name")
+        override fun toString() = "value of $value from $name"
     }
 
     val variables: ArrayList<Record> = arrayListOf()
@@ -55,21 +55,25 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
         contextVariablesToIndex.clear()
     }
 
-    fun createVariable(valueDeclaration: IrValueDeclaration, value: LLVMValueRef? = null, variableLocation: VariableDebugLocation?) : Int {
+    fun createVariable(valueDeclaration: IrValueDeclaration, value: LLVMValueRef? = null, variableLocation: VariableDebugLocation?): Int {
         val isVar = valueDeclaration is IrVariable && valueDeclaration.isVar
         // Note that we always create slot for object references for memory management.
         if (!functionGenerationContext.context.shouldContainDebugInfo() && !isVar && value != null)
             return createImmutable(valueDeclaration, value)
         else
-            // Unfortunately, we have to create mutable slots here,
-            // as even vals can be assigned on multiple paths. However, we use varness
-            // knowledge, as anonymous slots are created only for true vars (for vals
-            // their single assigner already have slot).
+        // Unfortunately, we have to create mutable slots here,
+        // as even vals can be assigned on multiple paths. However, we use varness
+        // knowledge, as anonymous slots are created only for true vars (for vals
+        // their single assigner already have slot).
             return createMutable(valueDeclaration, isVar, value, variableLocation)
     }
 
-    internal fun createMutable(valueDeclaration: IrValueDeclaration,
-                               isVar: Boolean, value: LLVMValueRef? = null, variableLocation: VariableDebugLocation?) : Int {
+    internal fun createMutable(
+        valueDeclaration: IrValueDeclaration,
+        isVar: Boolean,
+        value: LLVMValueRef? = null,
+        variableLocation: VariableDebugLocation?
+    ): Int {
         assert(!contextVariablesToIndex.contains(valueDeclaration))
         val index = variables.size
         val type = functionGenerationContext.getLLVMType(valueDeclaration.type)
@@ -82,12 +86,13 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
     }
 
     internal var skipSlots = 0
-    internal fun createParameter(valueDeclaration: IrValueDeclaration, variableLocation: VariableDebugLocation?) : Int {
+    internal fun createParameter(valueDeclaration: IrValueDeclaration, variableLocation: VariableDebugLocation?): Int {
         assert(!contextVariablesToIndex.contains(valueDeclaration))
         val index = variables.size
         val type = functionGenerationContext.getLLVMType(valueDeclaration.type)
         val slot = functionGenerationContext.alloca(
-                type, "p-${valueDeclaration.name.asString()}", variableLocation)
+            type, "p-${valueDeclaration.name.asString()}", variableLocation
+        )
         val isObject = functionGenerationContext.isObjectType(type)
         variables.add(ParameterRecord(slot, isObject))
         contextVariablesToIndex[valueDeclaration] = index
@@ -98,12 +103,12 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
 
     // Creates anonymous mutable variable.
     // Think of slot reuse.
-    fun createAnonymousSlot(value: LLVMValueRef? = null) : LLVMValueRef {
+    fun createAnonymousSlot(value: LLVMValueRef? = null): LLVMValueRef {
         val index = createAnonymousMutable(functionGenerationContext.kObjHeaderPtr, value)
         return addressOf(index)
     }
 
-    private fun createAnonymousMutable(type: LLVMTypeRef, value: LLVMValueRef? = null) : Int {
+    private fun createAnonymousMutable(type: LLVMTypeRef, value: LLVMValueRef? = null): Int {
         val index = variables.size
         val slot = functionGenerationContext.alloca(type, variableLocation = null)
         if (value != null)
@@ -112,7 +117,7 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
         return index
     }
 
-    internal fun createImmutable(valueDeclaration: IrValueDeclaration, value: LLVMValueRef) : Int {
+    internal fun createImmutable(valueDeclaration: IrValueDeclaration, value: LLVMValueRef): Int {
         if (contextVariablesToIndex.containsKey(valueDeclaration))
             throw Error("${ir2string(valueDeclaration)} is already defined")
         val index = variables.size
@@ -121,7 +126,7 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
         return index
     }
 
-    fun indexOf(valueDeclaration: IrValueDeclaration) : Int {
+    fun indexOf(valueDeclaration: IrValueDeclaration): Int {
         return contextVariablesToIndex.getOrElse(valueDeclaration) { -1 }
     }
 
@@ -138,34 +143,48 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
     }
 }
 
-internal data class VariableDebugLocation(val localVariable: DILocalVariableRef, val location:DILocationRef?, val file:DIFileRef, val line:Int)
+internal data class VariableDebugLocation(val localVariable: DILocalVariableRef, val location: DILocationRef?, val file: DIFileRef, val line: Int)
 
-internal fun debugInfoLocalVariableLocation(builder: DIBuilderRef?,
-        functionScope: DIScopeOpaqueRef, diType: DITypeOpaqueRef, name:Name, file: DIFileRef, line: Int,
-        location: DILocationRef?): VariableDebugLocation {
+internal fun debugInfoLocalVariableLocation(
+    builder: DIBuilderRef?,
+    functionScope: DIScopeOpaqueRef,
+    diType: DITypeOpaqueRef,
+    name: Name,
+    file: DIFileRef,
+    line: Int,
+    location: DILocationRef?
+): VariableDebugLocation {
     val variableDeclaration = DICreateAutoVariable(
-            builder = builder,
-            scope = functionScope,
-            name = name.asString(),
-            file = file,
-            line = line,
-            type = diType)
+        builder = builder,
+        scope = functionScope,
+        name = name.asString(),
+        file = file,
+        line = line,
+        type = diType
+    )
 
     return VariableDebugLocation(localVariable = variableDeclaration!!, location = location, file = file, line = line)
 }
 
-internal fun debugInfoParameterLocation(builder: DIBuilderRef?,
-                                        functionScope: DIScopeOpaqueRef, diType: DITypeOpaqueRef,
-                                        name:Name, argNo: Int, file: DIFileRef, line: Int,
-                                        location: DILocationRef?): VariableDebugLocation {
+internal fun debugInfoParameterLocation(
+    builder: DIBuilderRef?,
+    functionScope: DIScopeOpaqueRef,
+    diType: DITypeOpaqueRef,
+    name: Name,
+    argNo: Int,
+    file: DIFileRef,
+    line: Int,
+    location: DILocationRef?
+): VariableDebugLocation {
     val variableDeclaration = DICreateParameterVariable(
-            builder = builder,
-            scope = functionScope,
-            name = name.asString(),
-            argNo = argNo,
-            file = file,
-            line = line,
-            type = diType)
+        builder = builder,
+        scope = functionScope,
+        name = name.asString(),
+        argNo = argNo,
+        file = file,
+        line = line,
+        type = diType
+    )
 
     return VariableDebugLocation(localVariable = variableDeclaration!!, location = location, file = file, line = line)
 }

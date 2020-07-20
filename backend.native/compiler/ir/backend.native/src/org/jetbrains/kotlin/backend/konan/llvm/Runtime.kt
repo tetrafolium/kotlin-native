@@ -7,8 +7,8 @@ package org.jetbrains.kotlin.backend.konan.llvm
 
 import kotlinx.cinterop.*
 import llvm.*
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.types.IrType
 
 interface RuntimeAware {
     val runtime: Runtime
@@ -21,7 +21,7 @@ class Runtime(bitcodeFile: String) {
 
     internal fun getStructTypeOrNull(name: String) = LLVMGetTypeByName(llvmModule, "struct.$name")
     internal fun getStructType(name: String) = getStructTypeOrNull(name)
-            ?: throw Error("struct.$name is not found in the Runtime module.")
+        ?: throw Error("struct.$name is not found in the Runtime module.")
 
     val typeInfoType = getStructType("TypeInfo")
     val extendedTypeInfoType = getStructType("ExtendedTypeInfo")

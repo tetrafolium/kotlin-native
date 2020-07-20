@@ -20,10 +20,10 @@ import org.jetbrains.kotlin.ir.declarations.name
  * Besides the obvious [file] and line/column borders, it has [RegionKind] which is described later.
  */
 class Region(
-        val startOffset: Int,
-        val endOffset: Int,
-        val file: IrFile,
-        val kind: RegionKind
+    val startOffset: Int,
+    val endOffset: Int,
+    val file: IrFile,
+    val kind: RegionKind
 ) {
     val startLine: Int
         get() = file.fileEntry.line(startOffset)
@@ -39,11 +39,11 @@ class Region(
 
     companion object {
         fun fromIr(irElement: IrElement, irFile: IrFile, kind: RegionKind = RegionKind.Code) =
-                fromOffset(irElement.startOffset, irElement.endOffset, irFile, kind)
+            fromOffset(irElement.startOffset, irElement.endOffset, irFile, kind)
 
         fun fromOffset(startOffset: Int, endOffset: Int, irFile: IrFile, kind: RegionKind = RegionKind.Code) =
-                if (startOffset == UNDEFINED_OFFSET || endOffset == UNDEFINED_OFFSET || startOffset == endOffset) null
-                else Region(startOffset, endOffset, irFile, kind)
+            if (startOffset == UNDEFINED_OFFSET || endOffset == UNDEFINED_OFFSET || startOffset == endOffset) null
+            else Region(startOffset, endOffset, irFile, kind)
     }
 
     override fun toString(): String {
@@ -77,8 +77,8 @@ sealed class RegionKind {
  * "Regional" description of the [function].
  */
 class FunctionRegions(
-        val function: IrFunction,
-        val regions: Map<IrElement, Region>
+    val function: IrFunction,
+    val regions: Map<IrElement, Region>
 ) {
     // Enumeration is required for serialization and instrumentation calls.
     val regionEnumeration = regions.values.mapIndexed { index, region -> region to index }.toMap()
@@ -97,6 +97,6 @@ class FunctionRegions(
  * we aggregate [FunctionRegions] per [file].
  */
 class FileRegionInfo(
-        val file: IrFile,
-        val functions: List<FunctionRegions>
+    val file: IrFile,
+    val functions: List<FunctionRegions>
 )

@@ -11,7 +11,6 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.toKString
 import llvm.*
 import org.jetbrains.kotlin.backend.konan.CachedLibraries
-import org.jetbrains.kotlin.library.resolver.TopologicalLibraryOrder
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.hash.GlobalHash
 import org.jetbrains.kotlin.backend.konan.ir.llvmSymbolOrigin
@@ -87,8 +86,8 @@ internal sealed class Lifetime(val slotType: SlotType) {
     }
 
     // If reference is stored to the field of an incoming parameters.
-    class PARAMETERS_FIELD(val parameters: IntArray, val useReturnSlot: Boolean)
-        : Lifetime(SlotType.PARAMS_IF_ARENA(parameters, useReturnSlot)) {
+    class PARAMETERS_FIELD(val parameters: IntArray, val useReturnSlot: Boolean) :
+        Lifetime(SlotType.PARAMS_IF_ARENA(parameters, useReturnSlot)) {
         override fun toString(): String {
             return "PARAMETERS_FIELD(${parameters.contentToString()}, useReturnSlot='$useReturnSlot')"
         }
@@ -170,9 +169,12 @@ internal interface ContextUtils : RuntimeAware {
         get() {
             assert(this.isReal)
             return if (isExternal(this)) {
-                runtime.addedLLVMExternalFunctions.getOrPut(this) { context.llvm.externalFunction(this.symbolName, getLlvmFunctionType(this),
-                        origin = this.llvmSymbolOrigin) }
-
+                runtime.addedLLVMExternalFunctions.getOrPut(this) {
+                    context.llvm.externalFunction(
+                        this.symbolName, getLlvmFunctionType(this),
+                        origin = this.llvmSymbolOrigin
+                    )
+                }
             } else {
                 context.llvmDeclarations.forFunctionOrNull(this)?.llvmFunction
             }
@@ -190,8 +192,12 @@ internal interface ContextUtils : RuntimeAware {
     val IrClass.typeInfoPtr: ConstPointer
         get() {
             return if (isExternal(this)) {
-                constPointer(importGlobal(this.typeInfoSymbolName, runtime.typeInfoType,
-                        origin = this.llvmSymbolOrigin))
+                constPointer(
+                    importGlobal(
+                        this.typeInfoSymbolName, runtime.typeInfoType,
+                        origin = this.llvmSymbolOrigin
+                    )
+                )
             } else {
                 context.llvmDeclarations.forClass(this).typeInfo
             }
@@ -241,7 +247,6 @@ internal interface ContextUtils : RuntimeAware {
 
     val FqName.globalHash: ConstValue
         get() = this.toString().globalHash
-
 }
 
 /**
@@ -257,7 +262,6 @@ internal val Name.localHash: LocalHash
 
 internal val FqName.localHash: LocalHash
     get() = this.toString().localHash
-
 
 internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
 
@@ -321,10 +325,10 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
     }
 
     internal fun externalFunction(
-            name: String,
-            type: LLVMTypeRef,
-            origin: CompiledKlibModuleOrigin,
-            independent: Boolean = false
+        name: String,
+        type: LLVMTypeRef,
+        origin: CompiledKlibModuleOrigin,
+        independent: Boolean = false
     ): LLVMValueRef {
         this.imports.add(origin, onlyBitcode = independent)
 
@@ -332,7 +336,7 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
         if (found != null) {
             assert(getFunctionType(found) == type) {
                 "Expected: ${LLVMPrintTypeToString(type)!!.toKString()} " +
-                        "found: ${LLVMPrintTypeToString(getFunctionType(found))!!.toKString()}"
+                    "found: ${LLVMPrintTypeToString(getFunctionType(found))!!.toKString()}"
             }
             assert(LLVMGetLinkage(found) == LLVMLinkage.LLVMExternalLinkage)
             return found
@@ -393,16 +397,16 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
 
     val nativeDependenciesToLink: List<KonanLibrary> by lazy {
         context.config.resolvedLibraries
-                .getFullList(TopologicalLibraryOrder)
-                .filter {
-                    require(it is KonanLibrary)
-                    (!it.isDefault && !context.config.purgeUserLibs) || imports.nativeDependenciesAreUsed(it)
-                }.cast<List<KonanLibrary>>()
+            .getFullList(TopologicalLibraryOrder)
+            .filter {
+                require(it is KonanLibrary)
+                (!it.isDefault && !context.config.purgeUserLibs) || imports.nativeDependenciesAreUsed(it)
+            }.cast<List<KonanLibrary>>()
     }
 
     private val immediateBitcodeDependencies: List<KonanLibrary> by lazy {
         context.config.resolvedLibraries.getFullList(TopologicalLibraryOrder).cast<List<KonanLibrary>>()
-                .filter { (!it.isDefault && !context.config.purgeUserLibs) || imports.bitcodeIsUsed(it) }
+            .filter { (!it.isDefault && !context.config.purgeUserLibs) || imports.bitcodeIsUsed(it) }
     }
 
     val allCachedBitcodeDependencies: List<KonanLibrary> by lazy {
@@ -413,8 +417,10 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
             cachedLibrary.bitcodeDependencies.forEach {
                 val library = allLibraries[it] ?: error("Bitcode dependency to an unknown library: $it")
                 result.add(library as KonanLibrary)
-                addDependencies(context.config.cachedLibraries.getLibraryCache(library)
-                        ?: error("Library $it is expected to be cached"))
+                addDependencies(
+                    context.config.cachedLibraries.getLibraryCache(library)
+                        ?: error("Library $it is expected to be cached")
+                )
             }
         }
 
@@ -442,7 +448,7 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
 
     val bitcodeToLink: List<KonanLibrary> by lazy {
         (context.config.resolvedLibraries.getFullList(TopologicalLibraryOrder).cast<List<KonanLibrary>>())
-                .filter { shouldContainBitcode(it) }
+            .filter { shouldContainBitcode(it) }
     }
 
     private fun shouldContainBitcode(library: KonanLibrary): Boolean {
@@ -476,7 +482,7 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
 
     private fun importRtFunction(name: String) = importFunction(name, runtime.llvmModule)
     private fun importModelSpecificRtFunction(name: String) =
-            importRtFunction(name + context.memoryModel.suffix)
+        importRtFunction(name + context.memoryModel.suffix)
 
     private fun importRtGlobal(name: String) = importGlobal(name, runtime.llvmModule)
 
@@ -551,40 +557,40 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
     }
 
     val cxxStdTerminate = externalNounwindFunction(
-            "_ZSt9terminatev", // mangled C++ 'std::terminate'
-            functionType(voidType, false),
-            origin = context.standardLlvmSymbolsOrigin
+        "_ZSt9terminatev", // mangled C++ 'std::terminate'
+        functionType(voidType, false),
+        origin = context.standardLlvmSymbolsOrigin
     )
 
     val gxxPersonalityFunction = externalNounwindFunction(
-            personalityFunctionName,
-            functionType(int32Type, true),
-            origin = context.standardLlvmSymbolsOrigin
+        personalityFunctionName,
+        functionType(int32Type, true),
+        origin = context.standardLlvmSymbolsOrigin
     )
     val cxaBeginCatchFunction = externalNounwindFunction(
-            "__cxa_begin_catch",
-            functionType(int8TypePtr, false, int8TypePtr),
-            origin = context.standardLlvmSymbolsOrigin
+        "__cxa_begin_catch",
+        functionType(int8TypePtr, false, int8TypePtr),
+        origin = context.standardLlvmSymbolsOrigin
     )
     val cxaEndCatchFunction = externalNounwindFunction(
-            "__cxa_end_catch",
-            functionType(voidType, false),
-            origin = context.standardLlvmSymbolsOrigin
+        "__cxa_end_catch",
+        functionType(voidType, false),
+        origin = context.standardLlvmSymbolsOrigin
     )
 
     val memsetFunction = importMemset()
-    //val memcpyFunction = importMemcpy()
+    // val memcpyFunction = importMemcpy()
 
     val llvmTrap = llvmIntrinsic(
-            "llvm.trap",
-            functionType(voidType, false),
-            "cold", "noreturn", "nounwind"
+        "llvm.trap",
+        functionType(voidType, false),
+        "cold", "noreturn", "nounwind"
     )
 
     val llvmEhTypeidFor = llvmIntrinsic(
-            "llvm.eh.typeid.for",
-            functionType(int32Type, false, int8TypePtr),
-            "nounwind", "readnone"
+        "llvm.eh.typeid.for",
+        functionType(int32Type, false, int8TypePtr),
+        "nounwind", "readnone"
     )
 
     val usedFunctions = mutableListOf<LLVMValueRef>()
@@ -598,7 +604,8 @@ internal class Llvm(val context: Context, val llvmModule: LLVMModuleRef) {
 
     private object lazyRtFunction {
         operator fun provideDelegate(
-                thisRef: Llvm, property: KProperty<*>
+            thisRef: Llvm,
+            property: KProperty<*>
         ) = object : ReadOnlyProperty<Llvm, LLVMValueRef> {
 
             val value by lazy { thisRef.importRtFunction(property.name) }

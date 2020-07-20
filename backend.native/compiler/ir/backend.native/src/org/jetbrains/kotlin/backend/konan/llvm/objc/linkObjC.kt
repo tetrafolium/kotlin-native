@@ -47,9 +47,9 @@ private class PatchBuilder(val context: Context) {
     }
 
     data class LiteralPatch(
-            val generator: ObjCDataGenerator.CStringLiteralsGenerator,
-            val value: String,
-            val newValue: String
+        val generator: ObjCDataGenerator.CStringLiteralsGenerator,
+        val value: String,
+        val newValue: String
     )
 
     val globalPatches = mutableListOf<GlobalPatch>()
@@ -74,7 +74,7 @@ private class PatchBuilder(val context: Context) {
         addRenameClass(name, "$privatePrefix$name", ivars)
     }
 
-    private fun addRenameClass(oldName: String, newName: String, ivars: Array<out String>)  {
+    private fun addRenameClass(oldName: String, newName: String, ivars: Array<out String>) {
         globalPatches += GlobalPatch(GlobalKind.OBJC_CLASS, oldName, newName)
         globalPatches += GlobalPatch(GlobalKind.OBJC_METACLASS, oldName, newName)
 
@@ -136,9 +136,9 @@ private fun PatchBuilder.buildAndApply(llvmModule: LLVMModuleRef) {
     val nameToGlobalPatch = globalPatches.associateNonRepeatingBy { it.globalName }
 
     val sectionToValueToLiteralPatch = literalPatches.groupBy { it.generator.section }
-            .mapValues { (_, patches) ->
-                patches.associateNonRepeatingBy { it.value }
-            }
+        .mapValues { (_, patches) ->
+            patches.associateNonRepeatingBy { it.value }
+        }
 
     val unusedPatches = (globalPatches + literalPatches).toMutableSet()
 
@@ -195,16 +195,16 @@ private fun getStringValue(initializer: LLVMValueRef): String? = when (LLVMGetVa
 }
 
 private fun <T, K> List<T>.associateNonRepeatingBy(keySelector: (T) -> K): Map<K, T> =
-        this.groupBy(keySelector)
-                .mapValues { (key, values) ->
-                    values.singleOrNull()
-                            ?: error("multiple values found for $key: ${values.joinToString()}")
-                }
+    this.groupBy(keySelector)
+        .mapValues { (key, values) ->
+            values.singleOrNull()
+                ?: error("multiple values found for $key: ${values.joinToString()}")
+        }
 
 private fun patchLiteral(
-        global: LLVMValueRef,
-        generator: ObjCDataGenerator.CStringLiteralsGenerator,
-        newValue: String
+    global: LLVMValueRef,
+    generator: ObjCDataGenerator.CStringLiteralsGenerator,
+    newValue: String
 ) {
     val module = LLVMGetGlobalParent(global)!!
 
@@ -221,13 +221,13 @@ private fun patchLiteral(
 }
 
 private fun LLVMValueRef.isFirstCharPtr(global: LLVMValueRef): Boolean =
-        this.type == int8TypePtr &&
-                LLVMIsConstant(this) != 0 && LLVMGetConstOpcode(this) == LLVMOpcode.LLVMGetElementPtr
-                && LLVMGetNumOperands(this) == 3
-                && LLVMGetOperand(this, 0) == global
-                && LLVMGetOperand(this, 1).isZeroConst()
-                && LLVMGetOperand(this, 2).isZeroConst()
+    this.type == int8TypePtr &&
+        LLVMIsConstant(this) != 0 && LLVMGetConstOpcode(this) == LLVMOpcode.LLVMGetElementPtr &&
+        LLVMGetNumOperands(this) == 3 &&
+        LLVMGetOperand(this, 0) == global &&
+        LLVMGetOperand(this, 1).isZeroConst() &&
+        LLVMGetOperand(this, 2).isZeroConst()
 
 private fun LLVMValueRef?.isZeroConst(): Boolean =
-        this != null && LLVMGetValueKind(this) == LLVMValueKind.LLVMConstantIntValueKind
-                && LLVMConstIntGetZExtValue(this) == 0L
+    this != null && LLVMGetValueKind(this) == LLVMValueKind.LLVMConstantIntValueKind &&
+        LLVMConstIntGetZExtValue(this) == 0L

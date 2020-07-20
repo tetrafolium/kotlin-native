@@ -5,9 +5,7 @@
 
 package org.jetbrains.kotlin.backend.konan.llvm
 
-import llvm.LLVMStoreSizeOfType
 import llvm.LLVMValueRef
-import org.jetbrains.kotlin.backend.common.atMostOne
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.backend.konan.descriptors.getAnnotationStringValue
 import org.jetbrains.kotlin.backend.konan.ir.*
@@ -43,29 +41,32 @@ internal class KotlinObjCClassInfoGenerator(override val context: Context) : Con
         val className = exportedClassName ?: selectInternalClassName(irClass)
 
         val classNameLiteral = className?.let { staticData.cStringLiteral(it) } ?: NullPointer(int8Type)
-        val info = Struct(runtime.kotlinObjCClassInfo,
-                classNameLiteral,
-                Int32(if (exportedClassName != null) 1 else 0),
+        val info = Struct(
+            runtime.kotlinObjCClassInfo,
+            classNameLiteral,
+            Int32(if (exportedClassName != null) 1 else 0),
 
-                staticData.cStringLiteral(superclassName),
-                staticData.placeGlobalConstArray("", int8TypePtr,
-                        protocolNames.map { staticData.cStringLiteral(it) } + NullPointer(int8Type)),
+            staticData.cStringLiteral(superclassName),
+            staticData.placeGlobalConstArray(
+                "", int8TypePtr,
+                protocolNames.map { staticData.cStringLiteral(it) } + NullPointer(int8Type)
+            ),
 
-                staticData.placeGlobalConstArray("", runtime.objCMethodDescription, instanceMethods),
-                Int32(instanceMethods.size),
+            staticData.placeGlobalConstArray("", runtime.objCMethodDescription, instanceMethods),
+            Int32(instanceMethods.size),
 
-                staticData.placeGlobalConstArray("", runtime.objCMethodDescription, classMethods),
-                Int32(classMethods.size),
+            staticData.placeGlobalConstArray("", runtime.objCMethodDescription, classMethods),
+            Int32(classMethods.size),
 
-                objCLLvmDeclarations.bodyOffsetGlobal.pointer,
+            objCLLvmDeclarations.bodyOffsetGlobal.pointer,
 
-                irClass.typeInfoPtr,
-                companionObject?.typeInfoPtr ?: NullPointer(runtime.typeInfoType),
+            irClass.typeInfoPtr,
+            companionObject?.typeInfoPtr ?: NullPointer(runtime.typeInfoType),
 
-                staticData.placeGlobal(
-                        "kobjcclassptr:${irClass.fqNameForIrSerialization}#internal",
-                        NullPointer(int8Type)
-                ).pointer
+            staticData.placeGlobal(
+                "kobjcclassptr:${irClass.fqNameForIrSerialization}#internal",
+                NullPointer(int8Type)
+            ).pointer
         )
 
         objCLLvmDeclarations.classInfoGlobal.setInitializer(info)
@@ -76,16 +77,16 @@ internal class KotlinObjCClassInfoGenerator(override val context: Context) : Con
     private fun IrClass.generateMethodDescs(): List<ObjCMethodDesc> = this.generateImpMethodDescs()
 
     private fun generateInstanceMethodDescs(
-            irClass: IrClass
+        irClass: IrClass
     ): List<ObjCMethodDesc> = mutableListOf<ObjCMethodDesc>().apply {
         addAll(irClass.generateMethodDescs())
         val allImplementedSelectors = this.map { it.selector }.toSet()
 
         assert(irClass.getSuperClassNotAny()!!.isExternalObjCClass())
         val allInitMethodsInfo = irClass.getSuperClassNotAny()!!.constructors
-                .mapNotNull { it.getObjCInitMethod()?.getExternalObjCMethodInfo() }
-                .filter { it.selector !in allImplementedSelectors }
-                .distinctBy { it.selector }
+            .mapNotNull { it.getObjCInitMethod()?.getExternalObjCMethodInfo() }
+            .filter { it.selector !in allImplementedSelectors }
+            .distinctBy { it.selector }
 
         allInitMethodsInfo.mapTo(this) {
             ObjCMethodDesc(it.selector, it.encoding, context.llvm.missingInitImp)
@@ -109,27 +110,29 @@ internal class KotlinObjCClassInfoGenerator(override val context: Context) : Con
     private val impType = pointerType(functionType(int8TypePtr, true, int8TypePtr, int8TypePtr))
 
     private inner class ObjCMethodDesc(
-            val selector: String, val encoding: String, val impFunction: LLVMValueRef
+        val selector: String,
+        val encoding: String,
+        val impFunction: LLVMValueRef
     ) : Struct(
-            runtime.objCMethodDescription,
-            constPointer(impFunction).bitcast(impType),
-            staticData.cStringLiteral(selector),
-            staticData.cStringLiteral(encoding)
+        runtime.objCMethodDescription,
+        constPointer(impFunction).bitcast(impType),
+        staticData.cStringLiteral(selector),
+        staticData.cStringLiteral(encoding)
     )
 
     private fun IrClass.generateImpMethodDescs(): List<ObjCMethodDesc> = this.declarations
-            .filterIsInstance<IrSimpleFunction>()
-            .mapNotNull {
-                val annotation =
-                        it.annotations.findAnnotation(context.interopBuiltIns.objCMethodImp.fqNameSafe) ?:
-                                return@mapNotNull null
+        .filterIsInstance<IrSimpleFunction>()
+        .mapNotNull {
+            val annotation =
+                it.annotations.findAnnotation(context.interopBuiltIns.objCMethodImp.fqNameSafe)
+                    ?: return@mapNotNull null
 
-                ObjCMethodDesc(
-                        annotation.getAnnotationStringValue("selector"),
-                        annotation.getAnnotationStringValue("encoding"),
-                        it.llvmFunction
-                )
-            }
+            ObjCMethodDesc(
+                annotation.getAnnotationStringValue("selector"),
+                annotation.getAnnotationStringValue("encoding"),
+                it.llvmFunction
+            )
+        }
 
     companion object {
         const val createdClassFieldIndex = 11
@@ -140,9 +143,9 @@ internal fun CodeGenerator.kotlinObjCClassInfo(irClass: IrClass): LLVMValueRef {
     require(irClass.isKotlinObjCClass())
     return if (isExternal(irClass)) {
         importGlobal(
-                irClass.kotlinObjCClassInfoSymbolName,
-                runtime.kotlinObjCClassInfo,
-                origin = irClass.llvmSymbolOrigin
+            irClass.kotlinObjCClassInfoSymbolName,
+            runtime.kotlinObjCClassInfo,
+            origin = irClass.llvmSymbolOrigin
         )
     } else {
         context.llvmDeclarations.forClass(irClass).objCDeclarations!!.classInfoGlobal.llvmGlobal

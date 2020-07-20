@@ -20,17 +20,17 @@ fun makeVisibilityHiddenLikeLlvmInternalizePass(module: LLVMModuleRef) {
     val alwaysPreserved = getLlvmUsed(module)
 
     (getFunctions(module) + getGlobals(module) + getGlobalAliases(module))
-            .filter {
-                when (LLVMGetLinkage(it)) {
-                    LLVMLinkage.LLVMInternalLinkage, LLVMLinkage.LLVMPrivateLinkage -> false
-                    else -> true
-                }
+        .filter {
+            when (LLVMGetLinkage(it)) {
+                LLVMLinkage.LLVMInternalLinkage, LLVMLinkage.LLVMPrivateLinkage -> false
+                else -> true
             }
-            .filter { LLVMIsDeclaration(it) == 0 }
-            .minus(alwaysPreserved)
-            .forEach {
-                LLVMSetVisibility(it, LLVMVisibility.LLVMHiddenVisibility)
-            }
+        }
+        .filter { LLVMIsDeclaration(it) == 0 }
+        .minus(alwaysPreserved)
+        .forEach {
+            LLVMSetVisibility(it, LLVMVisibility.LLVMHiddenVisibility)
+        }
 }
 
 private fun getLlvmUsed(module: LLVMModuleRef): Set<LLVMValueRef> {
@@ -41,19 +41,19 @@ private fun getLlvmUsed(module: LLVMModuleRef): Set<LLVMValueRef> {
     // see llvm::collectUsedGlobalVariables.
     // Conservatively extract all involved globals for simplicity:
     return DFS.dfs(
-            /* nodes = */ listOf(llvmUsedValue),
-            /* neighbors = */ { value -> getOperands(value) },
-            object : DFS.CollectingNodeHandler<LLVMValueRef, LLVMValueRef, MutableSet<LLVMValueRef>>(mutableSetOf()) {
-                override fun beforeChildren(current: LLVMValueRef): Boolean = when (LLVMGetValueKind(current)) {
-                    LLVMValueKind.LLVMGlobalAliasValueKind,
-                    LLVMValueKind.LLVMGlobalVariableValueKind,
-                    LLVMValueKind.LLVMFunctionValueKind -> {
-                        result.add(current)
-                        false // Skip children.
-                    }
-
-                    else -> true
+        /* nodes = */ listOf(llvmUsedValue),
+        /* neighbors = */ { value -> getOperands(value) },
+        object : DFS.CollectingNodeHandler<LLVMValueRef, LLVMValueRef, MutableSet<LLVMValueRef>>(mutableSetOf()) {
+            override fun beforeChildren(current: LLVMValueRef): Boolean = when (LLVMGetValueKind(current)) {
+                LLVMValueKind.LLVMGlobalAliasValueKind,
+                LLVMValueKind.LLVMGlobalVariableValueKind,
+                LLVMValueKind.LLVMFunctionValueKind -> {
+                    result.add(current)
+                    false // Skip children.
                 }
+
+                else -> true
             }
+        }
     )
 }

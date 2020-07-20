@@ -18,9 +18,9 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
  * region in [functionRegions].
  */
 internal class LLVMCoverageInstrumentation(
-        override val context: Context,
-        private val functionRegions: FunctionRegions,
-        private val callSitePlacer: (function: LLVMValueRef, args: List<LLVMValueRef>) -> Unit
+    override val context: Context,
+    private val functionRegions: FunctionRegions,
+    private val callSitePlacer: (function: LLVMValueRef, args: List<LLVMValueRef>) -> Unit
 ) : ContextUtils {
 
     private val functionNameGlobal = createFunctionNameGlobal(functionRegions.function)

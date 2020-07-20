@@ -12,7 +12,7 @@ import org.jetbrains.kotlin.ir.expressions.IrConst
 /**
  * Provides utilities to create static data.
  */
-internal class StaticData(override val context: Context): ContextUtils {
+internal class StaticData(override val context: Context) : ContextUtils {
 
     /**
      * Represents the LLVM global variable.
@@ -20,10 +20,11 @@ internal class StaticData(override val context: Context): ContextUtils {
     class Global private constructor(val staticData: StaticData, val llvmGlobal: LLVMValueRef) {
         companion object {
 
-            private fun createLlvmGlobal(module: LLVMModuleRef,
-                                         type: LLVMTypeRef,
-                                         name: String,
-                                         isExported: Boolean
+            private fun createLlvmGlobal(
+                module: LLVMModuleRef,
+                type: LLVMTypeRef,
+                name: String,
+                isExported: Boolean
             ): LLVMValueRef {
 
                 if (isExported && LLVMGetNamedGlobal(module, name) != null) {
@@ -88,9 +89,11 @@ internal class StaticData(override val context: Context): ContextUtils {
      *
      * TODO: this class is probably should be implemented more optimally
      */
-    class Pointer private constructor(val global: Global,
-                                      private val delegate: ConstPointer,
-                                      val offsetInGlobal: Long) : ConstPointer by delegate {
+    class Pointer private constructor(
+        val global: Global,
+        private val delegate: ConstPointer,
+        val offsetInGlobal: Long
+    ) : ConstPointer by delegate {
 
         companion object {
             fun to(global: Global) = Pointer(global, constPointer(global.llvmGlobal), 0L)
@@ -161,7 +164,7 @@ internal class StaticData(override val context: Context): ContextUtils {
     private val cStringLiterals = mutableMapOf<String, ConstPointer>()
 
     fun cStringLiteral(value: String) =
-            cStringLiterals.getOrPut(value) { placeCStringLiteral(value) }
+        cStringLiterals.getOrPut(value) { placeCStringLiteral(value) }
 
     fun kotlinStringLiteral(value: String) =
         stringLiterals.getOrPut(value) { createKotlinStringLiteral(value) }

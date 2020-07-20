@@ -27,7 +27,7 @@ private fun StaticData.objHeader(typeInfo: ConstPointer): Struct {
 }
 
 private fun StaticData.arrayHeader(typeInfo: ConstPointer, length: Int): Struct {
-    assert (length >= 0)
+    assert(length >= 0)
     return Struct(runtime.arrayHeaderType, permanentTag(typeInfo), Int32(length))
 }
 
@@ -40,7 +40,7 @@ internal fun StaticData.createKotlinStringLiteral(value: String): ConstPointer {
 private fun StaticData.createRef(objHeaderPtr: ConstPointer) = objHeaderPtr.bitcast(kObjHeaderPtr)
 
 internal fun StaticData.createConstKotlinArray(arrayClass: IrClass, elements: List<LLVMValueRef>) =
-        createConstKotlinArray(arrayClass, elements.map { constValue(it) }).llvm
+    createConstKotlinArray(arrayClass, elements.map { constValue(it) }).llvm
 
 internal fun StaticData.createConstKotlinArray(arrayClass: IrClass, elements: List<ConstValue>): ConstPointer {
     val typeInfo = arrayClass.typeInfoPtr
@@ -75,7 +75,7 @@ internal fun StaticData.createConstKotlinObject(type: IrClass, vararg fields: Co
 }
 
 internal fun StaticData.createInitializer(type: IrClass, vararg fields: ConstValue): ConstValue =
-        Struct(objHeader(type.typeInfoPtr), *fields)
+    Struct(objHeader(type.typeInfoPtr), *fields)
 
 /**
  * Creates static instance of `kotlin.collections.ArrayList<elementType>` with given values of fields.
@@ -91,7 +91,8 @@ internal fun StaticData.createConstArrayList(array: ConstPointer, length: Int): 
         "$arrayListFqName.array" to array,
         "$arrayListFqName.offset" to Int32(0),
         "$arrayListFqName.length" to Int32(length),
-        "$arrayListFqName.backing" to NullPointer(kObjHeader))
+        "$arrayListFqName.backing" to NullPointer(kObjHeader)
+    )
 
     // Now sort these values according to the order of fields returned by getFields()
     // to match the sorting order of the real ArrayList().
@@ -105,8 +106,11 @@ internal fun StaticData.createConstArrayList(array: ConstPointer, length: Int): 
 }
 
 internal fun StaticData.createUniqueInstance(
-        kind: UniqueKind, bodyType: LLVMTypeRef, typeInfo: ConstPointer): ConstPointer {
-    assert (getStructElements(bodyType).size == 1) // ObjHeader only.
+    kind: UniqueKind,
+    bodyType: LLVMTypeRef,
+    typeInfo: ConstPointer
+): ConstPointer {
+    assert(getStructElements(bodyType).size == 1) // ObjHeader only.
     val objHeader = when (kind) {
         UniqueKind.UNIT -> objHeader(typeInfo)
         UniqueKind.EMPTY_ARRAY -> arrayHeader(typeInfo, 0)
@@ -122,9 +126,11 @@ internal fun ContextUtils.unique(kind: UniqueKind): ConstPointer {
         UniqueKind.EMPTY_ARRAY -> context.ir.symbols.array.owner
     }
     return if (isExternal(descriptor)) {
-        constPointer(importGlobal(
+        constPointer(
+            importGlobal(
                 kind.llvmName, context.llvm.runtime.objHeaderType, origin = descriptor.llvmSymbolOrigin
-        ))
+            )
+        )
     } else {
         context.llvmDeclarations.forUnique(kind).pointer
     }

@@ -24,13 +24,13 @@ import org.jetbrains.kotlin.ir.visitors.acceptVoid
 internal class CoverageRegionCollector(private val fileFilter: (IrFile) -> Boolean) {
 
     fun collectFunctionRegions(irModuleFragment: IrModuleFragment): List<FileRegionInfo> =
-            irModuleFragment.files
-                    .filter(fileFilter)
-                    .map { file ->
-                        val collector = FunctionsCollector(file)
-                        collector.visitFile(file)
-                        FileRegionInfo(file, collector.functionRegions)
-                    }
+        irModuleFragment.files
+            .filter(fileFilter)
+            .map { file ->
+                val collector = FunctionsCollector(file)
+                collector.visitFile(file)
+                FileRegionInfo(file, collector.functionRegions)
+            }
 
     private inner class FunctionsCollector(val file: IrFile) : IrElementVisitorVoid {
 
@@ -68,8 +68,8 @@ private val IrDeclaration.isGeneratedByCompiler: Boolean
  * TODO: for now it is very inaccurate.
  */
 private class IrFunctionRegionsCollector(
-        val fileFilter: (IrFile) -> Boolean,
-        val irFile: IrFile
+    val fileFilter: (IrFile) -> Boolean,
+    val irFile: IrFile
 ) : IrElementVisitorVoid {
 
     private data class StatementContext(val current: IrStatement, val next: IrStatement?)
@@ -103,8 +103,9 @@ private class IrFunctionRegionsCollector(
     override fun visitConstructor(declaration: IrConstructor) {
         val statements = declaration.body?.statements ?: return
         visitInStatementContext(statements) { statement ->
-            if (statement is IrDelegatingConstructorCall && !declaration.isPrimary
-                    || statement !is IrDelegatingConstructorCall && statement !is IrReturn) {
+            if (statement is IrDelegatingConstructorCall && !declaration.isPrimary ||
+                statement !is IrDelegatingConstructorCall && statement !is IrReturn
+            ) {
                 recordRegion(statement)
                 statement.acceptVoid(this)
             }
@@ -172,8 +173,8 @@ private class IrFunctionRegionsCollector(
 
     override fun visitReturn(expression: IrReturn) {
         irStatementsStack.subList(0, irStatementsStack.lastIndex)
-                .filter { (current, next) -> next != null && current.endOffset > expression.endOffset }
-                .forEach { (current, next) -> recordRegion(next!!, expression.endOffset, current.endOffset) }
+            .filter { (current, next) -> next != null && current.endOffset > expression.endOffset }
+            .forEach { (current, next) -> recordRegion(next!!, expression.endOffset, current.endOffset) }
         val next = irStatementsStack.lastOrNull()?.next ?: return
         val nextRegion = recordRegion(next, expression.endOffset, currentRegion.endOffset) ?: return
         regionStack.pop()
@@ -193,8 +194,8 @@ private class IrFunctionRegionsCollector(
     }
 
     private fun visitInStatementContext(
-            statements: List<IrStatement>,
-            visit: (IrStatement) -> Unit = { statement -> statement.acceptVoid(this) }
+        statements: List<IrStatement>,
+        visit: (IrStatement) -> Unit = { statement -> statement.acceptVoid(this) }
     ) {
         for (i in 0..statements.lastIndex) {
             val current = statements[i]
@@ -209,12 +210,12 @@ private class IrFunctionRegionsCollector(
         }
     }
 
-    private fun recordRegion(irElement: IrElement, kind: RegionKind = RegionKind.Code)
-            = Region.fromIr(irElement, currentFile, kind)?.also { regions[irElement] = it }
+    private fun recordRegion(irElement: IrElement, kind: RegionKind = RegionKind.Code) =
+        Region.fromIr(irElement, currentFile, kind)?.also { regions[irElement] = it }
 
-    private fun recordRegion(irElement: IrElement, startOffset: Int, endOffset: Int, kind: RegionKind = RegionKind.Code)
-            = Region.fromOffset(startOffset, endOffset, currentFile, kind)?.also { regions[irElement] = it }
+    private fun recordRegion(irElement: IrElement, startOffset: Int, endOffset: Int, kind: RegionKind = RegionKind.Code) =
+        Region.fromOffset(startOffset, endOffset, currentFile, kind)?.also { regions[irElement] = it }
 
-    private fun IrElement.hasValidOffsets() = startOffset != UNDEFINED_OFFSET && endOffset != UNDEFINED_OFFSET
-            && startOffset != endOffset
+    private fun IrElement.hasValidOffsets() = startOffset != UNDEFINED_OFFSET && endOffset != UNDEFINED_OFFSET &&
+        startOffset != endOffset
 }

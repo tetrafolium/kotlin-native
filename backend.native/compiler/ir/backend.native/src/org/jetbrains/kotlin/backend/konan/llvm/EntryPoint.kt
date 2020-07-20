@@ -29,17 +29,19 @@ internal fun findMainEntryPoint(context: Context): FunctionDescriptor? {
 
     val packageScope = context.builtIns.builtInsModule.getPackage(packageName).memberScope
 
-    val candidates = packageScope.getContributedFunctions(entryName,
-        NoLookupLocation.FROM_BACKEND).filter {
-            it.returnType?.isUnit() == true &&
+    val candidates = packageScope.getContributedFunctions(
+        entryName,
+        NoLookupLocation.FROM_BACKEND
+    ).filter {
+        it.returnType?.isUnit() == true &&
             it.typeParameters.isEmpty() &&
             it.visibility.isPublicAPI
-        }
+    }
 
     val main =
-        candidates.singleOrNull { it.hasSingleArrayOfStringParameter } ?:
-        candidates.singleOrNull { it.hasNoParameters } ?:
-        context.reportCompilationError("Could not find '$entryName' in '$packageName' package.")
+        candidates.singleOrNull { it.hasSingleArrayOfStringParameter }
+            ?: candidates.singleOrNull { it.hasNoParameters }
+            ?: context.reportCompilationError("Could not find '$entryName' in '$packageName' package.")
 
     if (main.isSuspend)
         context.reportCompilationError("Entry point can not be a suspend function.")
@@ -68,8 +70,8 @@ private val KotlinType.isString
     get() = filterClass?.isString ?: false
 
 private val KotlinType.isArrayOfString: Boolean
-    get() = (filterClass?.isArray ?: false) && 
-            (arguments.singleOrNull()?.type?.isString ?: false)
+    get() = (filterClass?.isArray ?: false) &&
+        (arguments.singleOrNull()?.type?.isString ?: false)
 
 private val FunctionDescriptor.hasSingleArrayOfStringParameter: Boolean
     get() = valueParameters.singleOrNull()?.type?.isArrayOfString ?: false

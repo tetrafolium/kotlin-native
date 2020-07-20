@@ -13,10 +13,12 @@ import llvm.*
  *
  * If [elements] is empty, then null pointer is returned.
  */
-internal fun StaticData.placeGlobalConstArray(name: String,
-                                              elemType: LLVMTypeRef,
-                                              elements: List<ConstValue>,
-                                              isExported: Boolean = false): ConstPointer {
+internal fun StaticData.placeGlobalConstArray(
+    name: String,
+    elemType: LLVMTypeRef,
+    elements: List<ConstValue>,
+    isExported: Boolean = false
+): ConstPointer {
     if (elements.isNotEmpty() || isExported) {
         val global = this.placeGlobalArray(name, elemType, elements, isExported)
         global.setConstant(true)

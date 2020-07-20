@@ -23,7 +23,7 @@ internal fun createLlvmDeclarations(context: Context): LlvmDeclarations {
     context.ir.irModule.acceptChildrenVoid(generator)
     return with(generator) {
         LlvmDeclarations(
-                functions, classes, fields, staticFields, uniques
+            functions, classes, fields, staticFields, uniques
         )
     }
 }
@@ -39,39 +39,40 @@ internal class LlvmDeclarations(
     private val classes: Map<IrClass, ClassLlvmDeclarations>,
     private val fields: Map<IrField, FieldLlvmDeclarations>,
     private val staticFields: Map<IrField, StaticFieldLlvmDeclarations>,
-    private val unique: Map<UniqueKind, UniqueLlvmDeclarations>) {
-    fun forFunction(function: IrFunction) = forFunctionOrNull(function) ?: with(function){error("$name in $file/${parent.fqNameForIrSerialization}")}
+    private val unique: Map<UniqueKind, UniqueLlvmDeclarations>
+) {
+    fun forFunction(function: IrFunction) = forFunctionOrNull(function) ?: with(function) { error("$name in $file/${parent.fqNameForIrSerialization}") }
     fun forFunctionOrNull(function: IrFunction) = functions[function]
 
-    fun forClass(irClass: IrClass) = classes[irClass] ?:
-            error(irClass.descriptor.toString())
+    fun forClass(irClass: IrClass) = classes[irClass]
+        ?: error(irClass.descriptor.toString())
 
-    fun forField(field: IrField) = fields[field] ?:
-            error(field.descriptor.toString())
+    fun forField(field: IrField) = fields[field]
+        ?: error(field.descriptor.toString())
 
-    fun forStaticField(field: IrField) = staticFields[field] ?:
-            error(field.descriptor.toString())
+    fun forStaticField(field: IrField) = staticFields[field]
+        ?: error(field.descriptor.toString())
 
-    fun forSingleton(irClass: IrClass) = forClass(irClass).singletonDeclarations ?:
-            error(irClass.descriptor.toString())
+    fun forSingleton(irClass: IrClass) = forClass(irClass).singletonDeclarations
+        ?: error(irClass.descriptor.toString())
 
     fun forUnique(kind: UniqueKind) = unique[kind] ?: error("No unique $kind")
-
 }
 
 internal class ClassLlvmDeclarations(
-        val bodyType: LLVMTypeRef,
-        val typeInfoGlobal: StaticData.Global,
-        val writableTypeInfoGlobal: StaticData.Global?,
-        val typeInfo: ConstPointer,
-        val singletonDeclarations: SingletonLlvmDeclarations?,
-        val objCDeclarations: KotlinObjCClassLlvmDeclarations?)
+    val bodyType: LLVMTypeRef,
+    val typeInfoGlobal: StaticData.Global,
+    val writableTypeInfoGlobal: StaticData.Global?,
+    val typeInfo: ConstPointer,
+    val singletonDeclarations: SingletonLlvmDeclarations?,
+    val objCDeclarations: KotlinObjCClassLlvmDeclarations?
+)
 
 internal class SingletonLlvmDeclarations(val instanceStorage: AddressAccess)
 
 internal class KotlinObjCClassLlvmDeclarations(
-        val classInfoGlobal: StaticData.Global,
-        val bodyOffsetGlobal: StaticData.Global
+    val classInfoGlobal: StaticData.Global,
+    val bodyOffsetGlobal: StaticData.Global
 )
 
 internal class FunctionLlvmDeclarations(val llvmFunction: LLVMValueRef)
@@ -98,7 +99,7 @@ private fun ContextUtils.createClassBodyType(name: String, fields: List<IrField>
 }
 
 private class DeclarationsGeneratorVisitor(override val context: Context) :
-        IrElementVisitorVoid, ContextUtils {
+    IrElementVisitorVoid, ContextUtils {
 
     val functions = mutableMapOf<IrFunction, FunctionLlvmDeclarations>()
     val classes = mutableMapOf<IrClass, ClassLlvmDeclarations>()
@@ -183,16 +184,18 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
             val typeInfoGlobalName = "ktypeglobal:$internalName"
 
             val typeInfoWithVtableType = structType(
-                    runtime.typeInfoType,
-                    LLVMArrayType(int8TypePtr, context.getLayoutBuilder(declaration).vtableEntries.size)!!
+                runtime.typeInfoType,
+                LLVMArrayType(int8TypePtr, context.getLayoutBuilder(declaration).vtableEntries.size)!!
             )
 
             typeInfoGlobal = staticData.createGlobal(typeInfoWithVtableType, typeInfoGlobalName, isExported = false)
 
-            val llvmTypeInfoPtr = LLVMAddAlias(context.llvmModule,
-                    kTypeInfoPtr,
-                    typeInfoGlobal.pointer.getElementPtr(0).llvm,
-                    typeInfoSymbolName)!!
+            val llvmTypeInfoPtr = LLVMAddAlias(
+                context.llvmModule,
+                kTypeInfoPtr,
+                typeInfoGlobal.pointer.getElementPtr(0).llvm,
+                typeInfoSymbolName
+            )!!
 
             if (declaration.isExported()) {
                 if (llvmTypeInfoPtr.name != typeInfoSymbolName) {
@@ -204,11 +207,12 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
             }
 
             typeInfoPtr = constPointer(llvmTypeInfoPtr)
-
         } else {
-            typeInfoGlobal = staticData.createGlobal(runtime.typeInfoType,
-                    typeInfoSymbolName,
-                    isExported = declaration.isExported())
+            typeInfoGlobal = staticData.createGlobal(
+                runtime.typeInfoType,
+                typeInfoSymbolName,
+                isExported = declaration.isExported()
+            )
 
             typeInfoPtr = typeInfoGlobal.pointer
         }
@@ -242,22 +246,27 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
             it.setZeroInitializer()
         }
 
-        return ClassLlvmDeclarations(bodyType, typeInfoGlobal, writableTypeInfoGlobal, typeInfoPtr,
-                singletonDeclarations, objCDeclarations)
+        return ClassLlvmDeclarations(
+            bodyType, typeInfoGlobal, writableTypeInfoGlobal, typeInfoPtr,
+            singletonDeclarations, objCDeclarations
+        )
     }
 
     private fun createUniqueDeclarations(
-            irClass: IrClass, typeInfoPtr: ConstPointer, bodyType: LLVMTypeRef) {
+        irClass: IrClass,
+        typeInfoPtr: ConstPointer,
+        bodyType: LLVMTypeRef
+    ) {
         when {
-                irClass.isUnit() -> {
-                    uniques[UniqueKind.UNIT] =
-                            UniqueLlvmDeclarations(staticData.createUniqueInstance(UniqueKind.UNIT, bodyType, typeInfoPtr))
-                }
-                irClass.isKotlinArray() -> {
-                    uniques[UniqueKind.EMPTY_ARRAY] =
-                            UniqueLlvmDeclarations(staticData.createUniqueInstance(UniqueKind.EMPTY_ARRAY, bodyType, typeInfoPtr))
-                }
-                else -> TODO("Unsupported unique $irClass")
+            irClass.isUnit() -> {
+                uniques[UniqueKind.UNIT] =
+                    UniqueLlvmDeclarations(staticData.createUniqueInstance(UniqueKind.UNIT, bodyType, typeInfoPtr))
+            }
+            irClass.isKotlinArray() -> {
+                uniques[UniqueKind.EMPTY_ARRAY] =
+                    UniqueLlvmDeclarations(staticData.createUniqueInstance(UniqueKind.EMPTY_ARRAY, bodyType, typeInfoPtr))
+            }
+            else -> TODO("Unsupported unique $irClass")
         }
     }
 
@@ -293,9 +302,9 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
             "kobjcclassinfo:$internalName"
         }
         val classInfoGlobal = staticData.createGlobal(
-                context.llvm.runtime.kotlinObjCClassInfo,
-                classInfoSymbolName,
-                isExported = isExported
+            context.llvm.runtime.kotlinObjCClassInfo,
+            classInfoSymbolName,
+            isExported = isExported
         ).apply {
             setConstant(true)
         }
@@ -311,12 +320,12 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
         val containingClass = declaration.parent as? IrClass
         if (containingClass != null) {
             if (!containingClass.requiresRtti()) return
-            val classDeclarations = this.classes[containingClass] ?:
-                error(containingClass.descriptor.toString())
+            val classDeclarations = this.classes[containingClass]
+                ?: error(containingClass.descriptor.toString())
             val allFields = context.getLayoutBuilder(containingClass).fields
             this.fields[declaration] = FieldLlvmDeclarations(
-                    allFields.indexOf(declaration) + 1, // First field is ObjHeader.
-                    classDeclarations.bodyType
+                allFields.indexOf(declaration) + 1, // First field is ObjHeader.
+                classDeclarations.bodyType
             )
         } else {
             // Fields are module-private, so we use internal name:
@@ -343,16 +352,18 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
         }
 
         val llvmFunction = if (declaration.isExternal) {
-            if (declaration.isTypedIntrinsic || declaration.isObjCBridgeBased()
-                    // All call-sites to external accessors to interop properties
-                    // are lowered by InteropLowering.
-                    || (declaration.isAccessor && declaration.isFromMetadataInteropLibrary())
-                    || declaration.annotations.hasAnnotation(RuntimeNames.cCall)) return
+            if (declaration.isTypedIntrinsic || declaration.isObjCBridgeBased() ||
+                // All call-sites to external accessors to interop properties
+                // are lowered by InteropLowering.
+                (declaration.isAccessor && declaration.isFromMetadataInteropLibrary()) ||
+                declaration.annotations.hasAnnotation(RuntimeNames.cCall)
+            ) return
 
-            context.llvm.externalFunction(declaration.symbolName, llvmFunctionType,
-                    // Assume that `external fun` is defined in native libs attached to this module:
-                    origin = declaration.llvmSymbolOrigin,
-                    independent = declaration.hasAnnotation(RuntimeNames.independent)
+            context.llvm.externalFunction(
+                declaration.symbolName, llvmFunctionType,
+                // Assume that `external fun` is defined in native libs attached to this module:
+                origin = declaration.llvmSymbolOrigin,
+                independent = declaration.hasAnnotation(RuntimeNames.independent)
             )
         } else {
             val symbolName = if (declaration.isExported()) {

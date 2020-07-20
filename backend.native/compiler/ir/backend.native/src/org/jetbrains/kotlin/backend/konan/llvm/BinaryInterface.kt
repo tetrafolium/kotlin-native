@@ -25,7 +25,6 @@ import org.jetbrains.kotlin.ir.util.render
 import org.jetbrains.kotlin.konan.library.KonanLibrary
 import org.jetbrains.kotlin.library.uniqueName
 
-
 // This file describes the ABI for Kotlin descriptors of exported declarations.
 // TODO: revise the naming scheme to ensure it produces unique names.
 // TODO: do not serialize descriptors of non-exported declarations.
@@ -81,32 +80,32 @@ object KonanBinaryInterface {
 
 internal val IrClass.writableTypeInfoSymbolName: String
     get() {
-        assert (this.isExported())
+        assert(this.isExported())
         return "ktypew:" + this.fqNameForIrSerialization.toString()
     }
 
 internal val IrClass.globalObjectStorageSymbolName: String
     get() {
-        assert (this.isExported())
-        assert (this.kind.isSingleton)
-        assert (!this.isUnit())
+        assert(this.isExported())
+        assert(this.kind.isSingleton)
+        assert(!this.isUnit())
 
         return "kobjref:$fqNameForIrSerialization"
     }
 
 internal val IrClass.threadLocalObjectStorageGetterSymbolName: String
     get() {
-        assert (this.isExported())
-        assert (this.kind.isSingleton)
-        assert (!this.isUnit())
+        assert(this.isExported())
+        assert(this.kind.isSingleton)
+        assert(!this.isUnit())
 
         return "kobjget:$fqNameForIrSerialization"
     }
 
 internal val IrClass.kotlinObjCClassInfoSymbolName: String
     get() {
-        assert (this.isExported())
-        assert (this.isKotlinObjCClass())
+        assert(this.isExported())
+        assert(this.isKotlinObjCClass())
 
         return "kobjcclassinfo:$fqNameForIrSerialization"
     }
@@ -125,12 +124,12 @@ fun IrDeclaration.isExported() = KonanBinaryInterface.isExported(this)
 internal fun RuntimeAware.getLlvmFunctionType(function: IrFunction): LLVMTypeRef {
     val returnType = when {
         function is IrConstructor -> voidType
-        function.isSuspend -> kObjHeaderPtr                // Suspend functions return Any?.
+        function.isSuspend -> kObjHeaderPtr // Suspend functions return Any?.
         else -> getLLVMReturnType(function.returnType)
     }
     val paramTypes = ArrayList(function.allParameters.map { getLLVMType(it.type) })
     if (function.isSuspend)
-        paramTypes.add(kObjHeaderPtr)                       // Suspend functions have implicit parameter of type Continuation<>.
+        paramTypes.add(kObjHeaderPtr) // Suspend functions have implicit parameter of type Continuation<>.
     if (isObjectType(returnType)) paramTypes.add(kObjHeaderPtrPtr)
 
     return functionType(returnType, isVarArg = false, paramTypes = paramTypes.toTypedArray())
@@ -140,7 +139,7 @@ internal val IrClass.typeInfoHasVtableAttached: Boolean
     get() = !this.isAbstract() && !this.isExternalObjCClass()
 
 internal val String.moduleConstructorName
-    get() = "_Konan_init_${this}"
+    get() = "_Konan_init_$this"
 
 internal val KonanLibrary.moduleConstructorName
     get() = uniqueName.moduleConstructorName

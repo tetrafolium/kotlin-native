@@ -84,19 +84,23 @@ internal open class Struct(val type: LLVMTypeRef?, val elements: List<ConstValue
 
     constructor(vararg elements: ConstValue) : this(structType(elements.map { it.llvmType }), *elements)
 
-    override val llvm = LLVMConstNamedStruct(type, elements.mapIndexed { index, element ->
-        val expectedType = LLVMStructGetTypeAtIndex(type, index)
-        if (element == null) {
-            LLVMConstNull(expectedType)!!
-        } else {
-            element.llvm.also {
-                assert(it.type == expectedType) {
-                    "Unexpected type at $index: expected ${LLVMPrintTypeToString(expectedType)!!.toKString()} " +
+    override val llvm = LLVMConstNamedStruct(
+        type,
+        elements.mapIndexed { index, element ->
+            val expectedType = LLVMStructGetTypeAtIndex(type, index)
+            if (element == null) {
+                LLVMConstNull(expectedType)!!
+            } else {
+                element.llvm.also {
+                    assert(it.type == expectedType) {
+                        "Unexpected type at $index: expected ${LLVMPrintTypeToString(expectedType)!!.toKString()} " +
                             "got ${LLVMPrintTypeToString(it.type)!!.toKString()}"
+                    }
                 }
             }
-        }
-    }.toCValues(), elements.size)!!
+        }.toCValues(),
+        elements.size
+    )!!
 
     init {
         assert(elements.size == LLVMCountStructElementTypes(type))
@@ -151,13 +155,13 @@ internal class Zero(val type: LLVMTypeRef) : ConstValue {
     override val llvm = LLVMConstNull(type)!!
 }
 
-internal class NullPointer(pointeeType: LLVMTypeRef): ConstPointer {
+internal class NullPointer(pointeeType: LLVMTypeRef) : ConstPointer {
     override val llvm = LLVMConstNull(pointerType(pointeeType))!!
 }
 
 internal fun constValue(value: LLVMValueRef) = object : ConstValue {
     init {
-        assert (LLVMIsConstant(value) == 1)
+        assert(LLVMIsConstant(value) == 1)
     }
 
     override val llvm = value
@@ -177,13 +181,13 @@ internal val RuntimeAware.kArrayHeaderPtr: LLVMTypeRef
     get() = pointerType(kArrayHeader)
 internal val RuntimeAware.kTypeInfoPtr: LLVMTypeRef
     get() = pointerType(kTypeInfo)
-internal val kInt1         get() = int1Type
-internal val kBoolean      get() = kInt1
-internal val kInt8Ptr      get() = pointerType(int8Type)
-internal val kInt8PtrPtr   get() = pointerType(kInt8Ptr)
-internal val kNullInt8Ptr  get() = LLVMConstNull(kInt8Ptr)!!
+internal val kInt1 get() = int1Type
+internal val kBoolean get() = kInt1
+internal val kInt8Ptr get() = pointerType(int8Type)
+internal val kInt8PtrPtr get() = pointerType(kInt8Ptr)
+internal val kNullInt8Ptr get() = LLVMConstNull(kInt8Ptr)!!
 internal val kImmInt32Zero get() = Int32(0).llvm
-internal val kImmInt32One  get() = Int32(1).llvm
+internal val kImmInt32One get() = Int32(1).llvm
 internal val ContextUtils.kNullObjHeaderPtr: LLVMValueRef
     get() = LLVMConstNull(this.kObjHeaderPtr)!!
 internal val ContextUtils.kNullObjHeaderPtrPtr: LLVMValueRef
@@ -200,7 +204,7 @@ internal fun structType(vararg types: LLVMTypeRef): LLVMTypeRef = structType(typ
 internal fun structType(types: List<LLVMTypeRef>): LLVMTypeRef =
     LLVMStructTypeInContext(llvmContext, types.toCValues(), types.size, 0)!!
 
-internal fun ContextUtils.numParameters(functionType: LLVMTypeRef) : Int {
+internal fun ContextUtils.numParameters(functionType: LLVMTypeRef): Int {
     // Note that type is usually function pointer, so we have to dereference it.
     return LLVMCountParamTypes(LLVMGetElementType(functionType))
 }
@@ -210,7 +214,7 @@ fun extractConstUnsignedInt(value: LLVMValueRef): Long {
     return LLVMConstIntGetZExtValue(value)
 }
 
-internal fun ContextUtils.isObjectReturn(functionType: LLVMTypeRef) : Boolean {
+internal fun ContextUtils.isObjectReturn(functionType: LLVMTypeRef): Boolean {
     // Note that type is usually function pointer, so we have to dereference it.
     val returnType = LLVMGetReturnType(LLVMGetElementType(functionType))!!
     return isObjectType(returnType)
@@ -228,7 +232,7 @@ internal fun RuntimeAware.isObjectType(type: LLVMTypeRef): Boolean {
  * Reads [size] bytes contained in this array.
  */
 internal fun CArrayPointer<ByteVar>.getBytes(size: Long) =
-        (0 .. size-1).map { this[it] }.toByteArray()
+    (0..size - 1).map { this[it] }.toByteArray()
 
 internal fun getFunctionType(ptrToFunction: LLVMValueRef): LLVMTypeRef {
     return getGlobalType(ptrToFunction)
@@ -250,8 +254,8 @@ internal fun ContextUtils.importGlobal(name: String, type: LLVMTypeRef, origin: 
 
     val found = LLVMGetNamedGlobal(context.llvmModule, name)
     return if (found != null) {
-        assert (getGlobalType(found) == type)
-        assert (LLVMGetInitializer(found) == null) { "$name is already declared in the current module" }
+        assert(getGlobalType(found) == type)
+        assert(LLVMGetInitializer(found) == null) { "$name is already declared in the current module" }
         found
     } else {
         addGlobal(name, type, isExported = false)
@@ -262,16 +266,20 @@ internal abstract class AddressAccess {
     abstract fun getAddress(generationContext: FunctionGenerationContext?): LLVMValueRef
 }
 
-internal class GlobalAddressAccess(private val address: LLVMValueRef): AddressAccess() {
+internal class GlobalAddressAccess(private val address: LLVMValueRef) : AddressAccess() {
     override fun getAddress(generationContext: FunctionGenerationContext?): LLVMValueRef = address
 }
 
 internal class TLSAddressAccess(
-        private val context: Context, private val index: Int): AddressAccess() {
+    private val context: Context,
+    private val index: Int
+) : AddressAccess() {
 
     override fun getAddress(generationContext: FunctionGenerationContext?): LLVMValueRef {
-        return generationContext!!.call(context.llvm.lookupTLS,
-                listOf(context.llvm.tlsKey, Int32(index).llvm))
+        return generationContext!!.call(
+            context.llvm.lookupTLS,
+            listOf(context.llvm.tlsKey, Int32(index).llvm)
+        )
     }
 }
 
@@ -281,34 +289,37 @@ internal fun ContextUtils.addKotlinThreadLocal(name: String, type: LLVMTypeRef):
         TLSAddressAccess(context, index)
     } else {
         // TODO: This will break if Workers get decoupled from host threads.
-        GlobalAddressAccess(LLVMAddGlobal(context.llvmModule, type, name)!!.also {
-            LLVMSetThreadLocalMode(it, context.llvm.tlsMode)
-            LLVMSetLinkage(it, LLVMLinkage.LLVMInternalLinkage)
-        })
+        GlobalAddressAccess(
+            LLVMAddGlobal(context.llvmModule, type, name)!!.also {
+                LLVMSetThreadLocalMode(it, context.llvm.tlsMode)
+                LLVMSetLinkage(it, LLVMLinkage.LLVMInternalLinkage)
+            }
+        )
     }
 }
 
 internal fun ContextUtils.addKotlinGlobal(name: String, type: LLVMTypeRef, isExported: Boolean): AddressAccess {
-    return GlobalAddressAccess(LLVMAddGlobal(context.llvmModule, type, name)!!.also {
-        if (!isExported)
-            LLVMSetLinkage(it, LLVMLinkage.LLVMInternalLinkage)
-    })
+    return GlobalAddressAccess(
+        LLVMAddGlobal(context.llvmModule, type, name)!!.also {
+            if (!isExported)
+                LLVMSetLinkage(it, LLVMLinkage.LLVMInternalLinkage)
+        }
+    )
 }
 
 internal fun functionType(returnType: LLVMTypeRef, isVarArg: Boolean = false, vararg paramTypes: LLVMTypeRef) =
-        LLVMFunctionType(
-                returnType,
-                cValuesOf(*paramTypes), paramTypes.size,
-                if (isVarArg) 1 else 0
-        )!!
+    LLVMFunctionType(
+        returnType,
+        cValuesOf(*paramTypes), paramTypes.size,
+        if (isVarArg) 1 else 0
+    )!!
 
 internal fun functionType(returnType: LLVMTypeRef, isVarArg: Boolean = false, paramTypes: List<LLVMTypeRef>) =
-        functionType(returnType, isVarArg, *paramTypes.toTypedArray())
-
+    functionType(returnType, isVarArg, *paramTypes.toTypedArray())
 
 fun llvm2string(value: LLVMValueRef?): String {
-  if (value == null) return "<null>"
-  return LLVMPrintValueToString(value)!!.toKString()
+    if (value == null) return "<null>"
+    return LLVMPrintValueToString(value)!!.toKString()
 }
 
 fun llvmtype2string(type: LLVMTypeRef?): String {
@@ -363,7 +374,6 @@ private val signextAttrKindId by lazy {
     getLlvmAttributeKindId("signext")
 }
 
-
 fun isFunctionNoUnwind(function: LLVMValueRef): Boolean {
     val attribute = LLVMGetEnumAttributeAtIndex(function, LLVMAttributeFunctionIndex, nounwindAttrKindId.value)
     return attribute != null
@@ -397,7 +407,7 @@ internal fun addLlvmFunctionEnumAttribute(function: LLVMValueRef, attrKindId: LL
 }
 
 internal fun createLlvmEnumAttribute(llvmContext: LLVMContextRef, attrKindId: LLVMAttributeKindId, value: Long = 0) =
-        LLVMCreateEnumAttribute(llvmContext, attrKindId.value, value)!!
+    LLVMCreateEnumAttribute(llvmContext, attrKindId.value, value)!!
 
 internal fun addLlvmFunctionAttribute(function: LLVMValueRef, attribute: LLVMAttributeRef) {
     LLVMAddAttributeAtIndex(function, LLVMAttributeFunctionIndex, attribute)
@@ -411,21 +421,21 @@ fun addFunctionSignext(function: LLVMValueRef, index: Int, type: LLVMTypeRef?) {
 }
 
 internal fun String.mdString() = LLVMMDStringInContext(llvmContext, this, this.length)!!
-internal fun node(vararg it:LLVMValueRef) = LLVMMDNodeInContext(llvmContext, it.toList().toCValues(), it.size)
+internal fun node(vararg it: LLVMValueRef) = LLVMMDNodeInContext(llvmContext, it.toList().toCValues(), it.size)
 
 internal fun LLVMValueRef.setUnaligned() = apply { LLVMSetAlignment(this, 1) }
 
 internal fun getOperands(value: LLVMValueRef) =
-        (0 until LLVMGetNumOperands(value)).map { LLVMGetOperand(value, it)!! }
+    (0 until LLVMGetNumOperands(value)).map { LLVMGetOperand(value, it)!! }
 
 internal fun getGlobalAliases(module: LLVMModuleRef) =
-        generateSequence(LLVMGetFirstGlobalAlias(module), { LLVMGetNextGlobalAlias(it) })
+    generateSequence(LLVMGetFirstGlobalAlias(module), { LLVMGetNextGlobalAlias(it) })
 
 internal fun getFunctions(module: LLVMModuleRef) =
-        generateSequence(LLVMGetFirstFunction(module), { LLVMGetNextFunction(it) })
+    generateSequence(LLVMGetFirstFunction(module), { LLVMGetNextFunction(it) })
 
 internal fun getGlobals(module: LLVMModuleRef) =
-        generateSequence(LLVMGetFirstGlobal(module), { LLVMGetNextGlobal(it) })
+    generateSequence(LLVMGetFirstGlobal(module), { LLVMGetNextGlobal(it) })
 
 fun LLVMTypeRef.isFloatingPoint(): Boolean = when (llvm.LLVMGetTypeKind(this)) {
     LLVMTypeKind.LLVMFloatTypeKind, LLVMTypeKind.LLVMDoubleTypeKind -> true

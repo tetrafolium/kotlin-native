@@ -22,9 +22,9 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
 
     fun finishModule() {
         addModuleClassList(
-                definedClasses,
-                "OBJC_LABEL_CLASS_$",
-                "__DATA,__objc_classlist,regular,no_dead_strip"
+            definedClasses,
+            "OBJC_LABEL_CLASS_$",
+            "__DATA,__objc_classlist,regular,no_dead_strip"
         )
     }
 
@@ -74,18 +74,18 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
         val globalName = prefix + name
 
         // TODO: refactor usages and use [Global] class.
-        val llvmGlobal = LLVMGetNamedGlobal(context.llvmModule, globalName) ?:
-                codegen.importGlobal(globalName, classObjectType, CurrentKlibModuleOrigin)
+        val llvmGlobal = LLVMGetNamedGlobal(context.llvmModule, globalName)
+            ?: codegen.importGlobal(globalName, classObjectType, CurrentKlibModuleOrigin)
 
         return constPointer(llvmGlobal)
     }
 
     private val emptyCache = constPointer(
-            codegen.importGlobal(
-                    "_objc_empty_cache",
-                    codegen.runtime.getStructType("_objc_cache"),
-                    CurrentKlibModuleOrigin
-            )
+        codegen.importGlobal(
+            "_objc_empty_cache",
+            codegen.runtime.getStructType("_objc_cache"),
+            CurrentKlibModuleOrigin
+        )
     )
 
     fun emitEmptyClass(name: String, superName: String) {
@@ -115,9 +115,9 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
             }
 
             val methodList = Struct(
-                    Int32(LLVMABISizeOfType(codegen.llvmTargetData, methodType).toInt()),
-                    Int32(instanceMethods.size),
-                    ConstArray(methodType, methodStructs)
+                Int32(LLVMABISizeOfType(codegen.llvmTargetData, methodType).toInt()),
+                Int32(instanceMethods.size),
+                ConstArray(methodType, methodStructs)
             )
 
             val globalName = "\u0001l_OBJC_\$_INSTANCE_METHODS_$name"
@@ -180,10 +180,10 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
         }
 
         fun buildClassObject(
-                isMetaclass: Boolean,
-                isa: ConstPointer,
-                superClass: ConstPointer,
-                classRo: ConstPointer
+            isMetaclass: Boolean,
+            isa: ConstPointer,
+            superClass: ConstPointer,
+            classRo: ConstPointer
         ): ConstPointer {
             val fields = mutableListOf<ConstValue>()
 
@@ -207,17 +207,17 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
         }
 
         val metaclassObject = buildClassObject(
-                isMetaclass = true,
-                isa = getClassGlobal("NSObject", isMetaclass = true),
-                superClass = getClassGlobal(superName, isMetaclass = true),
-                classRo = buildClassRo(isMetaclass = true)
+            isMetaclass = true,
+            isa = getClassGlobal("NSObject", isMetaclass = true),
+            superClass = getClassGlobal(superName, isMetaclass = true),
+            classRo = buildClassRo(isMetaclass = true)
         )
 
         val classObject = buildClassObject(
-                isMetaclass = false,
-                isa = metaclassObject,
-                superClass = getClassGlobal(superName, isMetaclass = false),
-                classRo = buildClassRo(isMetaclass = false)
+            isMetaclass = false,
+            isa = metaclassObject,
+            superClass = getClassGlobal(superName, isMetaclass = false),
+            classRo = buildClassRo(isMetaclass = false)
         )
 
         definedClasses.add(classObject)
@@ -229,16 +229,16 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
         if (elements.isEmpty()) return
 
         val global = context.llvm.staticData.placeGlobalArray(
-                name,
-                int8TypePtr,
-                elements.map { it.bitcast(int8TypePtr) }
+            name,
+            int8TypePtr,
+            elements.map { it.bitcast(int8TypePtr) }
         )
 
         global.setAlignment(
-                LLVMABIAlignmentOfType(
-                        context.llvm.runtime.targetData,
-                        LLVMGetInitializer(global.llvmGlobal)!!.type
-                )
+            LLVMABIAlignmentOfType(
+                context.llvm.runtime.targetData,
+                LLVMGetInitializer(global.llvmGlobal)!!.type
+            )
         )
 
         global.setSection(section)
@@ -265,13 +265,13 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
 
     companion object {
         val classNameGenerator =
-                CStringLiteralsGenerator("OBJC_CLASS_NAME_", "__TEXT,__objc_classname,cstring_literals")
+            CStringLiteralsGenerator("OBJC_CLASS_NAME_", "__TEXT,__objc_classname,cstring_literals")
 
         val selectorGenerator =
-                CStringLiteralsGenerator("OBJC_METH_VAR_NAME_",  "__TEXT,__objc_methname,cstring_literals")
+            CStringLiteralsGenerator("OBJC_METH_VAR_NAME_", "__TEXT,__objc_methname,cstring_literals")
 
         private val encodingGenerator =
-                CStringLiteralsGenerator("OBJC_METH_VAR_TYPE_", "__TEXT,__objc_methtype,cstring_literals")
+            CStringLiteralsGenerator("OBJC_METH_VAR_TYPE_", "__TEXT,__objc_methtype,cstring_literals")
     }
 
     class CStringLiteralsGenerator(val label: String, val section: String) {
