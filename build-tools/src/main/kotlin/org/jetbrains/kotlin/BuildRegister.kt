@@ -24,7 +24,7 @@ typealias performanceAdditionalResult = Triple<String, String, String>
  * Task to produce regressions report and send it to slack. Requires a report with current benchmarks result
  * and path to analyzer tool
  *
- * @property currentBenchmarksReportFile  path to file with becnhmarks result
+ * @property currentBenchmarksReportFile  path to file with benchmarks result
  * @property analyzer path to analyzer tool
  * @property bundleSize size of build
  * @property onlyBranch register only builds for branch

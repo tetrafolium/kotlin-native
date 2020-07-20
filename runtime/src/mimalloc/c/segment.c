@@ -182,7 +182,7 @@ static size_t mi_segment_size(size_t capacity, size_t required, size_t* pre_size
     /*
     if (mi_option_is_enabled(mi_option_secure)) {
       // always reserve maximally so the protection falls on
-      // the same address area, as we need to reuse them from the caches interchangably.
+      // the same address area, as we need to reuse them from the caches interchangeably.
       capacity = MI_SMALL_PAGES_PER_SEGMENT;
     }
     */

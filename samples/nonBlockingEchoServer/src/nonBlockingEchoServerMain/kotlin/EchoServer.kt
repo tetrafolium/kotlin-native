@@ -60,7 +60,7 @@ fun main(args: Array<String>) {
                         write(buffer, length)
                     }
                 } catch (e: IOException) {
-                    println("I/O error occured: ${e.message}")
+                    println("I/O error occurred: ${e.message}")
                 }
             }
         }

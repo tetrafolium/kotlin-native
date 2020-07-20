@@ -557,7 +557,7 @@ namespace {
 #define UPDATE_REF_EVENT(state, oldRef, newRef, slot, stack) \
   UPDATE_REF_STAT(state, oldRef, newRef, slot, stack) \
   UPDATE_REF_TRACE(state, oldRef, newRef, slot, stack)
-// Infomation shall be printed as worker is exiting.
+// Information shall be printed as worker is exiting.
 #define PRINT_EVENT(state) \
   PRINT_STAT(state)
 

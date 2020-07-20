@@ -419,7 +419,7 @@ The name contains the following parts (some of them may be empty):
 
 * `<ComponentName>` - name of a component. Empty for the main component.
 * `<BuildType>` - `Debug` or `Release`.
-* `<OutputKind>` - output kind name, e.g. `Executabe` or `Dynamic`. Empty if the component has only one output kind.
+* `<OutputKind>` - output kind name, e.g. `Executable` or `Dynamic`. Empty if the component has only one output kind.
 * `<Target>` - target the component is built for, e.g. `Macos_x64` or `Wasm32`. Empty if the component is built only for one target.
 
 Also the plugin creates a number of aggregate tasks allowing you to build all the binaries for a build type (e.g.

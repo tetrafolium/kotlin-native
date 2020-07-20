@@ -50,7 +50,7 @@ object KonanFakeOverrideClassFilter : PlatformFakeOverrideClassFilter {
         IdSignature.Flags.IS_NATIVE_INTEROP_LIBRARY.test()
     }
 
-    // This is an alternative to .isObjCClass that doesn't need to walk up all the class heirarchy,
+    // This is an alternative to .isObjCClass that doesn't need to walk up all the class hierarchy,
     // rather it only looks at immediate super class symbols.
     private fun IrClass.hasInteropSuperClass() = this.superTypes
         .mapNotNull { it.classOrNull }

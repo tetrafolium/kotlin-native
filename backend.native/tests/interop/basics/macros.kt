@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     assertEquals(0, ZERO)
     assertEquals(1, ONE)
     assertEquals(Long.MAX_VALUE, MAX_LONG)
-    assertEquals(42, FOURTY_TWO)
+    assertEquals(42, FORTY_TWO)
 
     val seventeen: Long = SEVENTEEN
     assertEquals(17L, seventeen)

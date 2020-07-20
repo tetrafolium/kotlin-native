@@ -108,7 +108,7 @@ int Konan_DebugBufferSizeWithObjectImpl(KRef obj) {
     return sizeof(debugBuffer);
 }
 
-// Auxilary function which can be called by developer/debugger to inspect an object.
+// Auxiliary function which can be called by developer/debugger to inspect an object.
 int32_t Konan_DebugObjectToUtf8ArrayImpl(KRef obj, char* buffer, int32_t bufferSize) {
     ObjHolder stringHolder;
     auto data = KonanObjectToUtf8Array(obj, stringHolder.slot())->array();
@@ -247,7 +247,7 @@ extern "C" {
         return impl(obj);
     }
 
-// Auxilary function which can be called by developer/debugger to inspect an object.
+// Auxiliary function which can be called by developer/debugger to inspect an object.
     RUNTIME_USED RUNTIME_WEAK int32_t Konan_DebugObjectToUtf8Array(KRef obj, char* buffer, int32_t bufferSize) {
         auto* impl = getImpl<int32_t (*)(KRef, char*, int32_t)>(obj, DO_DebugObjectToUtf8Array);
         if (impl == nullptr) return 0;

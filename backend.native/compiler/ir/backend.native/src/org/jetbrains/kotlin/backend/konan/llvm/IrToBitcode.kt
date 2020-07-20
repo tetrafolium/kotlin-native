@@ -391,7 +391,7 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
                                Int32(DEINIT_GLOBALS).llvm              to bbGlobalDeinit),
                         bbDefault)
 
-                // Globals initalizers may contain accesses to objects, so visit them first.
+                // Globals initializers may contain accesses to objects, so visit them first.
                 appendingTo(bbInit) {
                     // Bit clumsy, global init may need access to TLS, thus it has to be ready to that point.
                     if (context.llvm.tlsCount > 0) {

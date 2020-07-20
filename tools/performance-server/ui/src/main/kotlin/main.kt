@@ -171,7 +171,7 @@ fun customizeChart(chart: dynamic, chartContainer: String, jquerySelector: dynam
                 val triangle = Chartist.Svg("path", svgParameters, chartContainer)
                 element = data.element.replace(triangle)
             } else if (currentBuild.buildNumber == parameters["build"]) {
-                // Higlight choosen build.
+                // Higlight chosen build.
                 val svgParameters: dynamic = object{}
                 svgParameters["x"] = data.x - pointSize/2
                 svgParameters["y"] = data.y - pointSize/2
@@ -279,7 +279,7 @@ fun main(args: Array<String>) {
     document.querySelector("#inputGroupTarget [value=\"${parameters["target"]}\"]")?.setAttribute("selected", "true")
     document.querySelector("#inputGroupBuildType [value=\"${parameters["type"]}\"]")?.setAttribute("selected", "true")
     document.querySelector("#inputGroupBranch [value=\"${parameters["branch"]}\"]")?.setAttribute("selected", "true")
-    (document.getElementById("highligted_build") as HTMLInputElement).value = parameters["build"]!!
+    (document.getElementById("highlighted_build") as HTMLInputElement).value = parameters["build"]!!
 
     // Add onChange events for fields.
     js("$('#inputGroupTarget')").change({
@@ -316,8 +316,8 @@ fun main(args: Array<String>) {
             window.location.href = newLink
         }
     }
-    js("$( \"#highligted_build\" )").autocomplete(autocompleteParameters)
-    js("$('#highligted_build')").change({ value ->
+    js("$( \"#highlighted_build\" )").autocomplete(autocompleteParameters)
+    js("$('#highlighted_build')").change({ value ->
         val newValue = js("$(this).val()").toString()
         if (newValue.isEmpty() || newValue in builds.map {it.buildNumber}) {
             val newLink = "http://${window.location.host}/?target=${parameters["target"]}&type=${parameters["type"]}" +

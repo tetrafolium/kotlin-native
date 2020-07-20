@@ -214,7 +214,7 @@ private fun debugString(value: Any?): String {
 }
 
 /**
- * An atomic reference to a frozen Kotlin object. Can be used in concurrent scenarious
+ * An atomic reference to a frozen Kotlin object. Can be used in concurrent scenarios
  * but frequently shall be of nullable type and be zeroed out once no longer needed.
  * Otherwise memory leak could happen if the atomic reference is a part of a reference cycle.
  */
@@ -291,7 +291,7 @@ public class AtomicReference<T> {
 }
 
 /**
- * An atomic reference to a Kotlin object. Can be used in concurrent scenarious, but must be frozen first,
+ * An atomic reference to a Kotlin object. Can be used in concurrent scenarios, but must be frozen first,
  * otherwise behaves as regular box for the value. If frozen, shall be zeroed out once no longer needed.
  * Otherwise memory leak could happen if atomic reference is a part of a reference cycle.
  */

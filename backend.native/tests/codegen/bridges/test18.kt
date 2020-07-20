@@ -7,7 +7,7 @@ package codegen.bridges.test18
 
 import kotlin.test.*
 
-// overriden function returns Unit
+// overridden function returns Unit
 open class A {
     open fun foo(): Any = 42
 }

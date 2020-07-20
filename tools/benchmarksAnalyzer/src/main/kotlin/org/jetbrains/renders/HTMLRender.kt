@@ -441,7 +441,7 @@ class HTMLRender: Render() {
             }
             tfoot {
                 tr {
-                    th { +"Total becnhmarks number" }
+                    th { +"Total benchmarks number" }
                     th { +"${report.benchmarksNumber}" }
                 }
             }
@@ -601,7 +601,7 @@ class HTMLRender: Render() {
             if (report.regressions.isEmpty() && report.improvements.isEmpty()) {
                 div("alert alert-success") {
                     attributes["role"] = "alert"
-                    +"All becnhmarks are stable!"
+                    +"All benchmarks are stable!"
                 }
             }
         }

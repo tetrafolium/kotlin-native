@@ -218,7 +218,7 @@ fun main(args: Array<String>) {
             mergeReportsWithDetailedFlags(getBenchmarkReport(it, user))
         }
 
-        // Generate comparasion report.
+        // Generate comparison report.
         val summaryReport = SummaryBenchmarksReport(mainBenchsReport,
                 compareToBenchsReport,
                 epsValue)

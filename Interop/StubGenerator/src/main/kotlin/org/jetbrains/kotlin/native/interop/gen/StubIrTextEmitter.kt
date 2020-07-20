@@ -11,7 +11,7 @@ import java.lang.IllegalStateException
 
 /**
  * Emits stubs and bridge functions as *.kt and *.c files.
- * Many unintuitive printings are made for compatability with previous version of stub generator.
+ * Many unintuitive printings are made for compatibility with previous version of stub generator.
  *
  * [omitEmptyLines] is useful for testing output (e.g. diff calculating).
  */
