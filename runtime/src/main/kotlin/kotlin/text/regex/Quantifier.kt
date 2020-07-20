@@ -43,11 +43,11 @@ internal class Quantifier(val min: Int, val max: Int = min) : SpecialToken() {
     companion object {
         val starQuantifier = Quantifier(0, -1)
         val plusQuantifier = Quantifier(1, -1)
-        val altQuantifier  = Quantifier(0,  1)
+        val altQuantifier = Quantifier(0, 1)
 
         val INF = -1
 
-        fun fromLexerToken(token: Int) = when(token) {
+        fun fromLexerToken(token: Int) = when (token) {
             Lexer.QUANT_STAR, Lexer.QUANT_STAR_P, Lexer.QUANT_STAR_R -> starQuantifier
             Lexer.QUANT_ALT, Lexer.QUANT_ALT_P, Lexer.QUANT_ALT_R -> altQuantifier
             Lexer.QUANT_PLUS, Lexer.QUANT_PLUS_P, Lexer.QUANT_PLUS_R -> plusQuantifier
@@ -55,4 +55,3 @@ internal class Quantifier(val min: Int, val max: Int = min) : SpecialToken() {
         }
     }
 }
-

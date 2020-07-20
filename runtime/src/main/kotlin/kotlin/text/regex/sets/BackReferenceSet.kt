@@ -25,9 +25,8 @@ package kotlin.text.regex
 /**
  * Back reference node;
  */
-open internal class BackReferenceSet(val referencedGroup: Int, val consCounter: Int, val ignoreCase: Boolean = false)
-    : SimpleSet() {
-
+internal open class BackReferenceSet(val referencedGroup: Int, val consCounter: Int, val ignoreCase: Boolean = false) :
+    SimpleSet() {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
         val groupValue = getReferencedGroupValue(matchResult)
@@ -55,8 +54,9 @@ open internal class BackReferenceSet(val referencedGroup: Int, val consCounter: 
             if (index < 0) {
                 return -1
             }
-            if (index < testString.length
-                && next.matches(index + groupValue.length, testString, matchResult) >=0) {
+            if (index < testString.length &&
+                next.matches(index + groupValue.length, testString, matchResult) >= 0
+            ) {
                 return index
             }
             index++
@@ -84,10 +84,9 @@ open internal class BackReferenceSet(val referencedGroup: Int, val consCounter: 
         return -1
     }
 
-
     protected fun getReferencedGroupValue(matchResult: MatchResultImpl) = matchResult.group(referencedGroup)
     override val name: String
-            get() = "back reference: $referencedGroup"
+        get() = "back reference: $referencedGroup"
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean {
         val result = matchResult.getConsumed(consCounter) != 0

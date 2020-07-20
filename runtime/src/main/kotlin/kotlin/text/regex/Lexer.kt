@@ -26,22 +26,22 @@ package kotlin.text.regex
 // Access to the decomposition tables. =========================================================================
 /** Gets canonical class for given codepoint from decomposition mappings table. */
 @SymbolName("Kotlin_text_regex_getCanonicalClassInternal")
-external private fun getCanonicalClassInternal(ch: Int): Int
+private external fun getCanonicalClassInternal(ch: Int): Int
 
 /** Check if the given character is in table of single decompositions. */
 @SymbolName("Kotlin_text_regex_hasSingleCodepointDecompositionInternal")
-external private fun hasSingleCodepointDecompositionInternal(ch: Int): Boolean
+private external fun hasSingleCodepointDecompositionInternal(ch: Int): Boolean
 
 /** Returns a decomposition for a given codepoint. */
 @SymbolName("Kotlin_text_regex_getDecompositionInternal")
-external private fun getDecompositionInternal(ch: Int): IntArray?
+private external fun getDecompositionInternal(ch: Int): IntArray?
 
 /**
  * Decomposes the given string represented as an array of codepoints. Saves the decomposition into [outputCodepoints] array.
  * Returns the length of the decomposition.
  */
 @SymbolName("Kotlin_text_regex_decomposeString")
-external private fun decomposeString(inputCodePoints: IntArray, inputLength: Int, outputCodePoints: IntArray): Int
+private external fun decomposeString(inputCodePoints: IntArray, inputLength: Int, outputCodePoints: IntArray): Int
 // =============================================================================================================
 
 /**
@@ -88,7 +88,7 @@ internal class Lexer(val patternString: String, flags: Int) {
     private var savedMode = Mode.PATTERN
 
     fun setModeWithReread(value: Mode) {
-        if(value == Mode.PATTERN || value == Mode.RANGE) {
+        if (value == Mode.PATTERN || value == Mode.RANGE) {
             mode = value
         }
         if (mode == Mode.PATTERN) {
@@ -97,26 +97,26 @@ internal class Lexer(val patternString: String, flags: Int) {
     }
 
     // Tokens ==========================================================================================================
-    internal var lookBack: Int = 0           // Previous char read.
+    internal var lookBack: Int = 0 // Previous char read.
         private set
-    internal var currentChar: Int = 0        // Current character read. Returns 0 if there is no more characters.
+    internal var currentChar: Int = 0 // Current character read. Returns 0 if there is no more characters.
         private set
-    internal var lookAhead: Int = 0          // Next character.
+    internal var lookAhead: Int = 0 // Next character.
         private set
 
-    internal var curSpecialToken: SpecialToken? = null        // Current special token (e.g. quantifier)
+    internal var curSpecialToken: SpecialToken? = null // Current special token (e.g. quantifier)
         private set
-    internal var lookAheadSpecialToken: SpecialToken? = null  // Next special token
+    internal var lookAheadSpecialToken: SpecialToken? = null // Next special token
         private set
 
     // Indices in the pattern.
-    var index = 0                   // Current char being processed index.
+    var index = 0 // Current char being processed index.
         private set
-    var prevNonWhitespaceIndex = 0  // Previous non-whitespace character index.
+    var prevNonWhitespaceIndex = 0 // Previous non-whitespace character index.
         private set
-    var curTokenIndex = 0           // Current token start index.
+    var curTokenIndex = 0 // Current token start index.
         private set
-    var lookAheadTokenIndex = 0     // Next token index.
+    var lookAheadTokenIndex = 0 // Next token index.
         private set
 
     init {
@@ -138,11 +138,11 @@ internal class Lexer(val patternString: String, flags: Int) {
 
     // Character checks ================================================================================================
     /** Returns true, if current token is special, i.e. quantifier, or other compound token. */
-    val isSpecial: Boolean      get() = curSpecialToken != null
-    val isQuantifier: Boolean   get() = isSpecial && curSpecialToken!!.type == SpecialToken.Type.QUANTIFIER
-    val isNextSpecial: Boolean  get() = lookAheadSpecialToken != null
+    val isSpecial: Boolean get() = curSpecialToken != null
+    val isQuantifier: Boolean get() = isSpecial && curSpecialToken!!.type == SpecialToken.Type.QUANTIFIER
+    val isNextSpecial: Boolean get() = lookAheadSpecialToken != null
 
-    private fun Int.isSurrogatePair() : Boolean {
+    private fun Int.isSurrogatePair(): Boolean {
         val high = (this ushr 16).toChar()
         val low = this.toChar()
         return high.isHighSurrogate() && low.isLowSurrogate()
@@ -336,8 +336,8 @@ internal class Lexer(val patternString: String, flags: Int) {
                 // look at the next character to determine if the mode is greedy, reluctant or possessive.
                 when (mode) {
                     '+' -> { lookAhead = lookAhead or Lexer.QMOD_POSSESSIVE; nextIndex() }
-                    '?' -> { lookAhead = lookAhead or Lexer.QMOD_RELUCTANT;  nextIndex() }
-                    else ->  lookAhead = lookAhead or Lexer.QMOD_GREEDY
+                    '?' -> { lookAhead = lookAhead or Lexer.QMOD_RELUCTANT; nextIndex() }
+                    else -> lookAhead = lookAhead or Lexer.QMOD_GREEDY
                 }
             }
 
@@ -363,7 +363,7 @@ internal class Lexer(val patternString: String, flags: Int) {
                                 // Look ahead or an atomic group.
                                 '!' -> { lookAhead = CHAR_NEG_LOOKAHEAD; nextIndex() }
                                 '=' -> { lookAhead = CHAR_POS_LOOKAHEAD; nextIndex() }
-                                '>' -> { lookAhead = CHAR_ATOMIC_GROUP;  nextIndex() }
+                                '>' -> { lookAhead = CHAR_ATOMIC_GROUP; nextIndex() }
                                 // Positive / negaitve look behind - need to check the next char.
                                 '<' -> {
                                     nextIndex()
@@ -393,8 +393,8 @@ internal class Lexer(val patternString: String, flags: Int) {
                             // Process the second char for look behind construction.
                             isLookBehind = false
                             when (char) {
-                                '!' -> {  lookAhead = CHAR_NEG_LOOKBEHIND; nextIndex() }
-                                '=' -> {  lookAhead = CHAR_POS_LOOKBEHIND; nextIndex() }
+                                '!' -> { lookAhead = CHAR_NEG_LOOKBEHIND; nextIndex() }
+                                '=' -> { lookAhead = CHAR_POS_LOOKBEHIND; nextIndex() }
                                 else -> throw PatternSyntaxException("Unknown look behind", patternString, curTokenIndex)
                             }
                         }
@@ -420,17 +420,17 @@ internal class Lexer(val patternString: String, flags: Int) {
 
         when (lookAheadChar) {
             '\\' -> return processEscapedChar()
-            '['  -> lookAhead = CHAR_LEFT_SQUARE_BRACKET
-            ']'  -> lookAhead = CHAR_RIGHT_SQUARE_BRACKET
-            '^'  -> lookAhead = CHAR_CARET
-            '&'  -> lookAhead = CHAR_AMPERSAND
-            '-'  -> lookAhead = CHAR_HYPHEN
+            '[' -> lookAhead = CHAR_LEFT_SQUARE_BRACKET
+            ']' -> lookAhead = CHAR_RIGHT_SQUARE_BRACKET
+            '^' -> lookAhead = CHAR_CARET
+            '&' -> lookAhead = CHAR_AMPERSAND
+            '-' -> lookAhead = CHAR_HYPHEN
         }
         return false
     }
 
     /** Processes an escaped (\x) character in any mode. Returns whether we need to reread the character or not */
-    private fun processEscapedChar() : Boolean {
+    private fun processEscapedChar(): Boolean {
         lookAhead = if (index < pattern.size - 2) {
             nextCodePoint()
         } else {
@@ -457,8 +457,8 @@ internal class Lexer(val patternString: String, flags: Int) {
             // Word/whitespace/digit.
             'w', 's', 'd', 'W', 'S', 'D' -> {
                 lookAheadSpecialToken = AbstractCharClass.getPredefinedClass(
-                        String(pattern, prevNonWhitespaceIndex, 1),
-                        false
+                    String(pattern, prevNonWhitespaceIndex, 1),
+                    false
                 )
                 lookAhead = 0
             }
@@ -481,7 +481,7 @@ internal class Lexer(val patternString: String, flags: Int) {
             // Back references to capturing groups.
             '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
                 if (mode == Mode.PATTERN) {
-                    lookAhead = 0x80000000.toInt() or lookAhead  // Captured group reference is 0x80...<group number>
+                    lookAhead = 0x80000000.toInt() or lookAhead // Captured group reference is 0x80...<group number>
                 }
             }
 
@@ -560,7 +560,7 @@ internal class Lexer(val patternString: String, flags: Int) {
             }
         }
 
-        if (min < 0 || max >=0 && max < min) {
+        if (min < 0 || max >= 0 && max < min) {
             throw PatternSyntaxException("Incorrect Quantifier Syntax", patternString, curTokenIndex)
         }
 
@@ -568,7 +568,7 @@ internal class Lexer(val patternString: String, flags: Int) {
         when (mod) {
             '+' -> { lookAhead = Lexer.QUANT_COMP_P; nextIndex() }
             '?' -> { lookAhead = Lexer.QUANT_COMP_R; nextIndex() }
-            else ->  lookAhead = Lexer.QUANT_COMP
+            else -> lookAhead = Lexer.QUANT_COMP
         }
         return Quantifier(min, max)
     }
@@ -589,25 +589,29 @@ internal class Lexer(val patternString: String, flags: Int) {
                     positive = false
                 }
 
-                'i' -> result = if (positive)
-                                    result or Pattern.CASE_INSENSITIVE
-                                else
-                                    result xor Pattern.CASE_INSENSITIVE and result
+                'i' ->
+                    result = if (positive)
+                        result or Pattern.CASE_INSENSITIVE
+                    else
+                        result xor Pattern.CASE_INSENSITIVE and result
 
-                'd' -> result = if (positive)
-                                    result or Pattern.UNIX_LINES
-                                else
-                                    result xor Pattern.UNIX_LINES and result
+                'd' ->
+                    result = if (positive)
+                        result or Pattern.UNIX_LINES
+                    else
+                        result xor Pattern.UNIX_LINES and result
 
-                'm' -> result = if (positive)
-                                    result or Pattern.MULTILINE
-                                else
-                                    result xor Pattern.MULTILINE and result
+                'm' ->
+                    result = if (positive)
+                        result or Pattern.MULTILINE
+                    else
+                        result xor Pattern.MULTILINE and result
 
-                's' -> result = if (positive)
-                                    result or Pattern.DOTALL
-                                else
-                                    result xor Pattern.DOTALL and result
+                's' ->
+                    result = if (positive)
+                        result or Pattern.DOTALL
+                    else
+                        result xor Pattern.DOTALL and result
 
                 // We don't support UNICODE_CASE.
                 /*'u' -> result = if (positive)
@@ -615,10 +619,11 @@ internal class Lexer(val patternString: String, flags: Int) {
                                 else
                                     result xor Pattern.UNICODE_CASE and result*/
 
-                'x' -> result = if (positive)
-                                    result or Pattern.COMMENTS
-                                else
-                                    result xor Pattern.COMMENTS and result
+                'x' ->
+                    result = if (positive)
+                        result or Pattern.COMMENTS
+                    else
+                        result xor Pattern.COMMENTS and result
 
                 ':' -> {
                     nextIndex()
@@ -701,46 +706,46 @@ internal class Lexer(val patternString: String, flags: Int) {
 
     companion object {
         // Special characters.
-        val CHAR_DOLLAR               = 0xe0000000.toInt() or '$'.toInt()
-        val CHAR_RIGHT_PARENTHESIS    = 0xe0000000.toInt() or ')'.toInt()
-        val CHAR_LEFT_SQUARE_BRACKET  = 0xe0000000.toInt() or '['.toInt()
+        val CHAR_DOLLAR = 0xe0000000.toInt() or '$'.toInt()
+        val CHAR_RIGHT_PARENTHESIS = 0xe0000000.toInt() or ')'.toInt()
+        val CHAR_LEFT_SQUARE_BRACKET = 0xe0000000.toInt() or '['.toInt()
         val CHAR_RIGHT_SQUARE_BRACKET = 0xe0000000.toInt() or ']'.toInt()
-        val CHAR_CARET                = 0xe0000000.toInt() or '^'.toInt()
-        val CHAR_VERTICAL_BAR         = 0xe0000000.toInt() or '|'.toInt()
-        val CHAR_AMPERSAND            = 0xe0000000.toInt() or '&'.toInt()
-        val CHAR_HYPHEN               = 0xe0000000.toInt() or '-'.toInt()
-        val CHAR_DOT                  = 0xe0000000.toInt() or '.'.toInt()
-        val CHAR_LEFT_PARENTHESIS     = 0x80000000.toInt() or '('.toInt()
-        val CHAR_NONCAP_GROUP         = 0xc0000000.toInt() or '('.toInt()
-        val CHAR_POS_LOOKAHEAD        = 0xe0000000.toInt() or '('.toInt()
-        val CHAR_NEG_LOOKAHEAD        = 0xf0000000.toInt() or '('.toInt()
-        val CHAR_POS_LOOKBEHIND       = 0xf8000000.toInt() or '('.toInt()
-        val CHAR_NEG_LOOKBEHIND       = 0xfc000000.toInt() or '('.toInt()
-        val CHAR_ATOMIC_GROUP         = 0xfe000000.toInt() or '('.toInt()
-        val CHAR_FLAGS                = 0xff000000.toInt() or '('.toInt()
-        val CHAR_START_OF_INPUT       = 0x80000000.toInt() or 'A'.toInt()
-        val CHAR_WORD_BOUND           = 0x80000000.toInt() or 'b'.toInt()
-        val CHAR_NONWORD_BOUND        = 0x80000000.toInt() or 'B'.toInt()
-        val CHAR_PREVIOUS_MATCH       = 0x80000000.toInt() or 'G'.toInt()
-        val CHAR_END_OF_INPUT         = 0x80000000.toInt() or 'z'.toInt()
-        val CHAR_END_OF_LINE          = 0x80000000.toInt() or 'Z'.toInt()
-        
+        val CHAR_CARET = 0xe0000000.toInt() or '^'.toInt()
+        val CHAR_VERTICAL_BAR = 0xe0000000.toInt() or '|'.toInt()
+        val CHAR_AMPERSAND = 0xe0000000.toInt() or '&'.toInt()
+        val CHAR_HYPHEN = 0xe0000000.toInt() or '-'.toInt()
+        val CHAR_DOT = 0xe0000000.toInt() or '.'.toInt()
+        val CHAR_LEFT_PARENTHESIS = 0x80000000.toInt() or '('.toInt()
+        val CHAR_NONCAP_GROUP = 0xc0000000.toInt() or '('.toInt()
+        val CHAR_POS_LOOKAHEAD = 0xe0000000.toInt() or '('.toInt()
+        val CHAR_NEG_LOOKAHEAD = 0xf0000000.toInt() or '('.toInt()
+        val CHAR_POS_LOOKBEHIND = 0xf8000000.toInt() or '('.toInt()
+        val CHAR_NEG_LOOKBEHIND = 0xfc000000.toInt() or '('.toInt()
+        val CHAR_ATOMIC_GROUP = 0xfe000000.toInt() or '('.toInt()
+        val CHAR_FLAGS = 0xff000000.toInt() or '('.toInt()
+        val CHAR_START_OF_INPUT = 0x80000000.toInt() or 'A'.toInt()
+        val CHAR_WORD_BOUND = 0x80000000.toInt() or 'b'.toInt()
+        val CHAR_NONWORD_BOUND = 0x80000000.toInt() or 'B'.toInt()
+        val CHAR_PREVIOUS_MATCH = 0x80000000.toInt() or 'G'.toInt()
+        val CHAR_END_OF_INPUT = 0x80000000.toInt() or 'z'.toInt()
+        val CHAR_END_OF_LINE = 0x80000000.toInt() or 'Z'.toInt()
+
         // Quantifier modes.
-        val QMOD_GREEDY     = 0xe0000000.toInt()
-        val QMOD_RELUCTANT  = 0xc0000000.toInt()
+        val QMOD_GREEDY = 0xe0000000.toInt()
+        val QMOD_RELUCTANT = 0xc0000000.toInt()
         val QMOD_POSSESSIVE = 0x80000000.toInt()
-        
+
         // Quantifiers.
-        val QUANT_STAR   = QMOD_GREEDY or '*'.toInt()
+        val QUANT_STAR = QMOD_GREEDY or '*'.toInt()
         val QUANT_STAR_P = QMOD_POSSESSIVE or '*'.toInt()
         val QUANT_STAR_R = QMOD_RELUCTANT or '*'.toInt()
-        val QUANT_PLUS   = QMOD_GREEDY or '+'.toInt()
+        val QUANT_PLUS = QMOD_GREEDY or '+'.toInt()
         val QUANT_PLUS_P = QMOD_POSSESSIVE or '+'.toInt()
         val QUANT_PLUS_R = QMOD_RELUCTANT or '+'.toInt()
-        val QUANT_ALT    = QMOD_GREEDY or '?'.toInt()
-        val QUANT_ALT_P  = QMOD_POSSESSIVE or '?'.toInt()
-        val QUANT_ALT_R  = QMOD_RELUCTANT or '?'.toInt()
-        val QUANT_COMP   = QMOD_GREEDY or '{'.toInt()
+        val QUANT_ALT = QMOD_GREEDY or '?'.toInt()
+        val QUANT_ALT_P = QMOD_POSSESSIVE or '?'.toInt()
+        val QUANT_ALT_R = QMOD_RELUCTANT or '?'.toInt()
+        val QUANT_COMP = QMOD_GREEDY or '{'.toInt()
         val QUANT_COMP_P = QMOD_POSSESSIVE or '{'.toInt()
         val QUANT_COMP_R = QMOD_RELUCTANT or '{'.toInt()
 
@@ -811,22 +816,22 @@ internal class Lexer(val patternString: String, flags: Int) {
             var inputCodePointsIndex = 0
             var decompHangulIndex = 0
 
-            //codePoints of input
+            // codePoints of input
             val inputCodePoints = IntArray(inputLength)
 
-            //result of canonical decomposition of input
+            // result of canonical decomposition of input
             var resCodePoints = IntArray(inputLength * MAX_DECOMPOSITION_LENGTH)
 
-            //current symbol's codepoint
+            // current symbol's codepoint
             var ch: Int
 
-            //current symbol's decomposition
+            // current symbol's decomposition
             var decomp: IntArray?
 
-            //result of canonical and Hangul decomposition of input
+            // result of canonical and Hangul decomposition of input
             val decompHangul: IntArray
 
-            //result of canonical decomposition of input in UTF-16 encoding
+            // result of canonical decomposition of input in UTF-16 encoding
             val result = StringBuilder()
 
             var i = 0

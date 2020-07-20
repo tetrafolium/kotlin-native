@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * Group node over subexpression without alternations.
  */
-open internal class SingleSet(var kid: AbstractSet, fSet: FSet) : JointSet(listOf(), fSet) {
+internal open class SingleSet(var kid: AbstractSet, fSet: FSet) : JointSet(listOf(), fSet) {
 
     var backReferencedSet: BackReferencedSingleSet? = null
 
@@ -129,8 +129,12 @@ open internal class SingleSet(var kid: AbstractSet, fSet: FSet) : JointSet(listO
             return -1
         }
 
-        override fun findBack(leftLimit: Int, rightLimit: Int,
-                              testString: CharSequence, matchResult: MatchResultImpl): Int {
+        override fun findBack(
+            leftLimit: Int,
+            rightLimit: Int,
+            testString: CharSequence,
+            matchResult: MatchResultImpl
+        ): Int {
             for (index in rightLimit downTo leftLimit) {
                 val oldStart = matchResult.getStart(groupIndex)
                 matchResult.setStart(groupIndex, index)
@@ -148,4 +152,3 @@ open internal class SingleSet(var kid: AbstractSet, fSet: FSet) : JointSet(listO
         override fun processBackRefReplacement(): JointSet? = null
     }
 }
-

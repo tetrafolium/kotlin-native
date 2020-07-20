@@ -11,87 +11,86 @@ import kotlin.IllegalArgumentException
  * Returns `true` if this character (Unicode code point) is defined in Unicode.
  */
 @SymbolName("Kotlin_Char_isDefined")
-external public fun Char.isDefined(): Boolean
+public external fun Char.isDefined(): Boolean
 
 /**
  * Returns `true` if this character is a letter.
  */
 @SymbolName("Kotlin_Char_isLetter")
-external public fun Char.isLetter(): Boolean
+public external fun Char.isLetter(): Boolean
 
 /**
  * Returns `true` if this character is a letter or digit.
  */
 @SymbolName("Kotlin_Char_isLetterOrDigit")
-external public fun Char.isLetterOrDigit(): Boolean
+public external fun Char.isLetterOrDigit(): Boolean
 
 /**
  * Returns `true` if this character (Unicode code point) is a digit.
  */
 @SymbolName("Kotlin_Char_isDigit")
-external public fun Char.isDigit(): Boolean
+public external fun Char.isDigit(): Boolean
 
 /**
  * Returns `true` if this character (Unicode code point) should be regarded as an ignorable
  * character in a Java identifier or a Unicode identifier.
  */
 @SymbolName("Kotlin_Char_isIdentifierIgnorable")
-external public fun Char.isIdentifierIgnorable(): Boolean
+public external fun Char.isIdentifierIgnorable(): Boolean
 
 /**
  * Returns `true` if this character is an ISO control character.
  */
 @SymbolName("Kotlin_Char_isISOControl")
-external public fun Char.isISOControl(): Boolean
+public external fun Char.isISOControl(): Boolean
 
 /**
  * Determines whether a character is whitespace according to the Unicode standard.
  * Returns `true` if the character is whitespace.
  */
 @SymbolName("Kotlin_Char_isWhitespace")
-external public actual fun Char.isWhitespace(): Boolean
+public actual external fun Char.isWhitespace(): Boolean
 
 /**
  * Returns `true` if this character is upper case.
  */
 @SymbolName("Kotlin_Char_isUpperCase")
-external public fun Char.isUpperCase(): Boolean
+public external fun Char.isUpperCase(): Boolean
 
 /**
  * Returns `true` if this character is lower case.
  */
 @SymbolName("Kotlin_Char_isLowerCase")
-external public fun Char.isLowerCase(): Boolean
+public external fun Char.isLowerCase(): Boolean
 
 /**
  * Converts this character to uppercase.
  */
 @SymbolName("Kotlin_Char_toUpperCase")
-external public actual fun Char.toUpperCase(): Char
+public actual external fun Char.toUpperCase(): Char
 
 /**
  * Converts this character to lowercase.
  */
 @SymbolName("Kotlin_Char_toLowerCase")
-external public actual fun Char.toLowerCase(): Char
+public actual external fun Char.toLowerCase(): Char
 
 /**
  * Returns `true` if this character is a Unicode high-surrogate code unit (also known as leading-surrogate code unit).
  */
 @SymbolName("Kotlin_Char_isHighSurrogate")
-external public actual fun Char.isHighSurrogate(): Boolean
+public actual external fun Char.isHighSurrogate(): Boolean
 
 /**
  * Returns `true` if this character is a Unicode low-surrogate code unit (also known as trailing-surrogate code unit).
  */
 @SymbolName("Kotlin_Char_isLowSurrogate")
-external public actual fun Char.isLowSurrogate(): Boolean
-
+public actual external fun Char.isLowSurrogate(): Boolean
 
 internal actual fun digitOf(char: Char, radix: Int): Int = digitOfChecked(char, checkRadix(radix))
 
 @SymbolName("Kotlin_Char_digitOfChecked")
-external internal fun digitOfChecked(char: Char, radix: Int): Int
+internal external fun digitOfChecked(char: Char, radix: Int): Int
 
 /**
  * Returns a value indicating a character's general category.
@@ -100,14 +99,14 @@ public val Char.category: CharCategory get() = CharCategory.valueOf(getType())
 
 /** Retrun a Unicode category of the character as an Int. */
 @SymbolName("Kotlin_Char_getType")
-external internal fun Char.getType(): Int
+internal external fun Char.getType(): Int
 
 /**
  * Checks whether the given [radix] is valid radix for string to number and number to string conversion.
  */
 @PublishedApi
 internal actual fun checkRadix(radix: Int): Int {
-    if(radix !in Char.MIN_RADIX..Char.MAX_RADIX) {
+    if (radix !in Char.MIN_RADIX..Char.MAX_RADIX) {
         throw IllegalArgumentException("radix $radix was not in valid range ${Char.MIN_RADIX..Char.MAX_RADIX}")
     }
     return radix

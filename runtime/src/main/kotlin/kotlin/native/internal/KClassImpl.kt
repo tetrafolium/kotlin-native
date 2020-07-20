@@ -12,7 +12,7 @@ internal class KClassImpl<T : Any>(private val typeInfo: NativePtr) : KClass<T> 
     override val simpleName: String?
         get() {
             val relativeName = getRelativeName(typeInfo)
-                    ?: return null
+                ?: return null
 
             return relativeName.substringAfterLast(".")
         }
@@ -20,7 +20,7 @@ internal class KClassImpl<T : Any>(private val typeInfo: NativePtr) : KClass<T> 
     override val qualifiedName: String?
         get() {
             val packageName = getPackageName(typeInfo)
-                    ?: return null
+                ?: return null
 
             val relativeName = getRelativeName(typeInfo)!!
             return if (packageName.isEmpty()) {
@@ -33,7 +33,7 @@ internal class KClassImpl<T : Any>(private val typeInfo: NativePtr) : KClass<T> 
     override fun isInstance(value: Any?): Boolean = value != null && isInstance(value, this.typeInfo)
 
     override fun equals(other: Any?): Boolean =
-            other is KClassImpl<*> && this.typeInfo == other.typeInfo
+        other is KClassImpl<*> && this.typeInfo == other.typeInfo
 
     override fun hashCode(): Int = typeInfo.hashCode()
 
@@ -42,16 +42,16 @@ internal class KClassImpl<T : Any>(private val typeInfo: NativePtr) : KClass<T> 
     }
 
     internal fun findAssociatedObjectImpl(key: KClassImpl<*>): Any? =
-            findAssociatedObjectImpl(this.typeInfo, key.typeInfo)
+        findAssociatedObjectImpl(this.typeInfo, key.typeInfo)
 }
 
 @PublishedApi
 internal fun KClass<*>.findAssociatedObject(key: KClass<*>): Any? =
-        if (this is KClassImpl<*> && key is KClassImpl<*>) {
-            this.findAssociatedObjectImpl(key)
-        } else {
-            null
-        }
+    if (this is KClassImpl<*> && key is KClassImpl<*>) {
+        this.findAssociatedObjectImpl(key)
+    } else {
+        null
+    }
 
 @PublishedApi
 internal class KClassUnsupportedImpl(private val message: String) : KClass<Any> {

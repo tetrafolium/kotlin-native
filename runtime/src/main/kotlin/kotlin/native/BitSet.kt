@@ -42,7 +42,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
     /**
      * Creates a bit set of given [length] filling elements using [initializer]
      */
-    constructor(length: Int, initializer: (Int) -> Boolean): this(length) {
+    constructor(length: Int, initializer: (Int) -> Boolean) : this(length) {
         for (i in 0 until length) {
             set(i, initializer(i))
         }
@@ -87,7 +87,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
 
     // Transforms a pair of an element index and a bit offset to a bit index.
     private fun bitIndex(elementIndex: Int, bitOffset: Int) =
-            elementIndex * ELEMENT_SIZE + bitOffset
+        elementIndex * ELEMENT_SIZE + bitOffset
 
     // Sets all bits after the last available bit (size - 1) to 0.
     private fun clearUnusedTail() {
@@ -141,7 +141,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
     }
 
     /** Sets the bits with indices between [from] (inclusive) and [to] (exclusive) to the specified value. */
-    fun set(from : Int, to: Int, value: Boolean = true) = set(from until to, value)
+    fun set(from: Int, to: Int, value: Boolean = true) = set(from until to, value)
 
     /** Sets the bits from the range specified to the specified value. */
     fun set(range: IntRange, value: Boolean = true) {
@@ -169,11 +169,10 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
         }
     }
 
-
     /** Clears the bit specified */
     fun clear(index: Int) = set(index, false)
     /** Clears the bits with indices between [from] (inclusive) and [to] (exclusive) to the specified value. */
-    fun clear(from : Int, to: Int) = set(from, to, false)
+    fun clear(from: Int, to: Int) = set(from, to, false)
     /** Clears the bit specified */
     fun clear(range: IntRange) = set(range, false)
 
@@ -239,7 +238,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
         var element = bits[startElementIndex]
         for (offset in startOffset..MAX_BIT_OFFSET) {
             val bit = element and (0x1L shl offset) != 0L
-            if (bit == lookFor) {  // Look for not 0 if we need a set bit and look for 0 otherwise.
+            if (bit == lookFor) { // Look for not 0 if we need a set bit and look for 0 otherwise.
                 return bitIndex(startElementIndex, offset)
             }
         }
@@ -299,7 +298,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
         var element = bits[startElementIndex]
         for (offset in startOffset downTo 0) {
             val bit = element and (0x1L shl offset) != 0L
-            if (bit == lookFor) {  // Look for not 0 if we need a set bit and look for 0 otherwise.
+            if (bit == lookFor) { // Look for not 0 if we need a set bit and look for 0 otherwise.
                 return bitIndex(startElementIndex, offset)
             }
         }
@@ -308,7 +307,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
             element = bits[index]
             for (offset in MAX_BIT_OFFSET downTo 0) {
                 val bit = element and (0x1L shl offset) != 0L
-                if (bit == lookFor) {  // Look for not 0 if we need a set bit and look for 0 otherwise.
+                if (bit == lookFor) { // Look for not 0 if we need a set bit and look for 0 otherwise.
                     return bitIndex(index, offset)
                 }
             }
@@ -383,7 +382,7 @@ public class BitSet(size: Int = ELEMENT_SIZE) {
 
     /** Returns true if the specified BitSet has any bits set to true that are also set to true in this BitSet. */
     fun intersects(another: BitSet): Boolean =
-            (0 until minOf(bits.size, another.bits.size)).any { bits[it] and another.bits[it] != 0L }
+        (0 until minOf(bits.size, another.bits.size)).any { bits[it] and another.bits[it] != 0L }
 
     override fun toString(): String {
         val sb = StringBuilder()

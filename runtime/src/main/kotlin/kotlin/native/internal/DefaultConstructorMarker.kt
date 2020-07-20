@@ -6,4 +6,4 @@
 package kotlin.native.internal
 
 @ExportForCompiler
-internal object DefaultConstructorMarker;
+internal object DefaultConstructorMarker

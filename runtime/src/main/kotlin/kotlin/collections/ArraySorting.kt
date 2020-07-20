@@ -5,8 +5,7 @@
 
 package kotlin.collections
 
-
-private fun <T: Comparable<T>> mergeSort(array: Array<T>, start: Int, endInclusive: Int) {
+private fun <T : Comparable<T>> mergeSort(array: Array<T>, start: Int, endInclusive: Int) {
     @Suppress("UNCHECKED_CAST")
     val buffer = arrayOfNulls<Any?>(array.size) as Array<T>
     val result = mergeSort(array, buffer, start, endInclusive)
@@ -16,7 +15,7 @@ private fun <T: Comparable<T>> mergeSort(array: Array<T>, start: Int, endInclusi
 }
 
 // Both start and end are inclusive indices.
-private fun <T: Comparable<T>> mergeSort(array: Array<T>, buffer: Array<T>, start: Int, end: Int): Array<T> {
+private fun <T : Comparable<T>> mergeSort(array: Array<T>, buffer: Array<T>, start: Int, end: Int): Array<T> {
     if (start == end) {
         return array
     }
@@ -113,7 +112,10 @@ private fun <T> mergeSort(array: Array<T>, buffer: Array<T>, start: Int, end: In
 
 // ByteArray    =============================================================================
 private fun partition(
-        array: ByteArray, left: Int, right: Int): Int {
+    array: ByteArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -134,7 +136,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: ByteArray, left: Int, right: Int) {
+    array: ByteArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -144,7 +149,10 @@ private fun quickSort(
 
 // ShortArray   =============================================================================
 private fun partition(
-        array: ShortArray, left: Int, right: Int): Int {
+    array: ShortArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -165,7 +173,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: ShortArray, left: Int, right: Int) {
+    array: ShortArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -175,7 +186,10 @@ private fun quickSort(
 
 // IntArray     =============================================================================
 private fun partition(
-        array: IntArray, left: Int, right: Int): Int {
+    array: IntArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -196,7 +210,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: IntArray, left: Int, right: Int) {
+    array: IntArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -206,7 +223,10 @@ private fun quickSort(
 
 // LongArray    =============================================================================
 private fun partition(
-        array: LongArray, left: Int, right: Int): Int {
+    array: LongArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -227,7 +247,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: LongArray, left: Int, right: Int) {
+    array: LongArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -237,7 +260,10 @@ private fun quickSort(
 
 // CharArray    =============================================================================
 private fun partition(
-        array: CharArray, left: Int, right: Int): Int {
+    array: CharArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -258,7 +284,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: CharArray, left: Int, right: Int) {
+    array: CharArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -268,7 +297,10 @@ private fun quickSort(
 
 // FloatArray   =============================================================================
 private fun partition(
-        array: FloatArray, left: Int, right: Int): Int {
+    array: FloatArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -289,7 +321,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: FloatArray, left: Int, right: Int) {
+    array: FloatArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -299,7 +334,10 @@ private fun quickSort(
 
 // DoubleArray  =============================================================================
 private fun partition(
-        array: DoubleArray, left: Int, right: Int): Int {
+    array: DoubleArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -320,7 +358,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: DoubleArray, left: Int, right: Int) {
+    array: DoubleArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -330,7 +371,10 @@ private fun quickSort(
 
 // BooleanArray =============================================================================
 private fun partition(
-        array: BooleanArray, left: Int, right: Int): Int {
+    array: BooleanArray,
+    left: Int,
+    right: Int
+): Int {
     var i = left
     var j = right
     val pivot = array[(left + right) / 2]
@@ -351,7 +395,10 @@ private fun partition(
 }
 
 private fun quickSort(
-        array: BooleanArray, left: Int, right: Int) {
+    array: BooleanArray,
+    left: Int,
+    right: Int
+) {
     val index = partition(array, left, right)
     if (left < index - 1)
         quickSort(array, left, index - 1)
@@ -375,7 +422,7 @@ internal fun <T> sortArrayWith(array: Array<out T>, fromIndex: Int, toIndex: Int
  * Sorts a subarray of [Comparable] elements specified by [fromIndex] (inclusive) and
  * [toIndex] (exclusive) parameters using the merge sort algorithm.
  */
-internal fun <T: Comparable<T>> sortArray(array: Array<out T>, fromIndex: Int, toIndex: Int) {
+internal fun <T : Comparable<T>> sortArray(array: Array<out T>, fromIndex: Int, toIndex: Int) {
     if (fromIndex < toIndex - 1) {
         @Suppress("UNCHECKED_CAST")
         mergeSort(array as Array<T>, fromIndex, toIndex - 1)
@@ -385,11 +432,11 @@ internal fun <T: Comparable<T>> sortArray(array: Array<out T>, fromIndex: Int, t
 /**
  * Sorts the given array using qsort algorithm.
  */
-internal fun sortArray(array: ByteArray, fromIndex: Int, toIndex: Int)    = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: ShortArray, fromIndex: Int, toIndex: Int)   = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: IntArray, fromIndex: Int, toIndex: Int)     = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: LongArray, fromIndex: Int, toIndex: Int)    = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: CharArray, fromIndex: Int, toIndex: Int)    = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: FloatArray, fromIndex: Int, toIndex: Int)   = quickSort(array, fromIndex, toIndex - 1)
-internal fun sortArray(array: DoubleArray, fromIndex: Int, toIndex: Int)  = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: ByteArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: ShortArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: IntArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: LongArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: CharArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: FloatArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
+internal fun sortArray(array: DoubleArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)
 internal fun sortArray(array: BooleanArray, fromIndex: Int, toIndex: Int) = quickSort(array, fromIndex, toIndex - 1)

@@ -4,8 +4,8 @@
  */
 package kotlin.native
 
-import kotlin.native.internal.*
 import kotlinx.cinterop.*
+import kotlin.native.internal.*
 
 /**
  * An immutable compile-time array of bytes.
@@ -29,7 +29,7 @@ public final class ImmutableBlob private constructor() {
 }
 
 private class ImmutableBlobIteratorImpl(val blob: ImmutableBlob) : ByteIterator() {
-    var index : Int = 0
+    var index: Int = 0
 
     public override fun nextByte(): Byte {
         if (!hasNext()) throw NoSuchElementException("$index")
@@ -66,10 +66,10 @@ public external fun ImmutableBlob.toUByteArray(startIndex: Int = 0, endIndex: In
  * @see kotlinx.cinterop.CPointer
  */
 public fun ImmutableBlob.asCPointer(offset: Int = 0): CPointer<ByteVar> =
-        interpretCPointer<ByteVar>(asCPointerImpl(offset))!!
+    interpretCPointer<ByteVar>(asCPointerImpl(offset))!!
 
 public fun ImmutableBlob.asUCPointer(offset: Int = 0): CPointer<UByteVar> =
-        interpretCPointer<UByteVar>(asCPointerImpl(offset))!!
+    interpretCPointer<UByteVar>(asCPointerImpl(offset))!!
 
 @SymbolName("Kotlin_ImmutableBlob_asCPointerImpl")
 private external fun ImmutableBlob.asCPointerImpl(offset: Int): kotlin.native.internal.NativePtr

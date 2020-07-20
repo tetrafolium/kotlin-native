@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * The node which marks end of the particular group.
  */
-open internal class FSet(val groupIndex: Int) : SimpleSet() {
+internal open class FSet(val groupIndex: Int) : SimpleSet() {
 
     var isBackReferenced = false
 
@@ -41,7 +41,7 @@ open internal class FSet(val groupIndex: Int) : SimpleSet() {
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean = false
     override val name: String
-            get() = "fSet"
+        get() = "fSet"
 
     override fun processSecondPass(): FSet {
         val result = super.processSecondPass()
@@ -63,7 +63,7 @@ open internal class FSet(val groupIndex: Int) : SimpleSet() {
         }
 
         override val name: String
-                get() = "possessiveFSet"
+            get() = "possessiveFSet"
     }
 
     companion object {
@@ -76,8 +76,11 @@ open internal class FSet(val groupIndex: Int) : SimpleSet() {
  */
 internal class FinalSet : FSet(0) {
 
-    override fun matches(startIndex: Int, testString: CharSequence,
-                         matchResult: MatchResultImpl): Int {
+    override fun matches(
+        startIndex: Int,
+        testString: CharSequence,
+        matchResult: MatchResultImpl
+    ): Int {
         if (matchResult.mode == Regex.Mode.FIND || startIndex == testString.length) {
             matchResult.setEnd(0, startIndex)
             return startIndex

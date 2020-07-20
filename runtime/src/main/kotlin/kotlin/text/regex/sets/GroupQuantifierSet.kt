@@ -28,12 +28,12 @@ package kotlin.text.regex
  * consume.
 
  */
-open internal class GroupQuantifierSet(
-        val quantifier: Quantifier,
-        innerSet: AbstractSet,
-        next: AbstractSet,
-        type: Int,
-        val groupQuantifierIndex: Int // It's used to remember a number of the innerSet occurrences during the recursive search.
+internal open class GroupQuantifierSet(
+    val quantifier: Quantifier,
+    innerSet: AbstractSet,
+    next: AbstractSet,
+    type: Int,
+    val groupQuantifierIndex: Int // It's used to remember a number of the innerSet occurrences during the recursive search.
 ) : QuantifierSet(innerSet, next, type) {
 
     val max: Int get() = quantifier.max
@@ -84,9 +84,8 @@ open internal class GroupQuantifierSet(
         } else {
             nextIndex
         }
-
     }
 
     override val name: String
-            get() = quantifier.toString()
+        get() = quantifier.toString()
 }

@@ -35,7 +35,6 @@ public inline fun StringBuilder.appendLine(value: Float): StringBuilder = append
 @kotlin.internal.InlineOnly
 public inline fun StringBuilder.appendLine(value: Double): StringBuilder = append(value).appendLine()
 
-
 @Deprecated("Use appendLine instead", ReplaceWith("appendLine(it)"), level = DeprecationLevel.WARNING)
 public fun StringBuilder.appendln(it: String): StringBuilder = appendLine(it)
 

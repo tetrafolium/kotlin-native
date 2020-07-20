@@ -26,11 +26,11 @@ package kotlin.text.regex
  * Reluctant version of the group quantifier set.
  */
 internal class ReluctantGroupQuantifierSet(
-        quantifier: Quantifier,
-        innerSet: AbstractSet,
-        next: AbstractSet,
-        type: Int,
-        setCounter: Int
+    quantifier: Quantifier,
+    innerSet: AbstractSet,
+    next: AbstractSet,
+    type: Int,
+    setCounter: Int
 ) : GroupQuantifierSet(quantifier, innerSet, next, type, setCounter) {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {

@@ -5,8 +5,6 @@
 
 package kotlin.collections
 
-import kotlin.internal.PureReifiable
-
 /** Returns the array if it's not `null`, or an empty array otherwise. */
 public actual inline fun <reified T> Array<out T>?.orEmpty(): Array<out T> = this ?: emptyArray<T>()
 
@@ -16,7 +14,6 @@ internal fun checkCopyOfRangeArguments(fromIndex: Int, toIndex: Int, size: Int) 
     if (fromIndex > toIndex)
         throw IllegalArgumentException("fromIndex ($fromIndex) is greater than toIndex ($toIndex).")
 }
-
 
 // TODO: internal
 /**
@@ -37,7 +34,6 @@ public inline fun <T> Array<out T>.subarrayContentToString(offset: Int, length: 
     return sb.toString()
 }
 
-
 /**
  * Returns a hash code based on the contents of this array as if it is [List].
  * Nested arrays are treated as lists too.
@@ -51,25 +47,25 @@ internal fun <T> Array<out T>?.contentDeepHashCodeImpl(): Int {
     var result = 1
     for (element in this) {
         val elementHash = when (element) {
-            null            -> 0
+            null -> 0
 
-            is Array<*>     -> element.contentDeepHashCode()
+            is Array<*> -> element.contentDeepHashCode()
 
-            is ByteArray    -> element.contentHashCode()
-            is ShortArray   -> element.contentHashCode()
-            is IntArray     -> element.contentHashCode()
-            is LongArray    -> element.contentHashCode()
-            is FloatArray   -> element.contentHashCode()
-            is DoubleArray  -> element.contentHashCode()
-            is CharArray    -> element.contentHashCode()
+            is ByteArray -> element.contentHashCode()
+            is ShortArray -> element.contentHashCode()
+            is IntArray -> element.contentHashCode()
+            is LongArray -> element.contentHashCode()
+            is FloatArray -> element.contentHashCode()
+            is DoubleArray -> element.contentHashCode()
+            is CharArray -> element.contentHashCode()
             is BooleanArray -> element.contentHashCode()
 
-            is UByteArray   -> element.contentHashCode()
-            is UShortArray  -> element.contentHashCode()
-            is UIntArray    -> element.contentHashCode()
-            is ULongArray   -> element.contentHashCode()
+            is UByteArray -> element.contentHashCode()
+            is UShortArray -> element.contentHashCode()
+            is UIntArray -> element.contentHashCode()
+            is ULongArray -> element.contentHashCode()
 
-            else            -> element.hashCode()
+            else -> element.hashCode()
         }
 
         result = 31 * result + elementHash

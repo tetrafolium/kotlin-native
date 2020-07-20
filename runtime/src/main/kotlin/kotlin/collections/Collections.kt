@@ -11,10 +11,9 @@ import kotlin.random.*
 
 /** Copies typed varargs array to an array of objects */
 internal actual fun <T> Array<out T>.copyToArrayOfAny(isVarargs: Boolean): Array<out Any?> =
-        // if the array came from varargs and already is array of Any, copying isn't required.
-        if (isVarargs) this
-        else this.copyOfUninitializedElements(this.size)
-
+    // if the array came from varargs and already is array of Any, copying isn't required.
+    if (isVarargs) this
+    else this.copyOfUninitializedElements(this.size)
 
 /**
  * Classes that inherit from this interface can be represented as a sequence of elements that can
@@ -40,7 +39,6 @@ public interface MutableIterable<out T> : Iterable<T> {
     override fun iterator(): MutableIterator<T>
 }
 
-
 @PublishedApi
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
@@ -56,7 +54,6 @@ internal actual inline fun <E> buildListInternal(builderAction: MutableList<E>.(
 internal actual inline fun <E> buildListInternal(capacity: Int, builderAction: MutableList<E>.() -> Unit): List<E> {
     return ArrayList<E>(capacity).apply(builderAction).build()
 }
-
 
 /**
  * Replaces each element in the list with a result of a transformation specified.
@@ -87,7 +84,7 @@ public actual fun <T, K> Grouping<T, K>.eachCount(): Map<K, Int> = eachCountTo(m
  * Each element in the list gets replaced with the [value].
  */
 @SinceKotlin("1.2")
-public actual fun <T> MutableList<T>.fill(value: T): Unit {
+public actual fun <T> MutableList<T>.fill(value: T) {
     for (index in 0..lastIndex) {
         this[index] = value
     }
@@ -99,7 +96,7 @@ public actual fun <T> MutableList<T>.fill(value: T): Unit {
  * See: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
  */
 @SinceKotlin("1.2")
-public actual fun <T> MutableList<T>.shuffle(): Unit {
+public actual fun <T> MutableList<T>.shuffle() {
     for (i in lastIndex downTo 1) {
         val j = Random.nextInt(i + 1)
         val copy = this[i]

@@ -6,7 +6,7 @@
 package kotlin.collections
 
 actual class HashSet<E> internal constructor(
-        private val backing: HashMap<E, *>
+    private val backing: HashMap<E, *>
 ) : MutableSet<E>, kotlin.native.internal.KonanSet<E>, AbstractMutableSet<E>() {
 
     actual constructor() : this(HashMap<E, Nothing>())
@@ -26,26 +26,26 @@ actual class HashSet<E> internal constructor(
         return this
     }
 
-    override actual val size: Int get() = backing.size
-    override actual fun isEmpty(): Boolean = backing.isEmpty()
-    override actual fun contains(element: E): Boolean = backing.containsKey(element)
+    actual override val size: Int get() = backing.size
+    actual override fun isEmpty(): Boolean = backing.isEmpty()
+    actual override fun contains(element: E): Boolean = backing.containsKey(element)
     override fun getElement(element: E): E? = backing.getKey(element)
-    override actual fun clear() = backing.clear()
-    override actual fun add(element: E): Boolean = backing.addKey(element) >= 0
-    override actual fun remove(element: E): Boolean = backing.removeKey(element) >= 0
-    override actual fun iterator(): MutableIterator<E> = backing.keysIterator()
+    actual override fun clear() = backing.clear()
+    actual override fun add(element: E): Boolean = backing.addKey(element) >= 0
+    actual override fun remove(element: E): Boolean = backing.removeKey(element) >= 0
+    actual override fun iterator(): MutableIterator<E> = backing.keysIterator()
 
-    override actual fun addAll(elements: Collection<E>): Boolean {
+    actual override fun addAll(elements: Collection<E>): Boolean {
         backing.checkIsMutable()
         return super.addAll(elements)
     }
 
-    override actual fun removeAll(elements: Collection<E>): Boolean {
+    actual override fun removeAll(elements: Collection<E>): Boolean {
         backing.checkIsMutable()
         return super.removeAll(elements)
     }
 
-    override actual fun retainAll(elements: Collection<E>): Boolean {
+    actual override fun retainAll(elements: Collection<E>): Boolean {
         backing.checkIsMutable()
         return super.retainAll(elements)
     }

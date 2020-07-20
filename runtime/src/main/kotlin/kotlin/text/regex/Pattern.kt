@@ -81,10 +81,13 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
     /** A->(a|)+ */
     private fun processAlternations(last: AbstractSet): AbstractSet {
         val auxRange = CharClass(hasFlag(Pattern.CASE_INSENSITIVE))
-        while (!lexemes.isEmpty() && lexemes.isLetter()
-                && (lexemes.lookAhead == 0
-                    || lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR
-                    || lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS)) {
+        while (!lexemes.isEmpty() && lexemes.isLetter() &&
+            (
+                lexemes.lookAhead == 0 ||
+                    lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR ||
+                    lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS
+                )
+        ) {
             auxRange.add(lexemes.next())
             if (lexemes.currentChar == Lexer.CHAR_VERTICAL_BAR) {
                 lexemes.next()
@@ -132,7 +135,7 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
             }
         }
 
-        //Process to EOF or ')'
+        // Process to EOF or ')'
         do {
             val child: AbstractSet
             when {
@@ -180,21 +183,23 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
         }
     }
 
-
     /**
      * T->aaa
      */
     private fun processSequence(): AbstractSet {
         val substring = StringBuilder()
-        while (!lexemes.isEmpty()
-                && lexemes.isLetter()
-                && !lexemes.isSurrogate()
-                && (!lexemes.isNextSpecial && lexemes.lookAhead == 0 // End of a pattern.
-                    || !lexemes.isNextSpecial && Lexer.isLetter(lexemes.lookAhead)
-                    || lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS
-                    || lexemes.lookAhead and 0x8000ffff.toInt() == Lexer.CHAR_LEFT_PARENTHESIS
-                    || lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR
-                    || lexemes.lookAhead == Lexer.CHAR_DOLLAR)) {
+        while (!lexemes.isEmpty() &&
+            lexemes.isLetter() &&
+            !lexemes.isSurrogate() &&
+            (
+                !lexemes.isNextSpecial && lexemes.lookAhead == 0 || // End of a pattern.
+                    !lexemes.isNextSpecial && Lexer.isLetter(lexemes.lookAhead) ||
+                    lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS ||
+                    lexemes.lookAhead and 0x8000ffff.toInt() == Lexer.CHAR_LEFT_PARENTHESIS ||
+                    lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR ||
+                    lexemes.lookAhead == Lexer.CHAR_DOLLAR
+                )
+        ) {
             val ch = lexemes.next()
 
             if (Char.isSupplementaryCodePoint(ch)) {
@@ -242,16 +247,16 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                     codePointsHangul[@Suppress("UNUSED_CHANGED_VALUE")readCodePoints++] = curSymb.toChar()
                     lexemes.next()
 
-                    //LVT syllable
+                    // LVT syllable
                     return HangulDecomposedCharSet(codePointsHangul, 3)
                 } else {
 
-                    //LV syllable
+                    // LV syllable
                     return HangulDecomposedCharSet(codePointsHangul, 2)
                 }
             } else {
 
-                //L jamo
+                // L jamo
                 return CharSet(codePointsHangul[0], hasFlag(CASE_INSENSITIVE))
             }
 
@@ -263,9 +268,10 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
         } else {
             readCodePoints++
 
-            while (readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH
-                    && !lexemes.isEmpty() && lexemes.isLetter()
-                    && !Lexer.isDecomposedCharBoundary(lexemes.currentChar)) {
+            while (readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH &&
+                !lexemes.isEmpty() && lexemes.isLetter() &&
+                !Lexer.isDecomposedCharBoundary(lexemes.currentChar)
+            ) {
                 codePoints[readCodePoints++] = lexemes.next()
             }
 
@@ -290,10 +296,11 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 when {
                     hasFlag(Pattern.CANON_EQ) -> {
                         cur = processDecomposedChar()
-                        if (!lexemes.isEmpty()
-                            && (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet)
-                            && lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR
-                            && !lexemes.isLetter()) {
+                        if (!lexemes.isEmpty() &&
+                            (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet) &&
+                            lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR &&
+                            !lexemes.isLetter()
+                        ) {
 
                             cur = processQuantifier(last, cur)
                         }
@@ -319,21 +326,23 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
             }
         }
 
-        if (!lexemes.isEmpty()
-            && (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet)
-            && lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR) {
+        if (!lexemes.isEmpty() &&
+            (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet) &&
+            lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR
+        ) {
 
             val next = processSubExpression(last)
-            if (cur is LeafQuantifierSet
+            if (cur is LeafQuantifierSet &&
                 // '*' or '{0,}' quantifier
-                && cur.max == Quantifier.INF
-                && cur.min == 0
-                && !next.first(cur.innerSet)) {
+                cur.max == Quantifier.INF &&
+                cur.min == 0 &&
+                !next.first(cur.innerSet)
+            ) {
                 // An Optimizer node for the case where there is no intersection with the next node
                 cur = UnifiedQuantifierSet(cur)
             }
             cur.next = next
-        } else  {
+        } else {
             cur.next = last
         }
         return cur
@@ -374,7 +383,7 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                     q
                 }
 
-                Lexer.QUANT_PLUS_P, Lexer.QUANT_STAR_P, Lexer.QUANT_ALT_P  -> {
+                Lexer.QUANT_PLUS_P, Lexer.QUANT_STAR_P, Lexer.QUANT_ALT_P -> {
                     lexemes.next()
                     PossessiveGroupQuantifierSet(Quantifier.fromLexerToken(quant), term, last, quant, groupQuantifierCount++)
                 }
@@ -494,7 +503,7 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                     lexemes.next()
                 }
 
-                Lexer.CHAR_DOT -> {  // Dot: .
+                Lexer.CHAR_DOT -> { // Dot: .
                     lexemes.next()
                     term = DotSet(AbstractLineTerminator.getInstance(flags), hasFlag(DOTALL))
                 }
@@ -508,7 +517,6 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 Lexer.CHAR_DOLLAR -> { // End of the string: $
                     lexemes.next()
                     term = EOLSet(consumersCount++, AbstractLineTerminator.getInstance(flags), hasFlag(MULTILINE))
-
                 }
 
                 // Word / non-word boundary.
@@ -532,12 +540,12 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                     term = EOLSet(consumersCount++, AbstractLineTerminator.getInstance(flags))
                 }
 
-                Lexer.CHAR_START_OF_INPUT -> {  // Start if an input: \A
+                Lexer.CHAR_START_OF_INPUT -> { // Start if an input: \A
                     lexemes.next()
                     term = SOLSet(AbstractLineTerminator.getInstance(flags))
                 }
 
-                Lexer.CHAR_PREVIOUS_MATCH -> {  // A previous match: \G
+                Lexer.CHAR_PREVIOUS_MATCH -> { // A previous match: \G
                     lexemes.next()
                     term = PreviousMatchSet()
                 }
@@ -553,7 +561,7 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 0x80000000.toInt() or '8'.toInt(),
                 0x80000000.toInt() or '9'.toInt() -> {
                     val number = (char and 0x7FFFFFFF) - '0'.toInt()
-                    if (number < capturingGroupCount) {   // All is ok - the group exists.
+                    if (number < capturingGroupCount) { // All is ok - the group exists.
                         lexemes.next()
                         term = BackReferenceSet(number, consumersCount++, hasFlag(CASE_INSENSITIVE))
                         // backRefs[number] is proved to be not null because the group is already created (number < capturingGroupCount)
@@ -606,7 +614,6 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
         }
         return term
     }
-
 
     /**
      * Process [...] ranges
@@ -661,7 +668,7 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                     if (buffer >= 0) {
                         result.add(buffer)
                     }
-                    buffer = lexemes.next()  // buffer == Lexer.CHAR_AMPERSAND since next() returns currentChar.
+                    buffer = lexemes.next() // buffer == Lexer.CHAR_AMPERSAND since next() returns currentChar.
 
                     /*
                      * If there is a start for subrange we will do an intersection
@@ -685,16 +692,17 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                             }
                         }
                     } else {
-                        //treat '&' as a normal character
+                        // treat '&' as a normal character
                         buffer = '&'.toInt()
                     }
                 }
 
                 Lexer.CHAR_HYPHEN -> {
-                    if (firstInClass
-                        || lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET
-                        || lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET
-                        || buffer < 0) {
+                    if (firstInClass ||
+                        lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET ||
+                        lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET ||
+                        buffer < 0
+                    ) {
                         // Treat the hypen as a normal character.
                         if (buffer >= 0) {
                             result.add(buffer)
@@ -706,11 +714,14 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                         lexemes.next()
                         var cur = lexemes.currentChar
 
-                        if (!lexemes.isSpecial
-                            && (cur >= 0
-                                || lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET
-                                || lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET
-                                || buffer < 0)) {
+                        if (!lexemes.isSpecial &&
+                            (
+                                cur >= 0 ||
+                                    lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET ||
+                                    lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET ||
+                                    buffer < 0
+                                )
+                        ) {
 
                             try {
                                 if (!Lexer.isLetter(cur)) {
@@ -795,14 +806,14 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
 
         return when {
             isSupplCodePoint -> SequenceSet(String(Char.toChars(ch), 0, 2), hasFlag(CASE_INSENSITIVE))
-            ch.toChar().isLowSurrogate() ->  LowSurrogateCharSet(ch.toChar())
+            ch.toChar().isLowSurrogate() -> LowSurrogateCharSet(ch.toChar())
             ch.toChar().isHighSurrogate() -> HighSurrogateCharSet(ch.toChar())
             else -> CharSet(ch.toChar(), hasFlag(CASE_INSENSITIVE))
         }
     }
 
     companion object {
-        //TODO: Use RegexOption enum here.
+        // TODO: Use RegexOption enum here.
         // Flags.
         /**
          * This constant specifies that a pattern matches Unix line endings ('\n')
@@ -855,13 +866,12 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
 
         /** A bit mask that includes all defined match flags */
         internal val flagsBitMask = Pattern.UNIX_LINES or
-                Pattern.CASE_INSENSITIVE or
-                Pattern.COMMENTS or
-                Pattern.MULTILINE or
-                Pattern.LITERAL or
-                Pattern.DOTALL or
-                Pattern.CANON_EQ
-
+            Pattern.CASE_INSENSITIVE or
+            Pattern.COMMENTS or
+            Pattern.MULTILINE or
+            Pattern.LITERAL or
+            Pattern.DOTALL or
+            Pattern.CANON_EQ
 
         /**
          * Quotes a given string using "\Q" and "\E", so that all other meta-characters lose their special meaning.
@@ -869,10 +879,9 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
          */
         fun quote(s: String): String {
             return StringBuilder()
-                    .append("\\Q")
-                    .append(s.replace("\\E", "\\E\\\\E\\Q"))
-                    .append("\\E").toString()
+                .append("\\Q")
+                .append(s.replace("\\E", "\\E\\\\E\\Q"))
+                .append("\\E").toString()
         }
     }
 }
-

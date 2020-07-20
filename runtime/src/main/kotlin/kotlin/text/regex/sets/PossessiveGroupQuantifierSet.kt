@@ -26,12 +26,12 @@ package kotlin.text.regex
  * Possessive quantifier set over groups.
  */
 internal class PossessiveGroupQuantifierSet(
-        quantifier: Quantifier,
-        innerSet: AbstractSet,
-        next: AbstractSet,
-        type: Int,
-        setCounter: Int
-): GroupQuantifierSet(quantifier, innerSet, next, type, setCounter) {
+    quantifier: Quantifier,
+    innerSet: AbstractSet,
+    next: AbstractSet,
+    type: Int,
+    setCounter: Int
+) : GroupQuantifierSet(quantifier, innerSet, next, type, setCounter) {
 
     init {
         innerSet.next = FSet.possessiveFSet

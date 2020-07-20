@@ -36,5 +36,5 @@ internal class EOISet : SimpleSet() {
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean = false
     override val name: String
-            get() = "EOI"
+        get() = "EOI"
 }

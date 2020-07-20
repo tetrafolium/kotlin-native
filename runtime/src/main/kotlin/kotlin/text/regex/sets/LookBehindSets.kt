@@ -38,7 +38,7 @@ internal class PositiveLookBehindSet(children: List<AbstractSet>, fSet: FSet) : 
             }
         }
 
-         return -1
+        return -1
     }
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean = true

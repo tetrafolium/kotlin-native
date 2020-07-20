@@ -28,11 +28,11 @@ package kotlin.text.regex
  */
 // TODO: Add optimized implementation for '.+' case
 internal class DotQuantifierSet(
-        innerSet: AbstractSet,
-        next: AbstractSet,
-        type: Int,
-        val lineTerminator: AbstractLineTerminator,
-        val matchLineTerminator: Boolean = false
+    innerSet: AbstractSet,
+    next: AbstractSet,
+    type: Int,
+    val lineTerminator: AbstractLineTerminator,
+    val matchLineTerminator: Boolean = false
 ) : QuantifierSet(innerSet, next, type) {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
@@ -70,9 +70,11 @@ internal class DotQuantifierSet(
             }
 
             // 2. Check if we have other occurrences till the end of line (because .* is greedy and we need the last one).
-            val nextFoundLast = next.findBack(nextFound,
-                    testString.findLineTerminator(nextFound, rightBound),
-                    testString, matchResult)
+            val nextFoundLast = next.findBack(
+                nextFound,
+                testString.findLineTerminator(nextFound, rightBound),
+                testString, matchResult
+            )
             nextFound = maxOf(nextFound, nextFoundLast)
 
             // 3. Find the left boundary of this search.
@@ -99,5 +101,5 @@ internal class DotQuantifierSet(
         (from until to).lastOrNull { lineTerminator.isLineTerminator(testString[it]) } ?: from - 1
 
     override val name: String
-            get() = ".*"
+        get() = ".*"
 }

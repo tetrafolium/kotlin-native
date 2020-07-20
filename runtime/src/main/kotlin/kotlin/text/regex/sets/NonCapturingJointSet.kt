@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * Node representing non-capturing group
  */
-open internal class NonCapturingJointSet(children: List<AbstractSet>, fSet: FSet) : JointSet(children, fSet) {
+internal open class NonCapturingJointSet(children: List<AbstractSet>, fSet: FSet) : JointSet(children, fSet) {
 
     /**
      * Returns startIndex+shift, the next position to match

@@ -5,12 +5,14 @@
 
 package kotlin.native.concurrent
 
-import kotlin.native.internal.*
 import kotlinx.cinterop.*
+import kotlin.native.internal.*
 
-public class Continuation0(block: () -> Unit,
-                    private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
-                    private val singleShot: Boolean = false): Function0<Unit> {
+public class Continuation0(
+    block: () -> Unit,
+    private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
+    private val singleShot: Boolean = false
+) : Function0<Unit> {
 
     private val stable = StableRef.create(block)
 
@@ -18,7 +20,7 @@ public class Continuation0(block: () -> Unit,
         freeze()
     }
 
-    public override operator fun invoke()  {
+    public override operator fun invoke() {
         invoker(stable.asCPointer())
         if (singleShot) {
             stable.dispose()
@@ -32,9 +34,10 @@ public class Continuation0(block: () -> Unit,
 }
 
 public class Continuation1<T1>(
-        block: (p1: T1) -> Unit,
-        private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
-        private val singleShot: Boolean = false) : Function1<T1, Unit> {
+    block: (p1: T1) -> Unit,
+    private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
+    private val singleShot: Boolean = false
+) : Function1<T1, Unit> {
 
     private val stable = StableRef.create(block)
 
@@ -63,9 +66,10 @@ public class Continuation1<T1>(
 }
 
 public class Continuation2<T1, T2>(
-        block: (p1: T1, p2: T2) -> Unit,
-        private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
-        private val singleShot: Boolean = false) : Function2<T1, T2, Unit> {
+    block: (p1: T1, p2: T2) -> Unit,
+    private val invoker: CPointer<CFunction<(COpaquePointer?) -> Unit>>,
+    private val singleShot: Boolean = false
+) : Function2<T1, T2, Unit> {
 
     private val stable = StableRef.create(block)
 

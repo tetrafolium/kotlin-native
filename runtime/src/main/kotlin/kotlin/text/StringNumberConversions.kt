@@ -27,7 +27,7 @@ public actual inline fun Short.toString(radix: Int): String = this.toInt().toStr
 
 @SymbolName("Kotlin_Int_toStringRadix")
 @PublishedApi
-external internal fun intToString(value: Int, radix: Int): String
+internal external fun intToString(value: Int, radix: Int): String
 
 /**
  * Returns a string representation of this [Int] value in the specified [radix].
@@ -40,7 +40,7 @@ public actual inline fun Int.toString(radix: Int): String = intToString(this, ch
 
 @SymbolName("Kotlin_Long_toStringRadix")
 @PublishedApi
-external internal fun longToString(value: Long, radix: Int): String
+internal external fun longToString(value: Long, radix: Int): String
 
 /**
  * Returns a string representation of this [Long] value in the specified [radix].
@@ -128,7 +128,6 @@ public actual inline fun String.toLong(radix: Int): Long = toLongOrNull(radix) ?
  */
 @kotlin.internal.InlineOnly
 public actual inline fun String.toFloat(): Float = FloatingPointParser.parseFloat(this)
-
 
 /**
  * Parses the string as a [Double] number and returns the result.

@@ -106,7 +106,7 @@ internal class TestRunner(val suites: List<TestSuite>, args: Array<String>) {
      */
 
     private fun String.substringEscaped(range: IntRange) =
-            this.substring(range).let { if (it.isNotEmpty()) Regex.escape(it) else "" }
+        this.substring(range).let { if (it.isNotEmpty()) Regex.escape(it) else "" }
 
     private fun String.toGTestPatterns() = splitToSequence(':').map { pattern ->
         val result = StringBuilder()
@@ -136,7 +136,7 @@ internal class TestRunner(val suites: List<TestSuite>, args: Array<String>) {
 
         this.filters.add { testCase ->
             positivePatterns.any { testCase.prettyName.matches(it) } &&
-                    negativePatterns.none { testCase.prettyName.matches(it) }
+                negativePatterns.none { testCase.prettyName.matches(it) }
         }
     }
 
@@ -184,7 +184,8 @@ internal class TestRunner(val suites: List<TestSuite>, args: Array<String>) {
     }
 
     private val help: String
-        get() = """
+        get() =
+            """
             |Available options:
             |--gtest_list_tests
             |--ktest_list_tests                                  - Show all available tests.

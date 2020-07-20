@@ -5,76 +5,83 @@
 
 package kotlin.native.concurrent
 
+import kotlinx.cinterop.*
+import kotlin.native.identityHashCode
 import kotlin.native.internal.DescribeObjectForDebugging
 import kotlin.native.internal.ExportForCppRuntime
 import kotlin.native.internal.debugDescription
-import kotlin.native.identityHashCode
-import kotlin.reflect.KClass
-import kotlinx.cinterop.*
 
 // Implementation details.
 
 @SymbolName("Kotlin_Worker_stateOfFuture")
-external internal fun stateOfFuture(id: Int): Int
+internal external fun stateOfFuture(id: Int): Int
 
 @SymbolName("Kotlin_Worker_consumeFuture")
 @PublishedApi
-external internal fun consumeFuture(id: Int): Any?
+internal external fun consumeFuture(id: Int): Any?
 
 @SymbolName("Kotlin_Worker_waitForAnyFuture")
-external internal fun waitForAnyFuture(versionToken: Int, millis: Int): Boolean
+internal external fun waitForAnyFuture(versionToken: Int, millis: Int): Boolean
 
 @SymbolName("Kotlin_Worker_versionToken")
-external internal fun versionToken(): Int
+internal external fun versionToken(): Int
 
 @kotlin.native.internal.ExportForCompiler
-internal fun executeImpl(worker: Worker, mode: TransferMode, producer: () -> Any?,
-                         job: CPointer<CFunction<*>>): Future<Any?> =
-        Future<Any?>(executeInternal(worker.id, mode.value, producer, job))
+internal fun executeImpl(
+    worker: Worker,
+    mode: TransferMode,
+    producer: () -> Any?,
+    job: CPointer<CFunction<*>>
+): Future<Any?> =
+    Future<Any?>(executeInternal(worker.id, mode.value, producer, job))
 
 @SymbolName("Kotlin_Worker_startInternal")
-external internal fun startInternal(errorReporting: Boolean, name: String?): Int
+internal external fun startInternal(errorReporting: Boolean, name: String?): Int
 
 @SymbolName("Kotlin_Worker_currentInternal")
-external internal fun currentInternal(): Int
+internal external fun currentInternal(): Int
 
 @SymbolName("Kotlin_Worker_requestTerminationWorkerInternal")
-external internal fun requestTerminationInternal(id: Int, processScheduledJobs: Boolean): Int
+internal external fun requestTerminationInternal(id: Int, processScheduledJobs: Boolean): Int
 
 @SymbolName("Kotlin_Worker_executeInternal")
-external internal fun executeInternal(
-        id: Int, mode: Int, producer: () -> Any?, job: CPointer<CFunction<*>>): Int
+internal external fun executeInternal(
+    id: Int,
+    mode: Int,
+    producer: () -> Any?,
+    job: CPointer<CFunction<*>>
+): Int
 
 @SymbolName("Kotlin_Worker_executeAfterInternal")
-external internal fun executeAfterInternal(id: Int, operation: () -> Unit, afterMicroseconds: Long): Unit
+internal external fun executeAfterInternal(id: Int, operation: () -> Unit, afterMicroseconds: Long): Unit
 
 @SymbolName("Kotlin_Worker_processQueueInternal")
-external internal fun processQueueInternal(id: Int): Boolean
+internal external fun processQueueInternal(id: Int): Boolean
 
 @SymbolName("Kotlin_Worker_parkInternal")
-external internal fun parkInternal(id: Int, timeoutMicroseconds: Long, process: Boolean): Boolean
+internal external fun parkInternal(id: Int, timeoutMicroseconds: Long, process: Boolean): Boolean
 
 @SymbolName("Kotlin_Worker_getNameInternal")
-external internal fun getWorkerNameInternal(id: Int): String?
+internal external fun getWorkerNameInternal(id: Int): String?
 
 @ExportForCppRuntime
 internal fun ThrowWorkerUnsupported(): Unit =
-        throw UnsupportedOperationException("Workers are not supported")
+    throw UnsupportedOperationException("Workers are not supported")
 
 @ExportForCppRuntime
 internal fun ThrowWorkerInvalidState(): Unit =
-        throw IllegalStateException("Illegal transfer state")
+    throw IllegalStateException("Illegal transfer state")
 
 @ExportForCppRuntime
 internal fun WorkerLaunchpad(function: () -> Any?) = function()
 
 @PublishedApi
 @SymbolName("Kotlin_Worker_detachObjectGraphInternal")
-external internal fun detachObjectGraphInternal(mode: Int, producer: () -> Any?): NativePtr
+internal external fun detachObjectGraphInternal(mode: Int, producer: () -> Any?): NativePtr
 
 @PublishedApi
 @SymbolName("Kotlin_Worker_attachObjectGraphInternal")
-external internal fun attachObjectGraphInternal(stable: NativePtr): Any?
+internal external fun attachObjectGraphInternal(stable: NativePtr): Any?
 
 @SymbolName("Kotlin_Worker_freezeInternal")
 internal external fun freezeInternal(it: Any?)
@@ -84,7 +91,7 @@ internal external fun isFrozenInternal(it: Any?): Boolean
 
 @ExportForCppRuntime
 internal fun ThrowFreezingException(toFreeze: Any, blocker: Any): Nothing =
-        throw FreezingException(toFreeze, blocker)
+    throw FreezingException(toFreeze, blocker)
 
 @ExportForCppRuntime
 internal fun ThrowInvalidMutabilityException(where: Any): Nothing {
@@ -99,4 +106,4 @@ internal fun ThrowIllegalObjectSharingException(typeInfo: NativePtr, address: Na
 }
 
 @SymbolName("Kotlin_AtomicReference_checkIfFrozen")
-external internal fun checkIfFrozen(ref: Any?)
+internal external fun checkIfFrozen(ref: Any?)

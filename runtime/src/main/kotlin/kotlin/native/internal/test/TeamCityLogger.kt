@@ -10,16 +10,18 @@ import kotlin.text.StringBuilder
 internal class TeamCityLogger : BaseTestLogger() {
 
     private fun String.escapeForTC(): String = StringBuilder(length).apply {
-        for(char in this@escapeForTC) {
-            append(when(char) {
-                '|'  -> "||"
-                '\'' -> "|'"
-                '\n' -> "|n"
-                '\r' -> "|r"
-                '['  -> "|["
-                ']'  -> "|]"
-                else -> char
-            })
+        for (char in this@escapeForTC) {
+            append(
+                when (char) {
+                    '|' -> "||"
+                    '\'' -> "|'"
+                    '\n' -> "|n"
+                    '\r' -> "|r"
+                    '[' -> "|["
+                    ']' -> "|]"
+                    else -> char
+                }
+            )
         }
     }.toString()
 
@@ -30,16 +32,20 @@ internal class TeamCityLogger : BaseTestLogger() {
         get() = name.escapeForTC()
 
     private fun finish(testCase: TestCase, durationMs: Long) =
-            report("testFinished name='${testCase.tcName}' duration='$durationMs'")
+        report("testFinished name='${testCase.tcName}' duration='$durationMs'")
 
     private fun report(msg: String) = println("##teamcity[$msg]")
 
-    override fun start(testCase: TestCase) = report("testStarted" +
+    override fun start(testCase: TestCase) = report(
+        "testStarted" +
             " name='${testCase.tcName}'" +
-            " locationHint='ktest:test://${testCase.suite.tcName}.${testCase.tcName}'")
-    override fun startSuite(suite: TestSuite) = report("testSuiteStarted" +
+            " locationHint='ktest:test://${testCase.suite.tcName}.${testCase.tcName}'"
+    )
+    override fun startSuite(suite: TestSuite) = report(
+        "testSuiteStarted" +
             " name='${suite.tcName}'" +
-            " locationHint='ktest:suite://${suite.tcName}'")
+            " locationHint='ktest:suite://${suite.tcName}'"
+    )
 
     override fun ignoreSuite(suite: TestSuite) {
         startSuite(suite)

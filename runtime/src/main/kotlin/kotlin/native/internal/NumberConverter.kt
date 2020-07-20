@@ -18,8 +18,15 @@
 package kotlin.native.internal
 
 @SymbolName("Kotlin_native_NumberConverter_bigIntDigitGeneratorInstImpl")
-private external fun bigIntDigitGeneratorInstImpl(results: IntArray, uArray: IntArray, f: Long, e: Int,
-                                                  isDenormalized: Boolean, mantissaIsZero: Boolean, p: Int)
+private external fun bigIntDigitGeneratorInstImpl(
+    results: IntArray,
+    uArray: IntArray,
+    f: Long,
+    e: Int,
+    isDenormalized: Boolean,
+    mantissaIsZero: Boolean,
+    p: Int
+)
 
 @SymbolName("Kotlin_native_NumberConverter_ceil")
 private external fun ceil(x: Double): Double
@@ -83,8 +90,9 @@ class NumberConverter {
         else
             bigIntDigitGeneratorInstImpl(f, pow, e == 0, mantissaIsZero, numBits)
 
-        if (inputNumber >= 1e7 || inputNumber <= -1e7
-                || inputNumber > -1e-3 && inputNumber < 1e-3)
+        if (inputNumber >= 1e7 || inputNumber <= -1e7 ||
+            inputNumber > -1e-3 && inputNumber < 1e-3
+        )
             return signString + freeFormatExponential()
 
         return signString + freeFormat()
@@ -134,8 +142,9 @@ class NumberConverter {
             longDigitGenerator(f.toLong(), pow, e == 0, mantissaIsZero, numBits)
         else
             bigIntDigitGeneratorInstImpl(f.toLong(), pow, e == 0, mantissaIsZero, numBits)
-        if (inputNumber >= 1e7f || inputNumber <= -1e7f
-                || inputNumber > -1e-3f && inputNumber < 1e-3f)
+        if (inputNumber >= 1e7f || inputNumber <= -1e7f ||
+            inputNumber > -1e-3f && inputNumber < 1e-3f
+        )
             return signString + freeFormatExponential()
 
         return signString + freeFormat()
@@ -175,7 +184,7 @@ class NumberConverter {
             formattedDecimal[0] = '0'
             formattedDecimal[1] = '.'
             charPos += 2
-            for (i in k + 1 .. -1)
+            for (i in k + 1..-1)
                 formattedDecimal[charPos++] = '0'
         }
 
@@ -195,17 +204,27 @@ class NumberConverter {
         return unsafeStringFromCharArray(formattedDecimal, 0, charPos)
     }
 
-    private fun bigIntDigitGeneratorInstImpl(f: Long, e: Int,
-                                             isDenormalized: Boolean, mantissaIsZero: Boolean, p: Int) {
+    private fun bigIntDigitGeneratorInstImpl(
+        f: Long,
+        e: Int,
+        isDenormalized: Boolean,
+        mantissaIsZero: Boolean,
+        p: Int
+    ) {
         val results = IntArray(3)
         bigIntDigitGeneratorInstImpl(results, uArray, f, e, isDenormalized, mantissaIsZero, p)
         setCount = results[0]
         getCount = results[1]
-        firstK   = results[2]
+        firstK = results[2]
     }
 
-    private fun longDigitGenerator(f: Long, e: Int, isDenormalized: Boolean,
-                                   mantissaIsZero: Boolean, p: Int) {
+    private fun longDigitGenerator(
+        f: Long,
+        e: Int,
+        isDenormalized: Boolean,
+        mantissaIsZero: Boolean,
+        p: Int
+    ) {
         var r: Long
         var s: Long
         var m: Long

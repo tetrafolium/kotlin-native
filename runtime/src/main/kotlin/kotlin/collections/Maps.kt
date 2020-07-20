@@ -21,15 +21,13 @@ internal actual inline fun <K, V> buildMapInternal(capacity: Int, builderAction:
     return HashMap<K, V>(capacity).apply(builderAction).build()
 }
 
-
 // creates a singleton copy of map, if there is specialization available in target platform, otherwise returns itself
 @Suppress("NOTHING_TO_INLINE")
-internal inline actual fun <K, V> Map<K, V>.toSingletonMapOrSelf(): Map<K, V> = toSingletonMap()
+internal actual inline fun <K, V> Map<K, V>.toSingletonMapOrSelf(): Map<K, V> = toSingletonMap()
 
 // creates a singleton copy of map
-internal actual fun <K, V> Map<out K, V>.toSingletonMap(): Map<K, V>
-        = with(entries.iterator().next()) { mutableMapOf(key to value) }
-
+internal actual fun <K, V> Map<out K, V>.toSingletonMap(): Map<K, V> =
+    with(entries.iterator().next()) { mutableMapOf(key to value) }
 
 /**
  * Native map and set implementations do not make use of capacities or load factors.

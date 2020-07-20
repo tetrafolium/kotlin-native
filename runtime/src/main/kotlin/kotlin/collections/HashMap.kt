@@ -8,17 +8,17 @@ package kotlin.collections
 import kotlin.native.concurrent.isFrozen
 
 actual class HashMap<K, V> private constructor(
-        private var keysArray: Array<K>,
-        private var valuesArray: Array<V>?, // allocated only when actually used, always null in pure HashSet
-        private var presenceArray: IntArray,
-        private var hashArray: IntArray,
-        private var maxProbeDistance: Int,
-        private var length: Int
+    private var keysArray: Array<K>,
+    private var valuesArray: Array<V>?, // allocated only when actually used, always null in pure HashSet
+    private var presenceArray: IntArray,
+    private var hashArray: IntArray,
+    private var maxProbeDistance: Int,
+    private var length: Int
 ) : MutableMap<K, V> {
     private var hashShift: Int = computeShift(hashSize)
 
     private var _size: Int = 0
-    override actual val size: Int
+    actual override val size: Int
         get() = _size
 
     private var keysView: HashMapKeys<K>? = null
@@ -32,12 +32,13 @@ actual class HashMap<K, V> private constructor(
     actual constructor() : this(INITIAL_CAPACITY)
 
     actual constructor(initialCapacity: Int) : this(
-            arrayOfUninitializedElements(initialCapacity),
-            null,
-            IntArray(initialCapacity),
-            IntArray(computeHashSize(initialCapacity)),
-            INITIAL_MAX_PROBE_DISTANCE,
-            0)
+        arrayOfUninitializedElements(initialCapacity),
+        null,
+        IntArray(initialCapacity),
+        IntArray(computeHashSize(initialCapacity)),
+        INITIAL_MAX_PROBE_DISTANCE,
+        0
+    )
 
     actual constructor(original: Map<out K, V>) : this(original.size) {
         putAll(original)
@@ -53,17 +54,17 @@ actual class HashMap<K, V> private constructor(
         return this
     }
 
-    override actual fun isEmpty(): Boolean = _size == 0
-    override actual fun containsKey(key: K): Boolean = findKey(key) >= 0
-    override actual fun containsValue(value: V): Boolean = findValue(value) >= 0
+    actual override fun isEmpty(): Boolean = _size == 0
+    actual override fun containsKey(key: K): Boolean = findKey(key) >= 0
+    actual override fun containsValue(value: V): Boolean = findValue(value) >= 0
 
-    override actual operator fun get(key: K): V? {
+    actual override operator fun get(key: K): V? {
         val index = findKey(key)
         if (index < 0) return null
         return valuesArray!![index]
     }
 
-    override actual fun put(key: K, value: V): V? {
+    actual override fun put(key: K, value: V): V? {
         checkIsMutable()
         val index = addKey(key)
         val valuesArray = allocateValuesArray()
@@ -77,13 +78,13 @@ actual class HashMap<K, V> private constructor(
         }
     }
 
-    override actual fun putAll(from: Map<out K, V>) {
+    actual override fun putAll(from: Map<out K, V>) {
         checkIsMutable()
         putAllEntries(from.entries)
     }
 
-    override actual fun remove(key: K): V? {
-        val index = removeKey(key)  // mutability gets checked here
+    actual override fun remove(key: K): V? {
+        val index = removeKey(key) // mutability gets checked here
         if (index < 0) return null
         val valuesArray = valuesArray!!
         val oldValue = valuesArray[index]
@@ -91,7 +92,7 @@ actual class HashMap<K, V> private constructor(
         return oldValue
     }
 
-    override actual fun clear() {
+    actual override fun clear() {
         checkIsMutable()
         // O(length) implementation for hashArray cleanup
         for (i in 0..length - 1) {
@@ -107,7 +108,7 @@ actual class HashMap<K, V> private constructor(
         length = 0
     }
 
-    override actual val keys: MutableSet<K> get() {
+    actual override val keys: MutableSet<K> get() {
         val cur = keysView
         return if (cur == null) {
             val new = HashMapKeys(this)
@@ -117,7 +118,7 @@ actual class HashMap<K, V> private constructor(
         } else cur
     }
 
-    override actual val values: MutableCollection<V> get() {
+    actual override val values: MutableCollection<V> get() {
         val cur = valuesView
         return if (cur == null) {
             val new = HashMapValues(this)
@@ -127,7 +128,7 @@ actual class HashMap<K, V> private constructor(
         } else cur
     }
 
-    override actual val entries: MutableSet<MutableMap.MutableEntry<K, V>> get() {
+    actual override val entries: MutableSet<MutableMap.MutableEntry<K, V>> get() {
         val cur = entriesView
         return if (cur == null) {
             val new = HashMapEntrySet(this)
@@ -139,8 +140,8 @@ actual class HashMap<K, V> private constructor(
 
     override fun equals(other: Any?): Boolean {
         return other === this ||
-                (other is Map<*, *>) &&
-                contentEquals(other)
+            (other is Map<*, *>) &&
+            contentEquals(other)
     }
 
     override fun hashCode(): Int {
@@ -219,7 +220,7 @@ actual class HashMap<K, V> private constructor(
         keysArray.resetRange(j, length)
         valuesArray?.resetRange(j, length)
         length = j
-        //check(length == size) { "Internal invariant violated during compact: length=$length != size=$size" }
+        // check(length == size) { "Internal invariant violated during compact: length=$length != size=$size" }
     }
 
     private fun rehash(newHashSize: Int) {
@@ -233,8 +234,10 @@ actual class HashMap<K, V> private constructor(
         var i = 0
         while (i < length) {
             if (!putRehash(i++)) {
-                throw IllegalStateException("This cannot happen with fixed magic multiplier and grow-only hash array. " +
-                        "Have object hashCodes changed?")
+                throw IllegalStateException(
+                    "This cannot happen with fixed magic multiplier and grow-only hash array. " +
+                        "Have object hashCodes changed?"
+                )
             }
         }
     }
@@ -478,7 +481,7 @@ actual class HashMap<K, V> private constructor(
     }
 
     internal open class Itr<K, V>(
-            internal val map: HashMap<K, V>
+        internal val map: HashMap<K, V>
     ) {
         internal var index = 0
         internal var lastIndex: Int = -1
@@ -509,7 +512,6 @@ actual class HashMap<K, V> private constructor(
             initNext()
             return result
         }
-
     }
 
     internal class ValuesItr<K, V>(map: HashMap<K, V>) : Itr<K, V>(map), MutableIterator<V> {
@@ -522,8 +524,9 @@ actual class HashMap<K, V> private constructor(
         }
     }
 
-    internal class EntriesItr<K, V>(map: HashMap<K, V>) : Itr<K, V>(map),
-            MutableIterator<MutableMap.MutableEntry<K, V>> {
+    internal class EntriesItr<K, V>(map: HashMap<K, V>) :
+        Itr<K, V>(map),
+        MutableIterator<MutableMap.MutableEntry<K, V>> {
         override fun next(): EntryRef<K, V> {
             if (index >= map.length) throw NoSuchElementException()
             lastIndex = index++
@@ -553,8 +556,8 @@ actual class HashMap<K, V> private constructor(
     }
 
     internal class EntryRef<K, V>(
-            private val map: HashMap<K, V>,
-            private val index: Int
+        private val map: HashMap<K, V>,
+        private val index: Int
     ) : MutableMap.MutableEntry<K, V> {
         override val key: K
             get() = map.keysArray[index]
@@ -571,9 +574,9 @@ actual class HashMap<K, V> private constructor(
         }
 
         override fun equals(other: Any?): Boolean =
-                other is Map.Entry<*, *> &&
-                        other.key == key &&
-                        other.value == value
+            other is Map.Entry<*, *> &&
+                other.key == key &&
+                other.value == value
 
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
 
@@ -582,7 +585,7 @@ actual class HashMap<K, V> private constructor(
 }
 
 internal class HashMapKeys<E> internal constructor(
-        private val backing: HashMap<E, *>
+    private val backing: HashMap<E, *>
 ) : MutableSet<E>, kotlin.native.internal.KonanSet<E>, AbstractMutableSet<E>() {
 
     override val size: Int get() = backing.size
@@ -607,7 +610,7 @@ internal class HashMapKeys<E> internal constructor(
 }
 
 internal class HashMapValues<V> internal constructor(
-        val backing: HashMap<*, V>
+    val backing: HashMap<*, V>
 ) : MutableCollection<V>, AbstractMutableCollection<V>() {
 
     override val size: Int get() = backing.size
@@ -631,7 +634,7 @@ internal class HashMapValues<V> internal constructor(
 }
 
 internal class HashMapEntrySet<K, V> internal constructor(
-        val backing: HashMap<K, V>
+    val backing: HashMap<K, V>
 ) : MutableSet<MutableMap.MutableEntry<K, V>>, kotlin.native.internal.KonanSet<MutableMap.MutableEntry<K, V>>, AbstractMutableSet<MutableMap.MutableEntry<K, V>>() {
 
     override val size: Int get() = backing.size

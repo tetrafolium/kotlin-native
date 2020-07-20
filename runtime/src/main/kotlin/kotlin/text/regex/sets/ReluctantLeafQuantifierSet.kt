@@ -30,10 +30,10 @@ package kotlin.text.regex
  *  - a+? == a{1, <inf>}?;
  */
 internal class ReluctantLeafQuantifierSet(
-        quant: Quantifier,
-        innerSet: LeafSet,
-        next: AbstractSet,
-        type: Int
+    quant: Quantifier,
+    innerSet: LeafSet,
+    next: AbstractSet,
+    type: Int
 ) : LeafQuantifierSet(quant, innerSet, next, type) {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
@@ -64,7 +64,6 @@ internal class ReluctantLeafQuantifierSet(
                 index += shift
                 occurrences++
             }
-
         } while (shift >= 1 && (max == Quantifier.INF || occurrences <= max))
 
         return -1

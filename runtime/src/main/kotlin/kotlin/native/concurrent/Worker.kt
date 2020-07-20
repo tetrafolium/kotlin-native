@@ -5,12 +5,10 @@
 
 package kotlin.native.concurrent
 
-import kotlin.native.internal.ExportForCppRuntime
-import kotlin.native.internal.Frozen
-import kotlin.native.internal.VolatileLambda
+import kotlinx.cinterop.*
 import kotlin.native.internal.IntrinsicType
 import kotlin.native.internal.TypedIntrinsic
-import kotlinx.cinterop.*
+import kotlin.native.internal.VolatileLambda
 
 /**
  *  ## Workers: theory of operations.
@@ -38,8 +36,8 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
          * @param name defines the optional name of this worker, if none - default naming is used.
          * @return worker object, usable across multiple concurrent contexts.
          */
-        public fun start(errorReporting: Boolean = true, name: String? = null): Worker
-                = Worker(startInternal(errorReporting, name))
+        public fun start(errorReporting: Boolean = true, name: String? = null): Worker =
+            Worker(startInternal(errorReporting, name))
 
         /**
          * Return the current worker. Worker context is accessible to any valid Kotlin context,
@@ -58,7 +56,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
          */
         @Deprecated("Use kotlinx.cinterop.StableRef instead", level = DeprecationLevel.WARNING)
         public fun fromCPointer(pointer: COpaquePointer?): Worker =
-                if (pointer != null) Worker(pointer.toLong().toInt()) else throw IllegalArgumentException()
+            if (pointer != null) Worker(pointer.toLong().toInt()) else throw IllegalArgumentException()
     }
 
     /**
@@ -69,7 +67,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
      * is awaited for.
      */
     public fun requestTermination(processScheduledJobs: Boolean = true): Future<Unit> =
-            Future<Unit>(requestTerminationInternal(id, processScheduledJobs))
+        Future<Unit>(requestTerminationInternal(id, processScheduledJobs))
 
     /**
      * Plan job for further execution in the worker. Execute is a two-phase operation:
@@ -94,7 +92,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
              *   executeImpl(worker, mode, producer, job)
              * but first ensuring that `job` parameter  doesn't capture any state.
              */
-            throw RuntimeException("Shall not be called directly")
+        throw RuntimeException("Shall not be called directly")
 
     /**
      * Plan job for further execution in the worker. [operation] parameter must be either frozen, or execution to be
@@ -104,7 +102,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
      * @throws [IllegalArgumentException] on negative values of [afterMicroseconds].
      * @throws [IllegalStateException] if [operation] parameter is not frozen and worker is not current.
      */
-    public fun executeAfter(afterMicroseconds: Long = 0, operation: () -> Unit): Unit {
+    public fun executeAfter(afterMicroseconds: Long = 0, operation: () -> Unit) {
         val current = currentInternal()
         if (current != id && !operation.isFrozen) throw IllegalStateException("Job for another worker must be frozen")
         if (afterMicroseconds < 0) throw IllegalArgumentException("Timeout parameter must be non-negative")
@@ -153,7 +151,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
     /**
      * String representation of the worker.
      */
-    override public fun toString(): String = "Worker $name"
+    public override fun toString(): String = "Worker $name"
 
     /**
      * Convert worker to a COpaquePointer value that could be passed via native void* pointer.
@@ -166,7 +164,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
      * @return worker identifier as C pointer.
      */
     @Deprecated("Use kotlinx.cinterop.StableRef instead", level = DeprecationLevel.WARNING)
-    public fun asCPointer() : COpaquePointer? = id.toLong().toCPointer()
+    public fun asCPointer(): COpaquePointer? = id.toLong().toCPointer()
 }
 
 /**

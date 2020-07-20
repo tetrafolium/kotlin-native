@@ -53,13 +53,13 @@ internal abstract class WeakReferenceImpl {
 
 // Get a counter from non-null object.
 @SymbolName("Konan_getWeakReferenceImpl")
-external internal fun getWeakReferenceImpl(referent: Any): WeakReferenceImpl
+internal external fun getWeakReferenceImpl(referent: Any): WeakReferenceImpl
 
 // Create a counter object.
 @ExportForCppRuntime
 internal fun makeWeakReferenceCounter(referred: COpaquePointer) = WeakReferenceCounter(referred)
 
-internal class PermanentWeakReferenceImpl(val referred: Any): kotlin.native.ref.WeakReferenceImpl() {
+internal class PermanentWeakReferenceImpl(val referred: Any) : kotlin.native.ref.WeakReferenceImpl() {
     override fun get(): Any? = referred
 }
 

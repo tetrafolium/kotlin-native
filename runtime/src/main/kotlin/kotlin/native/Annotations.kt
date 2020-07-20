@@ -5,8 +5,6 @@
 
 package kotlin.native
 
-import kotlin.reflect.KClass
-
 /**
  * Forces the compiler to use specified symbol name for the target `external` function.
  *
@@ -31,7 +29,6 @@ public annotation class Retain
 @Retention(AnnotationRetention.BINARY)
 public annotation class RetainForTarget(val target: String)
 
-
 /** @suppress */
 @Deprecated("Use common kotlin.Throws annotation instead.", ReplaceWith("kotlin.Throws"), DeprecationLevel.WARNING)
 public typealias Throws = kotlin.Throws
@@ -51,4 +48,3 @@ public typealias SharedImmutable = kotlin.native.concurrent.SharedImmutable
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 public annotation class CName(val externName: String = "", val shortName: String = "")
-

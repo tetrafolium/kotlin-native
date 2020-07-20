@@ -38,6 +38,3 @@ internal class PreviousMatchSet : SimpleSet() {
     override val name: String
         get() = "PreviousMatchSet"
 }
-
-
-

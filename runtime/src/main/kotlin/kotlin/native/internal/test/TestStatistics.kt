@@ -17,10 +17,10 @@ internal interface TestStatistics {
     val hasFailedTests: Boolean
 }
 
-internal class MutableTestStatistics: TestStatistics {
+internal class MutableTestStatistics : TestStatistics {
 
-    override var total:   Int = 0; private set
-    override var passed:  Int = 0; private set
+    override var total: Int = 0; private set
+    override var passed: Int = 0; private set
     override var ignored: Int = 0; private set
 
     override var totalSuites: Int = 0; private set

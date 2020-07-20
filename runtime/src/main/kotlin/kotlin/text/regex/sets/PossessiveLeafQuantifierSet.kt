@@ -30,9 +30,10 @@ package kotlin.text.regex
  *  - a++ == a{1, <inf>}+;
  */
 internal class PossessiveLeafQuantifierSet(
-        quant: Quantifier,
-        innerSet: LeafSet,
-        next: AbstractSet, type: Int
+    quant: Quantifier,
+    innerSet: LeafSet,
+    next: AbstractSet,
+    type: Int
 ) : LeafQuantifierSet(quant, innerSet, next, type) {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {

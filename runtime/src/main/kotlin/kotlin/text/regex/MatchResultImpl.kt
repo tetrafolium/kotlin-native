@@ -32,8 +32,10 @@ internal class MatchResultImpl
  *  @param regex a [Regex] instance used for matching/searching.
  *  @param rightBound index in the [input] used as a right bound for matching/searching. Exclusive.
  */
-constructor (internal val input: CharSequence,
-             internal val regex: Regex) : MatchResult {
+constructor (
+    internal val input: CharSequence,
+    internal val regex: Regex
+) : MatchResult {
 
     // Harmony's implementation ========================================================================================
     private val nativePattern = regex.nativePattern
@@ -43,10 +45,10 @@ constructor (internal val input: CharSequence,
     private val consumers = IntArray(nativePattern.consumersCount + 1) { -1 }
 
     // Used by quantifiers to store a count of a quantified expression occurrences.
-    val enterCounters: IntArray = IntArray( maxOf(nativePattern.groupQuantifierCount, 0) )
+    val enterCounters: IntArray = IntArray(maxOf(nativePattern.groupQuantifierCount, 0))
 
     var startIndex: Int = 0
-        set (startIndex: Int) {
+        set(startIndex: Int) {
             field = startIndex
             if (previousMatch < 0) {
                 previousMatch = startIndex
@@ -72,13 +74,12 @@ constructor (internal val input: CharSequence,
      * Groups are indexed from 1 to `groupCount` and group with the index 0 corresponds to the entire match.
      */
     // Create one object or several ones?
-    override val groups: MatchGroupCollection = object: MatchGroupCollection, AbstractCollection<MatchGroup?>() {
+    override val groups: MatchGroupCollection = object : MatchGroupCollection, AbstractCollection<MatchGroup?>() {
         override val size: Int
             get() = this@MatchResultImpl.groupCount
 
-
         override fun iterator(): Iterator<MatchGroup?> {
-            return object: Iterator<MatchGroup?> {
+            return object : Iterator<MatchGroup?> {
                 var nextIndex: Int = 0
 
                 override fun hasNext(): Boolean {
@@ -130,7 +131,6 @@ constructor (internal val input: CharSequence,
         return regex.find(input, nextStart)
     }
     // =================================================================================================================
-
 
     // Harmony's implementation ========================================================================================
     fun setConsumed(counter: Int, value: Int) {
@@ -228,4 +228,3 @@ constructor (internal val input: CharSequence,
         groupBounds[index * 2 + 1] = endOffset
     }
 }
-

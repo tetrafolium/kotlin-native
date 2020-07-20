@@ -92,7 +92,6 @@ object GC {
         get() = getTuneThreshold()
         set(value) = setTuneThreshold(value)
 
-
     /**
      * If cyclic collector for atomic references to be deployed.
      */

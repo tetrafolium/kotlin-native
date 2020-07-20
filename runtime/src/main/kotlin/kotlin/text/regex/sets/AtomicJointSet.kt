@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * This class represent atomic group (?>X), once X matches, this match become unchangeable till the end of the match.
  */
-open internal class AtomicJointSet(children: List<AbstractSet>, fSet: FSet) : NonCapturingJointSet(children, fSet) {
+internal open class AtomicJointSet(children: List<AbstractSet>, fSet: FSet) : NonCapturingJointSet(children, fSet) {
 
     /** Returns startIndex+shift, the next position to match */
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {

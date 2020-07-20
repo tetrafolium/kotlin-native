@@ -25,8 +25,8 @@ package kotlin.text.regex
 /**
  * Node accepting any character except line terminators.
  */
-internal class DotSet(val lt: AbstractLineTerminator, val matchLineTerminator: Boolean)
-    : SimpleSet(AbstractSet.TYPE_DOTSET) {
+internal class DotSet(val lt: AbstractLineTerminator, val matchLineTerminator: Boolean) :
+    SimpleSet(AbstractSet.TYPE_DOTSET) {
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
         val rightBound = testString.length

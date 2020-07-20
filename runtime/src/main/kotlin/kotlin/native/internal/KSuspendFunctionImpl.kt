@@ -5,15 +5,17 @@
 
 package kotlin.native.internal
 
-import kotlin.reflect.KType
 import kotlin.reflect.KFunction
+import kotlin.reflect.KType
 
 @FixmeReflection
 internal abstract class KSuspendFunctionImpl<out R>(
-        override val name: String, val fqName: String,
-        val bound: Boolean, val receiver: Any?,
-        override val returnType: KType
-): KFunction<R> {
+    override val name: String,
+    val fqName: String,
+    val bound: Boolean,
+    val receiver: Any?,
+    override val returnType: KType
+) : KFunction<R> {
 
     override fun equals(other: Any?): Boolean {
         if (other !is KSuspendFunctionImpl<*>) return false

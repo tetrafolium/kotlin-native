@@ -5,10 +5,6 @@
 
 package kotlin.native.internal
 
-import kotlin.native.internal.ExportForCppRuntime
-import kotlin.native.internal.KonanSet
-import kotlin.native.internal.ReportUnhandledException
-
 /**
  * This interface denotes the object to be a wrapper for the Objective-C object,
  * so the latter should be used to observe object lifetime.
@@ -94,10 +90,10 @@ internal class NSDictionaryAsKMap : Map<Any?, Any?>, ObjCObjectWrapper {
     override fun isEmpty(): Boolean = (size == 0)
 
     @SymbolName("Kotlin_NSDictionaryAsKMap_containsKey")
-    override external fun containsKey(key: Any?): Boolean
+    external override fun containsKey(key: Any?): Boolean
 
     @SymbolName("Kotlin_NSDictionaryAsKMap_containsValue")
-    override external fun containsValue(value: Any?): Boolean
+    external override fun containsValue(value: Any?): Boolean
 
     @SymbolName("Kotlin_NSDictionaryAsKMap_get")
     external override operator fun get(key: Any?): Any?
@@ -153,9 +149,9 @@ internal class NSDictionaryAsKMap : Map<Any?, Any?>, ObjCObjectWrapper {
 
     private class Entry(override val key: Any?, override val value: Any?) : Map.Entry<Any?, Any?> {
         override fun equals(other: Any?): Boolean =
-                other is Map.Entry<*, *> &&
-                        other.key == key &&
-                        other.value == value
+            other is Map.Entry<*, *> &&
+                other.key == key &&
+                other.value == value
 
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
 
@@ -174,13 +170,12 @@ internal class NSDictionaryAsKMap : Map<Any?, Any?>, ObjCObjectWrapper {
             return Entry(nextKey, nextValue)
         }
     }
-
 }
 
 internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {
 
     @SymbolName("Kotlin_NSEnumeratorAsKIterator_computeNext")
-    override external fun computeNext()
+    external override fun computeNext()
 
     @ExportForCppRuntime
     private fun Kotlin_NSEnumeratorAsKIterator_done() = this.done()
@@ -214,7 +209,8 @@ internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {
 }
 
 @ExportForCppRuntime private fun Kotlin_MutableCollection_removeObject(
-        collection: MutableCollection<Any?>, element: Any?
+    collection: MutableCollection<Any?>,
+    element: Any?
 ) {
     collection.remove(element)
 }
@@ -225,17 +221,17 @@ internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {
 @ExportForCppRuntime private fun Kotlin_Set_contains(set: Set<Any?>, element: Any?): Boolean = set.contains(element)
 
 @ExportForCppRuntime private fun Kotlin_Set_getElement(set: Set<Any?>, element: Any?): Any? =
-        if (set is KonanSet<Any?>) {
-            set.getElement(element)
-        } else if (set.contains(element)) {
-            set.first { it == element }
-        } else {
-            null
-        }
+    if (set is KonanSet<Any?>) {
+        set.getElement(element)
+    } else if (set.contains(element)) {
+        set.first { it == element }
+    } else {
+        null
+    }
 
 @ExportForCppRuntime private fun Kotlin_Set_iterator(set: Set<Any?>): Iterator<Any?> = set.iterator()
 @ExportForCppRuntime private fun Kotlin_MutableSet_createWithCapacity(capacity: Int): MutableSet<Any?> =
-        HashSet<Any?>(capacity)
+    HashSet<Any?>(capacity)
 
 @ExportForCppRuntime private fun Kotlin_Map_getSize(map: Map<Any?, Any?>): Int = map.size
 @ExportForCppRuntime private fun Kotlin_Map_containsKey(map: Map<Any?, Any?>, key: Any?): Boolean = map.containsKey(key)
@@ -243,7 +239,7 @@ internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {
 @ExportForCppRuntime private fun Kotlin_Map_keyIterator(map: Map<Any?, Any?>): Iterator<Any?> = map.keys.iterator()
 
 @ExportForCppRuntime private fun Kotlin_MutableMap_createWithCapacity(capacity: Int): MutableMap<Any?, Any?> =
-        HashMap<Any?, Any?>(capacity)
+    HashMap<Any?, Any?>(capacity)
 
 @ExportForCppRuntime private fun Kotlin_MutableMap_set(map: MutableMap<Any?, Any?>, key: Any?, value: Any?) {
     map.set(key, value)
@@ -267,13 +263,13 @@ internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {
 @ExportForCppRuntime private fun Kotlin_NSDictionaryAsKMap_create() = NSDictionaryAsKMap()
 
 @ExportForCppRuntime private fun Kotlin_ObjCExport_NSErrorAsExceptionImpl(
-        message: String?,
-        error: Any
+    message: String?,
+    error: Any
 ) = ObjCErrorException(message, error)
 
 class ObjCErrorException(
-        message: String?,
-        internal val error: Any
+    message: String?,
+    internal val error: Any
 ) : Exception(message) {
     override fun toString(): String = "NSError-based exception: $message"
 }
@@ -288,7 +284,7 @@ private fun Kotlin_Throwable_getMessage(throwable: Throwable): String? = throwab
 
 @ExportForCppRuntime
 private fun Kotlin_ObjCExport_getWrappedError(throwable: Throwable): Any? =
-        (throwable as? ObjCErrorException)?.error
+    (throwable as? ObjCErrorException)?.error
 
 @ExportTypeInfo("theOpaqueFunctionTypeInfo")
 @PublishedApi

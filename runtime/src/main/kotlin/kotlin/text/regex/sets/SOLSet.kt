@@ -35,9 +35,12 @@ internal class SOLSet(val lt: AbstractLineTerminator, val multiline: Boolean = f
                 return next.matches(startIndex, testString, matchResult)
             }
         } else {
-            if (startIndex != testString.length
-                && (startIndex == 0
-                    || lt.isAfterLineTerminator(testString[startIndex - 1], testString[startIndex]))) {
+            if (startIndex != testString.length &&
+                (
+                    startIndex == 0 ||
+                        lt.isAfterLineTerminator(testString[startIndex - 1], testString[startIndex])
+                    )
+            ) {
                 return next.matches(startIndex, testString, matchResult)
             }
         }

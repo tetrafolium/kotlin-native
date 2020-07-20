@@ -58,8 +58,8 @@ public class DetachedObjectGraph<T> internal constructor(pointer: NativePtr) {
      * ([TransferMode.SAFE] by default).
      * Raw value returned by [asCPointer] could be stored to a C variable or passed to another Kotlin machine.
      */
-    public constructor(mode: TransferMode = TransferMode.SAFE, producer: () -> T)
-        : this(detachObjectGraphInternal(mode.value, producer as () -> Any?))
+    public constructor(mode: TransferMode = TransferMode.SAFE, producer: () -> T) :
+        this(detachObjectGraphInternal(mode.value, producer as () -> Any?))
 
     /**
      * Restores detached object graph from the value stored earlier in a C raw pointer.

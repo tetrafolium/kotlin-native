@@ -5,16 +5,16 @@
 
 package kotlin.native.internal.test
 
-import kotlin.system.exitProcess
 import kotlin.native.concurrent.*
+import kotlin.system.exitProcess
 
 @ThreadLocal
 private object GeneratedSuites {
-   val suites = mutableListOf<TestSuite>()
-   fun add(suite: TestSuite) = suites.add(suite)
+    val suites = mutableListOf<TestSuite>()
+    fun add(suite: TestSuite) = suites.add(suite)
 }
 
-public fun registerSuite(suite: TestSuite): Unit {
+public fun registerSuite(suite: TestSuite) {
     GeneratedSuites.add(suite)
 }
 
@@ -29,7 +29,8 @@ fun main(args: Array<String>) {
 fun worker(args: Array<String>) {
     val worker = Worker.start()
     val result = worker.execute(TransferMode.SAFE, { args.freeze() }) {
-        it -> testLauncherEntryPoint(it)
+        it ->
+        testLauncherEntryPoint(it)
     }.result
     worker.requestTermination().result
     exitProcess(result)

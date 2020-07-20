@@ -6,8 +6,6 @@
 package kotlin.native.internal.test
 
 import kotlin.IllegalArgumentException
-import kotlin.system.getTimeMillis
-import kotlin.system.measureTimeMillis
 
 public interface TestCase {
     val name: String
@@ -23,7 +21,7 @@ public interface TestSuite {
     val name: String
     val ignored: Boolean
     val testCases: Map<String, TestCase>
-    val size : Int
+    val size: Int
 
     fun doBeforeClass()
     fun doAfterClass()
@@ -36,16 +34,16 @@ public enum class TestFunctionKind {
     AFTER_CLASS
 }
 
-public abstract class AbstractTestSuite<F: Function<Unit>>(override val name: String, override val ignored: Boolean)
-    : TestSuite {
+public abstract class AbstractTestSuite<F : Function<Unit>>(override val name: String, override val ignored: Boolean) :
+    TestSuite {
     override fun toString(): String = name
 
     // TODO: Make inner and remove the type param when the bug is fixed.
-    abstract class BasicTestCase<F: Function<Unit>>(
-            override val name: String,
-            override val suite: AbstractTestSuite<F>,
-            val testFunction: F,
-            override val ignored: Boolean
+    abstract class BasicTestCase<F : Function<Unit>>(
+        override val name: String,
+        override val suite: AbstractTestSuite<F>,
+        val testFunction: F,
+        override val ignored: Boolean
     ) : TestCase {
         override fun toString(): String = "$name ($suite)"
     }
@@ -57,9 +55,9 @@ public abstract class AbstractTestSuite<F: Function<Unit>>(override val name: St
     private fun registerTestCase(testCase: BasicTestCase<F>) = _testCases.put(testCase.name, testCase)
 
     fun registerTestCase(name: String, testFunction: F, ignored: Boolean) =
-            registerTestCase(createTestCase(name, testFunction, ignored))
+        registerTestCase(createTestCase(name, testFunction, ignored))
 
-    abstract fun createTestCase(name: String, testFunction: F, ignored: Boolean):  BasicTestCase<F>
+    abstract fun createTestCase(name: String, testFunction: F, ignored: Boolean): BasicTestCase<F>
 
     init {
         registerSuite(this)
@@ -69,14 +67,16 @@ public abstract class AbstractTestSuite<F: Function<Unit>>(override val name: St
         get() = testCases.size
 }
 
-public abstract class BaseClassSuite<INSTANCE, COMPANION>(name: String, ignored: Boolean)
-    : AbstractTestSuite<INSTANCE.() -> Unit>(name, ignored) {
+public abstract class BaseClassSuite<INSTANCE, COMPANION>(name: String, ignored: Boolean) :
+    AbstractTestSuite<INSTANCE.() -> Unit>(name, ignored) {
 
-    class TestCase<INSTANCE, COMPANION>(name: String,
-                                        override val suite: BaseClassSuite<INSTANCE, COMPANION>,
-                                        testFunction: INSTANCE.() -> Unit,
-                                        ignored: Boolean)
-        : BasicTestCase<INSTANCE.() -> Unit>(name, suite, testFunction, ignored) {
+    class TestCase<INSTANCE, COMPANION>(
+        name: String,
+        override val suite: BaseClassSuite<INSTANCE, COMPANION>,
+        testFunction: INSTANCE.() -> Unit,
+        ignored: Boolean
+    ) :
+        BasicTestCase<INSTANCE.() -> Unit>(name, suite, testFunction, ignored) {
 
         override fun run() {
             val instance = suite.createInstance()
@@ -110,34 +110,34 @@ public abstract class BaseClassSuite<INSTANCE, COMPANION>(name: String, ignored:
         return companionFunction.getOrPut(kind) { mutableSetOf() }
     }
 
-    val before:      Collection<INSTANCE.() -> Unit>  get() = getInstanceFunctions(TestFunctionKind.BEFORE_TEST)
-    val after:       Collection<INSTANCE.() -> Unit>  get() = getInstanceFunctions(TestFunctionKind.AFTER_TEST)
+    val before: Collection<INSTANCE.() -> Unit> get() = getInstanceFunctions(TestFunctionKind.BEFORE_TEST)
+    val after: Collection<INSTANCE.() -> Unit> get() = getInstanceFunctions(TestFunctionKind.AFTER_TEST)
 
-    val beforeClass: Collection<COMPANION.() -> Unit>  get() = getCompanionFunctions(TestFunctionKind.BEFORE_CLASS)
-    val afterClass:  Collection<COMPANION.() -> Unit>  get() = getCompanionFunctions(TestFunctionKind.AFTER_CLASS)
+    val beforeClass: Collection<COMPANION.() -> Unit> get() = getCompanionFunctions(TestFunctionKind.BEFORE_CLASS)
+    val afterClass: Collection<COMPANION.() -> Unit> get() = getCompanionFunctions(TestFunctionKind.AFTER_CLASS)
 
     @Suppress("UNCHECKED_CAST")
     fun registerFunction(kind: TestFunctionKind, function: Function1<*, Unit>) =
-            when (kind) {
-                in INSTANCE_KINDS -> getInstanceFunctions(kind).add(function as INSTANCE.() -> Unit)
-                in COMPANION_KINDS -> getCompanionFunctions(kind).add(function as COMPANION.() -> Unit)
-                else -> throw IllegalArgumentException("Unknown function kind: $kind")
-            }
+        when (kind) {
+            in INSTANCE_KINDS -> getInstanceFunctions(kind).add(function as INSTANCE.() -> Unit)
+            in COMPANION_KINDS -> getCompanionFunctions(kind).add(function as COMPANION.() -> Unit)
+            else -> throw IllegalArgumentException("Unknown function kind: $kind")
+        }
 
     override fun doBeforeClass() = beforeClass.forEach { getCompanion().it() }
     override fun doAfterClass() = afterClass.forEach { getCompanion().it() }
 
-    override fun createTestCase(name: String, testFunction: INSTANCE.() -> Unit, ignored: Boolean)
-            : BasicTestCase<INSTANCE.() -> Unit> =
+    override fun createTestCase(name: String, testFunction: INSTANCE.() -> Unit, ignored: Boolean):
+        BasicTestCase<INSTANCE.() -> Unit> =
             TestCase<INSTANCE, COMPANION>(name, this, testFunction, ignored)
 }
 
 private typealias TopLevelFun = () -> Unit
 
-public class TopLevelSuite(name: String): AbstractTestSuite<TopLevelFun>(name, false) {
+public class TopLevelSuite(name: String) : AbstractTestSuite<TopLevelFun>(name, false) {
 
-    class TestCase(name: String, override val suite: TopLevelSuite, testFunction: TopLevelFun, ignored: Boolean)
-        : BasicTestCase<TopLevelFun>(name, suite, testFunction, ignored) {
+    class TestCase(name: String, override val suite: TopLevelSuite, testFunction: TopLevelFun, ignored: Boolean) :
+        BasicTestCase<TopLevelFun>(name, suite, testFunction, ignored) {
 
         override fun run() {
             try {
@@ -152,16 +152,16 @@ public class TopLevelSuite(name: String): AbstractTestSuite<TopLevelFun>(name, f
     private val specialFunctions = mutableMapOf<TestFunctionKind, MutableSet<TopLevelFun>>()
     private fun getFunctions(type: TestFunctionKind) = specialFunctions.getOrPut(type) { mutableSetOf() }
 
-    val before:      Collection<TopLevelFun>  get() = getFunctions(TestFunctionKind.BEFORE_TEST)
-    val after:       Collection<TopLevelFun>  get() = getFunctions(TestFunctionKind.AFTER_TEST)
-    val beforeClass: Collection<TopLevelFun>  get() = getFunctions(TestFunctionKind.BEFORE_CLASS)
-    val afterClass:  Collection<TopLevelFun>  get() = getFunctions(TestFunctionKind.AFTER_CLASS)
+    val before: Collection<TopLevelFun> get() = getFunctions(TestFunctionKind.BEFORE_TEST)
+    val after: Collection<TopLevelFun> get() = getFunctions(TestFunctionKind.AFTER_TEST)
+    val beforeClass: Collection<TopLevelFun> get() = getFunctions(TestFunctionKind.BEFORE_CLASS)
+    val afterClass: Collection<TopLevelFun> get() = getFunctions(TestFunctionKind.AFTER_CLASS)
 
     fun registerFunction(kind: TestFunctionKind, function: TopLevelFun) = getFunctions(kind).add(function)
 
     override fun doBeforeClass() = beforeClass.forEach { it() }
     override fun doAfterClass() = afterClass.forEach { it() }
 
-    override fun createTestCase(name: String, testFunction: TopLevelFun, ignored: Boolean)
-            : BasicTestCase<TopLevelFun> = TestCase(name, this, testFunction, ignored)
+    override fun createTestCase(name: String, testFunction: TopLevelFun, ignored: Boolean):
+        BasicTestCase<TopLevelFun> = TestCase(name, this, testFunction, ignored)
 }

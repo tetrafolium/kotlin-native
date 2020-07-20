@@ -17,7 +17,6 @@ public actual abstract class AbstractMutableMap<K, V> protected actual construct
      */
     actual abstract override fun put(key: K, value: V): V?
 
-
     /**
      * A mutable [Map.Entry] shared by several [Map] implementations.
      */
@@ -38,7 +37,6 @@ public actual abstract class AbstractMutableMap<K, V> protected actual construct
         override fun toString(): String = entryToString(this)
         override fun equals(other: Any?): Boolean = entryEquals(this, other)
     }
-
 
     actual override fun putAll(from: Map<out K, V>) {
         for ((key, value) in from) {

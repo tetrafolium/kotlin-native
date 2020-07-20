@@ -92,7 +92,7 @@ package kotlin.text.regex
  * This character can be supplementary (2 chars needed to represent) or from
  * basic multilingual pane (1 needed char to represent it).
  */
-open internal class SupplementaryRangeSet(charClass: AbstractCharClass, val ignoreCase: Boolean = false): SimpleSet() {
+internal open class SupplementaryRangeSet(charClass: AbstractCharClass, val ignoreCase: Boolean = false) : SimpleSet() {
 
     val chars = charClass.instance
 
@@ -135,9 +135,8 @@ open internal class SupplementaryRangeSet(charClass: AbstractCharClass, val igno
     override val name: String
         get() = "range:" + (if (chars.alt) "^ " else " ") + chars.toString()
 
-
     override fun first(set: AbstractSet): Boolean {
-        return when(set) {
+        return when (set) {
             is SupplementaryCharSet -> AbstractCharClass.intersects(chars, set.codePoint)
             is CharSet -> AbstractCharClass.intersects(chars, set.char.toInt())
             is SupplementaryRangeSet -> AbstractCharClass.intersects(chars, set.chars)

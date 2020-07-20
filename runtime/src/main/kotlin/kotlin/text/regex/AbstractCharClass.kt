@@ -71,7 +71,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
      * Returns BitSet representing this character class or `null`
      * if this character class does not have character representation;
      */
-    open internal val bits: BitSet?
+    internal open val bits: BitSet?
         get() = null
 
     fun hasLowHighSurrogates(): Boolean {
@@ -85,7 +85,6 @@ internal abstract class AbstractCharClass : SpecialToken() {
 
     open val instance: AbstractCharClass
         get() = this
-
 
     private val surrogates_ = AtomicReference<AbstractCharClass?>(null)
     fun classWithSurrogates(): AbstractCharClass {
@@ -108,7 +107,6 @@ internal abstract class AbstractCharClass : SpecialToken() {
         surrogates_.compareAndSet(null, result.freeze())
         return surrogates_.value!!
     }
-
 
     // We cannot cache this class as we've done with surrogates above because
     // here is a circular reference between it and AbstractCharClass.
@@ -153,9 +151,9 @@ internal abstract class AbstractCharClass : SpecialToken() {
     }
 
     internal abstract class CachedCharClass {
-        lateinit private var posValue: AbstractCharClass
+        private lateinit var posValue: AbstractCharClass
 
-        lateinit private var negValue: AbstractCharClass
+        private lateinit var negValue: AbstractCharClass
 
         // Somewhat ugly init sequence, as computeValue() may depend on fields, initialized in subclass ctor.
         protected fun initValues() {
@@ -179,7 +177,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                CharClass().add('0', '9').setNegative(true).apply { mayContainSupplCodepoints = true }
+            CharClass().add('0', '9').setNegative(true).apply { mayContainSupplCodepoints = true }
     }
 
     internal class CachedSpace : CachedCharClass() {
@@ -195,7 +193,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                CachedSpace().getValue(negative = true).apply { mayContainSupplCodepoints = true }
+            CachedSpace().getValue(negative = true).apply { mayContainSupplCodepoints = true }
     }
 
     internal class CachedWord : CachedCharClass() {
@@ -210,7 +208,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                CachedWord().getValue(negative = true).apply { mayContainSupplCodepoints = true }
+            CachedWord().getValue(negative = true).apply { mayContainSupplCodepoints = true }
     }
 
     internal class CachedLower : CachedCharClass() {
@@ -246,7 +244,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                (CachedAlpha().getValue(negative = false) as CharClass).add('0', '9')
+            (CachedAlpha().getValue(negative = false) as CharClass).add('0', '9')
     }
 
     internal class CachedPunct : CachedCharClass() {
@@ -263,10 +261,10 @@ internal abstract class AbstractCharClass : SpecialToken() {
         }
         /* plus punctuation */
         override fun computeValue(): AbstractCharClass =
-                (CachedAlnum().getValue(negative = false) as CharClass)
-                        .add(0x21, 0x40)
-                        .add(0x5B, 0x60)
-                        .add(0x7B, 0x7E)
+            (CachedAlnum().getValue(negative = false) as CharClass)
+                .add(0x21, 0x40)
+                .add(0x5B, 0x60)
+                .add(0x7B, 0x7E)
     }
 
     internal class CachedPrint : CachedCharClass() {
@@ -274,7 +272,7 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                (CachedGraph().getValue(negative = true) as CharClass).add(0x20)
+            (CachedGraph().getValue(negative = true) as CharClass).add(0x20)
     }
 
     internal class CachedBlank : CachedCharClass() {
@@ -303,21 +301,21 @@ internal abstract class AbstractCharClass : SpecialToken() {
             initValues()
         }
         override fun computeValue(): AbstractCharClass =
-                object: AbstractCharClass() {
-                    override fun contains(ch: Int): Boolean = alt xor (ch in start..end)
-                }.apply {
-                    if (end >= Char.MIN_SUPPLEMENTARY_CODE_POINT) {
-                        mayContainSupplCodepoints = true
-                    }
-                    val minSurrogate = Char.MIN_SURROGATE.toInt()
-                    val maxSurrogate = Char.MAX_SURROGATE.toInt()
-                    // There is an intersection with surrogate characters.
-                    if (end >= minSurrogate && start <= maxSurrogate && start <= end) {
-                        val surrogatesStart = maxOf(start, minSurrogate) - minSurrogate
-                        val surrogatesEnd = minOf(end, maxSurrogate) - minSurrogate
-                        lowHighSurrogates.set(surrogatesStart..surrogatesEnd)
-                    }
+            object : AbstractCharClass() {
+                override fun contains(ch: Int): Boolean = alt xor (ch in start..end)
+            }.apply {
+                if (end >= Char.MIN_SUPPLEMENTARY_CODE_POINT) {
+                    mayContainSupplCodepoints = true
                 }
+                val minSurrogate = Char.MIN_SURROGATE.toInt()
+                val maxSurrogate = Char.MAX_SURROGATE.toInt()
+                // There is an intersection with surrogate characters.
+                if (end >= minSurrogate && start <= maxSurrogate && start <= end) {
+                    val surrogatesStart = maxOf(start, minSurrogate) - minSurrogate
+                    val surrogatesEnd = minOf(end, maxSurrogate) - minSurrogate
+                    lowHighSurrogates.set(surrogatesStart..surrogatesEnd)
+                }
+            }
     }
 
     internal class CachedSpecialsBlock : CachedCharClass() {
@@ -328,9 +326,10 @@ internal abstract class AbstractCharClass : SpecialToken() {
     }
 
     internal class CachedCategoryScope(
-            val category: Int,
-            val mayContainSupplCodepoints: Boolean,
-            val containsAllSurrogates: Boolean = false) : CachedCharClass() {
+        val category: Int,
+        val mayContainSupplCodepoints: Boolean,
+        val containsAllSurrogates: Boolean = false
+    ) : CachedCharClass() {
         init {
             initValues()
         }
@@ -346,9 +345,10 @@ internal abstract class AbstractCharClass : SpecialToken() {
     }
 
     internal class CachedCategory(
-            val category: Int,
-            val mayContainSupplCodepoints: Boolean,
-            val containsAllSurrogates: Boolean = false) : CachedCharClass() {
+        val category: Int,
+        val mayContainSupplCodepoints: Boolean,
+        val containsAllSurrogates: Boolean = false
+    ) : CachedCharClass() {
         init {
             initValues()
         }
@@ -363,14 +363,14 @@ internal abstract class AbstractCharClass : SpecialToken() {
     }
 
     companion object {
-        //Char.MAX_SURROGATE - Char.MIN_SURROGATE + 1
+        // Char.MAX_SURROGATE - Char.MIN_SURROGATE + 1
         const val SURROGATE_CARDINALITY = 2048
 
         /**
          * Character classes.
          * See http://www.unicode.org/reports/tr18/, http://www.unicode.org/Public/4.1.0/ucd/Blocks.txt
          */
-        enum class CharClasses(val regexName : String, val factory: () -> CachedCharClass) {
+        enum class CharClasses(val regexName: String, val factory: () -> CachedCharClass) {
             LOWER("Lower", ::CachedLower),
             UPPER("Upper", ::CachedUpper),
             ASCII("ASCII", ::CachedASCII),
@@ -536,13 +536,21 @@ internal abstract class AbstractCharClass : SpecialToken() {
             CF("Cf", { CachedCategory(CharCategory.FORMAT.value, true) }),
             CO("Co", { CachedCategory(CharCategory.PRIVATE_USE.value, true) }),
             CS("Cs", { CachedCategory(CharCategory.SURROGATE.value, false, true) }),
-            ISP("IsP", { CachedCategoryScope((1 shl CharCategory.DASH_PUNCTUATION.value)
-                    or (1 shl CharCategory.START_PUNCTUATION.value)
-                    or (1 shl CharCategory.END_PUNCTUATION.value)
-                    or (1 shl CharCategory.CONNECTOR_PUNCTUATION.value)
-                    or (1 shl CharCategory.OTHER_PUNCTUATION.value)
-                    or (1 shl CharCategory.INITIAL_QUOTE_PUNCTUATION.value)
-                    or (1 shl CharCategory.FINAL_QUOTE_PUNCTUATION.value), true) }),
+            ISP(
+                "IsP",
+                {
+                    CachedCategoryScope(
+                        (1 shl CharCategory.DASH_PUNCTUATION.value)
+                            or (1 shl CharCategory.START_PUNCTUATION.value)
+                            or (1 shl CharCategory.END_PUNCTUATION.value)
+                            or (1 shl CharCategory.CONNECTOR_PUNCTUATION.value)
+                            or (1 shl CharCategory.OTHER_PUNCTUATION.value)
+                            or (1 shl CharCategory.INITIAL_QUOTE_PUNCTUATION.value)
+                            or (1 shl CharCategory.FINAL_QUOTE_PUNCTUATION.value),
+                        true
+                    )
+                }
+            ),
             PD("Pd", { CachedCategory(CharCategory.DASH_PUNCTUATION.value, false) }),
             PS("Ps", { CachedCategory(CharCategory.START_PUNCTUATION.value, false) }),
             PE("Pe", { CachedCategory(CharCategory.END_PUNCTUATION.value, false) }),
@@ -554,12 +562,15 @@ internal abstract class AbstractCharClass : SpecialToken() {
             SK("Sk", { CachedCategory(CharCategory.MODIFIER_SYMBOL.value, false) }),
             SO("So", { CachedCategory(CharCategory.OTHER_SYMBOL.value, true) }),
             PI("Pi", { CachedCategory(CharCategory.INITIAL_QUOTE_PUNCTUATION.value, false) }),
-            PF("Pf", { CachedCategory(CharCategory.FINAL_QUOTE_PUNCTUATION.value, false)  })
+            PF("Pf", { CachedCategory(CharCategory.FINAL_QUOTE_PUNCTUATION.value, false) })
         }
 
-        private val classCache = Array<AtomicReference<CachedCharClass?>>(CharClasses.values().size, {
-            AtomicReference<CachedCharClass?>(null)
-        })
+        private val classCache = Array<AtomicReference<CachedCharClass?>>(
+            CharClasses.values().size,
+            {
+                AtomicReference<CachedCharClass?>(null)
+            }
+        )
         private val classCacheMap = CharClasses.values().associate { it -> it.regexName to it }
 
         fun intersects(ch1: Int, ch2: Int): Boolean = ch1 == ch2

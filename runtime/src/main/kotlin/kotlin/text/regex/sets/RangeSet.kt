@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * Represents node accepting single character from the given char class.
  */
-open internal class RangeSet(charClass: AbstractCharClass, val ignoreCase: Boolean = false) : LeafSet() {
+internal open class RangeSet(charClass: AbstractCharClass, val ignoreCase: Boolean = false) : LeafSet() {
 
     val chars: AbstractCharClass = charClass.instance
 

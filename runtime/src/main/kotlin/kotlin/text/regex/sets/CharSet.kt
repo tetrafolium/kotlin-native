@@ -25,7 +25,7 @@ package kotlin.text.regex
 /**
  * Represents node accepting single character.
  */
-open internal class CharSet(char: Char, val ignoreCase: Boolean = false) : LeafSet() {
+internal open class CharSet(char: Char, val ignoreCase: Boolean = false) : LeafSet() {
 
     // We use only low case characters when working in case insensitive mode.
     val char: Char = if (ignoreCase) char.toLowerCase() else char
@@ -71,7 +71,7 @@ open internal class CharSet(char: Char, val ignoreCase: Boolean = false) : LeafS
     }
 
     override val name: String
-            get()= char.toString()
+        get() = char.toString()
 
     override fun first(set: AbstractSet): Boolean {
         if (ignoreCase) {

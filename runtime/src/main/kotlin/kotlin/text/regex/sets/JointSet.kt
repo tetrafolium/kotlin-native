@@ -26,7 +26,7 @@ package kotlin.text.regex
  * Represents group, which is alternation of other subexpression.
  * One should think about "group" in this model as JointSet opening group and corresponding FSet closing group.
  */
-open internal class JointSet(children: List<AbstractSet>, fSet: FSet) : AbstractSet() {
+internal open class JointSet(children: List<AbstractSet>, fSet: FSet) : AbstractSet() {
 
     protected var children: MutableList<AbstractSet> = mutableListOf<AbstractSet>().apply { addAll(children) }
 
@@ -62,7 +62,7 @@ open internal class JointSet(children: List<AbstractSet>, fSet: FSet) : Abstract
         }
 
     override val name: String
-            get() = "JointSet"
+        get() = "JointSet"
     override fun first(set: AbstractSet): Boolean = children.any { it.first(set) }
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean {

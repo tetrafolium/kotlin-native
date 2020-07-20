@@ -5,14 +5,14 @@
 
 package kotlin.native.concurrent
 
-import kotlin.native.internal.*
 import kotlinx.cinterop.*
+import kotlin.native.internal.*
 
 @SymbolName("Kotlin_Any_share")
-external private fun Any.share()
+private external fun Any.share()
 
 @SymbolName("Kotlin_CPointer_CopyMemory")
-external private fun CopyMemory(to: COpaquePointer?, from: COpaquePointer?, count: Int)
+private external fun CopyMemory(to: COpaquePointer?, from: COpaquePointer?, count: Int)
 
 @SymbolName("ReadHeapRefNoLock")
 internal external fun readHeapRefNoLock(where: Any, index: Int): Any?
@@ -32,7 +32,7 @@ public class MutableData constructor(capacity: Int = 16) {
     private var buffer_ = ByteArray(capacity).apply { share() }
     private var buffer: ByteArray
         get() = readHeapRefNoLock(this, 0) as ByteArray
-        set(value) { buffer_ = value}
+        set(value) { buffer_ = value }
     private var size_ = 0
     private val lock = Lock()
 
@@ -90,7 +90,8 @@ public class MutableData constructor(capacity: Int = 16) {
         if (data == null || count <= 0) return
         val where = resizeDataLocked(this.size + count)
         buffer.usePinned {
-            it -> CopyMemory(it.addressOf(where), data, count)
+            it ->
+            CopyMemory(it.addressOf(where), data, count)
         }
     }
 
@@ -119,7 +120,8 @@ public class MutableData constructor(capacity: Int = 16) {
      */
     public fun <R> withPointerLocked(block: (COpaquePointer, dataSize: Int) -> R) = locked(lock) {
         buffer.usePinned {
-            it -> block(it.addressOf(0), size)
+            it ->
+            block(it.addressOf(0), size)
         }
     }
 

@@ -5,8 +5,6 @@
 
 package kotlin.native.concurrent
 
-import kotlin.native.internal.Frozen
-
 /**
  * State of the future object.
  */
@@ -35,29 +33,29 @@ public inline class Future<T> @PublishedApi internal constructor(val id: Int) {
      * [FutureState.THROWN] state
      */
     public inline fun <R> consume(code: (T) -> R): R = when (state) {
-            FutureState.SCHEDULED, FutureState.COMPUTED -> {
-                val value = @Suppress("UNCHECKED_CAST", "NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-                    (consumeFuture(id) as T)
-                code(value)
-            }
-            FutureState.INVALID ->
-                throw IllegalStateException("Future is in an invalid state")
-            FutureState.CANCELLED -> {
-                consumeFuture(id)
-                throw IllegalStateException("Future is cancelled")
-            }
-            FutureState.THROWN -> {
-                consumeFuture(id)
-                throw IllegalStateException("Job has thrown an exception")
-            }
+        FutureState.SCHEDULED, FutureState.COMPUTED -> {
+            val value = @Suppress("UNCHECKED_CAST", "NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
+            (consumeFuture(id) as T)
+            code(value)
         }
+        FutureState.INVALID ->
+            throw IllegalStateException("Future is in an invalid state")
+        FutureState.CANCELLED -> {
+            consumeFuture(id)
+            throw IllegalStateException("Future is cancelled")
+        }
+        FutureState.THROWN -> {
+            consumeFuture(id)
+            throw IllegalStateException("Job has thrown an exception")
+        }
+    }
 
     /**
      * The result of the future computation.
      * Blocks execution until the future is ready. Second attempt to get will result in an error.
      */
     public val result: T
-            get() = consume { it -> it }
+        get() = consume { it -> it }
 
     /**
      * A [FutureState] of this future
@@ -65,13 +63,11 @@ public inline class Future<T> @PublishedApi internal constructor(val id: Int) {
     public val state: FutureState
         get() = FutureState.values()[stateOfFuture(id)]
 
-    override public fun toString(): String = "future $id"
+    public override fun toString(): String = "future $id"
 }
-
 
 @Deprecated("Use 'waitForMultipleFutures' top-level function instead", ReplaceWith("waitForMultipleFutures(this, millis)"), DeprecationLevel.ERROR)
 public fun <T> Collection<Future<T>>.waitForMultipleFutures(millis: Int): Set<Future<T>> = waitForMultipleFutures(this, millis)
-
 
 /**
  * Wait for availability of futures in the collection. Returns set with all futures which have

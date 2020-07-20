@@ -5,8 +5,8 @@
 
 package kotlin.collections
 
-import kotlin.native.internal.PointsTo
 import kotlin.native.internal.ExportForCppRuntime
+import kotlin.native.internal.PointsTo
 
 /**
  * Returns an array of objects of the given type with the given [size], initialized with _uninitialized_ values.
@@ -21,11 +21,10 @@ internal fun <E> arrayOfUninitializedElements(size: Int): Array<E> {
     return Array<E>(size)
 }
 
-
 /**
  * Returns a new array which is a copy of the original array with new elements filled with null values.
  */
-internal fun <E> Array<E>.copyOfNulls(newSize: Int): Array<E?>  = copyOfNulls(0, newSize)
+internal fun <E> Array<E>.copyOfNulls(newSize: Int): Array<E?> = copyOfNulls(0, newSize)
 
 internal fun <E> Array<E>.copyOfNulls(fromIndex: Int, toIndex: Int): Array<E?> {
     val newSize = toIndex - fromIndex
@@ -61,9 +60,8 @@ internal fun <E, T> collectionToArray(collection: Collection<E>, array: Array<T>
  * Creates an array of collection.size size and copies elements of the [collection] into it.
  * @return [array] with the elements copied from the collection.
  */
-internal fun <E> collectionToArray(collection: Collection<E>): Array<E>
-        = collectionToArray(collection, arrayOfUninitializedElements(collection.size))
-
+internal fun <E> collectionToArray(collection: Collection<E>): Array<E> =
+    collectionToArray(collection, arrayOfUninitializedElements(collection.size))
 
 /**
  * Resets an array element at a specified index to some implementation-specific _uninitialized_ value.
@@ -151,7 +149,6 @@ internal external fun arrayCopy(array: DoubleArray, fromIndex: Int, destination:
 
 @SymbolName("Kotlin_BooleanArray_copyImpl")
 internal external fun arrayCopy(array: BooleanArray, fromIndex: Int, destination: BooleanArray, toIndex: Int, count: Int)
-
 
 internal fun <E> Collection<E>.collectionToString(): String {
     val sb = StringBuilder(2 + size * 3)

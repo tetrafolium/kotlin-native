@@ -16,7 +16,7 @@ internal interface FlagEnum {
 private fun Iterable<FlagEnum>.toInt(): Int = this.fold(0, { value, option -> value or option.value })
 
 private fun fromInt(value: Int): Set<RegexOption> =
-        RegexOption.values().filterTo(mutableSetOf<RegexOption>()) { value and it.mask == it.value  }
+    RegexOption.values().filterTo(mutableSetOf<RegexOption>()) { value and it.mask == it.value }
 
 /**
  * Provides enumeration values to use to set regular expression options.
@@ -55,7 +55,6 @@ public actual enum class RegexOption(override val value: Int, override val mask:
     CANON_EQ(Pattern.CANON_EQ)
 }
 
-
 /**
  * Represents the results from a single capturing group within a [MatchResult] of [Regex].
  *
@@ -77,14 +76,13 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
     }
 
     /** Creates a regular expression from the specified [pattern] string and the default options.  */
-    actual constructor(pattern: String): this(Pattern(pattern))
+    actual constructor(pattern: String) : this(Pattern(pattern))
 
     /** Creates a regular expression from the specified [pattern] string and the specified single [option].  */
-    actual constructor(pattern: String, option: RegexOption): this(Pattern(pattern, ensureUnicodeCase(option.value)))
+    actual constructor(pattern: String, option: RegexOption) : this(Pattern(pattern, ensureUnicodeCase(option.value)))
 
     /** Creates a regular expression from the specified [pattern] string and the specified set of [options].  */
-    actual constructor(pattern: String, options: Set<RegexOption>): this(Pattern(pattern, ensureUnicodeCase(options.toInt())))
-
+    actual constructor(pattern: String, options: Set<RegexOption>) : this(Pattern(pattern, ensureUnicodeCase(options.toInt())))
 
     /** The pattern string of this regular expression. */
     actual val pattern: String
@@ -190,7 +188,7 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
      *
      * @return An instance of [MatchResult] if the entire input matches or `null` otherwise.
      */
-    actual fun matchEntire(input: CharSequence): MatchResult?= doMatch(input, Mode.MATCH)
+    actual fun matchEntire(input: CharSequence): MatchResult? = doMatch(input, Mode.MATCH)
 
     private fun processReplacement(match: MatchResult, replacement: String): String {
         val result = StringBuilder(replacement.length)
@@ -230,8 +228,8 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
      *
      * @param replacement A replacement expression that can include substitutions.
      */
-    actual fun replace(input: CharSequence, replacement: String): String
-            = replace(input) { match -> processReplacement(match, replacement) }
+    actual fun replace(input: CharSequence, replacement: String): String =
+        replace(input) { match -> processReplacement(match, replacement) }
 
     /**
      * Replaces all occurrences of this regular expression in the specified [input] string with the result of
@@ -283,7 +281,7 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
      *              Zero by default means no limit is set.
      */
     actual fun split(input: CharSequence, limit: Int): List<String> {
-        require(limit >= 0, { "Limit must be non-negative, but was $limit." } )
+        require(limit >= 0, { "Limit must be non-negative, but was $limit." })
 
         var match: MatchResult? = find(input)
 

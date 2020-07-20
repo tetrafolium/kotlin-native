@@ -11,7 +11,8 @@ package kotlin.text
  * String builder can be used to efficiently perform multiple string manipulation operations.
  */
 actual class StringBuilder private constructor (
-        private var array: CharArray) : CharSequence, Appendable {
+    private var array: CharArray
+) : CharSequence, Appendable {
 
     /** Constructs an empty string builder. */
     actual constructor() : this(10)
@@ -25,7 +26,7 @@ actual class StringBuilder private constructor (
     }
 
     /** Constructs a string builder that contains the same characters as the specified [content] char sequence. */
-    actual constructor(content: CharSequence): this(content.length) {
+    actual constructor(content: CharSequence) : this(content.length) {
         append(content)
     }
 
@@ -46,7 +47,7 @@ actual class StringBuilder private constructor (
     actual override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = substring(startIndex, endIndex)
 
     // Of Appenable.
-    actual override fun append(value: Char) : StringBuilder {
+    actual override fun append(value: Char): StringBuilder {
         ensureExtraCapacity(1)
         array[_length++] = value
         return this
@@ -59,7 +60,7 @@ actual class StringBuilder private constructor (
     }
 
     actual override fun append(value: CharSequence?, startIndex: Int, endIndex: Int): StringBuilder =
-            this.appendRange(value ?: "null", startIndex, endIndex)
+        this.appendRange(value ?: "null", startIndex, endIndex)
 
     /**
      * Reverses the contents of this string builder and returns this instance.
@@ -273,12 +274,12 @@ actual class StringBuilder private constructor (
      */
     // TODO: optimize those!
     actual fun insert(index: Int, value: Boolean): StringBuilder = insert(index, value.toString())
-    fun insert(index: Int, value: Byte)    = insert(index, value.toString())
-    fun insert(index: Int, value: Short)   = insert(index, value.toString())
-    fun insert(index: Int, value: Int)     = insert(index, value.toString())
-    fun insert(index: Int, value: Long)    = insert(index, value.toString())
-    fun insert(index: Int, value: Float)   = insert(index, value.toString())
-    fun insert(index: Int, value: Double)  = insert(index, value.toString())
+    fun insert(index: Int, value: Byte) = insert(index, value.toString())
+    fun insert(index: Int, value: Short) = insert(index, value.toString())
+    fun insert(index: Int, value: Int) = insert(index, value.toString())
+    fun insert(index: Int, value: Long) = insert(index, value.toString())
+    fun insert(index: Int, value: Float) = insert(index, value.toString())
+    fun insert(index: Int, value: Double) = insert(index, value.toString())
 
     /**
      * Inserts the specified character [value] into this string builder at the specified [index] and returns this instance.
@@ -675,7 +676,7 @@ public actual inline operator fun StringBuilder.set(index: Int, value: Char): Un
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.setRange(startIndex: Int, endIndex: Int, value: String): StringBuilder =
-        this.setRange(startIndex, endIndex, value)
+    this.setRange(startIndex, endIndex, value)
 
 /**
  * Removes the character at the specified [index] from this string builder and returns this instance.
@@ -723,7 +724,7 @@ public actual inline fun StringBuilder.deleteRange(startIndex: Int, endIndex: In
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER", "ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.toCharArray(destination: CharArray, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = this.length) =
-        this.toCharArray(destination, destinationOffset, startIndex, endIndex)
+    this.toCharArray(destination, destinationOffset, startIndex, endIndex)
 
 /**
  * Appends characters in a subarray of the specified character array [value] to this string builder and returns this instance.
@@ -741,7 +742,7 @@ public actual inline fun StringBuilder.toCharArray(destination: CharArray, desti
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.appendRange(value: CharArray, startIndex: Int, endIndex: Int): StringBuilder =
-        this.appendRange(value, startIndex, endIndex)
+    this.appendRange(value, startIndex, endIndex)
 
 /**
  * Appends a subsequence of the specified character sequence [value] to this string builder and returns this instance.
@@ -757,7 +758,7 @@ public actual inline fun StringBuilder.appendRange(value: CharArray, startIndex:
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.appendRange(value: CharSequence, startIndex: Int, endIndex: Int): StringBuilder =
-        this.appendRange(value, startIndex, endIndex)
+    this.appendRange(value, startIndex, endIndex)
 
 /**
  * Inserts characters in a subarray of the specified character array [value] into this string builder at the specified [index] and returns this instance.
@@ -777,7 +778,7 @@ public actual inline fun StringBuilder.appendRange(value: CharSequence, startInd
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.insertRange(index: Int, value: CharArray, startIndex: Int, endIndex: Int): StringBuilder =
-        this.insertRange(index, value, startIndex, endIndex)
+    this.insertRange(index, value, startIndex, endIndex)
 
 /**
  * Inserts characters in a subsequence of the specified character sequence [value] into this string builder at the specified [index] and returns this instance.
@@ -797,7 +798,7 @@ public actual inline fun StringBuilder.insertRange(index: Int, value: CharArray,
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 @kotlin.internal.InlineOnly
 public actual inline fun StringBuilder.insertRange(index: Int, value: CharSequence, startIndex: Int, endIndex: Int): StringBuilder =
-        this.insertRange(index, value, startIndex, endIndex)
+    this.insertRange(index, value, startIndex, endIndex)
 
 // Method parameters renamings
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
@@ -891,13 +892,13 @@ public inline fun StringBuilder.setLength(l: Int) = this.setLength(newLength = l
  * @throws IndexOutOfBoundsException if [index] is less than zero or greater than the length of this string builder.
  */
 @Deprecated(
-        "Use insertRange(index: Int, csq: CharSequence, start: Int, end: Int) instead",
-        ReplaceWith("insertRange(index, csq ?: \"null\", start, end)"),
-        DeprecationLevel.WARNING
+    "Use insertRange(index: Int, csq: CharSequence, start: Int, end: Int) instead",
+    ReplaceWith("insertRange(index, csq ?: \"null\", start, end)"),
+    DeprecationLevel.WARNING
 )
 @kotlin.internal.InlineOnly
 public inline fun StringBuilder.insert(index: Int, csq: CharSequence?, start: Int, end: Int): StringBuilder =
-        this.insertRange(index, csq ?: "null", start, end)
+    this.insertRange(index, csq ?: "null", start, end)
 
 @Deprecated("Use set(index: Int, value: Char) instead", ReplaceWith("set(index, value)"), DeprecationLevel.WARNING)
 @kotlin.internal.InlineOnly

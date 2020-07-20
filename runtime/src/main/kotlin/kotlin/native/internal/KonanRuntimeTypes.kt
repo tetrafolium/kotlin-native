@@ -5,5 +5,4 @@
 
 package kotlin.native.internal
 
-
 internal class FunctionReference

@@ -44,4 +44,3 @@ public class WeakReference<T : Any> {
     public val value: T?
         get() = this.get()
 }
-

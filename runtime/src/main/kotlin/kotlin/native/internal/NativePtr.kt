@@ -40,22 +40,22 @@ internal class NonNullNativePtr private constructor() { // TODO: refactor to use
 
     override fun hashCode() = toNativePtr().hashCode()
 
-    override fun equals(other: Any?) = other is NonNullNativePtr
-            && kotlin.native.internal.areEqualByValue(this.toNativePtr(), other.toNativePtr())
+    override fun equals(other: Any?) = other is NonNullNativePtr &&
+        kotlin.native.internal.areEqualByValue(this.toNativePtr(), other.toNativePtr())
 }
 
 @ExportTypeInfo("theNativePtrArrayTypeInfo")
 internal class NativePtrArray {
 
     @SymbolName("Kotlin_NativePtrArray_get")
-    external public operator fun get(index: Int): NativePtr
+    public external operator fun get(index: Int): NativePtr
 
     @SymbolName("Kotlin_NativePtrArray_set")
-    external public operator fun set(index: Int, value: NativePtr): Unit
+    public external operator fun set(index: Int, value: NativePtr): Unit
 
     val size: Int
         get() = getArrayLength()
 
     @SymbolName("Kotlin_NativePtrArray_getArrayLength")
-    external private fun getArrayLength(): Int
+    private external fun getArrayLength(): Int
 }

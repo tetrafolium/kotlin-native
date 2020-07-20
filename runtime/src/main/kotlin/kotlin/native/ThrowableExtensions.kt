@@ -9,4 +9,4 @@ package kotlin.native
  * pertaining to this throwable.
  */
 public fun Throwable.getStackTraceAddresses(): List<Long> =
-        this.getStackTraceAddressesInternal()
+    this.getStackTraceAddressesInternal()

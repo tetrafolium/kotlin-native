@@ -8,15 +8,15 @@ package kotlin.native.internal
 import kotlin.reflect.*
 
 internal class KTypeImpl(
-        override val classifier: KClassifier?,
-        override val arguments: List<KTypeProjection>,
-        override val isMarkedNullable: Boolean
+    override val classifier: KClassifier?,
+    override val arguments: List<KTypeProjection>,
+    override val isMarkedNullable: Boolean
 ) : KType {
     override fun equals(other: Any?) =
-            other is KTypeImpl &&
-                    this.classifier == other.classifier &&
-                    this.arguments == other.arguments &&
-                    this.isMarkedNullable == other.isMarkedNullable
+        other is KTypeImpl &&
+            this.classifier == other.classifier &&
+            this.arguments == other.arguments &&
+            this.isMarkedNullable == other.isMarkedNullable
 
     override fun hashCode(): Int {
         return (classifier?.hashCode() ?: 0) * 31 * 31 + this.arguments.hashCode() * 31 + if (isMarkedNullable) 1 else 0
@@ -40,11 +40,13 @@ internal class KTypeImpl(
                     if (argument.variance == null) {
                         append('*')
                     } else {
-                        append(when (argument.variance) {
-                            KVariance.INVARIANT -> ""
-                            KVariance.IN -> "in "
-                            KVariance.OUT -> "out "
-                        })
+                        append(
+                            when (argument.variance) {
+                                KVariance.INVARIANT -> ""
+                                KVariance.IN -> "in "
+                                KVariance.OUT -> "out "
+                            }
+                        )
                         append(argument.type)
                     }
                 }
@@ -67,8 +69,8 @@ internal class KTypeImplForGenerics : KType {
         get() = error("Generic types are not yet supported in reflection")
 
     override fun equals(other: Any?) =
-            error("Generic types are not yet supported in reflection")
+        error("Generic types are not yet supported in reflection")
 
     override fun hashCode(): Int =
-            error("Generic types are not yet supported in reflection")
+        error("Generic types are not yet supported in reflection")
 }

@@ -29,15 +29,16 @@ import kotlin.text.*
  * CANON_EQ flag of Pattern class is specified.
  */
 internal class HangulDecomposedCharSet(
-        /**
-         * Decomposed Hangul syllable.
-         */
-        private val decomposedChar: CharArray,
-        /**
-         * Length of useful part of decomposedChar
-         * decomposedCharLength <= decomposedChar.length
-         */
-        private val decomposedCharLength: Int) : SimpleSet() {
+    /**
+     * Decomposed Hangul syllable.
+     */
+    private val decomposedChar: CharArray,
+    /**
+     * Length of useful part of decomposedChar
+     * decomposedCharLength <= decomposedChar.length
+     */
+    private val decomposedCharLength: Int
+) : SimpleSet() {
 
     /**
      * String representing syllable
@@ -47,7 +48,7 @@ internal class HangulDecomposedCharSet(
     }
 
     override val name: String
-            get() = "decomposed Hangul syllable: $decomposedCharUTF16"
+        get() = "decomposed Hangul syllable: $decomposedCharUTF16"
 
     override fun matches(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
         var index = startIndex
@@ -58,8 +59,10 @@ internal class HangulDecomposedCharSet(
          */
         val rightBound = testString.length
         var SyllIndex = 0
-        val decompSyllable = IntArray(Lexer
-                .MAX_HANGUL_DECOMPOSITION_LENGTH)
+        val decompSyllable = IntArray(
+            Lexer
+                .MAX_HANGUL_DECOMPOSITION_LENGTH
+        )
         val decompCurSymb: IntArray?
         var curSymb: Char
 
@@ -122,9 +125,10 @@ internal class HangulDecomposedCharSet(
                  * We deal with LV syllable at testString, so
                  * compare it to this
                  */
-                return if (decomposedCharLength == 2
-                        && decompSyllable[0] == decomposedChar[0].toInt()
-                        && decompSyllable[1] == decomposedChar[1].toInt())
+                return if (decomposedCharLength == 2 &&
+                    decompSyllable[0] == decomposedChar[0].toInt() &&
+                    decompSyllable[1] == decomposedChar[1].toInt()
+                )
                     next.matches(index, testString, matchResult)
                 else
                     -1
@@ -136,10 +140,11 @@ internal class HangulDecomposedCharSet(
              * We deal with LVT syllable at testString, so
              * compare it to this
              */
-            return if (decomposedCharLength == 3
-                    && decompSyllable[0] == decomposedChar[0].toInt()
-                    && decompSyllable[1] == decomposedChar[1].toInt()
-                    && decompSyllable[2] == decomposedChar[2].toInt())
+            return if (decomposedCharLength == 3 &&
+                decompSyllable[0] == decomposedChar[0].toInt() &&
+                decompSyllable[1] == decomposedChar[1].toInt() &&
+                decompSyllable[2] == decomposedChar[2].toInt()
+            )
                 next.matches(index, testString, matchResult)
             else
                 -1
@@ -176,4 +181,3 @@ internal class HangulDecomposedCharSet(
         return true
     }
 }
-

@@ -8,13 +8,13 @@ package kotlin.native.concurrent
 import kotlin.native.internal.*
 
 @SymbolName("Kotlin_WorkerBoundReference_create")
-external private fun createWorkerBoundReference(value: Any): NativePtr
+private external fun createWorkerBoundReference(value: Any): NativePtr
 
 @SymbolName("Kotlin_WorkerBoundReference_deref")
-external private fun derefWorkerBoundReference(ref: NativePtr): Any?
+private external fun derefWorkerBoundReference(ref: NativePtr): Any?
 
 @SymbolName("Kotlin_WorkerBoundReference_describe")
-external private fun describeWorkerBoundReference(ref: NativePtr): String
+private external fun describeWorkerBoundReference(ref: NativePtr): String
 
 /**
  * A frozen shared reference to a Kotlin object.

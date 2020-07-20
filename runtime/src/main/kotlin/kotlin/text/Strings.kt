@@ -55,14 +55,17 @@ internal external fun stringEqualsIgnoreCase(thiz: String, other: String): Boole
  */
 @SymbolName("Kotlin_String_replace")
 public actual external fun String.replace(
-        oldChar: Char, newChar: Char, ignoreCase: Boolean): String
+    oldChar: Char,
+    newChar: Char,
+    ignoreCase: Boolean
+): String
 
 /**
  * Returns a new string obtained by replacing all occurrences of the [oldValue] substring in this string
  * with the specified [newValue] string.
  */
 public actual fun String.replace(oldValue: String, newValue: String, ignoreCase: Boolean): String =
-        splitToSequence(oldValue, ignoreCase = ignoreCase).joinToString(separator = newValue)
+    splitToSequence(oldValue, ignoreCase = ignoreCase).joinToString(separator = newValue)
 
 /**
  * Returns a new string with the first occurrence of [oldChar] replaced with [newChar].
@@ -96,32 +99,32 @@ public actual fun CharSequence.isBlank(): Boolean = length == 0 || indices.all {
  */
 @kotlin.internal.InlineOnly
 public actual inline fun String.substring(startIndex: Int, endIndex: Int): String =
-        subSequence(startIndex, endIndex) as String
+    subSequence(startIndex, endIndex) as String
 
 /**
  * Returns a substring of this string that starts at the specified [startIndex] and continues to the end of the string.
  */
 @kotlin.internal.InlineOnly
 public actual inline fun String.substring(startIndex: Int): String =
-        subSequence(startIndex, this.length) as String
+    subSequence(startIndex, this.length) as String
 
 /**
  * Returns `true` if this string starts with the specified prefix.
  */
 public actual fun String.startsWith(prefix: String, ignoreCase: Boolean): Boolean =
-        regionMatches(0, prefix, 0, prefix.length, ignoreCase)
+    regionMatches(0, prefix, 0, prefix.length, ignoreCase)
 
 /**
  * Returns `true` if a substring of this string starting at the specified offset [startIndex] starts with the specified prefix.
  */
 public actual fun String.startsWith(prefix: String, startIndex: Int, ignoreCase: Boolean): Boolean =
-        regionMatches(startIndex, prefix, 0, prefix.length, ignoreCase)
+    regionMatches(startIndex, prefix, 0, prefix.length, ignoreCase)
 
 /**
  * Returns `true` if this string ends with the specified suffix.
  */
 public actual fun String.endsWith(suffix: String, ignoreCase: Boolean): Boolean =
-        regionMatches(length - suffix.length, suffix, 0, suffix.length, ignoreCase)
+    regionMatches(length - suffix.length, suffix, 0, suffix.length, ignoreCase)
 
 /**
  * Returns `true` if the specified range in this char sequence is equal to the specified range in another char sequence.
@@ -131,8 +134,12 @@ public actual fun String.endsWith(suffix: String, ignoreCase: Boolean): Boolean 
  * @param length the length of the substring to compare.
  */
 public actual fun CharSequence.regionMatches(
-        thisOffset: Int, other: CharSequence, otherOffset: Int, length: Int,
-        ignoreCase: Boolean): Boolean {
+    thisOffset: Int,
+    other: CharSequence,
+    otherOffset: Int,
+    length: Int,
+    ignoreCase: Boolean
+): Boolean {
     return if (this is String && other is String) {
         this.regionMatches(thisOffset, other, otherOffset, length, ignoreCase)
     } else {
@@ -149,8 +156,12 @@ public actual fun CharSequence.regionMatches(
  */
 @SymbolName("Kotlin_String_regionMatches")
 public external fun String.regionMatches(
-        thisOffset: Int, other: String, otherOffset: Int, length: Int,
-        ignoreCase: Boolean = false): Boolean
+    thisOffset: Int,
+    other: String,
+    otherOffset: Int,
+    length: Int,
+    ignoreCase: Boolean = false
+): Boolean
 
 /**
  * Returns a copy of this string converted to upper case using the rules of the default locale.

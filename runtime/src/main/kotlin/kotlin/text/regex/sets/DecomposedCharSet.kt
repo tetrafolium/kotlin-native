@@ -27,14 +27,15 @@ package kotlin.text.regex
  * Returns the length of the decomposition.
  */
 @SymbolName("Kotlin_text_regex_decomposeCodePoint")
-external private fun decomposeCodePoint(codePoint: Int, outputCodePoints: IntArray, fromIndex: Int): Int
+private external fun decomposeCodePoint(codePoint: Int, outputCodePoints: IntArray, fromIndex: Int): Int
 
 /** Represents canonical decomposition of Unicode character. Is used when CANON_EQ flag of Pattern class is specified. */
-open internal class DecomposedCharSet(
-        /** Decomposition of the Unicode codepoint */
-        private val decomposedChar: IntArray,
-        /** Length of useful part of decomposedChar decomposedCharLength <= decomposedChar.length */
-        private val decomposedCharLength: Int) : SimpleSet() {
+internal open class DecomposedCharSet(
+    /** Decomposition of the Unicode codepoint */
+    private val decomposedChar: IntArray,
+    /** Length of useful part of decomposedChar decomposedCharLength <= decomposedChar.length */
+    private val decomposedCharLength: Int
+) : SimpleSet() {
 
     /** Contains information about number of chars that were read for a codepoint last time */
     private var readCharsForCodePoint = 1
@@ -157,4 +158,3 @@ open internal class DecomposedCharSet(
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean = true
 }
-

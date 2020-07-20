@@ -22,7 +22,7 @@ internal interface TestListener {
     fun ignore(testCase: TestCase)
 }
 
-internal open class BaseTestListener: TestListener {
+internal open class BaseTestListener : TestListener {
     override fun startTesting(runner: TestRunner) {}
     override fun finishTesting(runner: TestRunner, timeMillis: Long) {}
     override fun startIteration(runner: TestRunner, iteration: Int, suites: Collection<TestSuite>) {}

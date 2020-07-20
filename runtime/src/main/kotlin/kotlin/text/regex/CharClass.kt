@@ -26,7 +26,7 @@ package kotlin.text.regex
  * User defined character classes (e.g. [abef]).
  */
 // TODO: replace the implementation with one using BitSet for first 256 symbols and a hash table / tree for the rest of UTF.
-internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = false)  : AbstractCharClass()  {
+internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = false) : AbstractCharClass() {
 
     var invertedSurrogates = false
 
@@ -105,24 +105,24 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
         // Process surrogates.
         if (!invertedSurrogates) {
 
-            //A | !B = ! ((A ^ B) & B)
+            // A | !B = ! ((A ^ B) & B)
             if (another.altSurrogates) {
                 lowHighSurrogates.xor(another.lowHighSurrogates)
                 lowHighSurrogates.and(another.lowHighSurrogates)
                 altSurrogates = !altSurrogates
                 invertedSurrogates = true
 
-                //A | B
+                // A | B
             } else {
                 lowHighSurrogates.or(another.lowHighSurrogates)
             }
         } else {
 
-            //!A | !B = !(A & B)
+            // !A | !B = !(A & B)
             if (another.altSurrogates) {
                 lowHighSurrogates.and(another.lowHighSurrogates)
 
-                //!A | B = !(A & !B)
+                // !A | B = !(A & !B)
             } else {
                 lowHighSurrogates.andNot(another.lowHighSurrogates)
             }
@@ -132,29 +132,29 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
         if (!hideBits && anotherBits != null) {
             if (!inverted) {
 
-                //A | !B = ! ((A ^ B) & B)
+                // A | !B = ! ((A ^ B) & B)
                 if (another.isNegative()) {
                     bits_.xor(anotherBits)
                     bits_.and(anotherBits)
                     alt = !alt
                     inverted = true
 
-                    //A | B
+                    // A | B
                 } else {
                     bits_.or(anotherBits)
                 }
             } else {
 
-                //!A | !B = !(A & B)
+                // !A | !B = !(A & B)
                 if (another.isNegative()) {
                     bits_.and(anotherBits)
 
-                    //!A | B = !(A & !B)
+                    // !A | B = !(A & !B)
                 } else {
                     bits_.andNot(anotherBits)
                 }
             }
-        // Some of charclasses hides its bits
+            // Some of charclasses hides its bits
         } else {
             val curAlt = alt
 
@@ -229,9 +229,11 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
                 val surrogatesStart = maxOf(start, minSurrogate)
                 val surrogatesEnd = minOf(end, maxSurrogate)
                 bits_.set(start, end + 1, !inverted)
-                lowHighSurrogates.set(surrogatesStart - minSurrogate,
-                        surrogatesEnd - minSurrogate + 1,
-                        !invertedSurrogates)
+                lowHighSurrogates.set(
+                    surrogatesStart - minSurrogate,
+                    surrogatesEnd - minSurrogate + 1,
+                    !invertedSurrogates
+                )
                 if (!mayContainSupplCodepoints && end >= Char.MIN_SUPPLEMENTARY_CODE_POINT) {
                     mayContainSupplCodepoints = true
                 }
@@ -248,27 +250,25 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
             mayContainSupplCodepoints = true
         }
 
-
         if (altSurrogates xor another.altSurrogates) {
 
-            //!A | B = !(A & !B)
+            // !A | B = !(A & !B)
             if (altSurrogates) {
                 lowHighSurrogates.andNot(another.lowHighSurrogates)
 
-                //A | !B = !((A ^ B) & B)
+                // A | !B = !((A ^ B) & B)
             } else {
                 lowHighSurrogates.xor(another.lowHighSurrogates)
                 lowHighSurrogates.and(another.lowHighSurrogates)
                 altSurrogates = true
             }
-
         } else {
 
-            //!A | !B = !(A & B)
+            // !A | !B = !(A & B)
             if (altSurrogates) {
                 lowHighSurrogates.and(another.lowHighSurrogates)
 
-                //A | B
+                // A | B
             } else {
                 lowHighSurrogates.or(another.lowHighSurrogates)
             }
@@ -278,24 +278,23 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
         if (!hideBits && anotherBits != null) {
             if (alt xor another.isNegative()) {
 
-                //!A | B = !(A & !B)
+                // !A | B = !(A & !B)
                 if (alt) {
                     bits_.andNot(anotherBits)
 
-                    //A | !B = !((A ^ B) & B)
+                    // A | !B = !((A ^ B) & B)
                 } else {
                     bits_.xor(anotherBits)
                     bits_.and(anotherBits)
                     alt = true
                 }
-
             } else {
 
-                //!A | !B = !(A & B)
+                // !A | !B = !(A & B)
                 if (alt) {
                     bits_.and(anotherBits)
 
-                    //A | B
+                    // A | B
                 } else {
                     bits_.or(anotherBits)
                 }
@@ -364,23 +363,23 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
 
         if (altSurrogates xor another.altSurrogates) {
 
-            //!A & B = ((A ^ B) & B)
+            // !A & B = ((A ^ B) & B)
             if (altSurrogates) {
                 lowHighSurrogates.xor(another.lowHighSurrogates)
                 lowHighSurrogates.and(another.lowHighSurrogates)
                 altSurrogates = false
 
-                //A & !B
+                // A & !B
             } else {
                 lowHighSurrogates.andNot(another.lowHighSurrogates)
             }
         } else {
 
-            //!A & !B = !(A | B)
+            // !A & !B = !(A | B)
             if (altSurrogates) {
                 lowHighSurrogates.or(another.lowHighSurrogates)
 
-                //A & B
+                // A & B
             } else {
                 lowHighSurrogates.and(another.lowHighSurrogates)
             }
@@ -391,23 +390,23 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
 
             if (alt xor another.isNegative()) {
 
-                //!A & B = ((A ^ B) & B)
+                // !A & B = ((A ^ B) & B)
                 if (alt) {
                     bits_.xor(anotherBits)
                     bits_.and(anotherBits)
                     alt = false
 
-                    //A & !B
+                    // A & !B
                 } else {
                     bits_.andNot(anotherBits)
                 }
             } else {
 
-                //!A & !B = !(A | B)
+                // !A & !B = !(A | B)
                 if (alt) {
                     bits_.or(anotherBits)
 
-                    //A & B
+                    // A & B
                 } else {
                     bits_.and(anotherBits)
                 }
@@ -511,7 +510,6 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
 
                         return temp.toString()
                     }
-
                 }
                 return res.setNegative(isNegative())
             } else {
@@ -520,7 +518,7 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
         }
 
     @OptIn(ExperimentalStdlibApi::class)
-    //for debugging purposes only
+    // for debugging purposes only
     override fun toString(): String {
         val temp = StringBuilder()
         var i = bits_.nextSetBit(0)
@@ -536,4 +534,3 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
         return temp.toString()
     }
 }
-

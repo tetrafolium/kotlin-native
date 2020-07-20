@@ -5,12 +5,12 @@
 
 package kotlin.native.internal.test
 
-internal interface TestLogger: TestListener {
+internal interface TestLogger : TestListener {
     fun logTestList(runner: TestRunner, suites: Collection<TestSuite>)
     fun log(message: String)
 }
 
-internal open class BaseTestLogger: BaseTestListener(), TestLogger {
+internal open class BaseTestLogger : BaseTestListener(), TestLogger {
     override fun log(message: String) = println(message)
     override fun logTestList(runner: TestRunner, suites: Collection<TestSuite>) {
         suites.forEach { suite ->
@@ -22,7 +22,7 @@ internal open class BaseTestLogger: BaseTestListener(), TestLogger {
     }
 }
 
-internal open class TestLoggerWithStatistics: BaseTestLogger() {
+internal open class TestLoggerWithStatistics : BaseTestLogger() {
 
     protected val statistics = MutableTestStatistics()
 
@@ -36,20 +36,20 @@ internal open class TestLoggerWithStatistics: BaseTestLogger() {
     override fun ignore(testCase: TestCase) = statistics.registerIgnore()
 }
 
-internal class SilentTestLogger: BaseTestLogger() {
+internal class SilentTestLogger : BaseTestLogger() {
     override fun logTestList(runner: TestRunner, suites: Collection<TestSuite>) {}
     override fun log(message: String) {}
     override fun fail(testCase: TestCase, e: Throwable, timeMillis: Long) = e.printStackTrace()
 }
 
-internal class SimpleTestLogger: BaseTestLogger() {
+internal class SimpleTestLogger : BaseTestLogger() {
     override fun startTesting(runner: TestRunner) = println("Starting testing")
     override fun finishTesting(runner: TestRunner, timeMillis: Long) = println("Testing finished")
 
     override fun startIteration(runner: TestRunner, iteration: Int, suites: Collection<TestSuite>) =
-            println("Starting iteration: $iteration")
+        println("Starting iteration: $iteration")
     override fun finishIteration(runner: TestRunner, iteration: Int, timeMillis: Long) =
-            println("Iteration finished: $iteration")
+        println("Iteration finished: $iteration")
 
     override fun startSuite(suite: TestSuite) = println("Starting test suite: $suite")
     override fun finishSuite(suite: TestSuite, timeMillis: Long) = println("Test suite finished: $suite")

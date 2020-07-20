@@ -31,10 +31,11 @@ import kotlin.RuntimeException
  *  - a? == a{0, 1};
  *  - a+ == a{1, <inf>};
  */
-open internal class LeafQuantifierSet(var quantifier: Quantifier,
-                                      innerSet: LeafSet,
-                                      next: AbstractSet,
-                                      type: Int
+internal open class LeafQuantifierSet(
+    var quantifier: Quantifier,
+    innerSet: LeafSet,
+    next: AbstractSet,
+    type: Int
 ) : QuantifierSet(innerSet, next, type) {
 
     val leaf: LeafSet get() = super.innerSet as LeafSet
@@ -60,7 +61,7 @@ open internal class LeafQuantifierSet(var quantifier: Quantifier,
         }
 
         // Process occurrences between min and max.
-        while  ((max == Quantifier.INF || occurrences < max) && index + leaf.charCount <= testString.length) {
+        while ((max == Quantifier.INF || occurrences < max) && index + leaf.charCount <= testString.length) {
             val shift = leaf.accepts(index, testString)
             if (shift < 1) {
                 break

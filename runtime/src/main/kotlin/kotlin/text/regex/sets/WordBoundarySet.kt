@@ -62,6 +62,3 @@ internal class WordBoundarySet(var positive: Boolean) : SimpleSet() {
         return true
     }
 }
-
-
-

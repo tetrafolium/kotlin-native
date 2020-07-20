@@ -4,14 +4,14 @@
  */
 package kotlin.native
 
-import kotlin.native.concurrent.isFrozen
 import kotlin.native.concurrent.InvalidMutabilityException
+import kotlin.native.concurrent.isFrozen
 
 /**
  * Initializes Kotlin runtime for the current thread, if not inited already.
  */
 @SymbolName("Kotlin_initRuntimeIfNeeded")
-external public fun initRuntimeIfNeeded(): Unit
+public external fun initRuntimeIfNeeded(): Unit
 
 /**
  * Deinitializes Kotlin runtime for the current thread, if was inited.
@@ -19,7 +19,7 @@ external public fun initRuntimeIfNeeded(): Unit
  */
 @SymbolName("Kotlin_deinitRuntimeIfNeeded")
 @Deprecated("Deinit runtime can not be called from Kotlin", level = DeprecationLevel.ERROR)
-external public fun deinitRuntimeIfNeeded(): Unit
+public external fun deinitRuntimeIfNeeded(): Unit
 
 /**
  * Exception thrown when top level variable is accessed from incorrect execution context.
@@ -51,7 +51,7 @@ public fun setUnhandledExceptionHook(hook: ReportUnhandledExceptionHook): Report
 }
 
 @SymbolName("Kotlin_setUnhandledExceptionHook")
-external private fun setUnhandledExceptionHook0(hook: ReportUnhandledExceptionHook): ReportUnhandledExceptionHook?
+private external fun setUnhandledExceptionHook0(hook: ReportUnhandledExceptionHook): ReportUnhandledExceptionHook?
 
 /**
  * Compute stable wrt potential object relocations by the memory manager identity hash code.

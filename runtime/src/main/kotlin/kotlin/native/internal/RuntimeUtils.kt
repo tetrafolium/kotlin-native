@@ -45,17 +45,17 @@ fun ThrowInvalidReceiverTypeException(klass: KClass<*>): Nothing {
 }
 
 @ExportForCppRuntime
-internal fun ThrowArithmeticException() : Nothing {
+internal fun ThrowArithmeticException(): Nothing {
     throw ArithmeticException()
 }
 
 @ExportForCppRuntime
-internal fun ThrowNumberFormatException() : Nothing {
+internal fun ThrowNumberFormatException(): Nothing {
     throw NumberFormatException()
 }
 
 @ExportForCppRuntime
-internal fun ThrowOutOfMemoryError() : Nothing {
+internal fun ThrowOutOfMemoryError(): Nothing {
     throw OutOfMemoryError()
 }
 
@@ -68,25 +68,24 @@ fun ThrowUninitializedPropertyAccessException(propertyName: String): Nothing {
 }
 
 @ExportForCppRuntime
-internal fun ThrowIllegalArgumentException() : Nothing {
+internal fun ThrowIllegalArgumentException(): Nothing {
     throw IllegalArgumentException()
 }
 
 @ExportForCppRuntime
-internal fun ThrowIllegalArgumentExceptionWithMessage(message: String) : Nothing {
+internal fun ThrowIllegalArgumentExceptionWithMessage(message: String): Nothing {
     throw IllegalArgumentException(message)
 }
 
 @ExportForCppRuntime
-internal fun ThrowIllegalStateException() : Nothing {
+internal fun ThrowIllegalStateException(): Nothing {
     throw IllegalStateException()
 }
 
 @ExportForCppRuntime
-internal fun ThrowIllegalStateExceptionWithMessage(message:String) : Nothing {
+internal fun ThrowIllegalStateExceptionWithMessage(message: String): Nothing {
     throw IllegalStateException(message)
 }
-
 
 @ExportForCppRuntime
 internal fun ThrowNotImplementedError(): Nothing {
@@ -101,7 +100,8 @@ internal fun ThrowCharacterCodingException(): Nothing {
 @ExportForCppRuntime
 internal fun ThrowIncorrectDereferenceException() {
     throw IncorrectDereferenceException(
-            "Trying to access top level value not marked as @ThreadLocal or @SharedImmutable from non-main thread")
+        "Trying to access top level value not marked as @ThreadLocal or @SharedImmutable from non-main thread"
+    )
 }
 
 @ExportForCppRuntime
@@ -130,7 +130,7 @@ internal fun ExceptionReporterLaunchpad(reporter: (Throwable) -> Unit, throwable
 @ExportForCppRuntime
 internal fun TheEmptyString() = ""
 
-public fun <T: Enum<T>> valueOfForEnum(name: String, values: Array<T>) : T {
+public fun <T : Enum<T>> valueOfForEnum(name: String, values: Array<T>): T {
     var left = 0
     var right = values.size - 1
     while (left <= right) {
@@ -145,7 +145,7 @@ public fun <T: Enum<T>> valueOfForEnum(name: String, values: Array<T>) : T {
     throw Exception("Invalid enum value name: $name")
 }
 
-public fun <T: Enum<T>> valuesForEnum(values: Array<T>): Array<T> {
+public fun <T : Enum<T>> valuesForEnum(values: Array<T>): Array<T> {
     val result = @Suppress("TYPE_PARAMETER_AS_REIFIED") Array<T?>(values.size)
     for (value in values)
         result[value.ordinal] = value
@@ -162,22 +162,22 @@ internal external fun <T> createUninitializedInstance(): T
 internal external fun initInstance(thiz: Any, constructorCall: Any): Unit
 
 @PublishedApi
-internal fun checkProgressionStep(step: Int)  =
-        if (step > 0) step else throw IllegalArgumentException("Step must be positive, was: $step.")
+internal fun checkProgressionStep(step: Int) =
+    if (step > 0) step else throw IllegalArgumentException("Step must be positive, was: $step.")
 @PublishedApi
 internal fun checkProgressionStep(step: Long) =
-        if (step > 0) step else throw IllegalArgumentException("Step must be positive, was: $step.")
+    if (step > 0) step else throw IllegalArgumentException("Step must be positive, was: $step.")
 
 @PublishedApi
 internal fun getProgressionLast(start: Char, end: Char, step: Int): Char =
-        getProgressionLast(start.toInt(), end.toInt(), step).toChar()
+    getProgressionLast(start.toInt(), end.toInt(), step).toChar()
 
 @PublishedApi
 internal fun getProgressionLast(start: Int, end: Int, step: Int): Int =
-        getProgressionLastElement(start, end, step)
+    getProgressionLastElement(start, end, step)
 @PublishedApi
 internal fun getProgressionLast(start: Long, end: Long, step: Long): Long =
-        getProgressionLastElement(start, end, step)
+    getProgressionLastElement(start, end, step)
 
 @PublishedApi
 // Called by the debugger.
@@ -211,7 +211,6 @@ internal fun <T> listOfInternal(vararg elements: T): List<T> {
     return result
 }
 
-
 @PublishedApi
 @SymbolName("OnUnhandledException")
-external internal fun OnUnhandledException(throwable: Throwable)
+internal external fun OnUnhandledException(throwable: Throwable)

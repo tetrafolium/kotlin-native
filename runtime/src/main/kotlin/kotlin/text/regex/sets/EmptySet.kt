@@ -35,7 +35,8 @@ internal class EmptySet(override var next: AbstractSet) : LeafSet() {
         for (index in startIndex..testString.length) {
             if (index < testString.length) {
                 if (testString[index].isLowSurrogate() &&
-                    index > 0 && testString[index - 1].isHighSurrogate()) {
+                    index > 0 && testString[index - 1].isHighSurrogate()
+                ) {
                     continue
                 }
             }
@@ -50,7 +51,8 @@ internal class EmptySet(override var next: AbstractSet) : LeafSet() {
         for (index in rightLimit downTo leftLimit) {
             if (index < testString.length) {
                 if (testString[index].isLowSurrogate() &&
-                    index > 0 && testString[index - 1].isHighSurrogate()) {
+                    index > 0 && testString[index - 1].isHighSurrogate()
+                ) {
                     continue
                 }
             }
@@ -61,12 +63,10 @@ internal class EmptySet(override var next: AbstractSet) : LeafSet() {
         return -1
     }
 
-
     override val name: String
-            get()= "<Empty set>"
+        get() = "<Empty set>"
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean {
         return false
     }
-
 }

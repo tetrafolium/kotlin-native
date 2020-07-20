@@ -16,10 +16,10 @@ package kotlin.native.internal
  * This annotation is not intended for the general consumption and is public only for the launcher!
  */
 @Target(
-        AnnotationTarget.FUNCTION,
-        AnnotationTarget.CONSTRUCTOR,
-        AnnotationTarget.PROPERTY_GETTER,
-        AnnotationTarget.PROPERTY_SETTER
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.CONSTRUCTOR,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER
 )
 @Retention(AnnotationRetention.BINARY)
 public annotation class ExportForCppRuntime(val name: String = "")
@@ -93,7 +93,6 @@ internal annotation class Escapes(val who: Int)
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 internal annotation class PointsTo(vararg val onWhom: Int)
-
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)

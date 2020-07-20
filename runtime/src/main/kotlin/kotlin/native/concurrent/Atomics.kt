@@ -5,12 +5,12 @@
 
 package kotlin.native.concurrent
 
+import kotlinx.cinterop.NativePtr
+import kotlin.native.SymbolName
 import kotlin.native.internal.ExportTypeInfo
 import kotlin.native.internal.Frozen
 import kotlin.native.internal.LeakDetectorCandidate
 import kotlin.native.internal.NoReorderFields
-import kotlin.native.SymbolName
-import kotlinx.cinterop.NativePtr
 
 /**
  * Atomic values and freezing: atomics [AtomicInt], [AtomicLong], [AtomicNativePtr] and [AtomicReference]
@@ -23,8 +23,8 @@ public class AtomicInt(private var value_: Int) {
      * The value being held by this class.
      */
     public var value: Int
-            get() = getImpl()
-            set(new) = setImpl(new)
+        get() = getImpl()
+        set(new) = setImpl(new)
 
     /**
      * Increments the value by [delta] and returns the new value.
@@ -33,7 +33,7 @@ public class AtomicInt(private var value_: Int) {
      * @return the new value
      */
     @SymbolName("Kotlin_AtomicInt_addAndGet")
-    external public fun addAndGet(delta: Int): Int
+    public external fun addAndGet(delta: Int): Int
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
@@ -43,7 +43,7 @@ public class AtomicInt(private var value_: Int) {
      * @return the old value
      */
     @SymbolName("Kotlin_AtomicInt_compareAndSwap")
-    external public fun compareAndSwap(expected: Int, new: Int): Int
+    public external fun compareAndSwap(expected: Int, new: Int): Int
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
@@ -53,19 +53,19 @@ public class AtomicInt(private var value_: Int) {
      * @return true if successful
      */
     @SymbolName("Kotlin_AtomicInt_compareAndSet")
-    external public fun compareAndSet(expected: Int, new: Int): Boolean
+    public external fun compareAndSet(expected: Int, new: Int): Boolean
 
     /**
      * Increments value by one.
      */
-    public fun increment(): Unit {
+    public fun increment() {
         addAndGet(1)
     }
 
     /**
      * Decrements value by one.
      */
-    public fun decrement(): Unit {
+    public fun decrement() {
         addAndGet(-1)
     }
 
@@ -85,7 +85,7 @@ public class AtomicInt(private var value_: Int) {
 }
 
 @Frozen
-public class AtomicLong(private var value_: Long = 0)  {
+public class AtomicLong(private var value_: Long = 0) {
     /**
      * The value being held by this class.
      */
@@ -100,7 +100,7 @@ public class AtomicLong(private var value_: Long = 0)  {
      * @return the new value
      */
     @SymbolName("Kotlin_AtomicLong_addAndGet")
-    external public fun addAndGet(delta: Long): Long
+    public external fun addAndGet(delta: Long): Long
 
     /**
      * Increments the value by [delta] and returns the new value.
@@ -118,7 +118,7 @@ public class AtomicLong(private var value_: Long = 0)  {
      * @return the old value
      */
     @SymbolName("Kotlin_AtomicLong_compareAndSwap")
-    external public fun compareAndSwap(expected: Long, new: Long): Long
+    public external fun compareAndSwap(expected: Long, new: Long): Long
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
@@ -128,19 +128,19 @@ public class AtomicLong(private var value_: Long = 0)  {
      * @return true if successful, false if state is unchanged
      */
     @SymbolName("Kotlin_AtomicLong_compareAndSet")
-    external public fun compareAndSet(expected: Long, new: Long): Boolean
+    public external fun compareAndSet(expected: Long, new: Long): Boolean
 
     /**
      * Increments value by one.
      */
-    public fun increment(): Unit {
+    public fun increment() {
         addAndGet(1L)
     }
 
     /**
      * Decrements value by one.
      */
-    fun decrement(): Unit {
+    fun decrement() {
         addAndGet(-1L)
     }
 
@@ -178,7 +178,7 @@ public class AtomicNativePtr(private var value_: NativePtr) {
      * @return the old value
      */
     @SymbolName("Kotlin_AtomicNativePtr_compareAndSwap")
-    external public fun compareAndSwap(expected: NativePtr, new: NativePtr): NativePtr
+    public external fun compareAndSwap(expected: NativePtr, new: NativePtr): NativePtr
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
@@ -188,7 +188,7 @@ public class AtomicNativePtr(private var value_: NativePtr) {
      * @return true if successful
      */
     @SymbolName("Kotlin_AtomicNativePtr_compareAndSet")
-    external public fun compareAndSet(expected: NativePtr, new: NativePtr): Boolean
+    public external fun compareAndSet(expected: NativePtr, new: NativePtr): Boolean
 
     /**
      * Returns the string representation of this object.
@@ -204,7 +204,6 @@ public class AtomicNativePtr(private var value_: NativePtr) {
     @SymbolName("Kotlin_AtomicNativePtr_get")
     private external fun getImpl(): NativePtr
 }
-
 
 private fun idString(value: Any) = "${value.hashCode().toUInt().toString(16)}"
 
@@ -261,7 +260,7 @@ public class AtomicReference<T> {
      * @return the old value
      */
     @SymbolName("Kotlin_AtomicReference_compareAndSwap")
-    external public fun compareAndSwap(expected: T, new: T): T
+    public external fun compareAndSwap(expected: T, new: T): T
 
     /**
      * Compares value with [expected] and replaces it with [new] value if values matches.
@@ -272,7 +271,7 @@ public class AtomicReference<T> {
      * @return true if successful
      */
     @SymbolName("Kotlin_AtomicReference_compareAndSet")
-    external public fun compareAndSet(expected: T, new: T): Boolean
+    public external fun compareAndSet(expected: T, new: T): Boolean
 
     /**
      * Returns the string representation of this object.
@@ -280,7 +279,7 @@ public class AtomicReference<T> {
      * @return string representation of this object
      */
     public override fun toString(): String =
-            "${debugString(this)} -> ${debugString(value)}"
+        "${debugString(this)} -> ${debugString(value)}"
 
     // Implementation details.
     @SymbolName("Kotlin_AtomicReference_set")
@@ -330,7 +329,7 @@ public class FreezableAtomicReference<T>(private var value_: T) {
      * @throws InvalidMutabilityException if the value is not frozen or a permanent object
      * @return the old value
      */
-     public fun compareAndSwap(expected: T, new: T): T {
+    public fun compareAndSwap(expected: T, new: T): T {
         return if (this.isFrozen) @Suppress("UNCHECKED_CAST")(compareAndSwapImpl(expected, new) as T) else {
             val old = value_
             if (old === expected) value_ = new
@@ -363,7 +362,7 @@ public class FreezableAtomicReference<T>(private var value_: T) {
      * @return string representation of this object
      */
     public override fun toString(): String =
-            "${debugString(this)} -> ${debugString(value)}"
+        "${debugString(this)} -> ${debugString(value)}"
 
     // Implementation details.
     @SymbolName("Kotlin_AtomicReference_set")

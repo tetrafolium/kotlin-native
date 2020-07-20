@@ -12,7 +12,7 @@ package kotlin.native.concurrent
  * @param blocker an object preventing freezing, usually one marked with [ensureNeverFrozen] earlier.
  */
 public class FreezingException(toFreeze: Any, blocker: Any) :
-        RuntimeException("freezing of $toFreeze has failed, first blocker is $blocker")
+    RuntimeException("freezing of $toFreeze has failed, first blocker is $blocker")
 
 /**
  * Exception thrown whenever we attempt to mutate frozen objects.

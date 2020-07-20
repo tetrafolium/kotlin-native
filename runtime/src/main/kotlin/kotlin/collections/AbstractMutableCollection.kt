@@ -10,7 +10,7 @@ package kotlin.collections
  *
  * @param E the type of elements contained in the collection. The collection is invariant on its element type.
  */
-public actual abstract class AbstractMutableCollection<E> protected actual constructor(): MutableCollection<E>, AbstractCollection<E>() {
+public actual abstract class AbstractMutableCollection<E> protected actual constructor() : MutableCollection<E>, AbstractCollection<E>() {
 
     // Bulk Modification Operations
     /**
@@ -18,7 +18,7 @@ public actual abstract class AbstractMutableCollection<E> protected actual const
      *
      * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
      */
-    actual override public fun addAll(elements: Collection<E>): Boolean {
+    public actual override fun addAll(elements: Collection<E>): Boolean {
         var changed = false
         for (v in elements) {
             if (add(v)) changed = true
@@ -48,19 +48,19 @@ public actual abstract class AbstractMutableCollection<E> protected actual const
      *
      * @return `true` if any of the specified elements was removed from the collection, `false` if the collection was not modified.
      */
-    actual override public fun removeAll(elements: Collection<E>): Boolean = (this as MutableIterable<E>).removeAll { it in elements }
+    public actual override fun removeAll(elements: Collection<E>): Boolean = (this as MutableIterable<E>).removeAll { it in elements }
 
     /**
      * Retains only the elements in this collection that are contained in the specified collection.
      *
      * @return `true` if any element was removed from the collection, `false` if the collection was not modified.
      */
-    actual override public fun retainAll(elements: Collection<E>): Boolean = (this as MutableIterable<E>).retainAll { it in elements }
+    public actual override fun retainAll(elements: Collection<E>): Boolean = (this as MutableIterable<E>).retainAll { it in elements }
 
     /**
      * Removes all elements from this collection.
      */
-    actual override fun clear(): Unit {
+    actual override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.next()

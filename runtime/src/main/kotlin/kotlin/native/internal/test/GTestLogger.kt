@@ -23,7 +23,7 @@ internal class GTestLogger : TestLoggerWithStatistics() {
         println("[----------] Global test environment set-up.")
     }
 
-    private fun printResults(timeMillis: Long) = with (statistics) {
+    private fun printResults(timeMillis: Long) = with(statistics) {
         println("[----------] Global test environment tear-down") // Just hack to deal with the Clion parser.
         println("[==========] $total tests from $totalSuites test cases ran. ($timeMillis ms total)")
         println("[  PASSED  ] $passed tests.")

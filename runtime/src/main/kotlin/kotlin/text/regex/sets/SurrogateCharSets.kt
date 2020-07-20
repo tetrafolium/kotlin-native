@@ -104,8 +104,8 @@ internal class LowSurrogateCharSet(low: Char) : CharSet(low) {
         return result
     }
 
-    private fun CharSequence.isHighSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length)
-         = (index in leftBound until rightBound && this[index].isHighSurrogate())
+    private fun CharSequence.isHighSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length) =
+        (index in leftBound until rightBound && this[index].isHighSurrogate())
 
     override fun find(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
         var index = startIndex
@@ -114,8 +114,9 @@ internal class LowSurrogateCharSet(low: Char) : CharSet(low) {
             if (index < 0) {
                 return -1
             }
-            if (!testString.isHighSurrogate(index - 1)
-                &&  next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!testString.isHighSurrogate(index - 1) &&
+                next.matches(index + charCount, testString, matchResult) >= 0
+            ) {
                 return index
             }
             index++
@@ -130,8 +131,9 @@ internal class LowSurrogateCharSet(low: Char) : CharSet(low) {
             if (index < 0) {
                 return -1
             }
-            if (!testString.isHighSurrogate(index - 1, leftLimit, rightLimit)
-                && next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!testString.isHighSurrogate(index - 1, leftLimit, rightLimit) &&
+                next.matches(index + charCount, testString, matchResult) >= 0
+            ) {
                 return index
             }
             index--
@@ -140,7 +142,7 @@ internal class LowSurrogateCharSet(low: Char) : CharSet(low) {
     }
 
     override fun first(set: AbstractSet): Boolean {
-        return when(set) {
+        return when (set) {
             is LowSurrogateCharSet -> set.char == this.char
             is CharSet,
             is RangeSet,
@@ -166,8 +168,8 @@ internal class HighSurrogateCharSet(high: Char) : CharSet(high) {
         return result
     }
 
-    private fun CharSequence.isLowSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length)
-            = (index in leftBound until rightBound && this[index].isLowSurrogate())
+    private fun CharSequence.isLowSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length) =
+        (index in leftBound until rightBound && this[index].isLowSurrogate())
 
     // TODO: We have a similar code here, in LowSurrogateCharSet and in CharSet. Reuse it somehow.
     override fun find(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int {
@@ -178,8 +180,9 @@ internal class HighSurrogateCharSet(high: Char) : CharSet(high) {
                 return -1
             }
             // Remove params.
-            if (!testString.isLowSurrogate(index + 1)
-                &&  next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!testString.isLowSurrogate(index + 1) &&
+                next.matches(index + charCount, testString, matchResult) >= 0
+            ) {
                 return index
             }
             index++
@@ -194,8 +197,9 @@ internal class HighSurrogateCharSet(high: Char) : CharSet(high) {
             if (index < 0) {
                 return -1
             }
-            if (!testString.isLowSurrogate(index + 1, leftLimit, rightLimit)
-                && next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!testString.isLowSurrogate(index + 1, leftLimit, rightLimit) &&
+                next.matches(index + charCount, testString, matchResult) >= 0
+            ) {
                 return index
             }
             index--
@@ -216,4 +220,3 @@ internal class HighSurrogateCharSet(high: Char) : CharSet(high) {
 
     override fun hasConsumed(matchResult: MatchResultImpl): Boolean = true
 }
-

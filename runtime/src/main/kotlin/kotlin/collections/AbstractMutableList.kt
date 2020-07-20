@@ -29,12 +29,12 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
      *
      * @return `true` because the list is always modified as the result of this operation.
      */
-    override actual fun add(element: E): Boolean {
+    actual override fun add(element: E): Boolean {
         add(size, element)
         return true
     }
 
-    override actual fun addAll(index: Int, elements: Collection<E>): Boolean {
+    actual override fun addAll(index: Int, elements: Collection<E>): Boolean {
         var i = index
         var changed = false
         for (e in elements) {
@@ -44,19 +44,18 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
         return changed
     }
 
-    override actual fun clear() {
+    actual override fun clear() {
         removeRange(0, size)
     }
 
-    override actual fun removeAll(elements: Collection<E>): Boolean = removeAll { it in elements }
-    override actual fun retainAll(elements: Collection<E>): Boolean = removeAll { it !in elements }
+    actual override fun removeAll(elements: Collection<E>): Boolean = removeAll { it in elements }
+    actual override fun retainAll(elements: Collection<E>): Boolean = removeAll { it !in elements }
 
+    actual override fun iterator(): MutableIterator<E> = IteratorImpl()
 
-    override actual fun iterator(): MutableIterator<E> = IteratorImpl()
+    actual override fun contains(element: E): Boolean = indexOf(element) >= 0
 
-    override actual fun contains(element: E): Boolean = indexOf(element) >= 0
-
-    override actual fun indexOf(element: E): Int {
+    actual override fun indexOf(element: E): Int {
         for (index in 0..lastIndex) {
             if (get(index) == element) {
                 return index
@@ -65,7 +64,7 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
         return -1
     }
 
-    override actual fun lastIndexOf(element: E): Int {
+    actual override fun lastIndexOf(element: E): Int {
         for (index in lastIndex downTo 0) {
             if (get(index) == element) {
                 return index
@@ -74,11 +73,10 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
         return -1
     }
 
-    override actual fun listIterator(): MutableListIterator<E> = listIterator(0)
-    override actual fun listIterator(index: Int): MutableListIterator<E> = ListIteratorImpl(index)
+    actual override fun listIterator(): MutableListIterator<E> = listIterator(0)
+    actual override fun listIterator(index: Int): MutableListIterator<E> = ListIteratorImpl(index)
 
-
-    override actual fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = SubList(this, fromIndex, toIndex)
+    actual override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = SubList(this, fromIndex, toIndex)
 
     /**
      * Removes the range of elements from this list starting from [fromIndex] and ending with but not including [toIndex].
@@ -118,7 +116,7 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
         }
 
         override fun remove() {
-            check(last != -1) { "Call next() or previous() before removing element from the iterator."}
+            check(last != -1) { "Call next() or previous() before removing element from the iterator." }
 
             removeAt(last)
             index = last
@@ -156,7 +154,7 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
         }
 
         override fun set(element: E) {
-            check(last != -1) { "Call next() or previous() before updating element value with the iterator."}
+            check(last != -1) { "Call next() or previous() before updating element value with the iterator." }
             this@AbstractMutableList[last] = element
         }
     }
@@ -198,5 +196,4 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
 
         override val size: Int get() = _size
     }
-
 }

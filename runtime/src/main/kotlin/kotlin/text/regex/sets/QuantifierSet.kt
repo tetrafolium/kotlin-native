@@ -25,8 +25,8 @@ package kotlin.text.regex
 /**
  * Base class for quantifiers.
  */
-internal abstract class QuantifierSet(open var innerSet: AbstractSet, override var next: AbstractSet, type: Int)
-    : SimpleSet(type) {
+internal abstract class QuantifierSet(open var innerSet: AbstractSet, override var next: AbstractSet, type: Int) :
+    SimpleSet(type) {
 
     override fun first(set: AbstractSet): Boolean =
         innerSet.first(set) || next.first(set)

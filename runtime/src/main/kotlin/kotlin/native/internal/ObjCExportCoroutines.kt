@@ -12,16 +12,16 @@ import kotlin.native.concurrent.*
 
 @ExportForCppRuntime
 private fun Kotlin_ObjCExport_createContinuationArgumentImpl(
-        completionHolder: Any,
-        exceptionTypes: NativePtr
+    completionHolder: Any,
+    exceptionTypes: NativePtr
 ): Continuation<Any?> = createContinuationArgumentFromCallback(EmptyCompletion) { result ->
     result.fold(
-            onSuccess = { value ->
-                runCompletionSuccess(completionHolder, value)
-            },
-            onFailure = { exception ->
-                runCompletionFailure(completionHolder, exception, exceptionTypes)
-            }
+        onSuccess = { value ->
+            runCompletionSuccess(completionHolder, value)
+        },
+        onFailure = { exception ->
+            runCompletionFailure(completionHolder, exception, exceptionTypes)
+        }
     )
 }
 
