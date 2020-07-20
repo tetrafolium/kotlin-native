@@ -39,7 +39,7 @@ kotlin {
     // We declare only one target (either arm64 or x64)
     // to workaround lack of common platform libraries
     // for both device and simulator.
-    val ios = if (!target.simulator ) {
+    val ios = if (!target.simulator) {
         // Device.
         iosArm64("ios")
     } else {

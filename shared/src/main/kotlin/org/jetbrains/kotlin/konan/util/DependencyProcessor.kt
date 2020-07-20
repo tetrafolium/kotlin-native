@@ -27,23 +27,21 @@ import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
 import java.nio.file.Paths
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
-private val Properties.dependenciesUrl : String
+private val Properties.dependenciesUrl: String
     get() = getProperty("dependenciesUrl")
-            ?: throw IllegalStateException("No such property in konan.properties: dependenciesUrl")
+        ?: throw IllegalStateException("No such property in konan.properties: dependenciesUrl")
 
-private val Properties.airplaneMode : Boolean
+private val Properties.airplaneMode: Boolean
     get() = getProperty("airplaneMode")?.toBoolean() ?: false
 
-private val Properties.downloadingAttempts : Int
+private val Properties.downloadingAttempts: Int
     get() = getProperty("downloadingAttempts")?.toInt()
-            ?: DependencyDownloader.DEFAULT_MAX_ATTEMPTS
+        ?: DependencyDownloader.DEFAULT_MAX_ATTEMPTS
 
-private val Properties.downloadingAttemptIntervalMs : Long
+private val Properties.downloadingAttemptIntervalMs: Long
     get() = getProperty("downloadingAttemptPauseMs")?.toLong()
-            ?: DependencyDownloader.DEFAULT_ATTEMPT_INTERVAL_MS
+        ?: DependencyDownloader.DEFAULT_ATTEMPT_INTERVAL_MS
 
 private fun Properties.findCandidates(dependencies: List<String>): Map<String, List<DependencySource>> {
     val dependencyProfiles = this.propertyList("dependencyProfiles")
@@ -65,11 +63,10 @@ private fun Properties.findCandidates(dependencies: List<String>): Map<String, L
     }.toMap()
 }
 
-
-private val KonanPropertiesLoader.dependenciesUrl : String            get() = properties.dependenciesUrl
-private val KonanPropertiesLoader.airplaneMode : Boolean              get() = properties.airplaneMode
-private val KonanPropertiesLoader.downloadingAttempts : Int           get() = properties.downloadingAttempts
-private val KonanPropertiesLoader.downloadingAttemptIntervalMs : Long get() = properties.downloadingAttemptIntervalMs
+private val KonanPropertiesLoader.dependenciesUrl: String get() = properties.dependenciesUrl
+private val KonanPropertiesLoader.airplaneMode: Boolean get() = properties.airplaneMode
+private val KonanPropertiesLoader.downloadingAttempts: Int get() = properties.downloadingAttempts
+private val KonanPropertiesLoader.downloadingAttemptIntervalMs: Long get() = properties.downloadingAttemptIntervalMs
 
 sealed class DependencySource {
     data class Local(val path: File) : DependencySource()
@@ -84,17 +81,19 @@ sealed class DependencySource {
  * Inspects [dependencies] and downloads all the missing ones into [dependenciesDirectory] from [dependenciesUrl].
  * If [airplaneMode] is true will throw a RuntimeException instead of downloading.
  */
-class DependencyProcessor(dependenciesRoot: File,
-                          private val dependenciesUrl: String,
-                          dependencyToCandidates: Map<String, List<DependencySource>>,
-                          homeDependencyCache: File = defaultDependencyCacheDir,
-                          private val airplaneMode: Boolean = false,
-                          maxAttempts: Int = DependencyDownloader.DEFAULT_MAX_ATTEMPTS,
-                          attemptIntervalMs: Long = DependencyDownloader.DEFAULT_ATTEMPT_INTERVAL_MS,
-                          customProgressCallback: ProgressCallback? = null,
-                          private val keepUnstable: Boolean = true,
-                          private val deleteArchives: Boolean = true,
-                          private val archiveType: ArchiveType = ArchiveType.systemDefault) {
+class DependencyProcessor(
+    dependenciesRoot: File,
+    private val dependenciesUrl: String,
+    dependencyToCandidates: Map<String, List<DependencySource>>,
+    homeDependencyCache: File = defaultDependencyCacheDir,
+    private val airplaneMode: Boolean = false,
+    maxAttempts: Int = DependencyDownloader.DEFAULT_MAX_ATTEMPTS,
+    attemptIntervalMs: Long = DependencyDownloader.DEFAULT_ATTEMPT_INTERVAL_MS,
+    customProgressCallback: ProgressCallback? = null,
+    private val keepUnstable: Boolean = true,
+    private val deleteArchives: Boolean = true,
+    private val archiveType: ArchiveType = ArchiveType.systemDefault
+) {
 
     private val dependenciesDirectory = dependenciesRoot.apply { mkdirs() }
     private val cacheDirectory = homeDependencyCache.apply { mkdirs() }
@@ -107,33 +106,38 @@ class DependencyProcessor(dependenciesRoot: File,
     private val downloader = DependencyDownloader(maxAttempts, attemptIntervalMs, customProgressCallback)
     private val extractor = DependencyExtractor(archiveType)
 
-    constructor(dependenciesRoot: File,
-                properties: KonanPropertiesLoader,
-                dependenciesUrl: String = properties.dependenciesUrl,
-                keepUnstable:Boolean = true,
-                archiveType: ArchiveType = ArchiveType.systemDefault) : this(
-            dependenciesRoot,
-            properties.properties,
-            properties.dependencies,
-            dependenciesUrl,
-            keepUnstable = keepUnstable,
-            archiveType = archiveType)
+    constructor(
+        dependenciesRoot: File,
+        properties: KonanPropertiesLoader,
+        dependenciesUrl: String = properties.dependenciesUrl,
+        keepUnstable: Boolean = true,
+        archiveType: ArchiveType = ArchiveType.systemDefault
+    ) : this(
+        dependenciesRoot,
+        properties.properties,
+        properties.dependencies,
+        dependenciesUrl,
+        keepUnstable = keepUnstable,
+        archiveType = archiveType
+    )
 
-    constructor(dependenciesRoot: File,
-                properties: Properties,
-                dependencies: List<String>,
-                dependenciesUrl: String = properties.dependenciesUrl,
-                keepUnstable:Boolean = true,
-                archiveType: ArchiveType = ArchiveType.systemDefault) : this(
-            dependenciesRoot,
-            dependenciesUrl,
-            dependencyToCandidates = properties.findCandidates(dependencies),
-            airplaneMode = properties.airplaneMode,
-            maxAttempts = properties.downloadingAttempts,
-            attemptIntervalMs = properties.downloadingAttemptIntervalMs,
-            keepUnstable = keepUnstable,
-            archiveType = archiveType)
-
+    constructor(
+        dependenciesRoot: File,
+        properties: Properties,
+        dependencies: List<String>,
+        dependenciesUrl: String = properties.dependenciesUrl,
+        keepUnstable: Boolean = true,
+        archiveType: ArchiveType = ArchiveType.systemDefault
+    ) : this(
+        dependenciesRoot,
+        dependenciesUrl,
+        dependencyToCandidates = properties.findCandidates(dependencies),
+        airplaneMode = properties.airplaneMode,
+        maxAttempts = properties.downloadingAttempts,
+        attemptIntervalMs = properties.downloadingAttemptIntervalMs,
+        keepUnstable = keepUnstable,
+        archiveType = archiveType
+    )
 
     class DependencyFile(directory: File, fileName: String) {
         val file = File(directory, fileName).apply { createNewFile() }
@@ -176,7 +180,8 @@ class DependencyProcessor(dependenciesRoot: File,
         if (extractedDependencies.contains(depName) &&
             depDir.exists() &&
             depDir.isDirectory &&
-            depDir.list().isNotEmpty()) {
+            depDir.list().isNotEmpty()
+        ) {
 
             if (!keepUnstable && depDir.list().contains(".unstable")) {
                 // The downloaded version of the dependency is unstable -> redownload it.
@@ -195,10 +200,12 @@ class DependencyProcessor(dependenciesRoot: File,
 
         if (!archive.exists()) {
             if (airplaneMode) {
-                throw FileNotFoundException("""
+                throw FileNotFoundException(
+                    """
                     Cannot find a dependency locally: $dependency.
                     Set `airplaneMode = false` in konan.properties to download it.
-                """.trimIndent())
+                    """.trimIndent()
+                )
             }
             downloader.download(url, archive)
         }

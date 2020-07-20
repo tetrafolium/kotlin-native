@@ -30,7 +30,7 @@ kotlin {
         // Configure fields required by CocoaPods.
         summary = "Working with AFNetworking from Kotlin/Native using CocoaPods"
         homepage = "https://github.com/JetBrains/kotlin-native"
-        
+
         // Configure a dependency on AFNetworking. It will be added in all macOS and iOS targets.
         pod("AFNetworking", "~> 3.2.0")
     }

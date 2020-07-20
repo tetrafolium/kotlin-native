@@ -5,11 +5,11 @@
 
 package sample.videoplayer
 
-import kotlin.native.concurrent.Worker
 import kotlinx.cinterop.*
-import sdl.*
-import platform.posix.memset
 import platform.posix.memcpy
+import platform.posix.memset
+import sdl.*
+import kotlin.native.concurrent.Worker
 
 enum class SampleFormat {
     INVALID,

@@ -18,8 +18,8 @@ package org.jetbrains.kotlin.konan.target
 
 import org.jetbrains.kotlin.konan.util.DependencyProcessor
 
-class Platform(val configurables: Configurables) 
-    : Configurables by configurables {
+class Platform(val configurables: Configurables) :
+    Configurables by configurables {
 
     val clang by lazy {
         ClangArgs(configurables)
@@ -30,9 +30,9 @@ class Platform(val configurables: Configurables)
 }
 
 class PlatformManager(private val distribution: Distribution, experimental: Boolean = false) :
-        HostManager(distribution, experimental) {
+    HostManager(distribution, experimental) {
 
-    constructor(konanHome: String, experimental: Boolean = false): this(Distribution(konanHome), experimental)
+    constructor(konanHome: String, experimental: Boolean = false) : this(Distribution(konanHome), experimental)
 
     private val loaders = filteredOutEnabledButNotSupported.map {
         it to loadConfigurables(it, distribution.properties, DependencyProcessor.defaultDependenciesRoot.absolutePath)
@@ -53,4 +53,3 @@ class PlatformManager(private val distribution: Distribution, experimental: Bool
     val filteredOutEnabledButNotSupported
         get() = enabled.filterNot { it == KonanTarget.WATCHOS_X64 }
 }
-

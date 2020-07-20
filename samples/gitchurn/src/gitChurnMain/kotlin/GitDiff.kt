@@ -22,7 +22,6 @@ class GitDiff(val repository: GitRepository, val handle: CPointer<git_diff>) {
     fun close() {
         git_diff_free(handle)
     }
-
 }
 
 class GifDiffDelta(val diff: GitDiff, val handle: CPointer<git_diff_delta>) {
@@ -41,5 +40,4 @@ class GifDiffDelta(val diff: GitDiff, val handle: CPointer<git_diff_delta>) {
             else -> throw Exception("Unsupported delta status $status")
         }
     }
-
 }

@@ -5,9 +5,9 @@
 
 package org.jetbrains.kotlin.konan.library.impl
 
-import org.jetbrains.kotlin.konan.library.BitcodeWriter
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.konan.library.BitcodeKotlinLibraryLayout
+import org.jetbrains.kotlin.konan.library.BitcodeWriter
 import org.jetbrains.kotlin.konan.library.TargetedKotlinLibraryLayout
 
 open class TargetedWriterImpl(val targetLayout: TargetedKotlinLibraryLayout) {

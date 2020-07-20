@@ -1,13 +1,13 @@
 package org.jetbrains.kotlin.konan.target
 
 fun KonanTarget.supportsCodeCoverage(): Boolean =
-        this == KonanTarget.MINGW_X64 ||
+    this == KonanTarget.MINGW_X64 ||
         this == KonanTarget.LINUX_X64 ||
         this == KonanTarget.MACOS_X64 ||
         this == KonanTarget.IOS_X64
 
 fun KonanTarget.supportsMimallocAllocator(): Boolean =
-     when(this) {
+    when (this) {
         is KonanTarget.LINUX_X64 -> true
         is KonanTarget.MINGW_X86 -> true
         is KonanTarget.MINGW_X64 -> true

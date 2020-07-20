@@ -75,96 +75,122 @@ class PiecePosition(piece: Piece, private val origin: Point) {
  * See https://tetris.wiki/Nintendo_Rotation_System
  */
 enum class Piece(private val origin_: Point, private vararg val states: Field) {
-    T(Point(-1, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(CELL1, CELL1, CELL1),
-                    byteArrayOf(EMPTY, CELL1, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL1, EMPTY),
-                    byteArrayOf(CELL1, CELL1, EMPTY),
-                    byteArrayOf(EMPTY, CELL1, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL1, EMPTY),
-                    byteArrayOf(CELL1, CELL1, CELL1),
-                    byteArrayOf(EMPTY, EMPTY, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL1, EMPTY),
-                    byteArrayOf(EMPTY, CELL1, CELL1),
-                    byteArrayOf(EMPTY, CELL1, EMPTY))
+    T(
+        Point(-1, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY),
+            byteArrayOf(CELL1, CELL1, CELL1),
+            byteArrayOf(EMPTY, CELL1, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL1, EMPTY),
+            byteArrayOf(CELL1, CELL1, EMPTY),
+            byteArrayOf(EMPTY, CELL1, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL1, EMPTY),
+            byteArrayOf(CELL1, CELL1, CELL1),
+            byteArrayOf(EMPTY, EMPTY, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL1, EMPTY),
+            byteArrayOf(EMPTY, CELL1, CELL1),
+            byteArrayOf(EMPTY, CELL1, EMPTY)
+        )
     ),
-    J(Point(-1, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(CELL2, CELL2, CELL2),
-                    byteArrayOf(EMPTY, EMPTY, CELL2)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL2, EMPTY),
-                    byteArrayOf(EMPTY, CELL2, EMPTY),
-                    byteArrayOf(CELL2, CELL2, EMPTY)),
-            arrayOf(
-                    byteArrayOf(CELL2, EMPTY, EMPTY),
-                    byteArrayOf(CELL2, CELL2, CELL2),
-                    byteArrayOf(EMPTY, EMPTY, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL2, CELL2),
-                    byteArrayOf(EMPTY, CELL2, EMPTY),
-                    byteArrayOf(EMPTY, CELL2, EMPTY))
+    J(
+        Point(-1, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY),
+            byteArrayOf(CELL2, CELL2, CELL2),
+            byteArrayOf(EMPTY, EMPTY, CELL2)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL2, EMPTY),
+            byteArrayOf(EMPTY, CELL2, EMPTY),
+            byteArrayOf(CELL2, CELL2, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(CELL2, EMPTY, EMPTY),
+            byteArrayOf(CELL2, CELL2, CELL2),
+            byteArrayOf(EMPTY, EMPTY, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL2, CELL2),
+            byteArrayOf(EMPTY, CELL2, EMPTY),
+            byteArrayOf(EMPTY, CELL2, EMPTY)
+        )
     ),
-    Z(Point(-1, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(CELL3, CELL3, EMPTY),
-                    byteArrayOf(EMPTY, CELL3, CELL3)),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, CELL3),
-                    byteArrayOf(EMPTY, CELL3, CELL3),
-                    byteArrayOf(EMPTY, CELL3, EMPTY))
+    Z(
+        Point(-1, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY),
+            byteArrayOf(CELL3, CELL3, EMPTY),
+            byteArrayOf(EMPTY, CELL3, CELL3)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, CELL3),
+            byteArrayOf(EMPTY, CELL3, CELL3),
+            byteArrayOf(EMPTY, CELL3, EMPTY)
+        )
     ),
-    O(Point(0, -1),
-            arrayOf(
-                    byteArrayOf(CELL1, CELL1),
-                    byteArrayOf(CELL1, CELL1))
+    O(
+        Point(0, -1),
+        arrayOf(
+            byteArrayOf(CELL1, CELL1),
+            byteArrayOf(CELL1, CELL1)
+        )
     ),
-    S(Point(-1, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(EMPTY, CELL2, CELL2),
-                    byteArrayOf(CELL2, CELL2, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL2, EMPTY),
-                    byteArrayOf(EMPTY, CELL2, CELL2),
-                    byteArrayOf(EMPTY, EMPTY, CELL2))
+    S(
+        Point(-1, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY),
+            byteArrayOf(EMPTY, CELL2, CELL2),
+            byteArrayOf(CELL2, CELL2, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL2, EMPTY),
+            byteArrayOf(EMPTY, CELL2, CELL2),
+            byteArrayOf(EMPTY, EMPTY, CELL2)
+        )
     ),
-    L(Point(-1, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(CELL3, CELL3, CELL3),
-                    byteArrayOf(CELL3, EMPTY, EMPTY)),
-            arrayOf(
-                    byteArrayOf(CELL3, CELL3, EMPTY),
-                    byteArrayOf(EMPTY, CELL3, EMPTY),
-                    byteArrayOf(EMPTY, CELL3, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, CELL3),
-                    byteArrayOf(CELL3, CELL3, CELL3),
-                    byteArrayOf(EMPTY, EMPTY, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, CELL3, EMPTY),
-                    byteArrayOf(EMPTY, CELL3, EMPTY),
-                    byteArrayOf(EMPTY, CELL3, CELL3))
+    L(
+        Point(-1, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY),
+            byteArrayOf(CELL3, CELL3, CELL3),
+            byteArrayOf(CELL3, EMPTY, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(CELL3, CELL3, EMPTY),
+            byteArrayOf(EMPTY, CELL3, EMPTY),
+            byteArrayOf(EMPTY, CELL3, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, CELL3),
+            byteArrayOf(CELL3, CELL3, CELL3),
+            byteArrayOf(EMPTY, EMPTY, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, CELL3, EMPTY),
+            byteArrayOf(EMPTY, CELL3, EMPTY),
+            byteArrayOf(EMPTY, CELL3, CELL3)
+        )
     ),
-    I(Point(-2, -2),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY),
-                    byteArrayOf(CELL1, CELL1, CELL1, CELL1),
-                    byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY)),
-            arrayOf(
-                    byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
-                    byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
-                    byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
-                    byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY))
+    I(
+        Point(-2, -2),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY),
+            byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY),
+            byteArrayOf(CELL1, CELL1, CELL1, CELL1),
+            byteArrayOf(EMPTY, EMPTY, EMPTY, EMPTY)
+        ),
+        arrayOf(
+            byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
+            byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
+            byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY),
+            byteArrayOf(EMPTY, EMPTY, CELL1, EMPTY)
+        )
     );
 
     val origin get() = Point(origin_.x, origin_.y)
@@ -242,9 +268,10 @@ class GameField(val width: Int, val height: Int, val visualizer: GameFieldVisual
         for (i in field.indices) {
             val row = field[i]
             for (j in row.indices) {
-                if (i >= (MARGIN + height) // Bottom (field is flipped over).
-                        || (j < MARGIN) // Left
-                        || (j >= MARGIN + width)) // Right
+                if (i >= (MARGIN + height) || // Bottom (field is flipped over).
+                    (j < MARGIN) || // Left
+                    (j >= MARGIN + width)
+                ) // Right
                     row[j] = BRICK
             }
         }
@@ -383,12 +410,14 @@ class Game(width: Int, height: Int, val visualizer: GameFieldVisualizer, val use
     /*
      * For speed constants and level up thresholds see https://tetris.wiki/Tetris_(NES,_Nintendo)
      */
-    private val speeds = intArrayOf(48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2)
+    private val speeds = intArrayOf(
+        48, 43, 38, 33, 28, 23, 18, 13, 8, 6, 5, 5, 5, 4, 4, 4, 3, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+    )
     private val levelUpThreshold
         get() =
-        if (leveledUp) 10
-        else minOf(startLevel * 10 + 10, maxOf(100, startLevel * 10 - 50))
+            if (leveledUp) 10
+            else minOf(startLevel * 10 + 10, maxOf(100, startLevel * 10 - 50))
     private val speed get() = if (level < 29) speeds[level] else 1
 
     private var ticks = 0
@@ -486,6 +515,4 @@ class Game(width: Int, height: Int, val visualizer: GameFieldVisualizer, val use
             ticks -= speed
         }
     }
-
 }
-

@@ -32,14 +32,13 @@ interface Disposable {
  */
 abstract class DisposableContainer : Disposable {
     val arena = Arena()
-    
+
     override fun dispose() {
         arena.clear()
     }
 
     inline fun <T> tryConstruct(init: () -> T): T =
-        try { init() }
-        catch (e: Throwable) {
+        try { init() } catch (e: Throwable) {
             dispose()
             throw e
         }
@@ -58,13 +57,16 @@ abstract class DisposableContainer : Disposable {
     inline fun <T : Disposable> disposable(create: () -> T): T =
         disposable(
             create = create,
-            dispose = { it.dispose() })
+            dispose = { it.dispose() }
+        )
 
     inline fun <T : CPointed> sdlDisposable(
-            message: String,
-            ptr: CPointer<T>?,
-            crossinline dispose: (CPointer<T>) -> Unit): CPointer<T> =
+        message: String,
+        ptr: CPointer<T>?,
+        crossinline dispose: (CPointer<T>) -> Unit
+    ): CPointer<T> =
         disposable(
             create = { ptr ?: throwSDLError(message) },
-            dispose = dispose)
+            dispose = dispose
+        )
 }

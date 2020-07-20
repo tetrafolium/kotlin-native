@@ -8,13 +8,15 @@ package sample.androidnative
 import kotlinx.cinterop.*
 import platform.android.*
 import platform.egl.*
-import platform.posix.*
 import platform.gles.*
+import platform.posix.*
 import sample.androidnative.bmpformat.BMPHeader
 
-class Renderer(val container: DisposableContainer,
-               val nativeActivity: ANativeActivity,
-               val savedMatrix: COpaquePointer?) {
+class Renderer(
+    val container: DisposableContainer,
+    val nativeActivity: ANativeActivity,
+    val savedMatrix: COpaquePointer?
+) {
     private var display: EGLDisplay? = null
     private var surface: EGLSurface? = null
     private var context: EGLContext? = null
@@ -48,11 +50,11 @@ class Renderer(val container: DisposableContainer,
             }
 
             val attribs = cValuesOf(
-                    EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-                    EGL_BLUE_SIZE, 8,
-                    EGL_GREEN_SIZE, 8,
-                    EGL_RED_SIZE, 8,
-                    EGL_NONE
+                EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+                EGL_BLUE_SIZE, 8,
+                EGL_GREEN_SIZE, 8,
+                EGL_RED_SIZE, 8,
+                EGL_NONE
             )
             val numConfigs = alloc<EGLintVar>()
             if (eglChooseConfig(display, attribs, null, 0, numConfigs.ptr) == 0u) {
@@ -69,10 +71,11 @@ class Renderer(val container: DisposableContainer,
                 val b = alloc<EGLintVar>()
                 val d = alloc<EGLintVar>()
                 if (eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_RED_SIZE, r.ptr) != 0u &&
-                        eglGetConfigAttrib (display, supportedConfigs[configIndex], EGL_GREEN_SIZE, g.ptr) != 0u &&
-                eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_BLUE_SIZE, b.ptr) != 0u &&
-                eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_DEPTH_SIZE, d.ptr) != 0u &&
-                r.value == 8 && g.value == 8 && b.value == 8 && d.value == 0) break
+                    eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_GREEN_SIZE, g.ptr) != 0u &&
+                    eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_BLUE_SIZE, b.ptr) != 0u &&
+                    eglGetConfigAttrib(display, supportedConfigs[configIndex], EGL_DEPTH_SIZE, d.ptr) != 0u &&
+                    r.value == 8 && g.value == 8 && b.value == 8 && d.value == 0
+                ) break
                 ++configIndex
             }
             if (configIndex >= numConfigs.value)
@@ -94,10 +97,11 @@ class Renderer(val container: DisposableContainer,
 
             val width = alloc<EGLintVar>()
             val height = alloc<EGLintVar>()
-            if (eglQuerySurface(display, surface, EGL_WIDTH, width.ptr) == 0u
-                    || eglQuerySurface (display, surface, EGL_HEIGHT, height.ptr) == 0u) {
-            throw Error("eglQuerySurface() returned error ${eglGetError()}")
-        }
+            if (eglQuerySurface(display, surface, EGL_WIDTH, width.ptr) == 0u ||
+                eglQuerySurface(display, surface, EGL_HEIGHT, height.ptr) == 0u
+            ) {
+                throw Error("eglQuerySurface() returned error ${eglGetError()}")
+            }
 
             this@Renderer.screen = Vector2(width.value.toFloat(), height.value.toFloat())
 
@@ -161,10 +165,9 @@ class Renderer(val container: DisposableContainer,
         glPopMatrix()
     }
 
-
     private fun loadTexture(assetName: String): Unit = memScoped {
         val asset = AAssetManager_open(nativeActivity.assetManager, assetName, AASSET_MODE_BUFFER.convert())
-                ?: throw Error("Error opening asset $assetName")
+            ?: throw Error("Error opening asset $assetName")
         println("loading texture $assetName")
         try {
             val length = AAsset_getLength(asset)
@@ -184,7 +187,7 @@ class Renderer(val container: DisposableContainer,
                     data[i] = data[i + 2]
                     data[i + 2] = t
                 }
-                println("loaded texture ${width}x${height}")
+                println("loaded texture ${width}x$height")
                 glBindTexture(GL_TEXTURE_2D, 1)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -192,7 +195,6 @@ class Renderer(val container: DisposableContainer,
                 glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, cValuesOf(1.0f, 1.0f, 1.0f, 1.0f))
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data)
-
             }
         } finally {
             AAsset_close(asset)
@@ -200,12 +202,12 @@ class Renderer(val container: DisposableContainer,
     }
 
     private val texturePoints = arrayOf(
-            Vector2(0.0f, 0.2f), Vector2(0.0f, 0.8f), Vector2(0.6f, 1.0f), Vector2(1.0f, 0.5f), Vector2(0.8f, 0.0f)
+        Vector2(0.0f, 0.2f), Vector2(0.0f, 0.8f), Vector2(0.6f, 1.0f), Vector2(1.0f, 0.5f), Vector2(0.8f, 0.0f)
     )
 
     private val scale = 1.25f
 
-    fun draw(): Unit {
+    fun draw() {
         if (!initialized) return
 
         glPushMatrix()

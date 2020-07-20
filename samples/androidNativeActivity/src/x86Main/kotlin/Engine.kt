@@ -7,9 +7,9 @@ package sample.androidnative
 
 import kotlinx.cinterop.*
 import platform.android.*
-import platform.posix.*
 import platform.gles3.*
 import platform.linux.*
+import platform.posix.*
 
 fun logError(message: String) {
     __android_log_write(ANDROID_LOG_ERROR.convert(), "KonanActivity", message)
@@ -89,7 +89,8 @@ class Engine(val state: NativeActivityState) : DisposableContainer() {
 
         val contextClass = FindClass("android/content/Context")
         val getSystemServiceMethod = GetMethodID(
-                contextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;")!!
+            contextClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;"
+        )!!
         val vibrator = CallObjectMethod(context, getSystemServiceMethod, "vibrator")
         if (vibrator != null) {
             val vibratorClass = FindClass("android/os/Vibrator")
@@ -173,12 +174,12 @@ class Engine(val state: NativeActivityState) : DisposableContainer() {
     }
 
     private fun getEventPoint(event: CPointer<AInputEvent>?, i: Int) =
-            Vector2(AMotionEvent_getRawX(event, i.convert()), AMotionEvent_getRawY(event, i.convert()))
+        Vector2(AMotionEvent_getRawX(event, i.convert()), AMotionEvent_getRawY(event, i.convert()))
 
     private fun getEventTime(event: CPointer<AInputEvent>?) =
-            AMotionEvent_getEventTime(event) / 1_000_000_000.0f
+        AMotionEvent_getEventTime(event) / 1_000_000_000.0f
 
-    private fun processUserInput(): Unit {
+    private fun processUserInput() {
         if (AInputQueue_getEvent(queue, inputEvent.ptr) < 0) {
             logError("Failure reading input event")
             return

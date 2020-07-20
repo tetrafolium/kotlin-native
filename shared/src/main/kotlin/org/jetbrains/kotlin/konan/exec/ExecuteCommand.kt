@@ -21,14 +21,13 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.ProcessBuilder.Redirect
 
-
 open class Command(initialCommand: List<String>) {
 
-    constructor(tool: String) : this(listOf(tool)) 
-    constructor(vararg command: String) : this(command.toList<String>()) 
+    constructor(tool: String) : this(listOf(tool))
+    constructor(vararg command: String) : this(command.toList<String>())
     protected val command = initialCommand.toMutableList()
 
-    val args: List<String> 
+    val args: List<String>
         get() = command.drop(1)
 
     operator fun String.unaryPlus(): Command {
@@ -41,11 +40,11 @@ open class Command(initialCommand: List<String>) {
         return this@Command
     }
 
-    var logger: ((() -> String)->Unit)? = null
+    var logger: ((() -> String) -> Unit)? = null
 
     private var stdError: List<String> = emptyList()
 
-    fun logWith(newLogger: ((() -> String)->Unit)): Command {
+    fun logWith(newLogger: ((() -> String) -> Unit)): Command {
         logger = newLogger
         return this
     }
@@ -76,7 +75,7 @@ open class Command(initialCommand: List<String>) {
      * If withErrors is true then output from error stream will be added
      */
     fun getOutputLines(withErrors: Boolean = false): List<String> =
-            getResult(withErrors, handleError = true).outputLines
+        getResult(withErrors, handleError = true).outputLines
 
     fun getResult(withErrors: Boolean, handleError: Boolean = false): Result {
         log()
@@ -90,7 +89,7 @@ open class Command(initialCommand: List<String>) {
             builder.redirectInput(Redirect.INHERIT)
             builder.redirectError(Redirect.INHERIT)
             builder.redirectOutput(Redirect.to(outputFile))
-                    .redirectErrorStream(withErrors)
+                .redirectErrorStream(withErrors)
             // Note: getting process output could be done without redirecting to temporary file,
             // however this would require managing a thread to read `process.inputStream` because
             // it may have limited capacity.
@@ -108,10 +107,13 @@ open class Command(initialCommand: List<String>) {
     class Result(val exitCode: Int, val outputLines: List<String>)
 
     private fun handleExitCode(code: Int, output: List<String> = emptyList()) {
-        if (code != 0) throw KonanExternalToolFailure("""
+        if (code != 0) throw KonanExternalToolFailure(
+            """
             The ${command[0]} command returned non-zero exit code: $code.
             output:
-            """.trimIndent() + "\n${output.joinToString("\n")}", command[0])
+            """.trimIndent() + "\n${output.joinToString("\n")}",
+            command[0]
+        )
         // Show warnings in case of success linkage.
         if (stdError.isNotEmpty()) {
             stdError.joinToString("\n").also { message ->

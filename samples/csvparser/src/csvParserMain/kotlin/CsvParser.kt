@@ -6,10 +6,10 @@
 package sample.csvparser
 
 import kotlinx.cinterop.*
-import platform.posix.*
 import kotlinx.cli.*
+import platform.posix.*
 
-fun parseLine(line: String, separator: Char) : List<String> {
+fun parseLine(line: String, separator: Char): List<String> {
     val result = mutableListOf<String>()
     val builder = StringBuilder()
     var quotes = 0
@@ -19,7 +19,7 @@ fun parseLine(line: String, separator: Char) : List<String> {
                 quotes++
                 builder.append(ch)
             }
-            (ch == '\n') || (ch ==  '\r') -> {}
+            (ch == '\n') || (ch == '\r') -> {}
             (ch == separator) && (quotes % 2 == 0) -> {
                 result.add(builder.toString())
                 builder.setLength(0)

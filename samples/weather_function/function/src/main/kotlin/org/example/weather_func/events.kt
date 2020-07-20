@@ -27,8 +27,7 @@ internal class Event<T : Any?> {
     operator fun invoke(value: T) {
         var exception: Throwable? = null
         for (handler in handlers) {
-            try { handler(value) }
-            catch (ex: Throwable) { exception = ex }
+            try { handler(value) } catch (ex: Throwable) { exception = ex }
         }
         // If the exception isn't null then throw it.
         exception?.let { throw it }

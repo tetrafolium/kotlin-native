@@ -15,7 +15,7 @@ fun sleep(millis: Int) {
     SDL_Delay(millis.toUInt())
 }
 
-class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, UserInput {
+class SDL_Visualizer(val width: Int, val height: Int) : GameFieldVisualizer, UserInput {
     private val CELL_SIZE = 20
     private val COLORS = 10
     private val CELLS_WIDTH = COLORS * CELL_SIZE
@@ -94,8 +94,8 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
         }
 
         private fun inside(rect: SDL_Rect, x: Int, y: Int): Boolean {
-            return x >= stretch(rect.x) && x <= stretch(rect.x + rect.w)
-                    && y >= stretch(rect.y) && y <= stretch(rect.y + rect.h)
+            return x >= stretch(rect.x) && x <= stretch(rect.x + rect.w) &&
+                y >= stretch(rect.y) && y <= stretch(rect.y + rect.h)
         }
 
         fun destroy() {
@@ -159,8 +159,10 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
             windowY = (displayHeight - windowHeight) / 2
             ratio = 1.0f
         }
-        val window = SDL_CreateWindow("Tetris", windowX, windowY, windowWidth, windowHeight,
-            SDL_WINDOW_SHOWN or SDL_WINDOW_ALLOW_HIGHDPI)
+        val window = SDL_CreateWindow(
+            "Tetris", windowX, windowY, windowWidth, windowHeight,
+            SDL_WINDOW_SHOWN or SDL_WINDOW_ALLOW_HIGHDPI
+        )
         if (window == null) {
             println("SDL_CreateWindow Error: ${get_SDL_Error()}")
             SDL_Quit()
@@ -191,19 +193,19 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
     }
 
     private fun findFile(name: String): String {
-      memScoped {
-         val dirs = listOf(".", SDL_GetBasePath()?.toKString() ?: "/")
-         val statBuffer = alloc<stat>()
-         dirs.forEach {
-            val candidate = "$it/$name"
-            if (stat(candidate, statBuffer.ptr) == 0) return candidate
-         }
-         throw Error("name not found")
-      }
+        memScoped {
+            val dirs = listOf(".", SDL_GetBasePath()?.toKString() ?: "/")
+            val statBuffer = alloc<stat>()
+            dirs.forEach {
+                val candidate = "$it/$name"
+                if (stat(candidate, statBuffer.ptr) == 0) return candidate
+            }
+            throw Error("name not found")
+        }
     }
 
     private fun loadImage(win: CPointer<SDL_Window>, ren: CPointer<SDL_Renderer>, imagePath: String): CPointer<SDL_Texture> {
-        val bmp = SDL_LoadBMP_RW(SDL_RWFromFile(imagePath, "rb"), 1);
+        val bmp = SDL_LoadBMP_RW(SDL_RWFromFile(imagePath, "rb"), 1)
         if (bmp == null) {
             SDL_DestroyRenderer(ren)
             SDL_DestroyWindow(win)
@@ -298,7 +300,6 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
         for (i in 0..width - 1) {
             copyRect(srcX, srcY, destX, destY, CELL_SIZE + MARGIN, BORDER_WIDTH)
             destX += CELL_SIZE + MARGIN
-
         }
         // Right-down corner.
         srcX += CELL_SIZE + MARGIN
@@ -306,89 +307,116 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
     }
 
     private fun drawField() {
-        drawField(field    = field,
-                topLeftX = 0,
-                topLeftY = 0,
-                width    = width,
-                height   = height)
+        drawField(
+            field = field,
+            topLeftX = 0,
+            topLeftY = 0,
+            width = width,
+            height = height
+        )
     }
 
     private fun drawNextPiece() {
-        drawInt(labelSrcX   = LEVEL_LABEL_WIDTH,
-                labelSrcY   = CELLS_HEIGHT + SYMBOL_SIZE,
-                labelDestX  = fieldWidth + SYMBOL_SIZE,
-                labelDestY  = getInfoY(5),
-                labelWidth  = NEXT_LABEL_WIDTH,
-                totalDigits = 0,
-                value       = 0)
-        drawField(field    = nextPieceField,
-                topLeftX = fieldWidth + SYMBOL_SIZE,
-                topLeftY = getInfoY(6),
-                width    = 4,
-                height   = 4)
+        drawInt(
+            labelSrcX = LEVEL_LABEL_WIDTH,
+            labelSrcY = CELLS_HEIGHT + SYMBOL_SIZE,
+            labelDestX = fieldWidth + SYMBOL_SIZE,
+            labelDestY = getInfoY(5),
+            labelWidth = NEXT_LABEL_WIDTH,
+            totalDigits = 0,
+            value = 0
+        )
+        drawField(
+            field = nextPieceField,
+            topLeftX = fieldWidth + SYMBOL_SIZE,
+            topLeftY = getInfoY(6),
+            width = 4,
+            height = 4
+        )
     }
 
     private fun drawField(field: Field, topLeftX: Int, topLeftY: Int, width: Int, height: Int) {
-        drawBorder(topLeftX = topLeftX,
-                topLeftY = topLeftY,
-                width    = width,
-                height   = height)
+        drawBorder(
+            topLeftX = topLeftX,
+            topLeftY = topLeftY,
+            width = width,
+            height = height
+        )
         for (i in 0..height - 1)
             for (j in 0..width - 1) {
                 val cell = field[i][j].toInt()
                 if (cell == 0) continue
-                copyRect(srcX  = (level % COLORS) * CELL_SIZE,
-                        srcY  = (3 - cell) * CELL_SIZE,
-                        destX = topLeftX + BORDER_WIDTH + MARGIN + j * (CELL_SIZE + MARGIN),
-                        destY = topLeftY + BORDER_WIDTH + MARGIN + i * (CELL_SIZE + MARGIN),
-                        width = CELL_SIZE,
-                        height = CELL_SIZE)
+                copyRect(
+                    srcX = (level % COLORS) * CELL_SIZE,
+                    srcY = (3 - cell) * CELL_SIZE,
+                    destX = topLeftX + BORDER_WIDTH + MARGIN + j * (CELL_SIZE + MARGIN),
+                    destY = topLeftY + BORDER_WIDTH + MARGIN + i * (CELL_SIZE + MARGIN),
+                    width = CELL_SIZE,
+                    height = CELL_SIZE
+                )
             }
     }
 
     private fun drawInfo() {
-        drawInt(labelSrcX   = LINES_LABEL_WIDTH,
-                labelSrcY   = CELLS_HEIGHT,
-                labelDestX  = fieldWidth + SYMBOL_SIZE,
-                labelDestY  = getInfoY(0),
-                labelWidth  = SCORE_LABEL_WIDTH,
-                totalDigits = 6,
-                value       = score)
-        drawInt(labelSrcX   = 0,
-                labelSrcY   = CELLS_HEIGHT,
-                labelDestX  = fieldWidth + SYMBOL_SIZE,
-                labelDestY  = getInfoY(1),
-                labelWidth  = LINES_LABEL_WIDTH,
-                totalDigits = 3,
-                value       = linesCleared)
-        drawInt(labelSrcX   = 0,
-                labelSrcY   = CELLS_HEIGHT + SYMBOL_SIZE,
-                labelDestX  = fieldWidth + SYMBOL_SIZE,
-                labelDestY  = getInfoY(2),
-                labelWidth  = LEVEL_LABEL_WIDTH,
-                totalDigits = 2,
-                value       = level)
-        drawInt(labelSrcX   = 0,
-                labelSrcY   = CELLS_HEIGHT + SYMBOL_SIZE * 2,
-                labelDestX  = fieldWidth + SYMBOL_SIZE,
-                labelDestY  = getInfoY(3),
-                labelWidth  = TETRISES_LABEL_WIDTH,
-                totalDigits = 2,
-                value       = tetrises)
+        drawInt(
+            labelSrcX = LINES_LABEL_WIDTH,
+            labelSrcY = CELLS_HEIGHT,
+            labelDestX = fieldWidth + SYMBOL_SIZE,
+            labelDestY = getInfoY(0),
+            labelWidth = SCORE_LABEL_WIDTH,
+            totalDigits = 6,
+            value = score
+        )
+        drawInt(
+            labelSrcX = 0,
+            labelSrcY = CELLS_HEIGHT,
+            labelDestX = fieldWidth + SYMBOL_SIZE,
+            labelDestY = getInfoY(1),
+            labelWidth = LINES_LABEL_WIDTH,
+            totalDigits = 3,
+            value = linesCleared
+        )
+        drawInt(
+            labelSrcX = 0,
+            labelSrcY = CELLS_HEIGHT + SYMBOL_SIZE,
+            labelDestX = fieldWidth + SYMBOL_SIZE,
+            labelDestY = getInfoY(2),
+            labelWidth = LEVEL_LABEL_WIDTH,
+            totalDigits = 2,
+            value = level
+        )
+        drawInt(
+            labelSrcX = 0,
+            labelSrcY = CELLS_HEIGHT + SYMBOL_SIZE * 2,
+            labelDestX = fieldWidth + SYMBOL_SIZE,
+            labelDestY = getInfoY(3),
+            labelWidth = TETRISES_LABEL_WIDTH,
+            totalDigits = 2,
+            value = tetrises
+        )
     }
 
     private fun getInfoY(line: Int): Int {
         return SYMBOL_SIZE * (2 * line + 1) + INFO_MARGIN * line
     }
 
-    private fun drawInt(labelSrcX: Int, labelSrcY: Int, labelDestX: Int, labelDestY: Int,
-                        labelWidth: Int, totalDigits: Int, value: Int) {
-        copyRect(srcX   = labelSrcX,
-                srcY   = labelSrcY,
-                destX  = labelDestX,
-                destY  = labelDestY,
-                width  = labelWidth,
-                height = SYMBOL_SIZE)
+    private fun drawInt(
+        labelSrcX: Int,
+        labelSrcY: Int,
+        labelDestX: Int,
+        labelDestY: Int,
+        labelWidth: Int,
+        totalDigits: Int,
+        value: Int
+    ) {
+        copyRect(
+            srcX = labelSrcX,
+            srcY = labelSrcY,
+            destX = labelDestX,
+            destY = labelDestY,
+            width = labelWidth,
+            height = SYMBOL_SIZE
+        )
         val digits = IntArray(totalDigits)
         var x = value
         for (i in 0..totalDigits - 1) {
@@ -396,12 +424,14 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
             x = x / 10
         }
         for (i in 0..totalDigits - 1) {
-            copyRect(srcX   = digits[i] * SYMBOL_SIZE,
-                    srcY   = CELLS_HEIGHT + 3 * SYMBOL_SIZE,
-                    destX  = labelDestX + SYMBOL_SIZE + i * SYMBOL_SIZE,
-                    destY  = labelDestY + SYMBOL_SIZE,
-                    width  = SYMBOL_SIZE,
-                    height = SYMBOL_SIZE)
+            copyRect(
+                srcX = digits[i] * SYMBOL_SIZE,
+                srcY = CELLS_HEIGHT + 3 * SYMBOL_SIZE,
+                destX = labelDestX + SYMBOL_SIZE + i * SYMBOL_SIZE,
+                destY = labelDestY + SYMBOL_SIZE,
+                width = SYMBOL_SIZE,
+                height = SYMBOL_SIZE
+            )
         }
     }
 

@@ -1,8 +1,6 @@
 import kotlinx.cinterop.*
-
 import platform.Accelerate.*
 import platform.darwin.*
-
 
 // Custom print
 fun Vector128.toStringHex(): String {
@@ -13,7 +11,6 @@ fun Vector128.toStringHex(): String {
 fun Vector128.toStringFloat(): String {
     return "(${(0 until 4).map { getFloatAt(it).toString() }.joinToString(", ")})"
 }
-
 
 fun main() {
 
@@ -43,9 +40,8 @@ fun main() {
     x1 = x2
     println("Now (x1 == x1) is ${(x1 == x1)}")
 
-
     // Using library function (MacOS Accelerate framework)
-    val sum = vS128Add(vectorOf(1,2,3,4), vectorOf(4,3,2,1))
+    val sum = vS128Add(vectorOf(1, 2, 3, 4), vectorOf(4, 3, 2, 1))
     println(sum)
     // More Accelerate framework
     val q = vectorOf(1f, 9f, 25f, 49f)
@@ -53,6 +49,4 @@ fun main() {
     println("vsqrtf$q = ${sq.toStringFloat()}")
     val f4 = vectorOf(1f, 3.162f, 10f, 31f)
     println("vlog10f($f4) = ${vlog10f(vf4).toStringFloat()}")
-
-
 }

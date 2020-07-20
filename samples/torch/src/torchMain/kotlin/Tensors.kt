@@ -97,10 +97,10 @@ class FloatMatrix(raw: CPointer<THFloatTensor>) : FloatTensor(raw) {
 }
 
 fun uninitializedTensor(size: Int) =
-        FloatVector(THFloatTensor_newWithSize1d(size.signExtend())!!)
+    FloatVector(THFloatTensor_newWithSize1d(size.signExtend())!!)
 
 fun uninitializedTensor(size0: Int, size1: Int) =
-        FloatMatrix(THFloatTensor_newWithSize2d(size0.signExtend(), size1.signExtend())!!)
+    FloatMatrix(THFloatTensor_newWithSize2d(size0.signExtend(), size1.signExtend())!!)
 
 fun uninitializedTensor(shape: List<Int>) = when (shape.size) {
     1 -> uninitializedTensor(shape.single())
@@ -109,13 +109,13 @@ fun uninitializedTensor(shape: List<Int>) = when (shape.size) {
 }
 
 fun <T> initializedTensor(size: Int, initializer: (FloatVector) -> T) =
-        uninitializedTensor(size).apply { initializer(this) }
+    uninitializedTensor(size).apply { initializer(this) }
 
 fun <T> initializedTensor(size0: Int, size1: Int, initializer: (FloatMatrix) -> T) =
-        uninitializedTensor(size0, size1).apply { initializer(this) }
+    uninitializedTensor(size0, size1).apply { initializer(this) }
 
 fun <T> initializedTensor(shape: List<Int>, initializer: (FloatTensor) -> T) =
-        uninitializedTensor(shape).apply { initializer(this) }
+    uninitializedTensor(shape).apply { initializer(this) }
 
 fun tensor(size: Int, initializer: (Int) -> Float) = initializedTensor(size) {
     for (i in 0 until size) {
@@ -146,10 +146,10 @@ val randomGenerator = THGenerator_new()
 fun random(min: Float, max: Float) = THRandom_uniformFloat(randomGenerator, min, max)
 fun randomInt(count: Int, min: Int = 0) = random(min.toFloat(), count.toFloat()).toInt()
 fun random(min: Double, max: Double, size: Int) =
-        initializedTensor(size) { THFloatTensor_uniform(it.raw, randomGenerator, min, max) }
+    initializedTensor(size) { THFloatTensor_uniform(it.raw, randomGenerator, min, max) }
 
 fun random(min: Double, max: Double, size0: Int, size1: Int) =
-        initializedTensor(size0, size1) { THFloatTensor_uniform(it.raw, randomGenerator, min, max) }
+    initializedTensor(size0, size1) { THFloatTensor_uniform(it.raw, randomGenerator, min, max) }
 
 fun zeros(size: Int) = full(0f, size)
 fun zeros(size0: Int, size1: Int) = full(0f, size0, size1)

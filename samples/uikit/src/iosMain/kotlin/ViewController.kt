@@ -6,12 +6,12 @@
 package sample.uikit
 
 import kotlinx.cinterop.*
-import platform.Foundation.*
-import platform.UIKit.*
 import platform.CoreGraphics.CGPointMake
 import platform.CoreGraphics.CGRectMake
+import platform.Foundation.*
 import platform.Foundation.NSCoder
 import platform.Foundation.NSSelectorFromString
+import platform.UIKit.*
 
 @ExportObjCClass
 class ViewController : UIViewController {
@@ -55,7 +55,7 @@ class ViewController : UIViewController {
 
         label = UILabel().apply {
             setFrame(CGRectMake(x = 10.0, y = 10.0, width = width - 100.0, height = 40.0))
-            center = CGPointMake(x = width / 2, y = 40.0 )
+            center = CGPointMake(x = width / 2, y = 40.0)
             textAlignment = NSTextAlignmentCenter
             text = "Press OK"
             header.addSubview(this)
@@ -70,10 +70,11 @@ class ViewController : UIViewController {
             layer.borderWidth = 1.0
             layer.borderColor = UIColor.colorWithRed(0x47 / 255.0, 0x43 / 255.0, 0x70 / 255.0, 1.0).CGColor
             layer.masksToBounds = true
-            addTarget(target = this@ViewController, action = NSSelectorFromString("buttonPressed"),
-                    forControlEvents = UIControlEventTouchUpInside)
+            addTarget(
+                target = this@ViewController, action = NSSelectorFromString("buttonPressed"),
+                forControlEvents = UIControlEventTouchUpInside
+            )
             header.addSubview(this)
         }
-
     }
 }

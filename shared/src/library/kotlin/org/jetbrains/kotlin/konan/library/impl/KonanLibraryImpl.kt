@@ -80,7 +80,6 @@ class KonanLibraryImpl(
         get() = manifestProperties.propertyList(KLIB_PROPERTY_LINKED_OPTS, escapeInQuotes = true)
 }
 
-
 fun createKonanLibrary(
     libraryFile: File,
     component: String,
@@ -106,7 +105,7 @@ fun createKonanLibraryComponents(
     libraryFile: File,
     target: KonanTarget? = null,
     isDefault: Boolean = true
-) : List<KonanLibrary> {
+): List<KonanLibrary> {
     val baseAccess = BaseLibraryAccess<KotlinLibraryLayout>(libraryFile, null)
     val base = BaseKotlinLibraryImpl(baseAccess, isDefault)
     return base.componentList.map {

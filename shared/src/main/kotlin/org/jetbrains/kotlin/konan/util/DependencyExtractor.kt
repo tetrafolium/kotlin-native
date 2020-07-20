@@ -34,7 +34,7 @@ enum class ArchiveType(val fileExtension: String) {
 }
 
 class DependencyExtractor(
-        private val archiveType: ArchiveType
+    private val archiveType: ArchiveType
 ) {
     private fun extractTarGz(tarGz: File, targetDirectory: File) {
         val tarProcess = ProcessBuilder().apply {
@@ -47,13 +47,14 @@ class DependencyExtractor(
             finished && tarProcess.exitValue() != 0 ->
                 throw RuntimeException(
                     "Cannot extract archive with dependency: ${tarGz.canonicalPath}.\n" +
-                    "Tar exit code: ${tarProcess.exitValue()}."
+                        "Tar exit code: ${tarProcess.exitValue()}."
                 )
             !finished -> {
                 tarProcess.destroy()
                 throw RuntimeException(
                     "Cannot extract archive with dependency: ${tarGz.canonicalPath}.\n" +
-                    "Tar process hasn't finished in ${extractionTimeoutUntis.toSeconds(extractionTimeout)} sec.")
+                        "Tar process hasn't finished in ${extractionTimeoutUntis.toSeconds(extractionTimeout)} sec."
+                )
             }
         }
     }
@@ -69,5 +70,4 @@ class DependencyExtractor(
         val extractionTimeout = 3600L
         val extractionTimeoutUntis = TimeUnit.SECONDS
     }
-
 }

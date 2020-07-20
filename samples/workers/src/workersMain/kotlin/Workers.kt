@@ -16,9 +16,12 @@ fun main() {
 
     for (attempt in 1..3) {
         val futures = Array(workers.size) { workerIndex ->
-            workers[workerIndex].execute(TransferMode.SAFE, {
-                WorkerArgument(workerIndex, "attempt $attempt")
-            }) { input ->
+            workers[workerIndex].execute(
+                TransferMode.SAFE,
+                {
+                    WorkerArgument(workerIndex, "attempt $attempt")
+                }
+            ) { input ->
                 var sum = 0
                 for (i in 0..input.intParam * 1000) {
                     sum += i

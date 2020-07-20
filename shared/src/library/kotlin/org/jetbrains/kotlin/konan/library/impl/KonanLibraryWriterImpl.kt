@@ -5,11 +5,11 @@
 
 package org.jetbrains.kotlin.konan.library.impl
 
-import org.jetbrains.kotlin.konan.library.BitcodeWriter
-import org.jetbrains.kotlin.konan.library.KonanLibraryWriter
 import org.jetbrains.kotlin.konan.file.File
+import org.jetbrains.kotlin.konan.library.BitcodeWriter
 import org.jetbrains.kotlin.konan.library.KonanLibrary
 import org.jetbrains.kotlin.konan.library.KonanLibraryLayout
+import org.jetbrains.kotlin.konan.library.KonanLibraryWriter
 import org.jetbrains.kotlin.konan.properties.Properties
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.library.*
@@ -24,20 +24,20 @@ class KonanLibraryLayoutForWriter(
  * Requires non-null [target].
  */
 class KonanLibraryWriterImpl(
-        libDir: File,
-        moduleName: String,
-        versions: KotlinLibraryVersioning,
-        target: KonanTarget,
-        builtInsPlatform: BuiltInsPlatform,
-        nopack: Boolean = false,
-        shortName: String? = null,
+    libDir: File,
+    moduleName: String,
+    versions: KotlinLibraryVersioning,
+    target: KonanTarget,
+    builtInsPlatform: BuiltInsPlatform,
+    nopack: Boolean = false,
+    shortName: String? = null,
 
-        val layout: KonanLibraryLayoutForWriter = KonanLibraryLayoutForWriter(libDir, target),
+    val layout: KonanLibraryLayoutForWriter = KonanLibraryLayoutForWriter(libDir, target),
 
-        base: BaseWriter = BaseWriterImpl(layout, moduleName, versions, builtInsPlatform, listOf(target.visibleName), nopack, shortName),
-        bitcode: BitcodeWriter = BitcodeWriterImpl(layout),
-        metadata: MetadataWriter = MetadataWriterImpl(layout),
-        ir: IrWriter = IrMonoliticWriterImpl(layout)
+    base: BaseWriter = BaseWriterImpl(layout, moduleName, versions, builtInsPlatform, listOf(target.visibleName), nopack, shortName),
+    bitcode: BitcodeWriter = BitcodeWriterImpl(layout),
+    metadata: MetadataWriter = MetadataWriterImpl(layout),
+    ir: IrWriter = IrMonoliticWriterImpl(layout)
 
 ) : BaseWriter by base, BitcodeWriter by bitcode, MetadataWriter by metadata, IrWriter by ir, KonanLibraryWriter
 
@@ -58,13 +58,13 @@ fun buildLibrary(
 ): KonanLibraryLayout {
 
     val library = KonanLibraryWriterImpl(
-            File(output),
-            moduleName,
-            versions,
-            target,
-            BuiltInsPlatform.NATIVE,
-            nopack,
-            shortName
+        File(output),
+        moduleName,
+        versions,
+        target,
+        BuiltInsPlatform.NATIVE,
+        nopack,
+        shortName
     )
 
     library.addMetadata(metadata)

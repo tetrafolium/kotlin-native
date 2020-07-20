@@ -65,17 +65,16 @@ private object CurrentXcode : Xcode {
     override val watchosSdk: String by lazy { getSdkPath("watchos") }
     override val watchsimulatorSdk: String by lazy { getSdkPath("watchsimulator") }
 
-
     override val version by lazy {
         xcrun("xcodebuild", "-version")
-                .removePrefix("Xcode ")
+            .removePrefix("Xcode ")
     }
 
     private fun xcrun(vararg args: String): String = try {
-            Command("/usr/bin/xcrun", *args).getOutputLines().first()
-        } catch(e: KonanExternalToolFailure) {
-            throw MissingXcodeException("An error occurred during an xcrun execution. Make sure that Xcode and its command line tools are properly installed.", e)
-        }
+        Command("/usr/bin/xcrun", *args).getOutputLines().first()
+    } catch (e: KonanExternalToolFailure) {
+        throw MissingXcodeException("An error occurred during an xcrun execution. Make sure that Xcode and its command line tools are properly installed.", e)
+    }
 
-    private fun getSdkPath(sdk: String) = xcrun("--sdk",  sdk, "--show-sdk-path")
+    private fun getSdkPath(sdk: String) = xcrun("--sdk", sdk, "--show-sdk-path")
 }

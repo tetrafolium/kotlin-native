@@ -5,8 +5,8 @@
 
 package sample.videoplayer
 
-import sdl.SDL_GetError
 import kotlinx.cinterop.*
+import sdl.SDL_GetError
 
 fun throwSDLError(name: String): Nothing =
     throw Error("SDL_$name Error: ${SDL_GetError()!!.toKString()}")

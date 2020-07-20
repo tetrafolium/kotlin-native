@@ -17,7 +17,7 @@ data class Dataset(val inputs: List<FloatArray>, val labels: List<FloatArray>) {
 
     fun sampleBatch(batchSize: Int) = batch((0 until batchSize).map { randomInt(inputs.size) })
     private fun batchAt(batchIndex: Int, batchSize: Int) =
-            batch((0 until inputs.size).drop(batchSize + batchIndex).take(batchSize))
+        batch((0 until inputs.size).drop(batchSize + batchIndex).take(batchSize))
 
     fun testBatches(batchSize: Int) = (0 until inputs.size / batchSize).map { batchAt(it, batchSize = batchSize) }
 }
@@ -45,17 +45,17 @@ object MNIST {
     private fun Byte.reinterpretAsUnsigned() = this.toInt().let { it + if (it < 0) 256 else 0 }
 
     private fun unsignedBytesToInt(bytes: List<Byte>) =
-            bytes.withIndex().map { (i, value) -> value.reinterpretAsUnsigned().shl(8 * (3 - i)) }.sum()
+        bytes.withIndex().map { (i, value) -> value.reinterpretAsUnsigned().shl(8 * (3 - i)) }.sum()
 
     private val intSize = 4
     private fun ByteArray.getIntAt(index: Int) =
-            unsignedBytesToInt((index until (index + intSize)).map { this[it] })
+        unsignedBytesToInt((index until (index + intSize)).map { this[it] })
 
     private val imageLength = 28
     private val imageSize = imageLength * imageLength
 
     private fun ByteArray.getImageAt(index: Int) =
-            FloatArray(imageSize) { this[index + it].reinterpretAsUnsigned().toFloat() / 255 }
+        FloatArray(imageSize) { this[index + it].reinterpretAsUnsigned().toFloat() / 255 }
 
     private fun oneHot(size: Int, index: Int) = FloatArray(size) { if (it == index) 1f else 0f }
 
@@ -95,10 +95,12 @@ object MNIST {
     }
 
     fun labeledTrainingImages() = Dataset(
-            inputs = readImages("train-images-idx3-ubyte"),
-            labels = readLabels("train-labels-idx1-ubyte"))
+        inputs = readImages("train-images-idx3-ubyte"),
+        labels = readLabels("train-labels-idx1-ubyte")
+    )
 
     fun labeledTestImages() = Dataset(
-            inputs = readImages("t10k-images-idx3-ubyte"),
-            labels = readLabels("t10k-labels-idx1-ubyte"))
+        inputs = readImages("t10k-images-idx3-ubyte"),
+        labels = readLabels("t10k-labels-idx1-ubyte")
+    )
 }

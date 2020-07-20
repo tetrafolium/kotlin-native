@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
         val serverAddr = alloc<sockaddr_in>()
 
         val listenFd = socket(AF_INET, SOCK_STREAM, 0)
-                .ensureUnixCallResult { !it.isMinusOne() }
+            .ensureUnixCallResult { !it.isMinusOne() }
 
         with(serverAddr) {
             memset(this.ptr, 0, sockaddr_in.size.convert())
@@ -33,13 +33,13 @@ fun main(args: Array<String>) {
         }
 
         bind(listenFd, serverAddr.ptr.reinterpret(), sockaddr_in.size.toUInt())
-                .ensureUnixCallResult { it == 0 }
+            .ensureUnixCallResult { it == 0 }
 
         fcntl(listenFd, F_SETFL, O_NONBLOCK)
-                .ensureUnixCallResult { it == 0 }
+            .ensureUnixCallResult { it == 0 }
 
         listen(listenFd, 10)
-                .ensureUnixCallResult { it == 0 }
+            .ensureUnixCallResult { it == 0 }
 
         var connectionId = 0
         acceptClientsAndRun(listenFd) {
@@ -70,13 +70,17 @@ fun main(args: Array<String>) {
 sealed class WaitingFor {
     class Accept : WaitingFor()
 
-    class Read(val data: CArrayPointer<ByteVar>,
-               val length: ULong,
-               val continuation: Continuation<ULong>) : WaitingFor()
+    class Read(
+        val data: CArrayPointer<ByteVar>,
+        val length: ULong,
+        val continuation: Continuation<ULong>
+    ) : WaitingFor()
 
-    class Write(val data: CArrayPointer<ByteVar>,
-                val length: ULong,
-                val continuation: Continuation<Unit>) : WaitingFor()
+    class Write(
+        val data: CArrayPointer<ByteVar>,
+        val length: ULong,
+        val continuation: Continuation<Unit>
+    ) : WaitingFor()
 }
 
 class Client(val clientFd: Int, val waitingList: MutableMap<Int, WaitingFor>) {
@@ -124,19 +128,20 @@ fun acceptClientsAndRun(serverFd: Int, block: suspend Client.() -> Unit) {
             for ((socketFd, watingFor) in waitingList) {
                 when (watingFor) {
                     is WaitingFor.Accept -> posix_FD_SET(socketFd, readfds.ptr)
-                    is WaitingFor.Read   -> posix_FD_SET(socketFd, readfds.ptr)
-                    is WaitingFor.Write  -> posix_FD_SET(socketFd, writefds.ptr)
+                    is WaitingFor.Read -> posix_FD_SET(socketFd, readfds.ptr)
+                    is WaitingFor.Write -> posix_FD_SET(socketFd, writefds.ptr)
                 }
                 posix_FD_SET(socketFd, errorfds.ptr)
             }
             pselect(maxfd + 1, readfds.ptr, writefds.ptr, errorfds.ptr, null, null)
-                    .ensureUnixCallResult { it >= 0 }
+                .ensureUnixCallResult { it >= 0 }
             loop@for (socketFd in 0..maxfd) {
                 val waitingFor = waitingList[socketFd]
                 val errorOccured = posix_FD_ISSET(socketFd, errorfds.ptr) != 0
-                if (posix_FD_ISSET(socketFd, readfds.ptr) != 0
-		    || posix_FD_ISSET(socketFd, writefds.ptr) != 0
-		    || errorOccured) {
+                if (posix_FD_ISSET(socketFd, readfds.ptr) != 0 ||
+                    posix_FD_ISSET(socketFd, writefds.ptr) != 0 ||
+                    errorOccured
+                ) {
                     when (waitingFor) {
                         is WaitingFor.Accept -> {
                             if (errorOccured)
@@ -150,7 +155,7 @@ fun acceptClientsAndRun(serverFd: Int, block: suspend Client.() -> Unit) {
                                 break@loop
                             }
                             fcntl(clientFd, F_SETFL, O_NONBLOCK)
-                                    .ensureUnixCallResult { it == 0 }
+                                .ensureUnixCallResult { it == 0 }
                             if (maxfd < clientFd)
                                 maxfd = clientFd
                             block.startCoroutine(Client(clientFd, waitingList), EmptyContinuation)
@@ -184,7 +189,7 @@ fun acceptClientsAndRun(serverFd: Int, block: suspend Client.() -> Unit) {
     }
 }
 
-class IOException(message: String): RuntimeException(message)
+class IOException(message: String) : RuntimeException(message)
 
 fun getUnixError() = strerror(posix_errno())!!.toKString()
 

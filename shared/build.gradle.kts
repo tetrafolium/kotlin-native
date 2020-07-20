@@ -16,15 +16,15 @@
 @file:Suppress("UnstableApiUsage")
 
 import org.jetbrains.kotlin.VersionGenerator
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("kotlin")
 }
 
 val rootBuildDirectory by extra(file(".."))
-apply(from="../gradle/loadRootProperties.gradle")
+apply(from = "../gradle/loadRootProperties.gradle")
 
 val kotlinVersion: String by extra
 val buildKotlinVersion: String by extra

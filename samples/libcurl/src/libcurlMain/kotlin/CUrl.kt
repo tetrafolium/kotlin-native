@@ -6,10 +6,10 @@
 package sample.libcurl
 
 import kotlinx.cinterop.*
-import platform.posix.size_t
 import libcurl.*
+import platform.posix.size_t
 
-class CUrl(url: String)  {
+class CUrl(url: String) {
     private val stableRef = StableRef.create(this)
 
     private val curl = curl_easy_init()
@@ -27,7 +27,7 @@ class CUrl(url: String)  {
     val header = Event<String>()
     val body = Event<String>()
 
-    fun nobody(){
+    fun nobody() {
         curl_easy_setopt(curl, CURLOPT_NOBODY, 1L)
     }
 
@@ -58,7 +58,6 @@ fun header_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, us
     return size * nitems
 }
 
-
 fun write_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, userdata: COpaquePointer?): size_t {
     if (buffer == null) return 0u
     if (userdata != null) {
@@ -68,4 +67,3 @@ fun write_callback(buffer: CPointer<ByteVar>?, size: size_t, nitems: size_t, use
     }
     return size * nitems
 }
-

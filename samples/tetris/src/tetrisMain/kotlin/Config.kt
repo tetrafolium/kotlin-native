@@ -5,8 +5,8 @@
 
 package sample.tetris
 
-import platform.posix.*
 import kotlinx.cinterop.*
+import platform.posix.*
 
 object Config {
     var width: Int = 10

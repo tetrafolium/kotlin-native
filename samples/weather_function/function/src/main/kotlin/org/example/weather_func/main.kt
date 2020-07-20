@@ -5,12 +5,12 @@
 
 package org.example.weather_func
 
-import platform.posix.*
-import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.ByteVar
+import kotlinx.cinterop.allocArray
 import kotlinx.cinterop.memScoped
-import kotlinx.cinterop.toKString
 import kotlinx.cinterop.refTo
+import kotlinx.cinterop.toKString
+import platform.posix.*
 import kotlin.system.exitProcess
 
 private val API_KEY by lazy { fetchApiKey() }
@@ -81,7 +81,7 @@ private fun printJsonFile(jsonFile: String) {
 private fun printFromWeatherService(location: String) {
 	println("Fetching weather information (for $location)...")
 	val curl = CUrl(createUrl(location)).apply {
-		header += { if(it.startsWith("HTTP")) println("Response Status: $it") }
+		header += { if (it.startsWith("HTTP")) println("Response Status: $it") }
 		body += { data ->
 			val weather = createWeatherFromJson(data)
 			println("Weather information:\n${weatherToJsonString(weather)}")

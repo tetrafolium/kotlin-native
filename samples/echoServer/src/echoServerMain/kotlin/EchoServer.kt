@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
         val serverAddr = alloc<sockaddr_in>()
 
         val listenFd = socket(AF_INET, SOCK_STREAM, 0)
-                .ensureUnixCallResult("socket") { !it.isMinusOne() }
+            .ensureUnixCallResult("socket") { !it.isMinusOne() }
 
         with(serverAddr) {
             memset(this.ptr, 0, sockaddr_in.size.convert())
@@ -35,28 +35,28 @@ fun main(args: Array<String>) {
         }
 
         bind(listenFd, serverAddr.ptr.reinterpret(), sockaddr_in.size.convert())
-                .ensureUnixCallResult("bind") { it == 0 }
+            .ensureUnixCallResult("bind") { it == 0 }
 
         listen(listenFd, 10)
-                .ensureUnixCallResult("listen") { it == 0 }
+            .ensureUnixCallResult("listen") { it == 0 }
 
         val commFd = accept(listenFd, null, null)
-                .ensureUnixCallResult("accept") { !it.isMinusOne() }
+            .ensureUnixCallResult("accept") { !it.isMinusOne() }
 
         buffer.usePinned { pinned ->
-          while (true) {
-            val length = recv(commFd, pinned.addressOf(0), buffer.size.convert(), 0).toInt()
+            while (true) {
+                val length = recv(commFd, pinned.addressOf(0), buffer.size.convert(), 0).toInt()
                     .ensureUnixCallResult("read") { it >= 0 }
 
-            if (length == 0) {
-                break
-            }
+                if (length == 0) {
+                    break
+                }
 
-            send(commFd, prefixBuffer.refTo(0), prefixBuffer.size.convert(), 0)
+                send(commFd, prefixBuffer.refTo(0), prefixBuffer.size.convert(), 0)
                     .ensureUnixCallResult("write") { it >= 0 }
-            send(commFd, pinned.addressOf(0), length.convert(), 0)
+                send(commFd, pinned.addressOf(0), length.convert(), 0)
                     .ensureUnixCallResult("write") { it >= 0 }
-          }
+            }
         }
     }
 }

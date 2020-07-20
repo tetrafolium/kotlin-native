@@ -21,9 +21,9 @@ abstract class Backpropagatable<Input : Disposable, Output : Disposable> {
     }
 
     abstract inner class BackpropagationResults(
-            val input: Input,
-            val output: Output,
-            val outputGradient: Output
+        val input: Input,
+        val output: Output,
+        val outputGradient: Output
     ) : DisposableContainer() {
         init {
             use { input }
@@ -51,18 +51,23 @@ abstract class Module<Input : Disposable, Output : Disposable, Parameters> : Bac
     override fun forwardPass(input: Input) = object : ForwardResults(input) {
         override val output = use { this@Module(input) }
         override fun backpropagate(outputGradient: Output) =
-                object : Backpropagatable<Input, Output>.BackpropagationResults(input, output, outputGradient) {
-                    override val inputGradient = use { this@Module.inputGradient(input, outputGradient, output) }
-                    val parameterGradient = this@Module.parameterGradient(input,
-                            outputGradient = outputGradient, inputGradient = inputGradient)
+            object : Backpropagatable<Input, Output>.BackpropagationResults(input, output, outputGradient) {
+                override val inputGradient = use { this@Module.inputGradient(input, outputGradient, output) }
+                val parameterGradient = this@Module.parameterGradient(
+                    input,
+                    outputGradient = outputGradient, inputGradient = inputGradient
+                )
 
-                    override fun descend() = this@Module.descend(parameterGradient)
-                }
+                override fun descend() = this@Module.descend(parameterGradient)
+            }
     }
 
     open fun descend(parameterGradient: Parameters) {
-        parameters = parametersFromList(parameterList.zip(
-                parametersToList(parameterGradient)) { parameter, gradient -> parameter - gradient })
+        parameters = parametersFromList(
+            parameterList.zip(
+                parametersToList(parameterGradient)
+            ) { parameter, gradient -> parameter - gradient }
+        )
     }
 }
 
@@ -75,8 +80,8 @@ abstract class ParameterFreeModule<Input : Disposable, Output : Disposable> : Mo
 }
 
 class Chain<Input : Disposable, Hidden : Disposable, Output : Disposable>(
-        val module1: Backpropagatable<Input, Hidden>,
-        val module2: Backpropagatable<Hidden, Output>
+    val module1: Backpropagatable<Input, Hidden>,
+    val module2: Backpropagatable<Hidden, Output>
 ) : Backpropagatable<Input, Output>() {
     override fun forwardPass(input: Input) = ChainForwardResults(input)
 
@@ -86,25 +91,26 @@ class Chain<Input : Disposable, Hidden : Disposable, Output : Disposable>(
         val result2 = use { module2.forwardPass(result1.output) }
         override val output = result2.output
         override fun backpropagate(outputGradient: Output) =
-                object : Backpropagatable<Input, Output>.BackpropagationResults(input, output, outputGradient) {
-                    val backpropResults2 = use { result2.backpropagate(outputGradient) }
-                    val hiddenGradient = backpropResults2.inputGradient
-                    val backpropResults1 = use { result1.backpropagate(hiddenGradient) }
+            object : Backpropagatable<Input, Output>.BackpropagationResults(input, output, outputGradient) {
+                val backpropResults2 = use { result2.backpropagate(outputGradient) }
+                val hiddenGradient = backpropResults2.inputGradient
+                val backpropResults1 = use { result1.backpropagate(hiddenGradient) }
 
-                    override val inputGradient = backpropResults1.inputGradient
+                override val inputGradient = backpropResults1.inputGradient
 
-                    override fun descend() {
-                        backpropResults1.descend()
-                        backpropResults2.descend()
-                    }
+                override fun descend() {
+                    backpropResults1.descend()
+                    backpropResults2.descend()
                 }
+            }
     }
 
     override fun toString() = "$module1 before $module2"
 }
 
 infix fun <Input : Disposable, Hidden : Disposable, Output : Disposable> Backpropagatable<Input, Hidden>.before(
-        other: Backpropagatable<Hidden, Output>) = Chain(this, other)
+    other: Backpropagatable<Hidden, Output>
+) = Chain(this, other)
 
 object Abs : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
     override operator fun invoke(input: FloatMatrix) = initializedTensor(input.shape[0], input.shape[1]) {
@@ -112,9 +118,9 @@ object Abs : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
     }
 
     override fun inputGradient(input: FloatMatrix, outputGradient: FloatMatrix, output: FloatMatrix) =
-            initializedTensor(input.shape[0], input.shape[1]) {
-                THNN_FloatAbs_updateGradInput(null, input.raw, outputGradient.raw, it.raw)
-            }
+        initializedTensor(input.shape[0], input.shape[1]) {
+            THNN_FloatAbs_updateGradInput(null, input.raw, outputGradient.raw, it.raw)
+        }
 }
 
 object Relu : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
@@ -123,9 +129,9 @@ object Relu : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
     }
 
     override fun inputGradient(input: FloatMatrix, outputGradient: FloatMatrix, output: FloatMatrix) =
-            initializedTensor(input.shape[0], input.shape[1]) {
-                THNN_FloatLeakyReLU_updateGradInput(null, input.raw, outputGradient.raw, it.raw, 0.0, false)
-            }
+        initializedTensor(input.shape[0], input.shape[1]) {
+            THNN_FloatLeakyReLU_updateGradInput(null, input.raw, outputGradient.raw, it.raw, 0.0, false)
+        }
 }
 
 object Softmax : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
@@ -134,43 +140,52 @@ object Softmax : ParameterFreeModule<FloatMatrix, FloatMatrix>() {
     }
 
     override fun inputGradient(input: FloatMatrix, outputGradient: FloatMatrix, output: FloatMatrix) =
-            initializedTensor(input.shape[0], input.shape[1]) {
-                THNN_FloatSoftMax_updateGradInput(null, input.raw, outputGradient.raw, it.raw, output.raw, 1)
-            }
+        initializedTensor(input.shape[0], input.shape[1]) {
+            THNN_FloatSoftMax_updateGradInput(null, input.raw, outputGradient.raw, it.raw, output.raw, 1)
+        }
 }
 
 class MeanSquaredError(val labels: FloatMatrix) : ParameterFreeModule<FloatMatrix, FloatVector>() {
     override operator fun invoke(input: FloatMatrix) = initializedTensor(1) {
-        THNN_FloatMSECriterion_updateOutput(null, input.raw, labels.raw, it.raw,
-                sizeAverage = true, reduce = true)
+        THNN_FloatMSECriterion_updateOutput(
+            null, input.raw, labels.raw, it.raw,
+            sizeAverage = true, reduce = true
+        )
     }
 
     override fun inputGradient(
-            input: FloatMatrix,
-            outputGradient: FloatVector,
-            output: FloatVector
+        input: FloatMatrix,
+        outputGradient: FloatVector,
+        output: FloatVector
     ) = initializedTensor(input.shape[0], input.shape[1]) {
-        THNN_FloatMSECriterion_updateGradInput(null, input.raw, labels.raw,
-                outputGradient.raw, it.raw, sizeAverage = true, reduce = true)
+        THNN_FloatMSECriterion_updateGradInput(
+            null, input.raw, labels.raw,
+            outputGradient.raw, it.raw, sizeAverage = true, reduce = true
+        )
     }
 }
 
 class CrossEntropyLoss(val labels: FloatMatrix) : ParameterFreeModule<FloatMatrix, FloatVector>() {
     override operator fun invoke(input: FloatMatrix) = initializedTensor(1) {
-        THNN_FloatBCECriterion_updateOutput(null, input.raw, labels.raw, it.raw,
-                sizeAverage = true, reduce = true, weights = null)
+        THNN_FloatBCECriterion_updateOutput(
+            null, input.raw, labels.raw, it.raw,
+            sizeAverage = true, reduce = true, weights = null
+        )
     }
 
     override fun inputGradient(input: FloatMatrix, outputGradient: FloatVector, output: FloatVector) =
-            initializedTensor(input.shape[0], input.shape[1]) {
-                THNN_FloatBCECriterion_updateGradInput(null, input.raw, labels.raw, outputGradient.raw,
-                        it.raw, sizeAverage = true, reduce = true, weights = null)
-            }
+        initializedTensor(input.shape[0], input.shape[1]) {
+            THNN_FloatBCECriterion_updateGradInput(
+                null, input.raw, labels.raw, outputGradient.raw,
+                it.raw, sizeAverage = true, reduce = true, weights = null
+            )
+        }
 }
 
 data class Linear(
-        var weight: FloatMatrix,
-        var bias: FloatVector) : Module<FloatMatrix, FloatMatrix, Pair<FloatMatrix, FloatVector>>() {
+    var weight: FloatMatrix,
+    var bias: FloatVector
+) : Module<FloatMatrix, FloatMatrix, Pair<FloatMatrix, FloatVector>>() {
     val inputSize = weight.shape[1]
     val outputSize = weight.shape[0]
     val addBuffer = uninitializedTensor(outputSize)
@@ -180,19 +195,21 @@ data class Linear(
     }
 
     override fun inputGradient(input: FloatMatrix, outputGradient: FloatMatrix, output: FloatMatrix) =
-            initializedTensor(input.shape[0], inputSize) {
-                THNN_FloatLinear_updateGradInput(null, input.raw, outputGradient.raw, it.raw, weight.raw)
-            }
+        initializedTensor(input.shape[0], inputSize) {
+            THNN_FloatLinear_updateGradInput(null, input.raw, outputGradient.raw, it.raw, weight.raw)
+        }
 
     override fun parameterGradient(
-            input: FloatMatrix,
-            outputGradient: FloatMatrix,
-            inputGradient: FloatMatrix
+        input: FloatMatrix,
+        outputGradient: FloatMatrix,
+        inputGradient: FloatMatrix
     ): Pair<FloatMatrix, FloatVector> {
         val biasGradient = zeros(outputSize)
         val weightGradient = zeros(weight.shape[0], weight.shape[1]).also {
-            THNN_FloatLinear_accGradParameters(null, input.raw, outputGradient.raw, inputGradient.raw, weight.raw,
-                    bias.raw, it.raw, biasGradient.raw, addBuffer.raw, 1.0)
+            THNN_FloatLinear_accGradParameters(
+                null, input.raw, outputGradient.raw, inputGradient.raw, weight.raw,
+                bias.raw, it.raw, biasGradient.raw, addBuffer.raw, 1.0
+            )
         }
 
         return weightGradient to biasGradient
@@ -206,7 +223,7 @@ data class Linear(
         }
 
     override fun parametersToList(parameters: Pair<FloatMatrix, FloatVector>) =
-            listOf(parameters.first, parameters.second)
+        listOf(parameters.first, parameters.second)
 
     override fun parametersFromList(list: List<FloatTensor>) = list.first().asMatrix() to list.last().asVector()
 }

@@ -16,7 +16,7 @@
 
 package org.jetbrains.kotlin.konan.file
 
-val String.isJavaScript 
+val String.isJavaScript
     get() = this.endsWith(".js")
 
 val String.isUnixStaticLib

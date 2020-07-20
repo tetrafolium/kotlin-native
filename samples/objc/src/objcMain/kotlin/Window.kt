@@ -14,7 +14,6 @@ import platform.darwin.*
 import platform.posix.QOS_CLASS_BACKGROUND
 import platform.posix.memcpy
 import kotlin.native.concurrent.*
-import kotlin.test.assertNotNull
 
 data class QueryResult(val json: Map<String, *>?, val error: String?)
 
@@ -25,7 +24,7 @@ private fun MutableData.asNSData() = this.withPointerLocked { it, size ->
 }
 
 private fun MutableData.asJSON(): Map<String, *>? =
-        NSJSONSerialization.JSONObjectWithData(this.asNSData(), 0, null) as? Map<String, *>
+    NSJSONSerialization.JSONObjectWithData(this.asNSData(), 0, null) as? Map<String, *>
 
 fun main() {
     autoreleasepool {
@@ -45,7 +44,6 @@ private fun runApp() {
     app.run()
 }
 
-
 class Controller : NSObject() {
     private var index = 1
     private val httpDelegate = HttpDelegate()
@@ -59,10 +57,12 @@ class Controller : NSObject() {
 
         // Here we call continuator service to ensure we can access mutable state from continuation.
 
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND.convert(), 0),
-                Continuator.wrap({ println("In queue ${dispatch_get_current_queue()}")}.freeze()) {
-            println("After in queue ${dispatch_get_current_queue()}: $index")
-        })
+        dispatch_async(
+            dispatch_get_global_queue(QOS_CLASS_BACKGROUND.convert(), 0),
+            Continuator.wrap({ println("In queue ${dispatch_get_current_queue()}") }.freeze()) {
+                println("After in queue ${dispatch_get_current_queue()}: $index")
+            }
+        )
 
         appDelegate.canClick = false
         // Fetch URL in the background on the button click.
@@ -77,16 +77,19 @@ class Controller : NSObject() {
     @ObjCAction
     fun onRequest() {
         val addressBookRef = CNContactStore()
-        addressBookRef.requestAccessForEntityType(CNEntityType.CNEntityTypeContacts, mainContinuation {
-            granted, error ->
-            appDelegate.contentText.string = if (granted)
-                "Access granted!"
-            else
-                "Access denied: $error"
-        })
+        addressBookRef.requestAccessForEntityType(
+            CNEntityType.CNEntityTypeContacts,
+            mainContinuation {
+                granted, error ->
+                appDelegate.contentText.string = if (granted)
+                    "Access granted!"
+                else
+                    "Access denied: $error"
+            }
+        )
     }
 
-    class HttpDelegate: NSObject(), NSURLSessionDataDelegateProtocol {
+    class HttpDelegate : NSObject(), NSURLSessionDataDelegateProtocol {
         private val asyncQueue = NSOperationQueue()
         private val receivedData = MutableData()
 
@@ -97,9 +100,9 @@ class Controller : NSObject() {
         fun fetchUrl(url: String) {
             receivedData.reset()
             val session = NSURLSession.sessionWithConfiguration(
-                    NSURLSessionConfiguration.defaultSessionConfiguration(),
-                    this,
-                    delegateQueue = asyncQueue
+                NSURLSessionConfiguration.defaultSessionConfiguration(),
+                this,
+                delegateQueue = asyncQueue
             )
             session.dataTaskWithURL(NSURL(string = url)).resume()
         }
@@ -114,14 +117,17 @@ class Controller : NSObject() {
 
             executeAsync(NSOperationQueue.mainQueue) {
                 val response = task.response as? NSHTTPURLResponse
-                Pair(when {
-                    response == null -> QueryResult(null, didCompleteWithError?.localizedDescription)
-                    response.statusCode.toInt() != 200 -> QueryResult(null, "${response.statusCode.toInt()})")
-                    else -> QueryResult(receivedData.asJSON(), null)
-                }, { result: QueryResult ->
-                    appDelegate.contentText.string = result.json?.toString() ?: "Error: ${result.error}"
-                    appDelegate.canClick = true
-                })
+                Pair(
+                    when {
+                        response == null -> QueryResult(null, didCompleteWithError?.localizedDescription)
+                        response.statusCode.toInt() != 200 -> QueryResult(null, "${response.statusCode.toInt()})")
+                        else -> QueryResult(receivedData.asJSON(), null)
+                    },
+                    { result: QueryResult ->
+                        appDelegate.contentText.string = result.json?.toString() ?: "Error: ${result.error}"
+                        appDelegate.canClick = true
+                    }
+                )
             }
         }
     }
@@ -138,15 +144,15 @@ class MyAppDelegate() : NSObject(), NSApplicationDelegateProtocol {
         val mainDisplayRect = NSScreen.mainScreen()!!.frame
         val windowRect = mainDisplayRect.useContents {
             NSMakeRect(
-                    origin.x + size.width * 0.25,
-                    origin.y + size.height * 0.25,
-                    size.width * 0.5,
-                    size.height * 0.5
+                origin.x + size.width * 0.25,
+                origin.y + size.height * 0.25,
+                size.width * 0.5,
+                size.height * 0.5
             )
         }
 
         val windowStyle = NSWindowStyleMaskTitled or NSWindowStyleMaskMiniaturizable or
-                NSWindowStyleMaskClosable or NSWindowStyleMaskResizable
+            NSWindowStyleMaskClosable or NSWindowStyleMaskResizable
 
         window = NSWindow(windowRect, windowStyle, NSBackingStoreBuffered, false).apply {
             title = "URL async fetcher"
@@ -197,7 +203,6 @@ class MyAppDelegate() : NSObject(), NSApplicationDelegateProtocol {
             string = "Press 'Click' to start fetching"
             verticallyResizable = false
             horizontallyResizable = false
-
         }
         window.contentView!!.addSubview(contentText)
     }

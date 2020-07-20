@@ -30,4 +30,3 @@ class KonanExternalToolFailure(message: String, val toolName: String, cause: Thr
  * An exception indicating a failed attempt to access some parts of Xcode (e.g. get SDK paths or version).
  */
 class MissingXcodeException(message: String, cause: Throwable? = null) : KonanException(message, cause)
-

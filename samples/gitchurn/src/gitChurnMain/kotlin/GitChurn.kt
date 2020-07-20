@@ -74,7 +74,6 @@ private fun git_time_t.format() = memScoped {
     ctime(commitTime.ptr)!!.toKString().trim()
 }
 
-
 private fun printTree(commit: GitCommit) {
     commit.tree.entries().forEach { entry ->
         when (entry) {

@@ -13,13 +13,13 @@ data class JniObject(val jobject: jobject)
 data class JniMethod(val jmethod: jmethodID)
 
 fun asJniClass(jclass: jclass?) =
-        if (jclass != null) JniClass(jclass) else null
+    if (jclass != null) JniClass(jclass) else null
 
 fun asJniObject(jobject: jobject?) =
-        if (jobject != null) JniObject(jobject) else null
+    if (jobject != null) JniObject(jobject) else null
 
 fun asJniMethod(jmethodID: jmethodID?) =
-        if (jmethodID != null) JniMethod(jmethodID) else null
+    if (jmethodID != null) JniMethod(jmethodID) else null
 
 class JniBridge(val vm: CPointer<JavaVMVar>) {
     private val vmFunctions: JNIInvokeInterface = vm.pointed.pointed!!
@@ -85,14 +85,20 @@ class JniBridge(val vm: CPointer<JavaVMVar>) {
     }
 
     fun CallVoidMethod(receiver: JniObject?, method: JniMethod, vararg arguments: Any?) = memScoped {
-        fCallVoidMethodA(jniEnv, receiver?.jobject, method.jmethod,
-                toJValues(arguments, this@memScoped))
+        fCallVoidMethodA(
+            jniEnv, receiver?.jobject, method.jmethod,
+            toJValues(arguments, this@memScoped)
+        )
         check()
     }
 
     fun CallObjectMethod(receiver: JniObject?, method: JniMethod, vararg arguments: Any?) = memScoped {
-        val result = asJniObject(fCallObjectMethodA(jniEnv, receiver?.jobject, method.jmethod,
-                toJValues(arguments, this@memScoped)))
+        val result = asJniObject(
+            fCallObjectMethodA(
+                jniEnv, receiver?.jobject, method.jmethod,
+                toJValues(arguments, this@memScoped)
+            )
+        )
         check()
         result
     }

@@ -6,7 +6,7 @@
 package sample.calculator.arithmeticparser
 
 fun parseAndCompute(expression: String): PartialParser.Result<Double, String> =
-        PartialParser(Calculator(), PartialRenderer()).parseWithPartial(expression)
+    PartialParser(Calculator(), PartialRenderer()).parseWithPartial(expression)
 
 class Calculator : ExpressionComposer<Double> {
     override fun number(value: Double) = value
@@ -52,9 +52,9 @@ open class Parser<E : Any>(private val composer: ExpressionComposer<E>) {
     }
 
     internal fun parseAsPrefix(tokenizer: Tokenizer): ExpressionPrefix<E> =
-            generateSequence<ExpressionPrefix<E>>(Empty) {
-                it.tryExtend(tokenizer)
-            }.last()
+        generateSequence<ExpressionPrefix<E>>(Empty) {
+            it.tryExtend(tokenizer)
+        }.last()
 
     private fun ExpressionPrefix<E>.tryExtend(tokenizer: Tokenizer): ExpressionPrefix<E>? = when (this) {
         is ContinuableWithExpression -> {
@@ -83,36 +83,37 @@ open class Parser<E : Any>(private val composer: ExpressionComposer<E>) {
     }
 
     private tailrec fun EndedWithExpression<E>.extendedWithOperator(operator: BinaryOperator): EndedWithOperator<E> =
-            if (this.prefix is EndedWithOperator && this.prefix.operator.precedence >= operator.precedence) {
-                // Apply the operator
-                this.prefix
-                        .withOperatorApplied(this.expression)
-                        .extendedWithOperator(operator)
-            } else {
-                EndedWithOperator(this.prefix, this.expression, operator)
-            }
+        if (this.prefix is EndedWithOperator && this.prefix.operator.precedence >= operator.precedence) {
+            // Apply the operator
+            this.prefix
+                .withOperatorApplied(this.expression)
+                .extendedWithOperator(operator)
+        } else {
+            EndedWithOperator(this.prefix, this.expression, operator)
+        }
 
     internal tailrec fun EndedWithExpression<E>.reduced(): EndedWithExpression<E> = when (this.prefix) {
         Empty, is EndedWithLeftParenthesis -> this
 
         is EndedWithOperator ->
             this.prefix
-                    .withOperatorApplied(this.expression)
-                    .reduced()
+                .withOperatorApplied(this.expression)
+                .reduced()
     }
 
     private fun EndedWithOperator<E>.withOperatorApplied(rightOperand: E) =
-            this.prefix.with(composer.compose(this.operator, this.leftOperand, rightOperand))
+        this.prefix.with(composer.compose(this.operator, this.leftOperand, rightOperand))
 
     private fun ExpressionComposer<E>.compose(
-            binaryOperator: BinaryOperator, left: E, right: E
+        binaryOperator: BinaryOperator,
+        left: E,
+        right: E
     ): E = when (binaryOperator) {
         BinaryOperator.PLUS -> plus(left, right)
         BinaryOperator.MINUS -> minus(left, right)
         BinaryOperator.MULT -> mult(left, right)
         BinaryOperator.DIV -> div(left, right)
     }
-
 }
 
 interface PartialExpressionComposer<E : Any, PE : Any> {
@@ -128,8 +129,8 @@ interface PartialExpressionComposer<E : Any, PE : Any> {
 }
 
 class PartialParser<E : Any, PE : Any>(
-        composer: ExpressionComposer<E>,
-        private val partialComposer: PartialExpressionComposer<E, PE>
+    composer: ExpressionComposer<E>,
+    private val partialComposer: PartialExpressionComposer<E, PE>
 ) : Parser<E>(composer) {
 
     data class Result<E : Any, PE : Any>(val expression: E?, val partialExpression: PE, val remainder: String?)
@@ -141,9 +142,9 @@ class PartialParser<E : Any, PE : Any>(
         val remainder = tokenizer.getRemainder()
 
         return Result(
-                if (remainder != null) null else tryReduce(prefix),
-                prefix.toPartialExpression(),
-                remainder
+            if (remainder != null) null else tryReduce(prefix),
+            prefix.toPartialExpression(),
+            remainder
         )
     }
 
@@ -160,29 +161,29 @@ class PartialParser<E : Any, PE : Any>(
 
     private fun ExpressionPrefix<E>.toPartialExpression(): PE = when (this) {
         is EndedWithExpression -> this.prefix.toPartialExpressionWith(
-                ending = partialComposer.ending(this.expression)
+            ending = partialComposer.ending(this.expression)
         )
         is ContinuableWithExpression -> this.toPartialExpressionWith(ending = partialComposer.missing())
     }
 
     private tailrec fun ContinuableWithExpression<E>.toPartialExpressionWith(
-            ending: PE
+        ending: PE
     ): PE = when (this) {
         Empty -> ending
 
         is EndedWithLeftParenthesis -> this.prefix.toPartialExpressionWith(
-                ending = partialComposer.leftParenthesized(ending)
+            ending = partialComposer.leftParenthesized(ending)
         )
 
         is EndedWithOperator -> this.prefix.toPartialExpressionWith(
-                ending = partialComposer.compose(this.operator, this.leftOperand, ending)
+            ending = partialComposer.compose(this.operator, this.leftOperand, ending)
         )
     }
 
     private fun PartialExpressionComposer<E, PE>.compose(
-            binaryOperator: BinaryOperator,
-            left: E,
-            right: PE
+        binaryOperator: BinaryOperator,
+        left: E,
+        right: PE
     ): PE = when (binaryOperator) {
         BinaryOperator.PLUS -> plus(left, right)
         BinaryOperator.MINUS -> minus(left, right)
@@ -201,28 +202,28 @@ class PartialParser<E : Any, PE : Any>(
 internal sealed class ExpressionPrefix<out E>
 
 internal data class EndedWithExpression<E>(
-        val prefix: ContinuableWithExpression<E>,
-        val expression: E
+    val prefix: ContinuableWithExpression<E>,
+    val expression: E
 ) : ExpressionPrefix<E>()
 
 internal sealed class ContinuableWithExpression<out E> : ExpressionPrefix<E>()
 
 private fun <E> ContinuableWithExpression<E>.with(expression: E) =
-        EndedWithExpression(this, expression)
+    EndedWithExpression(this, expression)
 
 private object Empty : ContinuableWithExpression<Nothing>()
 
 private data class EndedWithLeftParenthesis<out E>(
-        val prefix: ContinuableWithExpression<E>
+    val prefix: ContinuableWithExpression<E>
 ) : ContinuableWithExpression<E>()
 
 private fun <E> ContinuableWithExpression<E>.withLeftParenthesis() =
-        EndedWithLeftParenthesis(this)
+    EndedWithLeftParenthesis(this)
 
 private data class EndedWithOperator<out E>(
-        val prefix: ContinuableWithExpression<E>,
-        val leftOperand: E,
-        val operator: BinaryOperator
+    val prefix: ContinuableWithExpression<E>,
+    val leftOperand: E,
+    val operator: BinaryOperator
 ) : ContinuableWithExpression<E>()
 
 internal enum class BinaryOperator(val sign: Char, val precedence: Int) {
@@ -266,7 +267,6 @@ internal class Tokenizer(private val expression: String) {
     fun tryReadLeftParenthesis(): Boolean = tryRead('(')
 
     fun tryReadRightParenthesis(): Boolean = tryRead(')')
-
 
     private fun tryRead(char: Char): Boolean = if (hasNext() && expression[index] == char) {
         ++index

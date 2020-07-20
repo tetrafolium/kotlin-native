@@ -28,13 +28,13 @@ fun main(args: Array<String>) {
     check(contentRoot.isDirectory) { "Invalid content root: $contentRoot." }
 
     println(
-            """
+        """
 
                 IMPORTANT: Please open http://localhost:8080/ in your browser!
 
                 To stop embedded HTTP server use Ctrl+C (Cmd+C for Mac OS X).
 
-            """.trimIndent()
+        """.trimIndent()
     )
 
     val server = embeddedServer(Netty, 8080) {

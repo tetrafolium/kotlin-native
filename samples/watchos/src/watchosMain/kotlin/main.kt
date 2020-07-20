@@ -58,7 +58,7 @@ class Watchapp3InterfaceController : WKInterfaceController {
         super.awakeWithContext(context)
         println("awakeWithContext $context")
         if (context == null) {
-          setTitle("Kotlin/Native sample")
+            setTitle("Kotlin/Native sample")
         }
     }
 }

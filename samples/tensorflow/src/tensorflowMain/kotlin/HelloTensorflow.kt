@@ -37,11 +37,13 @@ fun scalarTensor(value: Int): Tensor {
     val data = nativeHeap.allocArray<IntVar>(1)
     data[0] = value
 
-    return TF_NewTensor(TF_INT32,
-            dims = null, num_dims = 0,
-            data = data, len = IntVar.size.convert(),
-            deallocator = staticCFunction { dataToFree, _, _ -> nativeHeap.free(dataToFree!!.reinterpret<IntVar>()) },
-            deallocator_arg = null)!!
+    return TF_NewTensor(
+        TF_INT32,
+        dims = null, num_dims = 0,
+        data = data, len = IntVar.size.convert(),
+        deallocator = staticCFunction { dataToFree, _, _ -> nativeHeap.free(dataToFree!!.reinterpret<IntVar>()) },
+        deallocator_arg = null
+    )!!
 }
 
 val Tensor.scalarIntValue: Int get() {
@@ -54,7 +56,6 @@ val Tensor.scalarIntValue: Int get() {
 
     return TF_TensorData(this)!!.reinterpret<IntVar>().pointed.value
 }
-
 
 class Graph {
     val tensorflowGraph = TF_NewGraph()!!
@@ -175,7 +176,7 @@ class Session(val graph: Graph) {
     }
 
     operator fun invoke(output: Operation, inputsWithValues: List<Pair<Operation, Tensor>> = listOf()) =
-            invoke(listOf(output), inputsWithValues).single()!!
+        invoke(listOf(output), inputsWithValues).single()!!
 
     operator fun invoke(): List<Tensor?> {
         if (inputs.size != inputValues.size) {
@@ -205,11 +206,13 @@ class Session(val graph: Graph) {
             val outputValuesCArray = allocArrayOfPointersTo<TF_Tensor>(outputs.map { null })
 
             statusValidated {
-                TF_SessionRun(tensorflowSession, null,
-                        inputsCArray, inputValues.toCValues(), inputs.size,
-                        outputsCArray, outputValuesCArray, outputs.size,
-                        targets.toCValues(), targets.size,
-                        null, it)
+                TF_SessionRun(
+                    tensorflowSession, null,
+                    inputsCArray, inputValues.toCValues(), inputs.size,
+                    outputsCArray, outputValuesCArray, outputs.size,
+                    targets.toCValues(), targets.size,
+                    null, it
+                )
             }
 
             for (index in outputs.indices) {

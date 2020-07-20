@@ -28,7 +28,7 @@ class Queue<T>(val maxSize: Int) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun peek() : T? {
+    fun peek(): T? {
         if (isEmpty()) return null
         return array[head] as T
     }

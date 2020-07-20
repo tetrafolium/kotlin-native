@@ -5,30 +5,25 @@
 
 package org.example.weather_func
 
-import cjson.cJSON_CreateObject as createJsonObject
-import cjson.cJSON_AddStringToObject as addStringToObject
-import cjson.cJSON_AddNumberToObject as addNumberToObject
+import cjson.cJSON
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.pointed
+import kotlinx.cinterop.toKString
+import kotlin.system.exitProcess
 import cjson.cJSON_AddArrayToObject as addArrayToObject
 import cjson.cJSON_AddItemToArray as addItemToArray
 import cjson.cJSON_AddItemToObjectCS as addItemToObject
-
+import cjson.cJSON_AddNumberToObject as addNumberToObject
+import cjson.cJSON_AddStringToObject as addStringToObject
+import cjson.cJSON_CreateObject as createJsonObject
 import cjson.cJSON_Delete as deleteObject
-import cjson.cJSON_Print as jsonString
-import cjson.cJSON_Parse as parseJson
-import cjson.cJSON_GetObjectItemCaseSensitive as jsonObjectItem
-import cjson.cJSON_IsString as jsonValueIsString
-
-import cjson.cJSON_IsNumber as jsonValueIsNumber
-import cjson.cJSON_GetErrorPtr as getErrorPointer
-import cjson.cJSON_GetStringValue as jsonStringValue
-import cjson.cJSON_GetArraySize as jsonArraySize
 import cjson.cJSON_GetArrayItem as jsonArrayItem
-import cjson.cJSON
-
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.toKString
-import kotlinx.cinterop.pointed
-import kotlin.system.exitProcess
+import cjson.cJSON_GetArraySize as jsonArraySize
+import cjson.cJSON_GetErrorPtr as getErrorPointer
+import cjson.cJSON_GetObjectItemCaseSensitive as jsonObjectItem
+import cjson.cJSON_GetStringValue as jsonStringValue
+import cjson.cJSON_Parse as parseJson
+import cjson.cJSON_Print as jsonString
 
 private val trueValue = 1
 
@@ -58,12 +53,12 @@ internal fun createWeatherFromJson(jsonStr: String): Weather {
  * @return A instance of Weather.
 */
 private fun createWeather(
-	placeName: String, 
-	countryCode: String, 
-	windInfo: Pair<Double, Int>,
-	conditions: Array<Pair<String, String>>,
-	humidity: Int,
-	tempInfo: Triple<Int, Int, Int>
+    placeName: String,
+    countryCode: String,
+    windInfo: Pair<Double, Int>,
+    conditions: Array<Pair<String, String>>,
+    humidity: Int,
+    tempInfo: Triple<Int, Int, Int>
 ) = Weather(
 	placeName = placeName,
 	countryCode = countryCode,
@@ -115,11 +110,11 @@ private fun extractWindInfo(rootObj: CPointer<cJSON>?): Pair<Double, Int> {
 
 private fun extractCountryCode(rootObj: CPointer<cJSON>?): String {
 	val sys = jsonObjectItem(rootObj, "sys")
-	
+
 	return jsonObjectItem(sys, "country").stringValue()
 }
 
-internal fun weatherToJsonString(weather: Weather) : String {
+internal fun weatherToJsonString(weather: Weather): String {
 	val rootObj = createJsonObject()
 	addStringToObject(rootObj, "placeName", weather.placeName)
 	addStringToObject(rootObj, "countryCode", weather.countryCode)

@@ -6,10 +6,10 @@
 package sample.videoplayer
 
 import ffmpeg.*
-import kotlin.system.*
 import kotlinx.cinterop.*
-import platform.posix.*
 import kotlinx.cli.*
+import platform.posix.*
+import kotlin.system.*
 
 enum class State {
     PLAYING,
@@ -43,7 +43,7 @@ class VideoPlayer(val requestedSize: Dimensions?) : DisposableContainer() {
 
     val worker get() = decoder.worker
     var lastFrameTime = 0.0
-    
+
     fun stop() {
         state = State.STOPPED
     }
@@ -120,7 +120,7 @@ class VideoPlayer(val requestedSize: Dimensions?) : DisposableContainer() {
         // Wait for next frame, if needed
         if (passedTime < frameDuration) {
             usleep((1000_000 * (frameDuration - passedTime)).toInt().toUInt())
-        } else if (passedTime > frameDuration * 1.5){
+        } else if (passedTime > frameDuration * 1.5) {
             lastFrameTime = now // we fell behind more than half frame, reset time
         }
         // Play frame
@@ -136,7 +136,7 @@ class VideoPlayer(val requestedSize: Dimensions?) : DisposableContainer() {
         }
         audio.resume()
     }
-    
+
     private fun syncAV(info: CodecInfo) {
         if (info.hasVideo) {
             if (info.hasAudio) {
@@ -159,10 +159,11 @@ class VideoPlayer(val requestedSize: Dimensions?) : DisposableContainer() {
 fun main(args: Array<String>) {
     val argParser = ArgParser("videoplayer")
     val mode by argParser.option(
-            ArgType.Choice(listOf("video", "audio", "both")), shortName = "m", description = "Play mode")
-            .default("both")
+        ArgType.Choice(listOf("video", "audio", "both")), shortName = "m", description = "Play mode"
+    )
+        .default("both")
     val size by argParser.option(ArgType.Int, shortName = "s", description = "Required size of videoplayer window")
-            .delimiter(",")
+        .delimiter(",")
     val fileName by argParser.argument(ArgType.String, description = "File to play")
     argParser.parse(args)
 

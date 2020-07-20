@@ -5,11 +5,11 @@
 
 package sample.globalstate
 
-import kotlin.native.concurrent.*
 import kotlinx.cinterop.*
 import platform.posix.*
+import kotlin.native.concurrent.*
 
-inline fun Int.ensureUnixCallResult(op: String, predicate: (Int) -> Boolean = { x -> x == 0} ): Int {
+inline fun Int.ensureUnixCallResult(op: String, predicate: (Int) -> Boolean = { x -> x == 0 }): Int {
     if (!predicate(this)) {
         throw Error("$op: ${strerror(posix_errno())!!.toKString()}")
     }
@@ -25,9 +25,11 @@ val globalObject: SharedData?
     get() = sharedData.frozenKotlinObject?.asStableRef<SharedData>()?.get()
 
 fun dumpShared(prefix: String) {
-    println("""
+    println(
+        """
             $prefix: ${pthread_self()} x=${sharedData.x} f=${sharedData.f} s=${sharedData.string!!.toKString()}
-            """.trimIndent())
+        """.trimIndent()
+    )
 }
 
 fun main() {
@@ -54,15 +56,19 @@ fun main() {
     // memScoped is needed to pass thread's local address to pthread_create().
     memScoped {
         val thread = alloc<pthread_tVar>()
-        pthread_create(thread.ptr, null, staticCFunction { argC ->
-            initRuntimeIfNeeded()
-            dumpShared("thread2")
-            val kotlinObject = DetachedObjectGraph<SharedData>(sharedData.kotlinObject).attach()
-            val arg = DetachedObjectGraph<SharedDataMember>(argC).attach()
-            println("thread arg is $arg Kotlin object is $kotlinObject frozen is $globalObject")
-            // Workaround for compiler issue.
-            null as COpaquePointer?
-        }, DetachedObjectGraph { SharedDataMember(3.14)}.asCPointer() ).ensureUnixCallResult("pthread_create")
+        pthread_create(
+            thread.ptr, null,
+            staticCFunction { argC ->
+                initRuntimeIfNeeded()
+                dumpShared("thread2")
+                val kotlinObject = DetachedObjectGraph<SharedData>(sharedData.kotlinObject).attach()
+                val arg = DetachedObjectGraph<SharedDataMember>(argC).attach()
+                println("thread arg is $arg Kotlin object is $kotlinObject frozen is $globalObject")
+                // Workaround for compiler issue.
+                null as COpaquePointer?
+            },
+            DetachedObjectGraph { SharedDataMember(3.14) }.asCPointer()
+        ).ensureUnixCallResult("pthread_create")
         pthread_join(thread.value, null).ensureUnixCallResult("pthread_join")
     }
 

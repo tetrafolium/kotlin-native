@@ -46,11 +46,11 @@ kotlin {
 
         mavenPublication {
             pom {
-                 withXml {
-                     val root = asNode()
-                     root.appendNode("name", "libcurl interop library")
-                     root.appendNode("description", "A library providing interoperability with host libcurl")
-                 }
+                withXml {
+                    val root = asNode()
+                    root.appendNode("name", "libcurl interop library")
+                    root.appendNode("description", "A library providing interoperability with host libcurl")
+                }
             }
         }
     }

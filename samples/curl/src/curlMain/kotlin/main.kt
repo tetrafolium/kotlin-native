@@ -27,4 +27,3 @@ fun main(args: Array<String>) {
 fun help() {
     println("ERROR: missing URL command line argument")
 }
-

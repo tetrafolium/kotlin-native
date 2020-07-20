@@ -67,13 +67,13 @@ kotlin {
     sourceSets {
         val x86Main by getting
         if (!simulatorOnly) {
-          val x64Main by getting
-          val arm32Main by getting
-          val arm64Main by getting
-          arm32Main.dependsOn(x86Main)
-          arm64Main.dependsOn(x86Main)
-          x64Main.dependsOn(x86Main)
-       }
+            val x64Main by getting
+            val arm32Main by getting
+            val arm64Main by getting
+            arm32Main.dependsOn(x86Main)
+            arm64Main.dependsOn(x86Main)
+            x64Main.dependsOn(x86Main)
+        }
     }
 }
 

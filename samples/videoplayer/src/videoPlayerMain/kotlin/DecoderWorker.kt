@@ -6,9 +6,9 @@
 package sample.videoplayer
 
 import ffmpeg.*
-import kotlin.native.concurrent.*
 import kotlinx.cinterop.*
 import platform.posix.memcpy
+import kotlin.native.concurrent.*
 
 // This global variable only set to != null value in the decoding worker.
 @ThreadLocal
@@ -47,8 +47,8 @@ private fun AVFormatContext.streamAt(index: Int): AVStream? =
 private fun AVStream.openCodec(tag: String): AVCodecContext {
     // Get codec context for the video stream.
     val codecContext = codec!!.pointed
-    val codec = avcodec_find_decoder(codecContext.codec_id)?.pointed ?:
-        throw Error("Unsupported $tag codec with id ${codecContext.codec_id}...")
+    val codec = avcodec_find_decoder(codecContext.codec_id)?.pointed
+        ?: throw Error("Unsupported $tag codec with id ${codecContext.codec_id}...")
     // Open codec.
     if (avcodec_open2(codecContext.ptr, codec.ptr, null) < 0)
         throw Error("Couldn't open $tag codec with id ${codecContext.codec_id}")
@@ -110,7 +110,8 @@ private class VideoDecoder(
                 videoSize.w, videoSize.h,
                 videoCodecContext.pix_fmt,
                 windowSize.w, windowSize.h, avPixelFormat,
-                SWS_BILINEAR, null, null, null)
+                SWS_BILINEAR, null, null, null
+            )
         },
         dispose = ::sws_freeContext
     )
@@ -122,8 +123,10 @@ private class VideoDecoder(
     private val minVideoFrames = 5
 
     init {
-        avpicture_fill(scaledVideoFrame.ptr.reinterpret(), buffer.refTo(0),
-            avPixelFormat, windowSize.w, windowSize.h)
+        avpicture_fill(
+            scaledVideoFrame.ptr.reinterpret(), buffer.refTo(0),
+            avPixelFormat, windowSize.w, windowSize.h
+        )
     }
 
     override fun dispose() {
@@ -142,9 +145,11 @@ private class VideoDecoder(
         // Did we get a video frame?
         if (frameFinished.value != 0) {
             // Convert the frame from its movie format to window pixel format.
-            sws_scale(softwareScalingContext, videoFrame.data,
+            sws_scale(
+                softwareScalingContext, videoFrame.data,
                 videoFrame.linesize, 0, videoSize.h,
-                scaledVideoFrame.data, scaledVideoFrame.linesize)
+                scaledVideoFrame.data, scaledVideoFrame.linesize
+            )
             // TODO: reuse buffers!
             val buffer = av_buffer_alloc(scaledFrameSize)!!
             val ts = av_frame_get_best_effort_timestamp(videoFrame.ptr) *
@@ -153,7 +158,6 @@ private class VideoDecoder(
             videoQueue.push(VideoFrame(buffer, scaledVideoFrame.linesize[0], ts))
         }
     }
-
 }
 
 private fun SampleFormat.toAVSampleFormat(): AVSampleFormat? = when (this) {
@@ -165,7 +169,8 @@ private data class AudioDecoderOutput(
     val sampleRate: Int,
     val channels: Int,
     val channelLayout: Int,
-    val sampleFormat: AVSampleFormat)
+    val sampleFormat: AVSampleFormat
+)
 
 // Performs data type conversion and copy to transfer data to DecoderWorker
 private fun AudioOutput.toAudioDecoderOutput(): AudioDecoderOutput? {
@@ -177,7 +182,7 @@ private fun AudioOutput.toAudioDecoderOutput(): AudioDecoderOutput? {
 private class AudioDecoder(
     private val audioCodecContext: AVCodecContext,
     output: AudioDecoderOutput
-): DisposableContainer() {
+) : DisposableContainer() {
     private val audioFrame: AVFrame =
         disposable(create = ::av_frame_alloc, dispose = ::av_frame_unref).pointed
     private val resampledAudioFrame: AVFrame =
@@ -191,14 +196,14 @@ private class AudioDecoder(
     private val maxAudioFrames = 5
 
     init {
-        with (resampledAudioFrame) {
+        with(resampledAudioFrame) {
             channels = output.channels
             sample_rate = output.sampleRate
             format = output.sampleFormat
             channel_layout = output.channelLayout.convert()
         }
 
-        with (audioCodecContext) {
+        with(audioCodecContext) {
             setResampleOpt("in_channel_layout", channel_layout.convert())
             setResampleOpt("out_channel_layout", output.channelLayout)
             setResampleOpt("in_sample_rate", sample_rate)
@@ -241,7 +246,7 @@ private class AudioDecoder(
             if (frameFinished.value != 0) {
                 // Put audio frame to decoder's queue.
                 swr_convert_frame(resampleContext, resampledAudioFrame.ptr, audioFrame.ptr).checkAVError()
-                with (resampledAudioFrame) {
+                with(resampledAudioFrame) {
                     val audioFrameSize = av_samples_get_buffer_size(null, channels, nb_samples, format, 1)
                     val buffer = av_buffer_alloc(audioFrameSize)!!
                     val ts = av_frame_get_best_effort_timestamp(audioFrame.ptr) *
@@ -348,21 +353,30 @@ inline class DecoderWorker(val worker: Worker) : Disposable {
         }
 
         // Pack all state and pass it to the worker.
-        worker.execute(TransferMode.SAFE, {
-                Decoder(context.ptr,
+        worker.execute(
+            TransferMode.SAFE,
+            {
+                Decoder(
+                    context.ptr,
                     videoStreamIndex, audioStreamIndex,
-                    videoContext, audioContext)
-            }) { decoder = it }
+                    videoContext, audioContext
+                )
+            }
+        ) { decoder = it }
         return CodecInfo(video, audio)
     }
 
     fun start(videoOutput: VideoOutput, audioOutput: AudioOutput) {
-        worker.execute(TransferMode.SAFE,
-            { Pair(
-                videoOutput.toVideoDecoderOutput(),
-                audioOutput.toAudioDecoderOutput())
-            }) {
-                decoder?.start(it.first, it.second)
+        worker.execute(
+            TransferMode.SAFE,
+            {
+                Pair(
+                    videoOutput.toVideoDecoderOutput(),
+                    audioOutput.toAudioDecoderOutput()
+                )
+            }
+        ) {
+            decoder?.start(it.first, it.second)
         }
     }
 
@@ -376,10 +390,10 @@ inline class DecoderWorker(val worker: Worker) : Disposable {
     }
 
     fun done(): Boolean =
-            worker.execute(TransferMode.SAFE, { null }) { decoder?.done() ?: true }.result
+        worker.execute(TransferMode.SAFE, { null }) { decoder?.done() ?: true }.result
 
     fun requestDecodeChunk() =
-            worker.execute(TransferMode.SAFE, { null }) { decoder?.decodeIfNeeded() }.result
+        worker.execute(TransferMode.SAFE, { null }) { decoder?.decodeIfNeeded() }.result
 
     fun nextVideoFrame(): VideoFrame? =
         worker.execute(TransferMode.SAFE, { null }) { decoder?.nextVideoFrame() }.result

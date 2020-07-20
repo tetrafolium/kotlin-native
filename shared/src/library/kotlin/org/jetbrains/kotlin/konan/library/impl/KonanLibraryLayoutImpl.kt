@@ -16,7 +16,6 @@ open class TargetedLibraryLayoutImpl(klib: File, component: String, override val
 
     override fun directlyFromZip(zipFileSystem: FileSystem): TargetedKotlinLibraryLayout =
         FromZipTargetedLibraryImpl(this, zipFileSystem)
-
 }
 
 class BitcodeLibraryLayoutImpl(klib: File, component: String, target: KonanTarget?) :
@@ -27,7 +26,6 @@ class BitcodeLibraryLayoutImpl(klib: File, component: String, target: KonanTarge
 
     override fun directlyFromZip(zipFileSystem: FileSystem): BitcodeKotlinLibraryLayout =
         FromZipBitcodeLibraryImpl(this, zipFileSystem)
-
 }
 
 open class TargetedLibraryAccess<L : KotlinLibraryLayout>(klib: File, component: String, val target: KonanTarget?) :

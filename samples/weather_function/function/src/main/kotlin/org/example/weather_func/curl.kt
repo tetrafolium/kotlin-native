@@ -5,28 +5,25 @@
 
 package org.example.weather_func
 
-import org.example.weather_func.Event
-import platform.posix.size_t
-
-import curl.curl_easy_setopt
-import curl.CURLOPT_URL
-import curl.CURLOPT_HEADERFUNCTION
+import curl.CURLE_OK
 import curl.CURLOPT_HEADERDATA
-import curl.CURLOPT_WRITEFUNCTION
+import curl.CURLOPT_HEADERFUNCTION
+import curl.CURLOPT_URL
 import curl.CURLOPT_WRITEDATA
+import curl.CURLOPT_WRITEFUNCTION
 import curl.curl_easy_cleanup
 import curl.curl_easy_init
-import curl.CURLE_OK
-import curl.curl_easy_strerror
 import curl.curl_easy_perform
-
-import kotlinx.cinterop.staticCFunction
+import curl.curl_easy_setopt
+import curl.curl_easy_strerror
+import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.StableRef
 import kotlinx.cinterop.asStableRef
-import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.readBytes
+import kotlinx.cinterop.staticCFunction
+import platform.posix.size_t
 
 /**
  * Provides basic HTTP client functionality through the libCurl library.

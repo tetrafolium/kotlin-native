@@ -22,16 +22,17 @@ fun List<Float>.maxIndex() = withIndex().maxBy { it.value }!!.index
 fun accuracy(predictionBatch: FloatMatrix, labelBatch: FloatMatrix): Float {
     val resultIndexes = predictionBatch.toList().map { it.maxIndex() }
     val labelBatchIndexes = labelBatch.toList().map { it.maxIndex() }
-    return resultIndexes.zip(labelBatchIndexes).
-            count { (result, label) -> result == label }.toFloat() / resultIndexes.size
+    return resultIndexes.zip(labelBatchIndexes)
+        .count { (result, label) -> result == label }.toFloat() / resultIndexes.size
 }
 
 fun Backpropagatable<FloatMatrix, FloatMatrix>.trainClassifier(
-        dataset: Dataset,
-        lossByLabels: (FloatMatrix) -> Backpropagatable<FloatMatrix, FloatVector>,
-        learningRateByProgress: (Float) -> Float = { 5f * kotlin.math.exp(-it * 3) },
-        batchSize: Int = 64,
-        iterations: Int = 500) {
+    dataset: Dataset,
+    lossByLabels: (FloatMatrix) -> Backpropagatable<FloatMatrix, FloatVector>,
+    learningRateByProgress: (Float) -> Float = { 5f * kotlin.math.exp(-it * 3) },
+    batchSize: Int = 64,
+    iterations: Int = 500
+) {
 
     for (i in 0 until iterations) {
         disposeScoped {
@@ -44,10 +45,12 @@ fun Backpropagatable<FloatMatrix, FloatMatrix>.trainClassifier(
             val backpropResults = use { forwardResults.backpropagate(outputGradient = tensor(learningRate)) }
             val crossEntropy = forwardResults.output[0]
             backpropResults.descend()
-            println("Iteration ${i + 1}/$iterations: " +
+            println(
+                "Iteration ${i + 1}/$iterations: " +
                     "${accuracy.toPercentageString()}% training batch accuracy, " +
                     "cross entropy loss = ${crossEntropy.toRoundedString(4)}, " +
-                    "learning rate = ${learningRate.toRoundedString(4)}")
+                    "learning rate = ${learningRate.toRoundedString(4)}"
+            )
         }
     }
 }
@@ -67,8 +70,8 @@ fun randomInit(size0: Int, size1: Int) = random(-.1, .1, size0, size1)
 
 fun linear(inputSize: Int, outputSize: Int) = Linear(randomInit(outputSize, inputSize), randomInit(outputSize))
 fun twoLayerClassifier(dataset: Dataset, hiddenSize: Int = 64) =
-        linear(dataset.inputs[0].size, hiddenSize) before Relu before
-                linear(hiddenSize, dataset.labels[0].size) before Softmax
+    linear(dataset.inputs[0].size, hiddenSize) before Relu before
+        linear(hiddenSize, dataset.labels[0].size) before Softmax
 
 fun main() {
     val trainingDataset = MNIST.labeledTrainingImages()

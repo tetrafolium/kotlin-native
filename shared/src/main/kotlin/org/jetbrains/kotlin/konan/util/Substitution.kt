@@ -6,10 +6,11 @@ import java.util.*
 // FIXME(ddol): KLIB-REFACTORING-CLEANUP: remove the whole file!
 
 fun defaultTargetSubstitutions(target: KonanTarget) =
-        mapOf<String, String>(
-            "target" to target.visibleName,
-            "arch" to target.architecture.visibleName,
-            "family" to target.family.visibleName)
+    mapOf<String, String>(
+        "target" to target.visibleName,
+        "arch" to target.architecture.visibleName,
+        "family" to target.family.visibleName
+    )
 
 // Performs substitution similar to:
 //  foo = ${foo} ${foo.${arch}} ${foo.${os}}

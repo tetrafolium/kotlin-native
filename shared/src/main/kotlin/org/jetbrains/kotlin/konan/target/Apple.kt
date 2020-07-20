@@ -22,9 +22,9 @@ import org.jetbrains.kotlin.konan.util.InternalServer
 import kotlin.math.max
 
 class AppleConfigurablesImpl(
-        target: KonanTarget,
-        properties: Properties,
-        baseDir: String?
+    target: KonanTarget,
+    properties: Properties,
+    baseDir: String?
 ) : AppleConfigurables, KonanPropertiesLoader(target, properties, baseDir) {
 
     private val sdkDependency = this.targetSysRoot!!

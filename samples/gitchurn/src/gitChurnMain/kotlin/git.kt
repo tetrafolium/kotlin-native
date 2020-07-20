@@ -27,7 +27,9 @@ fun Int.errorCheck() {
     throw GitException()
 }
 
-class GitException : Exception(run {
-    val err = giterr_last()
-    err!!.pointed.message!!.toKString()
-})
+class GitException : Exception(
+    run {
+        val err = giterr_last()
+        err!!.pointed.message!!.toKString()
+    }
+)

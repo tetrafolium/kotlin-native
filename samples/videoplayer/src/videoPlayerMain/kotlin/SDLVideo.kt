@@ -5,9 +5,6 @@
 
 package sample.videoplayer
 
-import ffmpeg.AV_PIX_FMT_NONE
-import ffmpeg.AV_PIX_FMT_RGB24
-import ffmpeg.AV_PIX_FMT_RGB32
 import kotlinx.cinterop.*
 import sdl.*
 
@@ -26,7 +23,8 @@ class SDLVideo : DisposableContainer() {
     init {
         disposable(
             create = { checkSDLError("Init", SDL_Init(SDL_INIT_EVERYTHING)) },
-            dispose = { SDL_Quit() })
+            dispose = { SDL_Quit() }
+        )
         displaySize = tryConstruct {
             memScoped {
                 alloc<SDL_DisplayMode>().run {
@@ -62,17 +60,25 @@ class SDLVideo : DisposableContainer() {
 }
 
 class SDLRendererWindow(windowPos: Dimensions, videoSize: Dimensions) : DisposableContainer() {
-    private val window = sdlDisposable("CreateWindow",
+    private val window = sdlDisposable(
+        "CreateWindow",
         SDL_CreateWindow("VideoPlayer", windowPos.w, windowPos.h, videoSize.w, videoSize.h, SDL_WINDOW_SHOWN),
-        ::SDL_DestroyWindow)
-    private val renderer = sdlDisposable("CreateRenderer",
+        ::SDL_DestroyWindow
+    )
+    private val renderer = sdlDisposable(
+        "CreateRenderer",
         SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED or SDL_RENDERER_PRESENTVSYNC),
-        ::SDL_DestroyRenderer)
-    private val texture = sdlDisposable("CreateTexture",
+        ::SDL_DestroyRenderer
+    )
+    private val texture = sdlDisposable(
+        "CreateTexture",
         SDL_CreateTexture(renderer, SDL_GetWindowPixelFormat(window), 0, videoSize.w, videoSize.h),
-        ::SDL_DestroyTexture)
-    private val rect = sdlDisposable("calloc(SDL_Rect)",
-        SDL_calloc(1, SDL_Rect.size.convert()), ::SDL_free)
+        ::SDL_DestroyTexture
+    )
+    private val rect = sdlDisposable(
+        "calloc(SDL_Rect)",
+        SDL_calloc(1, SDL_Rect.size.convert()), ::SDL_free
+    )
         .reinterpret<SDL_Rect>()
 
     init {
