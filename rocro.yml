@@ -5,10 +5,9 @@ inspecode:
     thresholds: { num-issues: 136 }
 
   #### Failed ... xargs: clang-format: terminated by signal 9
-  #clang-format: # supports: C C++ Objective-C
-  #  auto-fix: false
-  #  thresholds:
-  #    num-issues: 1000
+  clang-format: # supports: C C++ Objective-C
+    auto-fix: false
+    thresholds: { num-issues: 999 }
 
   cpd:          # supports: C C++ C# Go Java JavaScript Objective-C PHP Python Ruby Scala Swift
     thresholds: { num-issues: 101 }
@@ -21,14 +20,17 @@ inspecode:
       --filter:
       - "-whitespace"
       - "-readability/casting"
+    thresholds: { num-issues: 797 }
+
+  detekt:       # supports: Kotlin
     thresholds: { num-issues: 999 }
 
   #### not supported yet.
   #fortify:
   #  thresholds: { num-issues: 999 }
 
-  fossology:
-    thresholds: { num-issues: 999 }
+  fossology:    # supports: All Languages
+    thresholds: { num-issues: 42 }
 
   grep:         # supports: All Languages
     options:
@@ -57,17 +59,18 @@ inspecode:
     thresholds: { num-issues: 52 }
 
   #### Aborted ... comment-out temporary
-  #scan-build:   # supports: C C++
-  #  thresholds: { num-issues: 999 }
+  scan-build:   # supports: C C++
+    thresholds: { num-issues: 999 }
 
   #### Failed ... Uncrustify finished with errors.
-  #uncrustify:   # supports: C C++ C# Objective-C Java
-  #  thresholds: { num-issues: 999 }
+  uncrustify:   # supports: C C++ C# Objective-C Java
+    thresholds: { num-issues: 999 }
 
   #### not supported yet.
   #understand:
   #  thresholds: { num-issues: 999 }
 
-  unused:       # supports: C C++ C# Go HTML Java JavaScript Objective-C PHP Python Ruby Shell
-    options: [ --single-occurrence, --all-likelihoods ]
-    thresholds: { num-issues: 640 }
+  #### temporary commented-out ... too long execution time
+  #unused:       # supports: C C++ C# Go HTML Java JavaScript Objective-C PHP Python Ruby Shell
+  #  options: [ --single-occurrence, --all-likelihoods ]
+  #  thresholds: { num-issues: 623 }
