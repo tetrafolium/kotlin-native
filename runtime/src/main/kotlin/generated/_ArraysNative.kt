@@ -11,7 +11,6 @@ package kotlin.collections
 //
 
 import kotlin.ranges.contains
-import kotlin.ranges.reversed
 
 /**
  * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this array.
@@ -1739,7 +1738,7 @@ internal fun CharArray.copyOfUninitializedElements(newSize: Int): CharArray {
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun <T> Array<T>.fill(element: T, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun <T> Array<T>.fill(element: T, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1754,7 +1753,7 @@ public actual fun <T> Array<T>.fill(element: T, fromIndex: Int = 0, toIndex: Int
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun ByteArray.fill(element: Byte, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun ByteArray.fill(element: Byte, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1769,7 +1768,7 @@ public actual fun ByteArray.fill(element: Byte, fromIndex: Int = 0, toIndex: Int
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun ShortArray.fill(element: Short, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun ShortArray.fill(element: Short, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1784,7 +1783,7 @@ public actual fun ShortArray.fill(element: Short, fromIndex: Int = 0, toIndex: I
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun IntArray.fill(element: Int, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun IntArray.fill(element: Int, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1799,7 +1798,7 @@ public actual fun IntArray.fill(element: Int, fromIndex: Int = 0, toIndex: Int =
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun LongArray.fill(element: Long, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun LongArray.fill(element: Long, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1814,7 +1813,7 @@ public actual fun LongArray.fill(element: Long, fromIndex: Int = 0, toIndex: Int
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun FloatArray.fill(element: Float, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun FloatArray.fill(element: Float, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1829,7 +1828,7 @@ public actual fun FloatArray.fill(element: Float, fromIndex: Int = 0, toIndex: I
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun DoubleArray.fill(element: Double, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun DoubleArray.fill(element: Double, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1844,7 +1843,7 @@ public actual fun DoubleArray.fill(element: Double, fromIndex: Int = 0, toIndex:
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun BooleanArray.fill(element: Boolean, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun BooleanArray.fill(element: Boolean, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -1859,7 +1858,7 @@ public actual fun BooleanArray.fill(element: Boolean, fromIndex: Int = 0, toInde
  */
 @SinceKotlin("1.3")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun CharArray.fill(element: Char, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun CharArray.fill(element: Char, fromIndex: Int = 0, toIndex: Int = size) {
     arrayFill(this, fromIndex, toIndex, element)
 }
 
@@ -2155,7 +2154,7 @@ public actual inline fun <T> Array<T>.plusElement(element: T): Array<T> {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun IntArray.sort(): Unit {
+public actual fun IntArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2164,7 +2163,7 @@ public actual fun IntArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun LongArray.sort(): Unit {
+public actual fun LongArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2173,7 +2172,7 @@ public actual fun LongArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun ByteArray.sort(): Unit {
+public actual fun ByteArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2182,7 +2181,7 @@ public actual fun ByteArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun ShortArray.sort(): Unit {
+public actual fun ShortArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2191,7 +2190,7 @@ public actual fun ShortArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun DoubleArray.sort(): Unit {
+public actual fun DoubleArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2200,7 +2199,7 @@ public actual fun DoubleArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun FloatArray.sort(): Unit {
+public actual fun FloatArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2209,7 +2208,7 @@ public actual fun FloatArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArray
  */
-public actual fun CharArray.sort(): Unit {
+public actual fun CharArray.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2220,7 +2219,7 @@ public actual fun CharArray.sort(): Unit {
  * 
  * @sample samples.collections.Arrays.Sorting.sortArrayOfComparable
  */
-public actual fun <T : Comparable<T>> Array<out T>.sort(): Unit {
+public actual fun <T : Comparable<T>> Array<out T>.sort() {
     if (size > 1) sortArray(this, 0, size)
 }
 
@@ -2239,7 +2238,7 @@ public actual fun <T : Comparable<T>> Array<out T>.sort(): Unit {
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun <T : Comparable<T>> Array<out T>.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun <T : Comparable<T>> Array<out T>.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2257,7 +2256,7 @@ public actual fun <T : Comparable<T>> Array<out T>.sort(fromIndex: Int = 0, toIn
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun ByteArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun ByteArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2275,7 +2274,7 @@ public actual fun ByteArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit 
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun ShortArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun ShortArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2293,7 +2292,7 @@ public actual fun ShortArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun IntArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun IntArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2311,7 +2310,7 @@ public actual fun IntArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun LongArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun LongArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2329,7 +2328,7 @@ public actual fun LongArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit 
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun FloatArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun FloatArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2347,7 +2346,7 @@ public actual fun FloatArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun DoubleArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun DoubleArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2365,7 +2364,7 @@ public actual fun DoubleArray.sort(fromIndex: Int = 0, toIndex: Int = size): Uni
  */
 @SinceKotlin("1.4")
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun CharArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun CharArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArray(this, fromIndex, toIndex)
 }
@@ -2375,7 +2374,7 @@ public actual fun CharArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit 
  * 
  * The sort is _stable_. It means that equal elements preserve their order relative to each other after sorting.
  */
-public actual fun <T> Array<out T>.sortWith(comparator: Comparator<in T>): Unit {
+public actual fun <T> Array<out T>.sortWith(comparator: Comparator<in T>) {
     if (size > 1) sortArrayWith(this, 0, size, comparator)
 }
 
@@ -2391,7 +2390,7 @@ public actual fun <T> Array<out T>.sortWith(comparator: Comparator<in T>): Unit 
  * @throws IllegalArgumentException if [fromIndex] is greater than [toIndex].
  */
 @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
-public actual fun <T> Array<out T>.sortWith(comparator: Comparator<in T>, fromIndex: Int = 0, toIndex: Int = size): Unit {
+public actual fun <T> Array<out T>.sortWith(comparator: Comparator<in T>, fromIndex: Int = 0, toIndex: Int = size) {
     AbstractList.checkRangeIndexes(fromIndex, toIndex, size)
     sortArrayWith(this, fromIndex, toIndex, comparator)
 }

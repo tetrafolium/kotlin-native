@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.util.SymbolTable
-import org.jetbrains.kotlin.ir.util.isEnumClass
 import org.jetbrains.kotlin.ir.util.isEnumEntry
 import org.jetbrains.kotlin.ir.util.referenceFunction
 import org.jetbrains.kotlin.konan.target.*
@@ -220,7 +219,7 @@ private class ExportedElement(val kind: ElementKind,
                     generateFunction(owner.codegen, LLVMGetElementType(llvmFunction.type)!!, cname) {
                         val receiver = param(0)
                         val numParams = LLVMCountParams(llvmFunction)
-                        val args = (0 .. numParams - 1).map { index -> param(index) }
+                        val args = (0..numParams - 1).map { index -> param(index) }
                         val callee = lookupVirtualImpl(receiver, irFunction)
                         val result = call(callee, args, exceptionHandler = ExceptionHandler.Caller, verbatim = true)
                         ret(result)
@@ -400,9 +399,9 @@ private class ExportedElement(val kind: ElementKind,
             owner.isMappedToReference(signatureElement.type) ->
                 if (direction == Direction.C_TO_KOTLIN) {
                     builder.append("  KObjHolder ${name}_holder2;\n")
-                    "DerefStablePointer(${name}.pinned, ${name}_holder2.slot())"
+                    "DerefStablePointer($name.pinned, ${name}_holder2.slot())"
                 } else {
-                    "((${owner.translateType(signatureElement.type)}){ .pinned = CreateStablePointer(${name})})"
+                    "((${owner.translateType(signatureElement.type)}){ .pinned = CreateStablePointer($name)})"
                 }
             else -> {
                 assert(!signatureElement.type.binaryTypeIsReference()) {
@@ -422,8 +421,8 @@ private class ExportedElement(val kind: ElementKind,
     private fun translateBody(cfunction: List<SignatureElement>): String {
         val visibility = if (isTopLevelFunction) "RUNTIME_USED extern \"C\"" else "static"
         val builder = StringBuilder()
-        builder.append("$visibility ${owner.translateType(cfunction[0])} ${cnameImpl}(${cfunction.drop(1).
-                mapIndexed { index, it -> "${owner.translateType(it)} arg${index}" }.joinToString(", ")}) {\n")
+        builder.append("$visibility ${owner.translateType(cfunction[0])} $cnameImpl(${cfunction.drop(1)
+                .mapIndexed { index, it -> "${owner.translateType(it)} arg$index" }.joinToString(", ")}) {\n")
         val args = ArrayList(cfunction.drop(1).mapIndexed { index, pair ->
             translateArgument("arg$index", pair, Direction.C_TO_KOTLIN, builder)
         })
@@ -539,7 +538,7 @@ internal class CAdapterGenerator(val context: Context) : DeclarationDescriptorVi
             if (count == 0) {
                 it to name
             } else {
-                it to "$name${count.toString()}"
+                it to "$name$count"
             }
         }
     }
@@ -1109,8 +1108,8 @@ internal class CAdapterGenerator(val context: Context) : DeclarationDescriptorVi
     fun translateType(element: SignatureElement): String =
             translateTypeFull(element.type).first
 
-    fun translateType(type: KotlinType): String
-            = translateTypeFull(type).first
+    fun translateType(type: KotlinType): String =
+            translateTypeFull(type).first
 
     fun translateTypeBridge(type: KotlinType): String = translateTypeFull(type).second
 

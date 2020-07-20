@@ -6,8 +6,6 @@
 package kotlin.native.internal.test
 
 import kotlin.IllegalArgumentException
-import kotlin.system.getTimeMillis
-import kotlin.system.measureTimeMillis
 
 public interface TestCase {
     val name: String

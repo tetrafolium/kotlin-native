@@ -23,8 +23,8 @@ data class Edge<T>(val id: UInt, val from: T, val to: T, val cost: Cost) {
             from.hashCode() * 31.0.pow(2.0).toInt() + to.hashCode() * 31 + cost.hashCode()
 }
 
-class EdgeAbsenceMultigraphException(message: String): Exception(message) {}
-class VertexAbsenceMultigraphException(message: String): Exception(message) {}
+class EdgeAbsenceMultigraphException(message: String): Exception(message)
+class VertexAbsenceMultigraphException(message: String): Exception(message)
 
 class Multigraph<T>() {
     private var edges = mutableMapOf<T, MutableList<Edge<T>>>()

@@ -20,8 +20,6 @@ package org.jetbrains.renders
 import org.jetbrains.analyzer.*
 import org.jetbrains.report.BenchmarkResult
 
-import kotlin.math.abs
-
 // Base class for printing report in different formats.
 abstract class Render {
 
@@ -200,8 +198,8 @@ class TextRender: Render() {
 
         val tableWidth = printPerformanceTableHeader()
         // Print geometric mean.
-        val geoMeanChangeMap = report.geoMeanScoreChange?.
-                let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
+        val geoMeanChangeMap = report.geoMeanScoreChange
+                ?.let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
         printBenchmarksDetails(
                 mutableMapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanBenchmark),
                 geoMeanChangeMap)

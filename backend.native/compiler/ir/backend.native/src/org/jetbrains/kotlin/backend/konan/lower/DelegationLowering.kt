@@ -142,7 +142,7 @@ internal class PropertyDelegationLowering(val context: Context) : FileLoweringPa
                 irBuilder.run {
                     val receiversCount = listOf(expression.dispatchReceiver, expression.extensionReceiver).count { it != null }
                     if (receiversCount == 2)
-                        throw AssertionError("Callable reference to properties with two receivers is not allowed: ${expression}")
+                        throw AssertionError("Callable reference to properties with two receivers is not allowed: $expression")
                     else { // Cache KProperties with no arguments.
                         // TODO: what about `receiversCount == 1` case?
                         val field = kProperties.getOrPut(expression.symbol.owner) {

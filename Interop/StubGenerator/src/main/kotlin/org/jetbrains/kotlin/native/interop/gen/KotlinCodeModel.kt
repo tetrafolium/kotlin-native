@@ -315,7 +315,7 @@ abstract class KotlinFile(
     }
 
     override fun declareProperty(receiver: String?, name: String): String? {
-        val fullName = receiver?.let { "$it.${name}" } ?: name
+        val fullName = receiver?.let { "$it.$name" } ?: name
         return if (fullName in declaredProperties || name in namesToBeDeclared || name in importedNameToPkg) {
             null
             // TODO: using original global name should be preferred to importing the clashed name.
@@ -333,7 +333,6 @@ abstract class KotlinFile(
             "import $pkg.${name.asSimpleName()}"
         }
     }.sorted()
-
 }
 
 internal fun getTopLevelPropertyDeclarationName(scope: KotlinScope, property: PropertyStub): String {

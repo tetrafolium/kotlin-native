@@ -16,7 +16,6 @@ import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.file.isBitcode
 import org.jetbrains.kotlin.library.*
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
-import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.library.impl.buildLibrary
 
 /**

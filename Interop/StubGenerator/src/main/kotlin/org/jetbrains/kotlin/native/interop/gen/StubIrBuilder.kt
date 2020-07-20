@@ -290,7 +290,7 @@ class StubIrBuilder(private val context: StubIrContext) {
     private fun addStubs(stubs: List<StubIrElement>) = stubs.forEach(this::addStub)
 
     private fun addStub(stub: StubIrElement) {
-        when(stub) {
+        when (stub) {
             is ClassStub -> classes += stub
             is FunctionStub -> functions += stub
             is PropertyStub -> globals += stub
@@ -310,7 +310,7 @@ class StubIrBuilder(private val context: StubIrContext) {
 
     fun build(): StubIrBuilderResult {
         nativeIndex.objCProtocols.filter { !it.isForwardDeclaration }.forEach { generateStubsForObjCProtocol(it) }
-        nativeIndex.objCClasses.filter { !it.isForwardDeclaration && !it.isNSStringSubclass()} .forEach { generateStubsForObjCClass(it) }
+        nativeIndex.objCClasses.filter { !it.isForwardDeclaration && !it.isNSStringSubclass()}.forEach { generateStubsForObjCClass(it) }
         nativeIndex.objCCategories.filter { !it.clazz.isNSStringSubclass() }.forEach { generateStubsForObjCCategory(it) }
         nativeIndex.structs.forEach { generateStubsForStruct(it) }
         nativeIndex.enums.forEach { generateStubsForEnum(it) }

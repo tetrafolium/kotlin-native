@@ -167,5 +167,4 @@ open class KonanArtifactContainer(val project: ProjectInternal)
     fun interop(name: String, configureAction: Action<KonanInteropLibrary>)    = interop(emptyMap(), name, configureAction)
     fun interop(name: String, configureAction: KonanInteropLibrary.() -> Unit) = interop(emptyMap(), name, configureAction)
     fun interop(name: String, configureAction: Closure<*>)                     = interop(emptyMap(), name, configureAction)
-
 }

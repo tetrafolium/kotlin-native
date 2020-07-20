@@ -1,7 +1,6 @@
 package org.jetbrains.kotlin.native.test.debugger
 
 import junit.framework.Assert.assertNotSame
-import junit.framework.Assert.assertTrue
 import org.junit.Test
 
 class DwarfTests {

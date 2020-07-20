@@ -155,7 +155,7 @@ public class Char private constructor() : Comparable<Char> {
     external public override fun toString(): String
 
     public override fun hashCode(): Int {
-        return this.toInt();
+        return this.toInt()
     }
 }
 

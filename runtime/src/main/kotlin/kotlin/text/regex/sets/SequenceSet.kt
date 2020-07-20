@@ -33,7 +33,7 @@ open internal class SequenceSet(substring: CharSequence, val ignoreCase: Boolean
     /** Represents a character sequence used for matching/searching. */
     protected val patternString: String = substring.toString()
 
-    override val name: String= "sequence: " + patternString
+    override val name: String = "sequence: " + patternString
 
     override val charCount = substring.length
 
@@ -44,9 +44,9 @@ open internal class SequenceSet(substring: CharSequence, val ignoreCase: Boolean
         index < string.length && string[index].isLowSurrogate() && index > 0 && string[index - 1].isHighSurrogate()
 
     override fun accepts(startIndex: Int, testString: CharSequence): Int {
-        return if (testString.startsWith(patternString, startIndex, ignoreCase)
-                    && !isLowSurrogateOfSupplement(testString, startIndex)
-                    && !isLowSurrogateOfSupplement(testString, startIndex + patternString.length)) {
+        return if (testString.startsWith(patternString, startIndex, ignoreCase) &&
+                    !isLowSurrogateOfSupplement(testString, startIndex) &&
+                    !isLowSurrogateOfSupplement(testString, startIndex + patternString.length)) {
             charCount
         } else {
             -1
@@ -61,9 +61,9 @@ open internal class SequenceSet(substring: CharSequence, val ignoreCase: Boolean
                 return -1
             }
             // Check if we have a supplementary code point at the beginning or at the end of the string.
-            if (!isLowSurrogateOfSupplement(testString, index)
-                && !isLowSurrogateOfSupplement(testString, index + patternString.length)
-                && next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!isLowSurrogateOfSupplement(testString, index) &&
+                !isLowSurrogateOfSupplement(testString, index + patternString.length) &&
+                next.matches(index + charCount, testString, matchResult) >= 0) {
                 return index
             }
             index++
@@ -79,9 +79,9 @@ open internal class SequenceSet(substring: CharSequence, val ignoreCase: Boolean
                 return -1
             }
             // Check if we have a supplementary code point at the beginning or at the end of the string.
-            if (!isLowSurrogateOfSupplement(testString, index)
-                    && !isLowSurrogateOfSupplement(testString, index + patternString.length)
-                    && next.matches(index + charCount, testString, matchResult) >= 0) {
+            if (!isLowSurrogateOfSupplement(testString, index) &&
+                    !isLowSurrogateOfSupplement(testString, index + patternString.length) &&
+                    next.matches(index + charCount, testString, matchResult) >= 0) {
                 return index
             }
             index--

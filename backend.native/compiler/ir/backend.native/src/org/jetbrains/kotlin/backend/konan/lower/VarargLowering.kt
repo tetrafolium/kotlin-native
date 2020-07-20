@@ -189,7 +189,7 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
     }
 
 
-    private fun hasSpreadElement(expression: IrVararg?) = expression?.elements?.any { it is IrSpreadElement }?:false
+    private fun hasSpreadElement(expression: IrVararg?) = expression?.elements?.any { it is IrSpreadElement } ?: false
 
     private fun log(msg:() -> String) {
         context.log { "VARARG-INJECTOR:    ${msg()}" }
@@ -253,7 +253,6 @@ internal class VarargInjectionLowering constructor(val context: KonanBackendCont
 
     val arrayToHandle =
         (primitiveArrayHandles.values + unsignedArrayHandles + ReferenceArrayHandle()).associateBy { it.arraySymbol }
-
 }
 
 private fun IrBuilderWithScope.irConstInt(value: Int): IrConst<Int> =

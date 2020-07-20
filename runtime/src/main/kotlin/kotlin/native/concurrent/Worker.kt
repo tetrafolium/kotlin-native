@@ -5,8 +5,6 @@
 
 package kotlin.native.concurrent
 
-import kotlin.native.internal.ExportForCppRuntime
-import kotlin.native.internal.Frozen
 import kotlin.native.internal.VolatileLambda
 import kotlin.native.internal.IntrinsicType
 import kotlin.native.internal.TypedIntrinsic
@@ -38,8 +36,8 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
          * @param name defines the optional name of this worker, if none - default naming is used.
          * @return worker object, usable across multiple concurrent contexts.
          */
-        public fun start(errorReporting: Boolean = true, name: String? = null): Worker
-                = Worker(startInternal(errorReporting, name))
+        public fun start(errorReporting: Boolean = true, name: String? = null): Worker =
+                Worker(startInternal(errorReporting, name))
 
         /**
          * Return the current worker. Worker context is accessible to any valid Kotlin context,
@@ -104,7 +102,7 @@ public inline class Worker @PublishedApi internal constructor(val id: Int) {
      * @throws [IllegalArgumentException] on negative values of [afterMicroseconds].
      * @throws [IllegalStateException] if [operation] parameter is not frozen and worker is not current.
      */
-    public fun executeAfter(afterMicroseconds: Long = 0, operation: () -> Unit): Unit {
+    public fun executeAfter(afterMicroseconds: Long = 0, operation: () -> Unit) {
         val current = currentInternal()
         if (current != id && !operation.isFrozen) throw IllegalStateException("Job for another worker must be frozen")
         if (afterMicroseconds < 0) throw IllegalArgumentException("Timeout parameter must be non-negative")

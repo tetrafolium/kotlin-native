@@ -260,5 +260,4 @@ open class ToolingModelTests {
         val library = libraries[0].name
         assertEquals("foo.klib", library, "Incorrect library name.")
     }
-
 }

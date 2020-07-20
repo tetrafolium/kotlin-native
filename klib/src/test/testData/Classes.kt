@@ -42,7 +42,6 @@ class A {
         val eVal = 0
         var eVar = ""
     }
-
 }
 
 data class F(val fVal: Int, var fVar: String) {

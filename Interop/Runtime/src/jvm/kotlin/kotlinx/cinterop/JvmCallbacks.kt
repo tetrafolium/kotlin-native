@@ -67,8 +67,8 @@ private fun getStructCType(structClass: KClass<*>): CType<*> = structTypeCache.c
     // so they don't require to be checked strictly.
 
     val annotations = structClass.annotations
-    val cNaturalStruct = annotations.filterIsInstance<CNaturalStruct>().firstOrNull() ?:
-            error("struct ${structClass.simpleName} has custom layout")
+    val cNaturalStruct = annotations.filterIsInstance<CNaturalStruct>().firstOrNull()
+            ?: error("struct ${structClass.simpleName} has custom layout")
 
     val propertiesByName = structClass.declaredMemberProperties.groupBy { it.name }
 
@@ -104,8 +104,8 @@ private fun getStructCType(structClass: KClass<*>): CType<*> = structTypeCache.c
 }
 
 private fun getStructValueCType(type: KType): CType<*> {
-    val structClass = type.arguments.singleOrNull()?.type?.classifier as? KClass<*> ?:
-            error("'$type' type is incomplete")
+    val structClass = type.arguments.singleOrNull()?.type?.classifier as? KClass<*>
+            ?: error("'$type' type is incomplete")
 
     return getStructCType(structClass)
 }
@@ -163,8 +163,8 @@ private fun createStaticCFunction(function: Function<*>): CPointer<CFunction<*>>
         throw IllegalArgumentException(errorMessage)
     }
 
-    val kFunction = function as? KFunction<*> ?: function.reflect() ?:
-            throw IllegalArgumentException(errorMessage)
+    val kFunction = function as? KFunction<*> ?: function.reflect()
+            ?: throw IllegalArgumentException(errorMessage)
 
     val returnType = getArgOrRetValCType(kFunction.returnType)
     val paramTypes = kFunction.parameters.map { getArgOrRetValCType(it.type) }
@@ -204,7 +204,7 @@ internal fun <F : Function<*>> staticCFunctionImpl(function: F) =
             createStaticCFunction(function)
         } as CPointer<CFunction<F>>
 
-private val invokeMethods = (0 .. 22).map { arity ->
+private val invokeMethods = (0..22).map { arity ->
     Class.forName("kotlin.jvm.functions.Function$arity").getMethod("invoke",
             *Array<Class<*>>(arity) { java.lang.Object::class.java })
 }

@@ -51,7 +51,7 @@ class TeamCityStatisticsRender: Render() {
                     " type='number' value='${benchmark.score}']\n")
 
     // Produce benchmark as test in TeamCity
-    private fun renderBenchmark(benchmark: BenchmarkResult , duration: Double) {
+    private fun renderBenchmark(benchmark: BenchmarkResult, duration: Double) {
         content.append("##teamcity[testStarted name='${benchmark.name}']\n")
         if (benchmark.status == BenchmarkResult.Status.FAILED) {
             content.append("##teamcity[testFailed name='${benchmark.name}']\n")

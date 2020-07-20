@@ -21,5 +21,4 @@ open class AllocationBenchmark {
             MyClass().inc()
         }
     }
-
 }

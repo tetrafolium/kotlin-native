@@ -21,7 +21,7 @@ annotation class B
 
 class Foo
 
-fun f1(x: Foo): Unit {}
+fun f1(x: Foo) {}
 fun f2(x: Foo, y: Foo) = 0
 
 // inline

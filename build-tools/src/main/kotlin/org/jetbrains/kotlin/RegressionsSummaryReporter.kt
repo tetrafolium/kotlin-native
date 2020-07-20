@@ -5,11 +5,7 @@
 
 package org.jetbrains.kotlin
 
-import groovy.lang.Closure
-import org.gradle.api.Action
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
@@ -36,8 +32,8 @@ open class RegressionsSummaryReporter : DefaultTask() {
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))

@@ -83,8 +83,8 @@ class NumberConverter {
         else
             bigIntDigitGeneratorInstImpl(f, pow, e == 0, mantissaIsZero, numBits)
 
-        if (inputNumber >= 1e7 || inputNumber <= -1e7
-                || inputNumber > -1e-3 && inputNumber < 1e-3)
+        if (inputNumber >= 1e7 || inputNumber <= -1e7 ||
+                inputNumber > -1e-3 && inputNumber < 1e-3)
             return signString + freeFormatExponential()
 
         return signString + freeFormat()
@@ -134,8 +134,8 @@ class NumberConverter {
             longDigitGenerator(f.toLong(), pow, e == 0, mantissaIsZero, numBits)
         else
             bigIntDigitGeneratorInstImpl(f.toLong(), pow, e == 0, mantissaIsZero, numBits)
-        if (inputNumber >= 1e7f || inputNumber <= -1e7f
-                || inputNumber > -1e-3f && inputNumber < 1e-3f)
+        if (inputNumber >= 1e7f || inputNumber <= -1e7f ||
+                inputNumber > -1e-3f && inputNumber < 1e-3f)
             return signString + freeFormatExponential()
 
         return signString + freeFormat()
@@ -175,7 +175,7 @@ class NumberConverter {
             formattedDecimal[0] = '0'
             formattedDecimal[1] = '.'
             charPos += 2
-            for (i in k + 1 .. -1)
+            for (i in k + 1..-1)
                 formattedDecimal[charPos++] = '0'
         }
 

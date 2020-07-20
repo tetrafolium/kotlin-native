@@ -261,7 +261,6 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
                 lowHighSurrogates.and(another.lowHighSurrogates)
                 altSurrogates = true
             }
-
         } else {
 
             //!A | !B = !(A & B)
@@ -288,7 +287,6 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
                     bits_.and(anotherBits)
                     alt = true
                 }
-
             } else {
 
                 //!A | !B = !(A & B)
@@ -511,7 +509,6 @@ internal class CharClass(val ignoreCase: Boolean = false, negative: Boolean = fa
 
                         return temp.toString()
                     }
-
                 }
                 return res.setNegative(isNegative())
             } else {

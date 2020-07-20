@@ -205,8 +205,8 @@ internal class InitializersLowering(val context: CommonBackendContext) : ClassLo
                              *
                              *   to avoid possible recursion we manually reject body generation for Any.
                              */
-                            it is IrDelegatingConstructorCall
-                                    && irClass.symbol == context.irBuiltIns.anyClass
+                            it is IrDelegatingConstructorCall &&
+                                    irClass.symbol == context.irBuiltIns.anyClass
                                     && it.symbol == declaration.symbol -> {
                                 listOf()
                             }

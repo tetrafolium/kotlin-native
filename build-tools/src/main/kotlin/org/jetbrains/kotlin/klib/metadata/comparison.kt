@@ -123,7 +123,6 @@ private fun compareMetadata(
                 processMissing(comparisonConfig, this)
         )
     }.wrap()
-
 }
 
 sealed class MetadataCompareResult {

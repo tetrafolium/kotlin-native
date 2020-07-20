@@ -12,8 +12,7 @@ class ReceiveChannel<out E>
 inline fun <E, R> ReceiveChannel<E>.consume(block: ReceiveChannel<E>.() -> R): R {
     try {
         return block()
-    }
-    finally {
+    } finally {
         println("zzz")
     }
 }

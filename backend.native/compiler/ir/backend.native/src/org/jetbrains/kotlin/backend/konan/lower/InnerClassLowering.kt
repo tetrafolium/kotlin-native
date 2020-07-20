@@ -116,8 +116,8 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
                         irThis = IrGetValueImpl(startOffset, endOffset, thisParameter.type, thisParameter.symbol, origin)
                     } else {
                         // For constructor we have outer class as dispatchReceiverParameter.
-                        innerClass = irClass.parent as? IrClass ?:
-                                throw AssertionError("No containing class for inner class ${irClass.dump()}")
+                        innerClass = irClass.parent as? IrClass
+                                ?: throw AssertionError("No containing class for inner class ${irClass.dump()}")
                         val thisParameter = constructorSymbol.owner.dispatchReceiverParameter!!
                         irThis = IrGetValueImpl(startOffset, endOffset, thisParameter.type, thisParameter.symbol, origin)
                     }
@@ -138,8 +138,8 @@ internal class InnerClassLowering(val context: Context) : ClassLoweringPass {
                         )
 
                         val outer = innerClass.parent
-                        innerClass = outer as? IrClass ?:
-                                throw AssertionError("Unexpected containing declaration for inner class ${innerClass.dump()}: $outer")
+                        innerClass = outer as? IrClass
+                                ?: throw AssertionError("Unexpected containing declaration for inner class ${innerClass.dump()}: $outer")
                     }
 
                     return irThis

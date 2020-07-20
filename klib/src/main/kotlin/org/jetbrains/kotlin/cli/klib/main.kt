@@ -100,7 +100,6 @@ open class ModuleDeserializer(val library: ByteArray) {
 
     val packageFragmentNameList: List<String>
         get() = moduleHeader.packageFragmentNameList
-
 }
 
 class Library(val name: String, val requestedRepository: String?, val target: String) {
@@ -119,7 +118,7 @@ class Library(val name: String, val requestedRepository: String?, val target: St
         println("Resolved to: ${library.libraryName.File().absolutePath}")
         println("Module name: $moduleName")
         println("ABI version: $headerAbiVersion")
-        println("Compiler version: ${headerCompilerVersion}")
+        println("Compiler version: $headerCompilerVersion")
         println("Library version: $headerLibraryVersion")
         println("Metadata version: $headerMetadataVersion")
         println("IR version: $headerIrVersion")
@@ -151,11 +150,9 @@ class Library(val name: String, val requestedRepository: String?, val target: St
             val library = libraryInRepo(repository, name)
             if (blind) warn("Removing The previously installed $name from $repository.")
             library
-
         } catch (e: Throwable) {
             if (!blind) println(e.message)
             null
-
         }
         library?.libraryFile?.deleteRecursively()
     }

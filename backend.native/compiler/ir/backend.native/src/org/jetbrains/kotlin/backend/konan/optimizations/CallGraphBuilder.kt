@@ -45,7 +45,6 @@ internal class CallGraph(val directEdges: Map<DataFlowIR.FunctionSymbol, CallGra
         directEdges[caller]!!.callSites += callSite
         reversedEdges[callSite.actualCallee]?.add(caller)
     }
-
 }
 
 internal class CallGraphBuilder(val context: Context,
@@ -169,8 +168,8 @@ internal class CallGraphBuilder(val context: Context,
 
     private fun staticCall(caller: DataFlowIR.FunctionSymbol, call: DataFlowIR.Node.Call, callee: DataFlowIR.FunctionSymbol) {
         callGraph.addEdge(caller, CallGraphNode.CallSite(call, false, callee))
-        if (callee is DataFlowIR.FunctionSymbol.Declared
-                && !directEdges.containsKey(callee))
+        if (callee is DataFlowIR.FunctionSymbol.Declared &&
+                !directEdges.containsKey(callee))
             functionStack.push(callee)
     }
 
@@ -236,9 +235,9 @@ internal class CallGraphBuilder(val context: Context,
                         addNode(callee)
                     if (local)
                         callGraph.addEdge(symbol, CallGraphNode.CallSite(call, call is DataFlowIR.Node.VirtualCall, callee))
-                    if (callee is DataFlowIR.FunctionSymbol.Declared
-                            && call !is DataFlowIR.Node.VirtualCall
-                            && !visitedFunctions.contains(callee))
+                    if (callee is DataFlowIR.FunctionSymbol.Declared &&
+                            call !is DataFlowIR.Node.VirtualCall &&
+                            !visitedFunctions.contains(callee))
                         functionStack.push(callee)
                 } else {
                     devirtualizedCallSite.possibleCallees.forEach {
@@ -247,8 +246,8 @@ internal class CallGraphBuilder(val context: Context,
                             addNode(callee)
                         if (local)
                             callGraph.addEdge(symbol, CallGraphNode.CallSite(call, false, callee))
-                        if (callee is DataFlowIR.FunctionSymbol.Declared
-                                && !visitedFunctions.contains(callee))
+                        if (callee is DataFlowIR.FunctionSymbol.Declared &&
+                                !visitedFunctions.contains(callee))
                             functionStack.push(callee)
                     }
                 }

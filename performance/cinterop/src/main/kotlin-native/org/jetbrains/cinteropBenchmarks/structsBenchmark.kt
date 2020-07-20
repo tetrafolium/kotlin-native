@@ -28,8 +28,7 @@ actual fun structBenchmark() {
                 0
             } else if (first.pointed.string.toKString().contains(second.pointed.string.toKString())) {
                 1
-            }
-            else {
+            } else {
                 0
             }
         }

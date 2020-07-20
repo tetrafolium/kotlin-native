@@ -81,7 +81,7 @@ private fun printJsonFile(jsonFile: String) {
 private fun printFromWeatherService(location: String) {
 	println("Fetching weather information (for $location)...")
 	val curl = CUrl(createUrl(location)).apply {
-		header += { if(it.startsWith("HTTP")) println("Response Status: $it") }
+		header += { if (it.startsWith("HTTP")) println("Response Status: $it") }
 		body += { data ->
 			val weather = createWeatherFromJson(data)
 			println("Weather information:\n${weatherToJsonString(weather)}")

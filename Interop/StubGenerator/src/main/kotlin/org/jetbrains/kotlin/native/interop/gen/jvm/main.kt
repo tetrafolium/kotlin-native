@@ -65,7 +65,7 @@ fun main(args: Array<String>) {
 fun interop(
         flavor: String, args: Array<String>,
         additionalArgs: InternalInteropOptions
-): Array<String>? = when(flavor) {
+): Array<String>? = when (flavor) {
             "jvm", "native" -> {
                 val cinteropArguments = CInteropArguments()
                 cinteropArguments.argParser.parse(args)
@@ -125,8 +125,8 @@ private fun selectNativeLanguage(config: DefFile.DefFileConfig): Language {
 
     val language = config.language ?: return Language.C
 
-    return languages[language] ?:
-            error("Unexpected language '$language'. Possible values are: ${languages.keys.joinToString { "'$it'" }}")
+    return languages[language]
+            ?: error("Unexpected language '$language'. Possible values are: ${languages.keys.joinToString { "'$it'" }}")
 }
 
 private fun parseImports(dependencies: List<KotlinLibrary>): ImportsImpl =
@@ -141,7 +141,7 @@ private fun parseImports(dependencies: List<KotlinLibrary>): ImportsImpl =
 fun getCompilerFlagsForVfsOverlay(headerFilterPrefix: Array<String>, def: DefFile): List<String> {
     val relativeToRoot = mutableMapOf<Path, Path>() // TODO: handle clashes
 
-    val filteredIncludeDirs = headerFilterPrefix .map { Paths.get(it) }
+    val filteredIncludeDirs = headerFilterPrefix.map { Paths.get(it) }
     if (filteredIncludeDirs.isNotEmpty()) {
         val headerFilterGlobs = def.config.headerFilter
         if (headerFilterGlobs.isEmpty()) {
@@ -333,7 +333,7 @@ private fun processCLib(flavorName: String, cinteropArguments: CInteropArguments
     val compilerArgs = stubIrContext.libraryForCStubs.compilerArgs.toTypedArray()
     val nativeOutputPath: String = when (flavor) {
         KotlinPlatform.JVM -> {
-            val outOFile = tempFiles.create(libName,".o")
+            val outOFile = tempFiles.create(libName, ".o")
             val compilerCmd = arrayOf(compiler, *compilerArgs,
                     "-c", outCFile.absolutePath, "-o", outOFile.absolutePath)
             runCmd(compilerCmd, verbose)
@@ -392,7 +392,7 @@ private fun compileSources(
 ): List<String> = cinteropArguments.compileSource.mapIndexed { index, source ->
     // Mangle file name to avoid collisions.
     val mangledFileName = "${index}_${File(source).nameWithoutExtension}"
-    val outputFileName = "$nativeLibsDir/${mangledFileName}.bc"
+    val outputFileName = "$nativeLibsDir/$mangledFileName.bc"
     val compilerArgs = cinteropArguments.sourceCompileOptions.toTypedArray()
     val compilerCmd = toolConfig.clang.clangCXX(*compilerArgs, source, "-emit-llvm", "-c", "-o", outputFileName)
     runCmd(compilerCmd.toTypedArray(), verbose = cinteropArguments.verbose)

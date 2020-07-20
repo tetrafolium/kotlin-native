@@ -325,8 +325,8 @@ internal class EnumConstructorsLowering(val context: Context) : ClassLoweringPas
             override fun visitEnumConstructorCall(expression: IrEnumConstructorCall): IrExpression {
                 expression.transformChildrenVoid(this)
 
-                val callTransformer = enumConstructorCallTransformer ?:
-                throw AssertionError("Enum constructor call outside of enum entry initialization or enum class constructor:\n" + irClass.dump())
+                val callTransformer = enumConstructorCallTransformer
+                ?: throw AssertionError("Enum constructor call outside of enum entry initialization or enum class constructor:\n" + irClass.dump())
 
 
                 return callTransformer.transform(expression)
@@ -336,8 +336,8 @@ internal class EnumConstructorsLowering(val context: Context) : ClassLoweringPas
                 expression.transformChildrenVoid(this)
 
                 if (expression.symbol.owner.parentAsClass.kind == ClassKind.ENUM_CLASS) {
-                    val callTransformer = enumConstructorCallTransformer ?:
-                    throw AssertionError("Enum constructor call outside of enum entry initialization or enum class constructor:\n" + irClass.dump())
+                    val callTransformer = enumConstructorCallTransformer
+                    ?: throw AssertionError("Enum constructor call outside of enum entry initialization or enum class constructor:\n" + irClass.dump())
 
                     return callTransformer.transform(expression)
                 }

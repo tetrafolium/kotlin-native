@@ -11,7 +11,7 @@ import kotlinx.cinterop.*
 import platform.posix.*
 import kotlin.system.exitProcess
 
-fun exc_handler(x: Any?) : Unit {
+fun exc_handler(x: Any?) {
     println("Uncaught exception handler")
     println(x.toString())
     exitProcess(0)

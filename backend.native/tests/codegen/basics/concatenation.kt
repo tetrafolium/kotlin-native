@@ -11,7 +11,7 @@ import kotlin.test.*
 fun runTest() {
     val s = "world"
     val i = 1
-    println("Hello $s $i ${2*i}")
+    println("Hello $s $i ${2 * i}")
 
     for (item in listOf("a", "b")) {
         println("Hello, $item")

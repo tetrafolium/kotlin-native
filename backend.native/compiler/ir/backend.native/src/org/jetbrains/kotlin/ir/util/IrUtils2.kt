@@ -225,7 +225,6 @@ fun IrType.substitute(map: Map<IrTypeParameterSymbol, IrType>): IrType {
         }
         else -> error(classifier)
     }
-
 }
 
 private fun IrFunction.substitutedReturnType(typeArguments: List<IrType>): IrType {

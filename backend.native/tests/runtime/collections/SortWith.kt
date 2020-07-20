@@ -43,13 +43,13 @@ class MyComparable (val value: Int, val comparator: Comparator<Int>): Comparable
 
 // Assert that the array is sorted in terms of a comparator only for correct/partially correct cases
 val comparators = listOf<ComparatorInfo>(
-    ComparatorInfo("Correct increasing", correctIncreasing ,  true),
-    ComparatorInfo("Correct decreasing", correctDecreasing ,  true),
-    ComparatorInfo("Incorrect increasing", Comparator { a ,b -> if (a > b) 1 else -1 },  false),
-    ComparatorInfo("Incorrect decreasing", Comparator { a ,b -> if (a < b) 1 else -1 },  false),
-    ComparatorInfo("Always 1",  Comparator { a ,b ->  1  },  false),
-    ComparatorInfo("Always -1", Comparator { a ,b ->  -1 },  false),
-    ComparatorInfo("Always 0",  Comparator { a ,b ->  0  },  false)
+    ComparatorInfo("Correct increasing", correctIncreasing,  true),
+    ComparatorInfo("Correct decreasing", correctDecreasing,  true),
+    ComparatorInfo("Incorrect increasing", Comparator { a, b -> if (a > b) 1 else -1 },  false),
+    ComparatorInfo("Incorrect decreasing", Comparator { a, b -> if (a < b) 1 else -1 },  false),
+    ComparatorInfo("Always 1",  Comparator { a, b ->  1  },  false),
+    ComparatorInfo("Always -1", Comparator { a, b ->  -1 },  false),
+    ComparatorInfo("Always 0",  Comparator { a, b ->  0  },  false)
 )
 
 val arrays = listOf<Array<Int>>(

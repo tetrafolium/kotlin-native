@@ -6,8 +6,7 @@
 import org.jetbrains.benchmarksLauncher.*
 import kotlinx.cli.*
 
-expect class NumericalLauncher() : Launcher {
-}
+expect class NumericalLauncher() : Launcher
 
 fun main(args: Array<String>) {
     val launcher = NumericalLauncher()

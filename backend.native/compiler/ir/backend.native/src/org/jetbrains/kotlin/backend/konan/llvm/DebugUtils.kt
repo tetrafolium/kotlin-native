@@ -222,7 +222,7 @@ internal fun IrType.size(context:Context) = context.debugInfo.llvmTypeSizes.getO
 internal fun IrType.alignment(context:Context) = context.debugInfo.llvmTypeAlignments.getOrDefault(this, context.debugInfo.otherTypeAlignment).toLong()
 
 internal fun IrType.llvmType(context:Context): LLVMTypeRef = context.debugInfo.llvmTypes.getOrElse(this) {
-    when(computePrimitiveBinaryTypeOrNull()) {
+    when (computePrimitiveBinaryTypeOrNull()) {
         PrimitiveBinaryType.BYTE -> context.llvm.llvmInt8
         PrimitiveBinaryType.SHORT -> context.llvm.llvmInt16
         PrimitiveBinaryType.INT -> context.llvm.llvmInt32
@@ -234,7 +234,7 @@ internal fun IrType.llvmType(context:Context): LLVMTypeRef = context.debugInfo.l
     }
 }
 
-internal fun IrType.encoding(): DwarfTypeKind = when(computePrimitiveBinaryTypeOrNull()) {
+internal fun IrType.encoding(): DwarfTypeKind = when (computePrimitiveBinaryTypeOrNull()) {
     PrimitiveBinaryType.FLOAT -> DwarfTypeKind.DW_ATE_float
     PrimitiveBinaryType.DOUBLE -> DwarfTypeKind.DW_ATE_float
     PrimitiveBinaryType.BOOLEAN -> DwarfTypeKind.DW_ATE_boolean

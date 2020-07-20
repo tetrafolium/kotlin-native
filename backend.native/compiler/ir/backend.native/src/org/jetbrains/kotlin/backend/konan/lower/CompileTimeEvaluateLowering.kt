@@ -33,8 +33,8 @@ internal class CompileTimeEvaluateLowering(val context: Context): FileLoweringPa
                 // The function is kotlin.collections.listOf<T>(vararg args: T).
                 // TODO: refer functions more reliably.
 
-                if (elementsArr.elements.any { it is IrSpreadElement }
-                        || !elementsArr.elements.all { it is IrConst<*> && it.type.isString() })
+                if (elementsArr.elements.any { it is IrSpreadElement } ||
+                        !elementsArr.elements.all { it is IrConst<*> && it.type.isString() })
                     return expression
 
 

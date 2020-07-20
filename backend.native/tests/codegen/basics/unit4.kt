@@ -9,7 +9,7 @@ import kotlin.test.*
 
 @Test
 fun runTest() {
-    for (x in 0 .. 8) {
+    for (x in 0..8) {
         foo(x, Unit)
     }
     println("Done")

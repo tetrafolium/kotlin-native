@@ -99,7 +99,6 @@ class PatternTest2 {
             println(e.message)
             fail()
         }
-
     }
 
     @Test fun testGroups() {
@@ -751,7 +750,6 @@ class PatternTest2 {
             if (block.high < 0xFFFF) {
                 assertTrue(regex.matches((block.high + 1).toChar().toString()))
             }
-
         }
     }
 
@@ -862,7 +860,7 @@ class PatternTest2 {
         assertTrue(regex.matches("abc;bar0-def$-;123"))
 
         regex = Regex("[a-z]+;(bar[0-9]-[a-z\\Q[0-9]\\E]+);[0-9]+")
-        assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"));
+        assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"))
 
         regex = Regex("[a-z]+;(bar[0-9]-[a-z\\[0\\-9\\]]+);[0-9]+")
         assertTrue(regex.matches("abc;bar0-def[99]-]0x[;123"))

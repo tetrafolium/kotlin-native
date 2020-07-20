@@ -37,9 +37,9 @@ internal fun findMainEntryPoint(context: Context): FunctionDescriptor? {
         }
 
     val main =
-        candidates.singleOrNull { it.hasSingleArrayOfStringParameter } ?:
-        candidates.singleOrNull { it.hasNoParameters } ?:
-        context.reportCompilationError("Could not find '$entryName' in '$packageName' package.")
+        candidates.singleOrNull { it.hasSingleArrayOfStringParameter }
+        ?: candidates.singleOrNull { it.hasNoParameters }
+        ?: context.reportCompilationError("Could not find '$entryName' in '$packageName' package.")
 
     if (main.isSuspend)
         context.reportCompilationError("Entry point can not be a suspend function.")

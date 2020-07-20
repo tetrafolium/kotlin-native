@@ -44,7 +44,7 @@ private fun staticGnuArCommands(ar: String, executable: ExecutableFile,
                         +libraries
                     },
                     Command("cmd", "/c").apply {
-                        +"(echo create $executable & echo addlib ${temp} & echo save & echo end) | $arWindows -M"
+                        +"(echo create $executable & echo addlib $temp & echo save & echo end) | $arWindows -M"
                     },
                     Command("cmd", "/c", "del", "/q", temp))
         }
@@ -119,7 +119,7 @@ open class AndroidLinker(targetProperties: AndroidConfigurables)
             return staticGnuArCommands(ar, executable, objectFiles, libraries)
 
         val dynamic = kind == LinkerOutputKind.DYNAMIC_LIBRARY
-        val toolchainSysroot = "${absoluteTargetToolchain}/sysroot"
+        val toolchainSysroot = "$absoluteTargetToolchain/sysroot"
         val architectureDir = Android.architectureDirForTarget(target)
         val apiSysroot = "$absoluteTargetSysRoot/$architectureDir"
         val clangTarget = targetArg!!
@@ -296,7 +296,7 @@ open class GccBasedLinker(targetProperties: GccConfigurables)
         else "$absoluteTargetToolchain/bin/ar"
     override val libGcc = "$absoluteTargetSysRoot/${super.libGcc}"
     private val linker = "$absoluteLlvmHome/bin/ld.lld"
-    private val specificLibs = abiSpecificLibraries.map { "-L${absoluteTargetSysRoot}/$it" }
+    private val specificLibs = abiSpecificLibraries.map { "-L$absoluteTargetSysRoot/$it" }
 
     override fun provideCompilerRtLibrary(libraryName: String): String? {
         val targetSuffix = when (target) {
@@ -322,7 +322,7 @@ open class GccBasedLinker(targetProperties: GccConfigurables)
         val crtPrefix = if (configurables.target == KonanTarget.LINUX_ARM64) "usr/lib" else "usr/lib64"
         // TODO: Can we extract more to the konan.configurables?
         return listOf(Command(linker).apply {
-            +"--sysroot=${absoluteTargetSysRoot}"
+            +"--sysroot=$absoluteTargetSysRoot"
             +"-export-dynamic"
             +"-z"
             +"relro"

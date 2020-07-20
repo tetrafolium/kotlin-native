@@ -27,8 +27,8 @@ internal actual inline fun <K, V> buildMapInternal(capacity: Int, builderAction:
 internal inline actual fun <K, V> Map<K, V>.toSingletonMapOrSelf(): Map<K, V> = toSingletonMap()
 
 // creates a singleton copy of map
-internal actual fun <K, V> Map<out K, V>.toSingletonMap(): Map<K, V>
-        = with(entries.iterator().next()) { mutableMapOf(key to value) }
+internal actual fun <K, V> Map<out K, V>.toSingletonMap(): Map<K, V> =
+        with(entries.iterator().next()) { mutableMapOf(key to value) }
 
 
 /**

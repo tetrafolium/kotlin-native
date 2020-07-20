@@ -28,21 +28,21 @@ internal class VariableManager(val functionGenerationContext: FunctionGeneration
             functionGenerationContext.storeAny(value, address, true)
         }
         override fun address() : LLVMValueRef = this.address
-        override fun toString() = (if (refSlot) "refslot" else "slot") + " for ${address}"
+        override fun toString() = (if (refSlot) "refslot" else "slot") + " for $address"
     }
 
     inner class ParameterRecord(val address: LLVMValueRef, val refSlot: Boolean) : Record {
         override fun load() : LLVMValueRef = functionGenerationContext.loadSlot(address, false)
         override fun store(value: LLVMValueRef) = throw Error("writing to parameter")
         override fun address() : LLVMValueRef = this.address
-        override fun toString() = (if (refSlot) "refslot" else "slot") + " for ${address}"
+        override fun toString() = (if (refSlot) "refslot" else "slot") + " for $address"
     }
 
     class ValueRecord(val value: LLVMValueRef, val name: Name) : Record {
         override fun load() : LLVMValueRef = value
-        override fun store(value: LLVMValueRef) = throw Error("writing to immutable: ${name}")
-        override fun address() : LLVMValueRef = throw Error("no address for: ${name}")
-        override fun toString() = "value of ${value} from ${name}"
+        override fun store(value: LLVMValueRef) = throw Error("writing to immutable: $name")
+        override fun address() : LLVMValueRef = throw Error("no address for: $name")
+        override fun toString() = "value of $value from $name"
     }
 
     val variables: ArrayList<Record> = arrayListOf()

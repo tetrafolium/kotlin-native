@@ -86,7 +86,7 @@ open class CompileToBitcode @Inject constructor(@InputDirectory val srcRoot: Fil
         }
 
     @OutputFile
-    val outFile = File(targetDir, "${folderName}.bc")
+    val outFile = File(targetDir, "$folderName.bc")
 
     @TaskAction
     fun compile() {

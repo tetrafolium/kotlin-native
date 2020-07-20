@@ -239,7 +239,6 @@ internal class EnumClassLowering(val context: Context) : ClassLoweringPass {
                                         createUninitializedInstance,
                                         listOf(entryClass.defaultType)
                                 )
-
                             }
             )
             val irField = loweredEnum.valuesField
@@ -352,6 +351,5 @@ internal class EnumClassLowering(val context: Context) : ClassLoweringPass {
                 )
             }
         }
-
     }
 }

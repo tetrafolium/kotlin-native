@@ -5,9 +5,7 @@
 
 package org.jetbrains.kotlin.backend.konan.llvm
 
-import llvm.LLVMStoreSizeOfType
 import llvm.LLVMValueRef
-import org.jetbrains.kotlin.backend.common.atMostOne
 import org.jetbrains.kotlin.backend.konan.*
 import org.jetbrains.kotlin.backend.konan.descriptors.getAnnotationStringValue
 import org.jetbrains.kotlin.backend.konan.ir.*
@@ -121,8 +119,8 @@ internal class KotlinObjCClassInfoGenerator(override val context: Context) : Con
             .filterIsInstance<IrSimpleFunction>()
             .mapNotNull {
                 val annotation =
-                        it.annotations.findAnnotation(context.interopBuiltIns.objCMethodImp.fqNameSafe) ?:
-                                return@mapNotNull null
+                        it.annotations.findAnnotation(context.interopBuiltIns.objCMethodImp.fqNameSafe)
+                                ?: return@mapNotNull null
 
                 ObjCMethodDesc(
                         annotation.getAnnotationStringValue("selector"),

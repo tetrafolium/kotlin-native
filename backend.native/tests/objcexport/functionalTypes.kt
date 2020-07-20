@@ -10,7 +10,7 @@ typealias AN = Any?
 
 typealias F2 = (AN, AN) -> AN
 typealias F5 = (AN, AN, AN, AN, AN) -> AN
-typealias F6 = (AN, AN, AN, AN, AN, AN,) -> AN
+typealias F6 = (AN, AN, AN, AN, AN, AN, ) -> AN
 typealias F32 = (AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
                  AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN, AN,
                  AN, AN, AN, AN, AN, AN, AN, AN) -> AN
@@ -31,42 +31,26 @@ fun callStaticType2(fct: F2, param: AN) {
 
 fun callDynType32(list: List<F32>, param: AN) {
     val fct = list.first()
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
+    val ret = fct(param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callStaticType32(fct: F32, param: AN) {
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
+    val ret = fct(param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callDynType33(list: List<F33>, param: AN) {
     val fct = list.first()
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null, null
+    val ret = fct(param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }
 
 fun callStaticType33(fct: F33, param: AN) {
-    val ret = fct(param
-            , null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null
-            , null, null, null, null, null, null, null, null, null
+    val ret = fct(param, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
     )
     assertEquals(param, ret)
 }

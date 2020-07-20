@@ -38,8 +38,7 @@ abstract class DisposableContainer : Disposable {
     }
 
     inline fun <T> tryConstruct(init: () -> T): T =
-        try { init() }
-        catch (e: Throwable) {
+        try { init() } catch (e: Throwable) {
             dispose()
             throw e
         }

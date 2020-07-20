@@ -290,7 +290,6 @@ class PatternTest {
             } catch (pse: IllegalArgumentException) {
                 continue
             }
-
         }
     }
 
@@ -353,7 +352,6 @@ class PatternTest {
                 fail("IllegalArgumentException was expected: " + element)
             } catch (pse: IllegalArgumentException) {
             }
-
         }
 
         val pos_patterns = arrayOf("[-]+", "----", "[a-]+", "a-a-a-a-aa--", "[\\w-a]+", "123-2312--aaa-213", "[a-]]+", "-]]]]]]]]]]]]]]]")
@@ -396,7 +394,6 @@ class PatternTest {
             fail("IllegalArgumentException expected")
         } catch (pse: IllegalArgumentException) {
         }
-
     }
 
     @Test fun testOrphanQuantifiers2() {
@@ -405,7 +402,6 @@ class PatternTest {
             fail("IllegalArgumentException expected")
         } catch (pse: IllegalArgumentException) {
         }
-
     }
 
     @Test fun testBug197() {
@@ -433,13 +429,13 @@ class PatternTest {
     }
 
     @Test fun testURIPatterns() {
-        val URI_REGEXP_STR = "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
-        val SCHEME_REGEXP_STR = "^[a-zA-Z]{1}[\\w+-.]+$";
-        val REL_URI_REGEXP_STR = "^(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?";
-        val IPV6_REGEXP_STR = "^[0-9a-fA-F\\:\\.]+(\\%\\w+)?$";
-        val IPV6_REGEXP_STR2 = "^\\[[0-9a-fA-F\\:\\.]+(\\%\\w+)?\\]$";
-        val IPV4_REGEXP_STR = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$";
-        val HOSTNAME_REGEXP_STR = "\\w+[\\w\\-\\.]*";
+        val URI_REGEXP_STR = "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+        val SCHEME_REGEXP_STR = "^[a-zA-Z]{1}[\\w+-.]+$"
+        val REL_URI_REGEXP_STR = "^(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?"
+        val IPV6_REGEXP_STR = "^[0-9a-fA-F\\:\\.]+(\\%\\w+)?$"
+        val IPV6_REGEXP_STR2 = "^\\[[0-9a-fA-F\\:\\.]+(\\%\\w+)?\\]$"
+        val IPV4_REGEXP_STR = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$"
+        val HOSTNAME_REGEXP_STR = "\\w+[\\w\\-\\.]*"
 
         Regex(URI_REGEXP_STR)
         Regex(REL_URI_REGEXP_STR)
@@ -464,7 +460,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("aA", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases3() {
@@ -473,7 +468,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("aA", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases4() {
@@ -482,7 +476,6 @@ class PatternTest {
 
         assertNotNull(result)
         assertEquals("A", result!!.value)
-
     }
 
     @Test fun testFindBoundaryCases5() {

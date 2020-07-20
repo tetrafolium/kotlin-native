@@ -29,7 +29,6 @@ class PatternSyntaxExceptionTest {
         } catch (e: IllegalArgumentException) {
             // TODO: Check the exception's properties.
         }
-
     }
 
     @Test fun testCase2() {
@@ -39,6 +38,5 @@ class PatternSyntaxExceptionTest {
             fail("IllegalArgumentException expected")
         } catch (e: IllegalArgumentException) {
         }
-
     }
 }

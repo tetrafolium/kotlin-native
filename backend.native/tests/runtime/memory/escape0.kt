@@ -23,7 +23,7 @@ class Node(var previous: Node?)
 
 fun zoo3() : Node {
     var current = Node(null)
-    for (i in 1 .. 5) {
+    for (i in 1..5) {
         current = Node(current)
     }
     return current
@@ -52,7 +52,7 @@ fun zoo6(arg: Any) : Any {
 }
 
 fun zoo7(arg1: Any, arg2: Any, selector: Int) : Any {
-    return if (selector < 2) arg1 else arg2;
+    return if (selector < 2) arg1 else arg2
 }
 
 @Test fun runTest() {

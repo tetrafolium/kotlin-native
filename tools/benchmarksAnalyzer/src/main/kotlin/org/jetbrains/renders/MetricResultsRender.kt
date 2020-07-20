@@ -18,7 +18,6 @@
 package org.jetbrains.renders
 
 import org.jetbrains.analyzer.*
-import org.jetbrains.report.BenchmarkResult
 
 // Report render to text format.
 class MetricResultsRender: Render() {
@@ -35,6 +34,5 @@ class MetricResultsRender: Render() {
             }
         }.joinToString(", ")
         return "[ $results ]"
-
     }
 }

@@ -101,14 +101,13 @@ fun run() {
     createObjectWithFactory(object : NSObject(), ObjectFactoryProtocol {
         override fun create() = autoreleasepool { NSObject() }
     })
-
 }
 
 fun MutablePairProtocol.swap() {
     update(0, add = second)
     update(1, sub = first)
     update(0, add = second)
-    update(1, sub = second*2)
+    update(1, sub = second * 2)
 }
 
 class Bar : Foo() {

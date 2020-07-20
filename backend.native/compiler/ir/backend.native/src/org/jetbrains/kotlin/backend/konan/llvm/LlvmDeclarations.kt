@@ -43,20 +43,19 @@ internal class LlvmDeclarations(
     fun forFunction(function: IrFunction) = forFunctionOrNull(function) ?: with(function){error("$name in $file/${parent.fqNameForIrSerialization}")}
     fun forFunctionOrNull(function: IrFunction) = functions[function]
 
-    fun forClass(irClass: IrClass) = classes[irClass] ?:
-            error(irClass.descriptor.toString())
+    fun forClass(irClass: IrClass) = classes[irClass]
+            ?: error(irClass.descriptor.toString())
 
-    fun forField(field: IrField) = fields[field] ?:
-            error(field.descriptor.toString())
+    fun forField(field: IrField) = fields[field]
+            ?: error(field.descriptor.toString())
 
-    fun forStaticField(field: IrField) = staticFields[field] ?:
-            error(field.descriptor.toString())
+    fun forStaticField(field: IrField) = staticFields[field]
+            ?: error(field.descriptor.toString())
 
-    fun forSingleton(irClass: IrClass) = forClass(irClass).singletonDeclarations ?:
-            error(irClass.descriptor.toString())
+    fun forSingleton(irClass: IrClass) = forClass(irClass).singletonDeclarations
+            ?: error(irClass.descriptor.toString())
 
     fun forUnique(kind: UniqueKind) = unique[kind] ?: error("No unique $kind")
-
 }
 
 internal class ClassLlvmDeclarations(
@@ -204,7 +203,6 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
             }
 
             typeInfoPtr = constPointer(llvmTypeInfoPtr)
-
         } else {
             typeInfoGlobal = staticData.createGlobal(runtime.typeInfoType,
                     typeInfoSymbolName,
@@ -311,8 +309,8 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
         val containingClass = declaration.parent as? IrClass
         if (containingClass != null) {
             if (!containingClass.requiresRtti()) return
-            val classDeclarations = this.classes[containingClass] ?:
-                error(containingClass.descriptor.toString())
+            val classDeclarations = this.classes[containingClass]
+                ?: error(containingClass.descriptor.toString())
             val allFields = context.getLayoutBuilder(containingClass).fields
             this.fields[declaration] = FieldLlvmDeclarations(
                     allFields.indexOf(declaration) + 1, // First field is ObjHeader.
@@ -343,11 +341,11 @@ private class DeclarationsGeneratorVisitor(override val context: Context) :
         }
 
         val llvmFunction = if (declaration.isExternal) {
-            if (declaration.isTypedIntrinsic || declaration.isObjCBridgeBased()
+            if (declaration.isTypedIntrinsic || declaration.isObjCBridgeBased() ||
                     // All call-sites to external accessors to interop properties
                     // are lowered by InteropLowering.
-                    || (declaration.isAccessor && declaration.isFromMetadataInteropLibrary())
-                    || declaration.annotations.hasAnnotation(RuntimeNames.cCall)) return
+                    (declaration.isAccessor && declaration.isFromMetadataInteropLibrary()) ||
+                    declaration.annotations.hasAnnotation(RuntimeNames.cCall)) return
 
             context.llvm.externalFunction(declaration.symbolName, llvmFunctionType,
                     // Assume that `external fun` is defined in native libs attached to this module:

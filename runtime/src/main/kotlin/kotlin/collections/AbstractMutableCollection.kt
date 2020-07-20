@@ -60,7 +60,7 @@ public actual abstract class AbstractMutableCollection<E> protected actual const
     /**
      * Removes all elements from this collection.
      */
-    actual override fun clear(): Unit {
+    actual override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.next()

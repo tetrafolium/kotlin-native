@@ -136,7 +136,6 @@ object FloatingPointParser {
                 }
                 e = if (strExp[0] == '-') Int.MIN_VALUE else Int.MAX_VALUE
             }
-
         } else {
             end = length
         }

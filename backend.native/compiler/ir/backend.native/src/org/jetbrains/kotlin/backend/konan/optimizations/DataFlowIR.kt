@@ -154,9 +154,7 @@ internal object DataFlowIR {
 
         abstract class Declared(val module: Module, val symbolTableIndex: Int,
                                 attributes: Int, irFunction: IrFunction?, var bridgeTarget: FunctionSymbol?, name: String?)
-            : FunctionSymbol(attributes, irFunction, name) {
-
-        }
+            : FunctionSymbol(attributes, irFunction, name)
 
         class Public(val hash: Long, module: Module, symbolTableIndex: Int,
                      attributes: Int, irFunction: IrFunction?, bridgeTarget: FunctionSymbol?, name: String? = null)
@@ -593,9 +591,9 @@ internal object DataFlowIR {
                 attributes = attributes or FunctionAttributes.RETURNS_UNIT
             if (returnsNothing)
                 attributes = attributes or FunctionAttributes.RETURNS_NOTHING
-            if (it.hasAnnotation(RuntimeNames.exportForCppRuntime)
-                    || it.getExternalObjCMethodInfo() != null // TODO-DCE-OBJC-INIT
-                    || it.hasAnnotation(RuntimeNames.objCMethodImp)) {
+            if (it.hasAnnotation(RuntimeNames.exportForCppRuntime) ||
+                    it.getExternalObjCMethodInfo() != null || // TODO-DCE-OBJC-INIT
+                    it.hasAnnotation(RuntimeNames.objCMethodImp)) {
                 attributes = attributes or FunctionAttributes.EXPLICITLY_EXPORTED
             }
             val symbol = when {
@@ -620,9 +618,9 @@ internal object DataFlowIR {
                         it != null && BuiltinMethodsWithSpecialGenericSignature.getDefaultValueForOverriddenBuiltinFunction(it.descriptor) != null
                     }
                     val bridgeTargetSymbol = if (isSpecialBridge || bridgeTarget == null) null else mapFunction(bridgeTarget)
-                    val placeToFunctionsTable = !isAbstract && it !is IrConstructor && irClass != null
-                            && !irClass.isNonGeneratedAnnotation()
-                            && (it.isOverridableOrOverrides || bridgeTarget != null || function.isSpecial || !irClass.isFinal())
+                    val placeToFunctionsTable = !isAbstract && it !is IrConstructor && irClass != null &&
+                            !irClass.isNonGeneratedAnnotation() &&
+                            (it.isOverridableOrOverrides || bridgeTarget != null || function.isSpecial || !irClass.isFinal())
                     val symbolTableIndex = if (placeToFunctionsTable) module.numberOfFunctions++ else -1
                     if (it.isExported())
                         FunctionSymbol.Public(name.localHash.value, module, symbolTableIndex, attributes, it, bridgeTargetSymbol, takeName { name })
@@ -645,8 +643,8 @@ internal object DataFlowIR {
         }
 
         private val IrFunction.isSpecial get() =
-            origin == DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION
-                    || origin is DECLARATION_ORIGIN_BRIDGE_METHOD
+            origin == DECLARATION_ORIGIN_INLINE_CLASS_SPECIAL_FUNCTION ||
+                    origin is DECLARATION_ORIGIN_BRIDGE_METHOD
 
         private fun mapPropertyInitializer(irField: IrField): FunctionSymbol {
             functionMap[irField]?.let { return it }

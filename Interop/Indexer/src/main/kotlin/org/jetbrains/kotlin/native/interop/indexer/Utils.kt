@@ -182,7 +182,6 @@ internal fun getFields(type: CValue<CXType>): List<CValue<CXCursor>> {
             result.add(cursor)
             CXVisitorResult.CXVisit_Continue
         }, clientData)
-
     } finally {
         resultStableRef.dispose()
     }
@@ -353,7 +352,7 @@ fun List<List<String>>.mapFragmentIsCompilable(originalLibrary: CompilationWithP
                 fragmentsToCheck.retainAll {
                     val firstLineNumber = lastLineNumber + 1
                     lastLineNumber += it.value.size
-                    (firstLineNumber .. lastLineNumber).any { it in errorLineNumbers }
+                    (firstLineNumber..lastLineNumber).any { it in errorLineNumbers }
                 }
 
                 if (fragmentsToCheck.isNotEmpty()) {
@@ -484,7 +483,6 @@ internal class ModulesMap(
                     .toBeDisposedWith { clang_disposeTranslationUnit(it) }
 
             translationUnitWithModules.ensureNoCompileErrors()
-
         } catch (e: Throwable) {
             this.close()
             throw e

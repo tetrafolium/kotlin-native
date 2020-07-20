@@ -172,7 +172,6 @@ internal interface ContextUtils : RuntimeAware {
             return if (isExternal(this)) {
                 runtime.addedLLVMExternalFunctions.getOrPut(this) { context.llvm.externalFunction(this.symbolName, getLlvmFunctionType(this),
                         origin = this.llvmSymbolOrigin) }
-
             } else {
                 context.llvmDeclarations.forFunctionOrNull(this)?.llvmFunction
             }
@@ -241,7 +240,6 @@ internal interface ContextUtils : RuntimeAware {
 
     val FqName.globalHash: ConstValue
         get() = this.toString().globalHash
-
 }
 
 /**

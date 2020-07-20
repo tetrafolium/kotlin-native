@@ -44,7 +44,7 @@ class A {
 
 open class B(val a:Int, val b:Int) {
     constructor(a:Int):this (a, 0) {
-        println("B::constructor(" + a.toString()+ ")")
+        println("B::constructor(" + a.toString() + ")")
     }
     constructor():this(0) {
         println("B::constructor()")

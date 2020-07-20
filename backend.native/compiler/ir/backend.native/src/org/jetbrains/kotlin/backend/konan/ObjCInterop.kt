@@ -237,7 +237,6 @@ class ObjCOverridabilityCondition : ExternalOverridabilityCondition {
 
         return true
     }
-
 }
 
 fun IrConstructor.objCConstructorIsDesignated(): Boolean =

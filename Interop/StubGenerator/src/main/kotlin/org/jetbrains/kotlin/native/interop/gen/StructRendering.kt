@@ -59,7 +59,6 @@ private fun tryRenderUnion(def: StructDef): String? =
                 append("$decl; ")
             }
             append("}")
-
         }
 
 private fun tryRenderVar(type: Type, name: String): String? = when (type) {

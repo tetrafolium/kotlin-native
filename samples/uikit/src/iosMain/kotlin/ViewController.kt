@@ -74,6 +74,5 @@ class ViewController : UIViewController {
                     forControlEvents = UIControlEventTouchUpInside)
             header.addSubview(this)
         }
-
     }
 }

@@ -15,8 +15,7 @@ class C1: C() {
     override val p1 = super<C>.p1 + "<prop:C1>"
 }
 
-open class C2: C() {
-}
+open class C2: C()
 
 class C3: C2() {
     override val p1 = super<C2>.p1 + "<prop:C3>"

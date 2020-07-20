@@ -16,9 +16,7 @@ import cjson.cJSON_Delete as deleteObject
 import cjson.cJSON_Print as jsonString
 import cjson.cJSON_Parse as parseJson
 import cjson.cJSON_GetObjectItemCaseSensitive as jsonObjectItem
-import cjson.cJSON_IsString as jsonValueIsString
 
-import cjson.cJSON_IsNumber as jsonValueIsNumber
 import cjson.cJSON_GetErrorPtr as getErrorPointer
 import cjson.cJSON_GetStringValue as jsonStringValue
 import cjson.cJSON_GetArraySize as jsonArraySize

@@ -206,7 +206,7 @@ internal class BlockGenerator(private val codegen: CodeGenerator) {
 
             var paramOffset = 0L
 
-            (0 .. numberOfParameters).forEach { index ->
+            (0..numberOfParameters).forEach { index ->
                 append('@')
                 if (index == 0) append('?')
                 append(paramOffset)
@@ -239,7 +239,7 @@ internal class BlockGenerator(private val codegen: CodeGenerator) {
                     verbatim = true
             )
 
-            val arguments = (1 .. blockType.numberOfParameters).map { index -> param(index) }
+            val arguments = (1..blockType.numberOfParameters).map { index -> param(index) }
 
             genBody(kotlinObject, arguments)
         }.also {

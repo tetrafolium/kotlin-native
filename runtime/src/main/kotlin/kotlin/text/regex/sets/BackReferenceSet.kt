@@ -55,8 +55,8 @@ open internal class BackReferenceSet(val referencedGroup: Int, val consCounter: 
             if (index < 0) {
                 return -1
             }
-            if (index < testString.length
-                && next.matches(index + groupValue.length, testString, matchResult) >=0) {
+            if (index < testString.length &&
+                next.matches(index + groupValue.length, testString, matchResult) >= 0) {
                 return index
             }
             index++

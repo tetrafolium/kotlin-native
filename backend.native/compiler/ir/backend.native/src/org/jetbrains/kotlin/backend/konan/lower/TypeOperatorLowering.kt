@@ -61,8 +61,8 @@ private class TypeOperatorTransformer(val context: CommonBackendContext, val fun
         return when (classifier) {
             is IrClassSymbol -> this
             is IrTypeParameterSymbol -> {
-                val upperBound = classifier.owner.superTypes.firstOrNull() ?:
-                        TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
+                val upperBound = classifier.owner.superTypes.firstOrNull()
+                        ?: TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
 
                 if (this.hasQuestionMark) {
                     // `T?`

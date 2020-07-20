@@ -20,7 +20,6 @@ import org.gradle.api.*
 import org.gradle.api.component.ComponentWithVariants
 import org.gradle.api.component.SoftwareComponent
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.FeaturePreviews
 import org.gradle.api.internal.component.SoftwareComponentInternal
 import org.gradle.api.internal.component.UsageContext
 import org.gradle.api.internal.project.ProjectInternal
@@ -36,7 +35,6 @@ import org.jetbrains.kotlin.gradle.plugin.model.KonanToolingModelBuilder
 import org.jetbrains.kotlin.gradle.plugin.tasks.*
 import org.jetbrains.kotlin.konan.CURRENT
 import org.jetbrains.kotlin.konan.CompilerVersion
-import org.jetbrains.kotlin.konan.parseCompilerVersion
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.buildDistribution
@@ -102,8 +100,8 @@ internal val Project.konanBitcodeBaseDir     get() = konanBuildRoot.resolve("bit
 internal fun File.targetSubdir(target: KonanTarget) = resolve(target.visibleName)
 
 internal val Project.konanDefaultSrcFiles         get() = fileTree("${projectDir.canonicalPath}/src/main/kotlin")
-internal fun Project.konanDefaultDefFile(libName: String)
-        = file("${projectDir.canonicalPath}/src/main/c_interop/$libName.def")
+internal fun Project.konanDefaultDefFile(libName: String) =
+        file("${projectDir.canonicalPath}/src/main/c_interop/$libName.def")
 
 @Suppress("UNCHECKED_CAST")
 internal val Project.konanArtifactsContainer: KonanArtifactContainer
@@ -115,8 +113,8 @@ internal val Project.konanArtifactsContainer: KonanArtifactContainer
 // by using HostManager instead of PlatformManager. But we need to download the compiler at the configuration
 // stage (e.g. by getting it from maven as a plugin dependency) and bring back the PlatformManager here.
 internal val Project.hostManager: HostManager
-    get() = findProperty("hostManager") as HostManager? ?:
-            if (hasProperty("org.jetbrains.kotlin.native.experimentalTargets"))
+    get() = findProperty("hostManager") as HostManager?
+            ?: if (hasProperty("org.jetbrains.kotlin.native.experimentalTargets"))
                 HostManager(buildDistribution(rootProject.rootDir.absolutePath), true)
             else
                 HostManager(customerDistribution(konanHome))
@@ -320,7 +318,7 @@ class KonanPlugin @Inject constructor(private val registry: ToolingModelBuilderR
         check(current >= REQUIRED_GRADLE_VERSION) {
             "Kotlin/Native Gradle plugin is incompatible with this version of Gradle.\n" +
             "The minimal required version is $REQUIRED_GRADLE_VERSION\n" +
-            "Current version is ${current}"
+            "Current version is $current"
         }
     }
 

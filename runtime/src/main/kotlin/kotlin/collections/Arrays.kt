@@ -5,8 +5,6 @@
 
 package kotlin.collections
 
-import kotlin.internal.PureReifiable
-
 /** Returns the array if it's not `null`, or an empty array otherwise. */
 public actual inline fun <reified T> Array<out T>?.orEmpty(): Array<out T> = this ?: emptyArray<T>()
 

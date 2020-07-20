@@ -45,7 +45,7 @@ open class B : A() {
 }
 
 // All test methods from B should be executed for C.
-class C: B() {}
+class C: B()
 
 class D: I1, I2 {
     // This method shouldn't be executed because its parent methods annotated

@@ -120,6 +120,5 @@ open class RunJvmTask: JavaExec() {
             )
             BenchmarkRepeatingType.EXTERNAL -> execBenchmarksRepeatedly(filterArgs, filterRegexArgs)
         }
-
     }
 }

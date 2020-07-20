@@ -14,7 +14,7 @@ actual class NumericalLauncher : Launcher() {
 }
 
 fun jvmBellardPi() {
-    for (n in 1 .. 1000 step 9) {
+    for (n in 1..1000 step 9) {
         val result = pi_nth_digit(n)
         Blackhole.consume(result)
     }

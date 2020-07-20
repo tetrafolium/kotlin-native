@@ -14,7 +14,6 @@ import platform.darwin.*
 import platform.posix.QOS_CLASS_BACKGROUND
 import platform.posix.memcpy
 import kotlin.native.concurrent.*
-import kotlin.test.assertNotNull
 
 data class QueryResult(val json: Map<String, *>?, val error: String?)
 
@@ -197,7 +196,6 @@ class MyAppDelegate() : NSObject(), NSApplicationDelegateProtocol {
             string = "Press 'Click' to start fetching"
             verticallyResizable = false
             horizontallyResizable = false
-
         }
         window.contentView!!.addSubview(contentText)
     }

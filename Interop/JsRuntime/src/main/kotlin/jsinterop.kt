@@ -43,11 +43,11 @@ const val upperWord = 0xffffffff.toLong() shl 32
 
 @ExportForCppRuntime
 fun doubleUpper(value: Double): Int =
-    ((value.toBits() and upperWord) ushr 32) .toInt()
+    ((value.toBits() and upperWord) ushr 32).toInt()
 
 @ExportForCppRuntime
 fun doubleLower(value: Double): Int =
-    (value.toBits() and 0x00000000ffffffff) .toInt()
+    (value.toBits() and 0x00000000ffffffff).toInt()
 
 @RetainForTarget("wasm32")
 @SymbolName("ReturnSlot_getDouble")
@@ -61,7 +61,7 @@ external public fun stringPointer(message: String): Pointer
 @SymbolName("Kotlin_String_utf16length")
 external public fun stringLengthBytes(message: String): Int
 
-typealias KtFunction <R> = ((ArrayList<JsValue>)->R)
+typealias KtFunction <R> = ((ArrayList<JsValue>) -> R)
 
 fun <R> wrapFunction(func: KtFunction<R>): Int {
     val ptr: Long = StableRef.create(func).asCPointer().toLong() 
@@ -73,7 +73,7 @@ fun <R> wrapFunction(func: KtFunction<R>): Int {
 fun runLambda(pointer: Int, argumentsArena: Arena, argumentsArenaSize: Int): Int {
     val arguments = arrayListOf<JsValue>()
     for (i in 0 until argumentsArenaSize) {
-        arguments.add(JsValue(argumentsArena, i));
+        arguments.add(JsValue(argumentsArena, i))
     }
     val previousArena = ArenaManager.currentArena
     ArenaManager.currentArena = argumentsArena
@@ -106,15 +106,15 @@ open class JsArray(arena: Arena, index: Object): JsValue(arena, index) {
 
 @RetainForTarget("wasm32")
 @SymbolName("Konan_js_getInt")
-external public fun getInt(arena: Arena, obj: Object, propertyPtr: Pointer, propertyLen: Int): Int;
+external public fun getInt(arena: Arena, obj: Object, propertyPtr: Pointer, propertyLen: Int): Int
 
 @RetainForTarget("wasm32")
 @SymbolName("Konan_js_getProperty")
-external public fun Konan_js_getProperty(arena: Arena, obj: Object, propertyPtr: Pointer, propertyLen: Int): Int;
+external public fun Konan_js_getProperty(arena: Arena, obj: Object, propertyPtr: Pointer, propertyLen: Int): Int
 
 @RetainForTarget("wasm32")
 @SymbolName("Konan_js_setFunction")
-external public fun setFunction(arena: Arena, obj: Object, propertyName: Pointer, propertyLength: Int , function: Int)
+external public fun setFunction(arena: Arena, obj: Object, propertyName: Pointer, propertyLength: Int, function: Int)
 
 @RetainForTarget("wasm32")
 @SymbolName("Konan_js_setString")
@@ -125,7 +125,7 @@ fun setter(obj: JsValue, property: String, string: String) {
 }
 
 fun setter(obj: JsValue, property: String, lambda: KtFunction<Unit>) {
-    val pointer = wrapFunction(lambda);
+    val pointer = wrapFunction(lambda)
     setFunction(obj.arena, obj.index, stringPointer(property), stringLengthBytes(property), pointer)
 }
 

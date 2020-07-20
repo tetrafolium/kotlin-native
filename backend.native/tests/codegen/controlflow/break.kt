@@ -43,8 +43,7 @@ fun qux() {
     t1@try {
       println("qux@t1")
       throw Exception()
-    }
-    finally {
+    } finally {
       l2@ for (j in 1..6) {
         if ((j % 2) == 0) continue@l2
         println("qux@l2")

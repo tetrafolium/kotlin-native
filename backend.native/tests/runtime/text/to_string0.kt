@@ -40,7 +40,6 @@ fun testLongToStringWithRadix() {
     assertEquals(0x7fffffffffffffffL.toString(10), "9223372036854775807", "Max decimal string")
     assertEquals((-0x7fffffffffffffffL - 1).toString(16), "-8000000000000000", "Min hex string")
     assertEquals(0x7fffffffffffffffL.toString(16), "7fffffffffffffff", "Max hex string")
-
 }
 
 @Test fun runTest() {

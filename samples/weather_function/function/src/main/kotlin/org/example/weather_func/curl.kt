@@ -5,7 +5,6 @@
 
 package org.example.weather_func
 
-import org.example.weather_func.Event
 import platform.posix.size_t
 
 import curl.curl_easy_setopt

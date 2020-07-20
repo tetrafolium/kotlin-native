@@ -19,7 +19,6 @@ import kotlin.test.*
         }
 
         println("After nested try")
-
     } catch (e: Error) {
         println("Caught Error")
     }

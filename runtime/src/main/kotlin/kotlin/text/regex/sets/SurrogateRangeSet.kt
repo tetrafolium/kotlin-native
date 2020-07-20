@@ -103,11 +103,11 @@ internal class SurrogateRangeSet(surrChars: AbstractCharClass) : RangeSet(surrCh
         return result
     }
 
-    private fun CharSequence.isHighSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length)
-            = (index in leftBound until rightBound && this[index].isHighSurrogate())
+    private fun CharSequence.isHighSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length) =
+            (index in leftBound until rightBound && this[index].isHighSurrogate())
 
-    private fun CharSequence.isLowSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length)
-            = (index in leftBound until rightBound && this[index].isLowSurrogate())
+    private fun CharSequence.isLowSurrogate(index: Int, leftBound: Int = 0, rightBound: Int = length) =
+            (index in leftBound until rightBound && this[index].isLowSurrogate())
 
     override fun first(set: AbstractSet): Boolean {
         return when (set) {

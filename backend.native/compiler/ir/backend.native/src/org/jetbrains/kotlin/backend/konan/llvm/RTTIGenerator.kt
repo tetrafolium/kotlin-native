@@ -16,7 +16,6 @@ import org.jetbrains.kotlin.ir.types.*
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.ir.util.isAnnotationClass
 import org.jetbrains.kotlin.ir.util.isInterface
-import org.jetbrains.kotlin.library.KotlinAbiVersion
 import org.jetbrains.kotlin.name.FqName
 
 internal class RTTIGenerator(override val context: Context) : ContextUtils {
@@ -27,7 +26,7 @@ internal class RTTIGenerator(override val context: Context) : ContextUtils {
             context.irBuiltIns.booleanClass, context.irBuiltIns.charClass,
             context.irBuiltIns.byteClass, context.irBuiltIns.shortClass, context.irBuiltIns.intClass,
             context.irBuiltIns.longClass,
-            context.irBuiltIns.floatClass,context.irBuiltIns.doubleClass) +
+            context.irBuiltIns.floatClass, context.irBuiltIns.doubleClass) +
             context.ir.symbols.primitiveArrays.values +
             context.ir.symbols.unsignedArrays.values
 
@@ -245,8 +244,8 @@ internal class RTTIGenerator(override val context: Context) : ContextUtils {
         val methodsPtr = staticData.placeGlobalConstArray("kmethods:$className",
                 runtime.methodTableRecordType, methods)
 
-        val needInterfaceTable = context.ghaEnabled() && !irClass.isInterface
-                && !irClass.isAbstract() && !irClass.isObjCClass()
+        val needInterfaceTable = context.ghaEnabled() && !irClass.isInterface &&
+                !irClass.isAbstract() && !irClass.isObjCClass()
         val (interfaceTable, interfaceTableSize) = if (needInterfaceTable) {
             interfaceTableRecords(irClass)
         } else {
@@ -420,7 +419,7 @@ internal class RTTIGenerator(override val context: Context) : ContextUtils {
     private val debugOperations: ConstValue by lazy {
         if (debugRuntimeOrNull != null) {
             val external = LLVMGetNamedGlobal(debugRuntimeOrNull, "Konan_debugOperationsList")!!
-            val local = LLVMAddGlobal(context.llvmModule, LLVMGetElementType(LLVMTypeOf(external)),"Konan_debugOperationsList")!!
+            val local = LLVMAddGlobal(context.llvmModule, LLVMGetElementType(LLVMTypeOf(external)), "Konan_debugOperationsList")!!
             constPointer(LLVMConstBitCast(local, kInt8PtrPtr)!!)
         } else {
             Zero(kInt8PtrPtr)
@@ -469,7 +468,6 @@ internal class RTTIGenerator(override val context: Context) : ContextUtils {
 
             Struct(runtime.extendedTypeInfoType, Int32(fields.size), offsetsPtr, typesPtr, namesPtr,
                     debugOperationsSize, debugOperations)
-
         }
         val result = staticData.placeGlobal("", value)
         result.setConstant(true)

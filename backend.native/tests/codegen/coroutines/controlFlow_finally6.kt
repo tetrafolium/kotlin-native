@@ -52,8 +52,7 @@ fun builder(c: suspend () -> Unit) {
             } finally {
                 println("finally")
             }
-        }
-        catch(t: Error) {
+        } catch (t: Error) {
             println(t.message)
         }
     }

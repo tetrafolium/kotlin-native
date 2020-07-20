@@ -24,7 +24,7 @@ internal fun KmFunction.mangle(): String {
     val typeParameters = typeParameters.joinToString(prefix = "<", postfix = ">", transform = KmTypeParameter::name)
     val valueParameters = valueParameters.joinToString(prefix = "(", postfix = ")", transform = KmValueParameter::name)
     val receiver = receiverParameterType?.classifier
-    return "$receiver.${name}.$typeParameters.$valueParameters"
+    return "$receiver.$name.$typeParameters.$valueParameters"
 }
 
 internal fun KmProperty.mangle(): String {

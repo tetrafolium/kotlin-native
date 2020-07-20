@@ -80,7 +80,6 @@ internal class CodeGenerator(override val context: Context) : ContextUtils {
         context.config.target.family.isAppleFamily -> ObjCDataGenerator(this)
         else -> null
     }
-
 }
 
 internal sealed class ExceptionHandler {
@@ -98,7 +97,7 @@ val LLVMValueRef.isConst:Boolean
     get() = (LLVMIsConstant(this) == 1)
 
 
-internal inline fun<R> generateFunction(codegen: CodeGenerator,
+internal inline fun <R> generateFunction(codegen: CodeGenerator,
                                         function: IrFunction,
                                         startLocation: LocationInfo? = null,
                                         endLocation: LocationInfo? = null,
@@ -123,7 +122,7 @@ internal inline fun<R> generateFunction(codegen: CodeGenerator,
 }
 
 
-internal inline fun<R> generateFunction(codegen: CodeGenerator, function: LLVMValueRef,
+internal inline fun <R> generateFunction(codegen: CodeGenerator, function: LLVMValueRef,
                                         startLocation: LocationInfo? = null, endLocation: LocationInfo? = null,
                                         code:FunctionGenerationContext.(FunctionGenerationContext) -> R) {
     val functionGenerationContext = FunctionGenerationContext(function, codegen, startLocation, endLocation)
@@ -454,7 +453,7 @@ internal class FunctionGenerationContext(val function: LLVMValueRef,
     // It's needed to prevent changing variables order on stack.
     // TODO: add alignment calculation. Now it isn't needed, because of working only with primitive types.
     private fun localArrayType(className: String, count: Int): LLVMTypeRef {
-        val name = "local#${className}${count}#internal"
+        val name = "local#${className}$count#internal"
         // Create new type or get already created.
         return context.declaredLocalArrays.getOrPut(name) {
             val fieldTypes = listOf(kArrayHeader, LLVMArrayType(arrayToElementType[className]!!, count))
@@ -801,8 +800,8 @@ internal class FunctionGenerationContext(val function: LLVMValueRef,
         }
 
         // See details in ClassLayoutBuilder.
-        return if (context.globalHierarchyAnalysisResult.bitsPerColor <= ClassGlobalHierarchyInfo.MAX_BITS_PER_COLOR
-                && context.config.produce != CompilerOutputKind.FRAMEWORK) {
+        return if (context.globalHierarchyAnalysisResult.bitsPerColor <= ClassGlobalHierarchyInfo.MAX_BITS_PER_COLOR &&
+                context.config.produce != CompilerOutputKind.FRAMEWORK) {
             // All interface tables are small and no unknown interface inheritance.
             fastPath()
         } else {

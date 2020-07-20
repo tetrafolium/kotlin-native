@@ -4,11 +4,7 @@
  */
 package org.jetbrains.kotlin
 
-import groovy.lang.Closure
-import org.gradle.api.Action
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
@@ -17,12 +13,6 @@ import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import org.jetbrains.report.json.*
 
 import java.io.FileInputStream
-import java.io.IOException
-import java.io.File
-import java.util.concurrent.TimeUnit
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.Base64
 import java.util.Properties
 
 /**
@@ -97,8 +87,8 @@ open class RegressionsReporter : DefaultTask() {
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))
@@ -110,12 +100,12 @@ open class RegressionsReporter : DefaultTask() {
 
         // Get branch.
         val currentBuild = getBuild("id:$buildId", user, password)
-        val branch = getBuildProperty(currentBuild,"branchName")
+        val branch = getBuildProperty(currentBuild, "branchName")
 
         val testReportUrl = testReportUrl(buildId, buildTypeId)
 
         // Get previous build on branch.
-        val builds = getBuild(previousBuildLocator(buildTypeId,branch), user, password)
+        val builds = getBuild(previousBuildLocator(buildTypeId, branch), user, password)
 
         // Get changes description.
         val changesList = getCommits("id:$buildId", user, password)
@@ -130,8 +120,8 @@ open class RegressionsReporter : DefaultTask() {
 
         // Get compare to build.
         val compareToBuild = getBuild(previousBuildLocator(buildTypeId, defaultBranch), user, password)
-        val compareToBuildLink = getBuildProperty(compareToBuild,"webUrl")
-        val compareToBuildNumber = getBuildProperty(compareToBuild,"number")
+        val compareToBuildLink = getBuildProperty(compareToBuild, "webUrl")
+        val compareToBuildNumber = getBuildProperty(compareToBuild, "number")
         val target = System.getProperty("os.name").replace("\\s".toRegex(), "")
 
         // Generate comparison report.

@@ -36,7 +36,7 @@ internal class EOLSet(val consCounter: Int, val lt: AbstractLineTerminator, val 
         when {
             startIndex >= rightBound ||
             remainingChars == 1 && lt.isLineTerminator(testString[startIndex]) ||
-            remainingChars == 2 && lt.isLineTerminatorPair(testString[startIndex], testString[startIndex+1]) ||
+            remainingChars == 2 && lt.isLineTerminatorPair(testString[startIndex], testString[startIndex + 1]) ||
             multiline && lt.isLineTerminator(testString[startIndex]) -> {
                 matchResult.setConsumed(consCounter, 0)
                 return next.matches(startIndex, testString, matchResult)
@@ -52,5 +52,5 @@ internal class EOLSet(val consCounter: Int, val lt: AbstractLineTerminator, val 
     }
 
     override val name: String
-            get()= "<EOL>"
+            get() = "<EOL>"
 }

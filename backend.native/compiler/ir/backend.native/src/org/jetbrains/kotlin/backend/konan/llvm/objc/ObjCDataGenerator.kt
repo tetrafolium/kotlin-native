@@ -74,8 +74,8 @@ internal class ObjCDataGenerator(val codegen: CodeGenerator) {
         val globalName = prefix + name
 
         // TODO: refactor usages and use [Global] class.
-        val llvmGlobal = LLVMGetNamedGlobal(context.llvmModule, globalName) ?:
-                codegen.importGlobal(globalName, classObjectType, CurrentKlibModuleOrigin)
+        val llvmGlobal = LLVMGetNamedGlobal(context.llvmModule, globalName)
+                ?: codegen.importGlobal(globalName, classObjectType, CurrentKlibModuleOrigin)
 
         return constPointer(llvmGlobal)
     }

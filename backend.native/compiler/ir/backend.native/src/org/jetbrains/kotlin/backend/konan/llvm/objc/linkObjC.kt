@@ -222,12 +222,12 @@ private fun patchLiteral(
 
 private fun LLVMValueRef.isFirstCharPtr(global: LLVMValueRef): Boolean =
         this.type == int8TypePtr &&
-                LLVMIsConstant(this) != 0 && LLVMGetConstOpcode(this) == LLVMOpcode.LLVMGetElementPtr
-                && LLVMGetNumOperands(this) == 3
-                && LLVMGetOperand(this, 0) == global
-                && LLVMGetOperand(this, 1).isZeroConst()
-                && LLVMGetOperand(this, 2).isZeroConst()
+                LLVMIsConstant(this) != 0 && LLVMGetConstOpcode(this) == LLVMOpcode.LLVMGetElementPtr &&
+                LLVMGetNumOperands(this) == 3 &&
+                LLVMGetOperand(this, 0) == global &&
+                LLVMGetOperand(this, 1).isZeroConst() &&
+                LLVMGetOperand(this, 2).isZeroConst()
 
 private fun LLVMValueRef?.isZeroConst(): Boolean =
-        this != null && LLVMGetValueKind(this) == LLVMValueKind.LLVMConstantIntValueKind
-                && LLVMConstIntGetZExtValue(this) == 0L
+        this != null && LLVMGetValueKind(this) == LLVMValueKind.LLVMConstantIntValueKind &&
+                LLVMConstIntGetZExtValue(this) == 0L

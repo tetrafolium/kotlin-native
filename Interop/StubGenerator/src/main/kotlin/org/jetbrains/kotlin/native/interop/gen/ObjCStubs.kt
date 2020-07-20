@@ -247,8 +247,8 @@ internal val ObjCMethod.kotlinName: String
     get() {
         val candidate = selector.split(":").first()
         val trimmed = candidate.trimEnd('_')
-        return if (trimmed == "equals" && parameters.size == 1
-                || (trimmed == "hashCode" || trimmed == "toString") && parameters.size == 0) {
+        return if (trimmed == "equals" && parameters.size == 1 ||
+                (trimmed == "hashCode" || trimmed == "toString") && parameters.size == 0) {
             candidate + "_"
         } else {
             candidate
@@ -516,7 +516,6 @@ class GeneratedObjCCategoriesMembers {
             (if (method.isClass) classMethodSelectors else instanceMethodSelectors).add(method.selector)
 
     fun register(property: ObjCProperty): Boolean = propertyNames.add(property.name)
-
 }
 
 internal class ObjCCategoryStubBuilder(

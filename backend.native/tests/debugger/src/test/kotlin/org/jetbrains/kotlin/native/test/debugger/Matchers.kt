@@ -94,7 +94,7 @@ private val isOsxDevToolsEnabled: Boolean by lazy {
     r.find(rawStatus.stdout)?.destructured?.component1() == "enabled"
 }
 
-fun dwarfDumpTest(@Language("kotlin") programText: String, flags: List<String>, test:List<DwarfTag>.()->Unit) {
+fun dwarfDumpTest(@Language("kotlin") programText: String, flags: List<String>, test:List<DwarfTag>.() -> Unit) {
     if (!haveDwarfDump) {
         println("Skipping test: no dwarfdump")
         return
@@ -163,8 +163,8 @@ private class LldbSessionSpecification private constructor(
         val responses = blocks.drop(2)
         val executedCommands = responses.map { it.lines().first() }
         val bodies = responses.map { it.lines().drop(1) }
-        val responsesMatch = executedCommands.size == commands.size
-                && commands.zip(executedCommands).all { (cmd, h) -> h == "(lldb) $cmd" }
+        val responsesMatch = executedCommands.size == commands.size &&
+                commands.zip(executedCommands).all { (cmd, h) -> h == "(lldb) $cmd" }
 
         if (!responsesMatch) {
             val message = """

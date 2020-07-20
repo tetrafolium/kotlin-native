@@ -112,7 +112,6 @@ open class Parser<E : Any>(private val composer: ExpressionComposer<E>) {
         BinaryOperator.MULT -> mult(left, right)
         BinaryOperator.DIV -> div(left, right)
     }
-
 }
 
 interface PartialExpressionComposer<E : Any, PE : Any> {

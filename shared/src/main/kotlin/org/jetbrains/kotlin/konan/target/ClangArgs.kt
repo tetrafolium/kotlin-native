@@ -28,7 +28,7 @@ internal object Android {
     )
 
     fun architectureDirForTarget(target: KonanTarget) =
-            "android-${API}/arch-${architectureMap.getValue(target)}"
+            "android-$API/arch-${architectureMap.getValue(target)}"
 }
 
 class ClangArgs(private val configurables: Configurables) : Configurables by configurables {
@@ -386,11 +386,11 @@ class ClangArgs(private val configurables: Configurables) : Configurables by con
             // We workaround the problem with -isystem flag below.
             listOf("-isystem", "$absoluteLlvmHome/lib/clang/$llvmVersion/include", *clangArgs)
 
-    val targetClangCmd
-            = listOf("${absoluteLlvmHome}/bin/clang") + clangArgs
+    val targetClangCmd =
+            listOf("$absoluteLlvmHome/bin/clang") + clangArgs
 
-    val targetClangXXCmd
-            = listOf("${absoluteLlvmHome}/bin/clang++") + clangArgs
+    val targetClangXXCmd =
+            listOf("$absoluteLlvmHome/bin/clang++") + clangArgs
 
     fun clangC(vararg userArgs: String) = targetClangCmd + userArgs.asList()
 

@@ -65,7 +65,7 @@ internal class BuiltInFictitiousFunctionIrClassFactory(
 
     fun buildAllClasses() {
         val maxArity = 255 // See [BuiltInFictitiousFunctionClassFactory].
-        (0 .. maxArity).forEach { arity ->
+        (0..maxArity).forEach { arity ->
             functionN(arity)
             kFunctionN(arity)
             suspendFunctionN(arity)

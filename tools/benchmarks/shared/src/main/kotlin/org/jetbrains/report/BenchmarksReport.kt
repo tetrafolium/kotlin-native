@@ -148,13 +148,12 @@ data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerial
             val result = """
             {
                 "type": "${type.type}",
-                "version": "${version}""""
+                "version": "$version""""
             // Don't print flags field if there is no one.
             if (flags.isEmpty()) {
                 return """$result
                 }"""
-            }
-            else {
+            } else {
                 return """
                     $result,
                 "flags": ${arrayToJson(flags)}
@@ -168,7 +167,7 @@ data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerial
         return """
         {
             "backend": ${backend.toJson()},
-            "kotlinVersion": "${kotlinVersion}"
+            "kotlinVersion": "$kotlinVersion"
         }
         """
     }
@@ -305,11 +304,11 @@ class BenchmarkResult(val name: String, val status: Status,
         {
             "name": "${name.removeSuffix(metric.suffix)}",
             "status": "${status.value}",
-            "score": ${score},
+            "score": $score,
             "metric": "${metric.value}",
-            "runtimeInUs": ${runtimeInUs},
-            "repeat": ${repeat},
-            "warmup": ${warmup}
+            "runtimeInUs": $runtimeInUs,
+            "repeat": $repeat,
+            "warmup": $warmup
         }
         """
     }

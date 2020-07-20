@@ -26,7 +26,7 @@ fun getAndShow(url: String, contentView: UITextView) {
         contentView.attributedText = html
     }
     val onError = { _: NSURLSessionDataTask?, error: NSError? ->
-        NSLog("Cannot get ${url}.")
+        NSLog("Cannot get $url.")
         NSLog(error.toString())
     }
 

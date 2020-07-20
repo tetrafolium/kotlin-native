@@ -44,7 +44,7 @@ class ExecClang(private val project: Project) {
 
         if (listOf("clang", "clang++").contains(executable)) {
             val llvmDir = project.findProperty("llvmDir")
-            return "${llvmDir}/bin/$executable"
+            return "$llvmDir/bin/$executable"
         } else {
             throw GradleException("unsupported clang executable: $executable")
         }

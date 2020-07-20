@@ -46,8 +46,8 @@ private fun demonstrateManualBackpropagationFor1LinearLayer(
             val loss = use { error(output) }
             val outputGradient = use { error.inputGradient(output, tensor(learningRate), loss) }
             val inputGradient = use { linear.inputGradient(inputs, outputGradient, output) }
-            val parameterGradient = linear.parameterGradient(inputs, outputGradient, inputGradient).
-                    also { use { it.first } }.also { use { it.second } }
+            val parameterGradient = linear.parameterGradient(inputs, outputGradient, inputGradient)
+                    .also { use { it.first } }.also { use { it.second } }
             println("input: $inputs, \n" +
                     "output: $output, \n" +
                     "labels: $labels, \n" +

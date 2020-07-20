@@ -43,8 +43,8 @@ class ToolDriver(
                 .stdout
     }
 
-    fun runDwarfDump(program: Path, processor:List<DwarfTag>.()->Unit) {
-        val out = subprocess(DistProperties.dwarfDump, "${program}.dSYM/Contents/Resources/DWARF/${program.fileName}").takeIf { it.process.exitValue() == 0 }?.stdout ?: error("${program}.dSYM/Contents/Resources/DWARF/${program.fileName}")
+    fun runDwarfDump(program: Path, processor:List<DwarfTag>.() -> Unit) {
+        val out = subprocess(DistProperties.dwarfDump, "$program.dSYM/Contents/Resources/DWARF/${program.fileName}").takeIf { it.process.exitValue() == 0 }?.stdout ?: error("$program.dSYM/Contents/Resources/DWARF/${program.fileName}")
         DwarfUtilParser().parse(StringReader(out)).tags.toList().processor()
     }
 }

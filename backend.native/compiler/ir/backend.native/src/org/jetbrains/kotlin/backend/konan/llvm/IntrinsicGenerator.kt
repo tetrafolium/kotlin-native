@@ -412,7 +412,7 @@ internal class IntrinsicGenerator(private val environment: IntrinsicGeneratorEnv
     }
 
     private fun FunctionGenerationContext.emitMemoryCopy(callSite: IrCall, args: List<LLVMValueRef>): LLVMValueRef {
-        println("memcpy at ${callSite}")
+        println("memcpy at $callSite")
         args.map { println(llvm2string(it)) }
         TODO("Implement me")
     }
@@ -513,8 +513,8 @@ internal class IntrinsicGenerator(private val environment: IntrinsicGeneratorEnv
         val elementSize = LLVMSizeOfTypeInBits(codegen.llvmTargetData, callSite.llvmReturnType).toInt()
         val vectorSize = LLVMSizeOfTypeInBits(codegen.llvmTargetData, vector.type).toInt()
 
-        assert(callSite.llvmReturnType.isVectorElementType()
-                && vectorSize % elementSize == 0
+        assert(callSite.llvmReturnType.isVectorElementType() &&
+                vectorSize % elementSize == 0
         ) { "Invalid vector element type ${LLVMGetTypeKind(callSite.llvmReturnType)}"}
 
         val elementCount = vectorSize / elementSize

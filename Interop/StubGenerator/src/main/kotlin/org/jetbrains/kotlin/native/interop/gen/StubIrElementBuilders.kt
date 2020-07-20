@@ -601,8 +601,8 @@ internal class FunctionStubBuilder(
     }
 
     // We take this approach as generic 'const short*' shall not be used as String.
-    private fun representCFunctionParameterAsWString(function: FunctionDecl, type: Type) = type.isAliasOf(platformWStringTypes)
-            && !noStringConversion.contains(function.name)
+    private fun representCFunctionParameterAsWString(function: FunctionDecl, type: Type) = type.isAliasOf(platformWStringTypes) &&
+            !noStringConversion.contains(function.name)
 }
 
 internal class GlobalStubBuilder(

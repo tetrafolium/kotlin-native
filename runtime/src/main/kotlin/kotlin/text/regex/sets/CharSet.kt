@@ -71,7 +71,7 @@ open internal class CharSet(char: Char, val ignoreCase: Boolean = false) : LeafS
     }
 
     override val name: String
-            get()= char.toString()
+            get() = char.toString()
 
     override fun first(set: AbstractSet): Boolean {
         if (ignoreCase) {

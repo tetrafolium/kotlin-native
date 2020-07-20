@@ -17,7 +17,7 @@ fun <T> assertEquals(actual: T, expected: T) {
     try {
         TODO()
         throw AssertionError("TODO() doesn't throw an exception")
-    } catch(e: NotImplementedError) {}
+    } catch (e: NotImplementedError) {}
 
     val foo = Foo(42)
     assertEquals(run { 42 }, 42)

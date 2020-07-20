@@ -187,8 +187,8 @@ internal val IrFunction.bridgeTarget: IrFunction?
 
 private fun IrBuilderWithScope.returnIfBadType(value: IrExpression,
                                                type: IrType,
-                                               returnValueOnFail: IrExpression)
-        = irIfThen(irNotIs(value, type), irReturn(returnValueOnFail))
+                                               returnValueOnFail: IrExpression) =
+        irIfThen(irNotIs(value, type), irReturn(returnValueOnFail))
 
 private fun IrBuilderWithScope.irConst(value: Any?) = when (value) {
     null       -> irNull()

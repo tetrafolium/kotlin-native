@@ -51,8 +51,8 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val nativeMemUtils = this.packageScope.getContributedClass("nativeMemUtils")
 
     val allocType = this.packageScope.getContributedFunctions("alloc")
-            .single { it.extensionReceiverParameter != null
-                    && it.valueParameters.singleOrNull()?.name?.toString() == "type" }
+            .single { it.extensionReceiverParameter != null &&
+                    it.valueParameters.singleOrNull()?.name?.toString() == "type" }
 
     val cPointer = this.packageScope.getContributedClass(InteropFqNames.cPointerName)
 
@@ -111,7 +111,6 @@ internal class InteropBuiltIns(builtIns: KonanBuiltIns) {
     val exportObjCClass = packageScope.getContributedClass("ExportObjCClass")
 
     val CreateNSStringFromKString = packageScope.getContributedFunctions("CreateNSStringFromKString").single()
-
 }
 
 private fun MemberScope.getContributedVariables(name: String) =

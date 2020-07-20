@@ -133,7 +133,7 @@ class DoubleMathTest {
         assertEquals(0.25, 2.0.pow(-2))
         assertTrue(0.0.pow(Double.NaN).isNaN())
         assertTrue(Double.NaN.pow(-1).isNaN())
-        assertTrue((-7.0).pow(1/3.0).isNaN())
+        assertTrue((-7.0).pow(1 / 3.0).isNaN())
         assertTrue(1.0.pow(Double.POSITIVE_INFINITY).isNaN())
         assertTrue((-1.0).pow(Double.NEGATIVE_INFINITY).isNaN())
 
@@ -321,8 +321,7 @@ class DoubleMathTest {
             val prev = value.nextDown()
             if (prev > 0) {
                 assertEquals(value, prev + prev.ulp)
-            }
-            else {
+            } else {
                 assertEquals(prev, value - value.ulp)
             }
 
@@ -401,10 +400,10 @@ class DoubleMathTest {
         assertEquals(atan2(-1.0, Double.POSITIVE_INFINITY), -0.0)
         assertEquals(atan2(1.0, Double.NEGATIVE_INFINITY), PI)
         assertEquals(atan2(-1.0, Double.NEGATIVE_INFINITY), -PI)
-        assertEquals(atan2(1.0, 0.0), PI/2)
-        assertEquals(atan2(-1.0, 0.0), -PI/2)
-        assertEquals(atan2(Double.POSITIVE_INFINITY, 1.0), PI/2)
-        assertEquals(atan2(Double.NEGATIVE_INFINITY, 1.0), -PI/2)
+        assertEquals(atan2(1.0, 0.0), PI / 2)
+        assertEquals(atan2(-1.0, 0.0), -PI / 2)
+        assertEquals(atan2(Double.POSITIVE_INFINITY, 1.0), PI / 2)
+        assertEquals(atan2(Double.NEGATIVE_INFINITY, 1.0), -PI / 2)
 
         assertTrue(atan2(Double.NaN, 1.0).isNaN())
         assertTrue(atan2(1.0, Double.NaN).isNaN())
@@ -528,7 +527,7 @@ class FloatMathTest {
         assertEquals(0.25F, 2.0F.pow(-2))
         assertTrue(0.0F.pow(Float.NaN).isNaN())
         assertTrue(Float.NaN.pow(-1).isNaN())
-        assertTrue((-7.0F).pow(1/3.0F).isNaN())
+        assertTrue((-7.0F).pow(1 / 3.0F).isNaN())
         assertTrue(1.0F.pow(Float.POSITIVE_INFINITY).isNaN())
         assertTrue((-1.0F).pow(Float.NEGATIVE_INFINITY).isNaN())
 
@@ -709,8 +708,7 @@ class FloatMathTest {
             val prev = value.nextDown()
             if (prev > 0) {
                 assertEquals(value, prev + prev.ulp)
-            }
-            else {
+            } else {
                 assertEquals(prev, value - value.ulp)
             }
 

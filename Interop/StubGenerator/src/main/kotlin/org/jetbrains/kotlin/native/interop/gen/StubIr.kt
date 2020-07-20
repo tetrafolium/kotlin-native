@@ -60,7 +60,6 @@ class TypeParameterStub(
 ) {
     fun getStubType(nullable: Boolean) =
             TypeParameterType(name, nullable = nullable, typeParameterDeclaration = this)
-
 }
 
 interface TypeArgument {
@@ -338,7 +337,7 @@ sealed class ClassStub : StubContainer(), StubElementWithOrigin, AnnotationHolde
             override val origin: StubOrigin,
             override val annotations: List<AnnotationStub> = emptyList(),
             override val childrenClasses: List<ClassStub> = emptyList(),
-            override val companion: Companion?= null,
+            override val companion: Companion? = null,
             override val simpleContainers: List<SimpleStubContainer> = emptyList()
     ) : ClassStub() {
         override val functions: List<FunctionalStub> = constructors
@@ -457,7 +456,6 @@ sealed class PropertyAccessor : FunctionalStub {
 
     override fun <T, R> accept(visitor: StubIrVisitor<T, R>, data: T) =
         visitor.visitPropertyAccessor(this, data)
-
 }
 
 class FunctionStub(

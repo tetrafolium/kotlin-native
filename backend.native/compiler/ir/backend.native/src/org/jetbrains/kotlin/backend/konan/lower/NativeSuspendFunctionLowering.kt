@@ -282,8 +282,8 @@ internal class NativeSuspendFunctionsLowering(ctx: Context): AbstractSuspendFunc
                 val children = when (expression) {
                     is IrSetField -> listOf(expression.receiver, expression.value)
                     is IrMemberAccessExpression<*> -> (
-                            listOf(expression.dispatchReceiver, expression.extensionReceiver)
-                                    + (0 until expression.valueArgumentsCount).map { expression.getValueArgument(it) }
+                            listOf(expression.dispatchReceiver, expression.extensionReceiver) +
+                                    (0 until expression.valueArgumentsCount).map { expression.getValueArgument(it) }
                             )
                     else -> throw Error("Unexpected expression: $expression")
                 }
@@ -405,12 +405,11 @@ internal class NativeSuspendFunctionsLowering(ctx: Context): AbstractSuspendFunc
                     +expressionResult
                 }
             }
-
         }
     }
 
-    private fun IrBuilderWithScope.irWrap(expression: IrExpression, tempStatements: List<IrStatement>)
-            = if (tempStatements.isEmpty())
+    private fun IrBuilderWithScope.irWrap(expression: IrExpression, tempStatements: List<IrStatement>) =
+            if (tempStatements.isEmpty())
         expression
     else irBlock(expression, STATEMENT_ORIGIN_COROUTINE_IMPL) {
         tempStatements.forEach { +it }
@@ -429,8 +428,8 @@ internal class NativeSuspendFunctionsLowering(ctx: Context): AbstractSuspendFunc
     private val IrExpression.isSuspendCall: Boolean
         get() = this is IrCall && this.isSuspend
 
-    private fun IrElement.isSpecialBlock()
-            = this is IrBlock && this.origin == STATEMENT_ORIGIN_COROUTINE_IMPL
+    private fun IrElement.isSpecialBlock() =
+            this is IrBlock && this.origin == STATEMENT_ORIGIN_COROUTINE_IMPL
 
     private fun IrElement.hasSuspendCalls(): Boolean {
         var hasSuspendCalls = false

@@ -480,7 +480,7 @@ open class ArgParser(
                                         "provided for current option."
                             )
                         }
-                    }?: printError("Unknown option $optionShortFromPrefix$opt in option combination $candidate.")
+                    } ?: printError("Unknown option $optionShortFromPrefix$opt in option combination $candidate.")
 
                     saveOptionWithoutParameter(shortNames["$opt"]!!)
                 }
@@ -538,14 +538,13 @@ open class ArgParser(
                 }
                 with(value.descriptor as OptionDescriptor) {
                     if (shortName != null && shortNames.containsKey(shortName)) {
-                        error("Option with short name ${shortName} was already added.")
+                        error("Option with short name $shortName was already added.")
                     }
                     shortName?.let {
                         shortNames[it] = value
                     }
                 }
                 options[it] = value
-
             } ?: error("Option was added, but unnamed. Added option under №${index + 1}")
         }
 

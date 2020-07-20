@@ -224,7 +224,6 @@ class StubIrTextEmitter(
         }
 
         override fun visitPropertyAccessor(propertyAccessor: PropertyAccessor, data: StubContainer?) {
-
         }
 
         override fun visitSimpleStubContainer(simpleStubContainer: SimpleStubContainer, data: StubContainer?) {
@@ -292,8 +291,8 @@ class StubIrTextEmitter(
         }
         val header = "$receiver$name: ${renderStubType(element.type)}"
 
-        if (element.kind is PropertyStub.Kind.Val && !nativeBridges.isSupported(element.kind.getter)
-                || element.kind is PropertyStub.Kind.Var && !nativeBridges.isSupported(element.kind.getter)) {
+        if (element.kind is PropertyStub.Kind.Val && !nativeBridges.isSupported(element.kind.getter) ||
+                element.kind is PropertyStub.Kind.Var && !nativeBridges.isSupported(element.kind.getter)) {
             out(annotationForUnableToImport)
             out("val $header")
             out("    get() = TODO()")
@@ -307,10 +306,10 @@ class StubIrTextEmitter(
                 }
                 is PropertyStub.Kind.Val -> {
                     val shouldWriteInline = kind.getter.let {
-                        (it is PropertyAccessor.Getter.SimpleGetter && it.constant != null)
+                        (it is PropertyAccessor.Getter.SimpleGetter && it.constant != null) ||
                                 // We should render access to constructor parameter inline.
                                 // Otherwise, it may be access to the property itself. (val f: Any get() = f)
-                                || it is PropertyAccessor.Getter.GetConstructorParameter
+                                it is PropertyAccessor.Getter.GetConstructorParameter
                     }
                     if (shouldWriteInline) {
                         out("${modality}val $header ${renderGetter(kind.getter)}")

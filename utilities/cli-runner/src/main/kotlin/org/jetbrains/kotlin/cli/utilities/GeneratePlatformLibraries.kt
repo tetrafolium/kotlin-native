@@ -411,7 +411,6 @@ private fun generatePlatformLibraries(target: KonanTarget, mode: String,
             logger.logFailedLibraries(built)
             exitProcess(-1)
         }
-
     } finally {
         if (!saveTemps) {
             tmpDirectory.deleteRecursively()

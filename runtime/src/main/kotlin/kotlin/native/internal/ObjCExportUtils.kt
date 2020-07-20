@@ -5,10 +5,6 @@
 
 package kotlin.native.internal
 
-import kotlin.native.internal.ExportForCppRuntime
-import kotlin.native.internal.KonanSet
-import kotlin.native.internal.ReportUnhandledException
-
 /**
  * This interface denotes the object to be a wrapper for the Objective-C object,
  * so the latter should be used to observe object lifetime.
@@ -174,7 +170,6 @@ internal class NSDictionaryAsKMap : Map<Any?, Any?>, ObjCObjectWrapper {
             return Entry(nextKey, nextValue)
         }
     }
-
 }
 
 internal class NSEnumeratorAsKIterator : AbstractIterator<Any?>() {

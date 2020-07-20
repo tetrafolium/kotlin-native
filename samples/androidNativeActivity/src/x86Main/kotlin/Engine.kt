@@ -178,7 +178,7 @@ class Engine(val state: NativeActivityState) : DisposableContainer() {
     private fun getEventTime(event: CPointer<AInputEvent>?) =
             AMotionEvent_getEventTime(event) / 1_000_000_000.0f
 
-    private fun processUserInput(): Unit {
+    private fun processUserInput() {
         if (AInputQueue_getEvent(queue, inputEvent.ptr) < 0) {
             logError("Failure reading input event")
             return

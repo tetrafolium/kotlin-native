@@ -61,8 +61,8 @@ internal fun <E, T> collectionToArray(collection: Collection<E>, array: Array<T>
  * Creates an array of collection.size size and copies elements of the [collection] into it.
  * @return [array] with the elements copied from the collection.
  */
-internal fun <E> collectionToArray(collection: Collection<E>): Array<E>
-        = collectionToArray(collection, arrayOfUninitializedElements(collection.size))
+internal fun <E> collectionToArray(collection: Collection<E>): Array<E> =
+        collectionToArray(collection, arrayOfUninitializedElements(collection.size))
 
 
 /**

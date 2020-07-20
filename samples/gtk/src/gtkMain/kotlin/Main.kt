@@ -13,7 +13,6 @@ fun <F : CFunction<*>> g_signal_connect(obj: CPointer<*>, actionName: String,
         action: CPointer<F>, data: gpointer? = null, connect_flags: GConnectFlags = 0u) {
     g_signal_connect_data(obj.reinterpret(), actionName, action.reinterpret(),
             data = data, destroy_data = null, connect_flags = connect_flags)
-
 }
 
 fun activate(app: CPointer<GtkApplication>?, user_data: gpointer?) {

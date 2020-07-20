@@ -107,7 +107,7 @@ class DependencyDownloader(
         do {
             progressCallback(originalUrl.toString(), progress.currentBytes, totalBytes)
             result = executor.poll(1, TimeUnit.SECONDS)
-        } while(result == null)
+        } while (result == null)
         progressCallback(originalUrl.toString(), progress.currentBytes, totalBytes)
 
         try {
@@ -208,7 +208,7 @@ class DependencyDownloader(
                 return "$this bytes"
             }
             val exp = (Math.log(this.toDouble()) / Math.log(1024.0)).toInt()
-            val prefix = "kMGTPE"[exp-1]
+            val prefix = "kMGTPE"[exp - 1]
             return "%.1f %siB".format(this / Math.pow(1024.0, exp.toDouble()), prefix)
         }
 

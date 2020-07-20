@@ -5,9 +5,6 @@
 
 package sample.videoplayer
 
-import ffmpeg.AV_PIX_FMT_NONE
-import ffmpeg.AV_PIX_FMT_RGB24
-import ffmpeg.AV_PIX_FMT_RGB32
 import kotlinx.cinterop.*
 import sdl.*
 

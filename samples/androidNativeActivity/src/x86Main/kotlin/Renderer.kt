@@ -94,8 +94,8 @@ class Renderer(val container: DisposableContainer,
 
             val width = alloc<EGLintVar>()
             val height = alloc<EGLintVar>()
-            if (eglQuerySurface(display, surface, EGL_WIDTH, width.ptr) == 0u
-                    || eglQuerySurface (display, surface, EGL_HEIGHT, height.ptr) == 0u) {
+            if (eglQuerySurface(display, surface, EGL_WIDTH, width.ptr) == 0u ||
+                    eglQuerySurface (display, surface, EGL_HEIGHT, height.ptr) == 0u) {
             throw Error("eglQuerySurface() returned error ${eglGetError()}")
         }
 
@@ -184,7 +184,7 @@ class Renderer(val container: DisposableContainer,
                     data[i] = data[i + 2]
                     data[i + 2] = t
                 }
-                println("loaded texture ${width}x${height}")
+                println("loaded texture ${width}x$height")
                 glBindTexture(GL_TEXTURE_2D, 1)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
@@ -192,7 +192,6 @@ class Renderer(val container: DisposableContainer,
                 glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, cValuesOf(1.0f, 1.0f, 1.0f, 1.0f))
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data)
-
             }
         } finally {
             AAsset_close(asset)
@@ -205,7 +204,7 @@ class Renderer(val container: DisposableContainer,
 
     private val scale = 1.25f
 
-    fun draw(): Unit {
+    fun draw() {
         if (!initialized) return
 
         glPushMatrix()

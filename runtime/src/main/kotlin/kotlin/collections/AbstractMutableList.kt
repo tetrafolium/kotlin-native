@@ -198,5 +198,4 @@ public actual abstract class AbstractMutableList<E> protected actual constructor
 
         override val size: Int get() = _size
     }
-
 }

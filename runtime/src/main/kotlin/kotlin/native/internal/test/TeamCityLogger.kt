@@ -10,8 +10,8 @@ import kotlin.text.StringBuilder
 internal class TeamCityLogger : BaseTestLogger() {
 
     private fun String.escapeForTC(): String = StringBuilder(length).apply {
-        for(char in this@escapeForTC) {
-            append(when(char) {
+        for (char in this@escapeForTC) {
+            append(when (char) {
                 '|'  -> "||"
                 '\'' -> "|'"
                 '\n' -> "|n"

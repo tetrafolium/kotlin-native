@@ -34,7 +34,7 @@ fun differentEnums() {
 // Nullable subject shouldn't be lowered.
 fun nullable() {
     val x: EnumA? = null
-    when(x) {
+    when (x) {
         EnumA.A -> println("fail")
         else    -> println("ok")
     }
@@ -45,7 +45,7 @@ fun operatorOverloading() {
     operator fun E.contains(other: E): Boolean = false
 
     val y = E.ONE
-    when(y) {
+    when (y) {
         in E.ONE    -> println("Should not reach here")
         else        -> println("ok")
     }

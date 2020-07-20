@@ -5,8 +5,6 @@
 
 package kotlin.native
 
-import kotlin.reflect.KClass
-
 /**
  * Forces the compiler to use specified symbol name for the target `external` function.
  *

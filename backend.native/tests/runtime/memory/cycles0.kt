@@ -12,7 +12,7 @@ data class Node(val data: Int, var next: Node?, var prev: Node?, val outer: Node
 fun makeCycle(len: Int, outer: Node?): Node {
     val start = Node(0, null, null, outer)
     var prev = start
-    for (i in 1 .. len - 1) {
+    for (i in 1..len - 1) {
         prev = Node(i, prev, null, outer)
     }
     start.next = prev
@@ -41,7 +41,6 @@ fun createCycles(junk: Node) {
     val dcycle2 = makeDoubleCycle(2)
     val dcycle10 = makeDoubleCycle(10)
     val dcycle100 = makeDoubleCycle(100)
-
 }
 
 @Test fun runTest() {

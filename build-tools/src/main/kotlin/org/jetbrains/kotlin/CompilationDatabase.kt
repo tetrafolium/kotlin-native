@@ -16,7 +16,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.jetbrains.kotlin.konan.target.HostManager
 import java.io.FileReader
 import java.io.FileWriter
 
@@ -120,7 +119,7 @@ fun createCompilationDatabasesFromCompileToBitcodeTasks(project: Project, name: 
                 task.objDir)
     }
     for ((target, tasks) in compdbTasks) {
-        project.tasks.create("${target}${name}", MergeCompilationDatabases::class.java) { task ->
+        project.tasks.create("${target}$name", MergeCompilationDatabases::class.java) { task ->
             task.dependsOn(tasks)
             task.inputFiles.addAll(tasks.map { it.outputFile })
             task.outputFile = File(File(project.buildDir, target), "compile_commands.json")

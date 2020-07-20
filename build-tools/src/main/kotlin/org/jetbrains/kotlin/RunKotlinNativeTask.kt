@@ -119,6 +119,5 @@ open class RunKotlinNativeTask @Inject constructor(private val linkTask: Task,
         File(outputFileName).printWriter().use { out ->
             out.println("[${results.joinToString(",")}]")
         }
-
     }
 }

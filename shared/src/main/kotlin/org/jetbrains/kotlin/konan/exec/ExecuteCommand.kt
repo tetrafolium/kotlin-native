@@ -41,11 +41,11 @@ open class Command(initialCommand: List<String>) {
         return this@Command
     }
 
-    var logger: ((() -> String)->Unit)? = null
+    var logger: ((() -> String) -> Unit)? = null
 
     private var stdError: List<String> = emptyList()
 
-    fun logWith(newLogger: ((() -> String)->Unit)): Command {
+    fun logWith(newLogger: ((() -> String) -> Unit)): Command {
         logger = newLogger
         return this
     }

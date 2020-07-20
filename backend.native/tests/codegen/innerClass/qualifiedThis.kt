@@ -28,16 +28,16 @@ class A: ABase() { // implicit label @A
         val z = "b"
         override fun zzz() = "b"
         fun D.foo() : String { // implicit label @foo
-            if(this@A.z != "a") return "Fail1"
-            if(this@B.z != "b") return "Fail2"
+            if (this@A.z != "a") return "Fail1"
+            if (this@B.z != "b") return "Fail2"
 
-            if(super@A.zzz() != "a_base") return "Fail3"
-            if(super<BBase>.zzz() != "b_base") return "Fail4"
-            if(super@B.zzz() != "b_base") return "Fail5"
-            if(this@A.zzz() != "a") return "Fail6"
-            if(this@B.zzz() != "b") return "Fail7"
+            if (super@A.zzz() != "a_base") return "Fail3"
+            if (super<BBase>.zzz() != "b_base") return "Fail4"
+            if (super@B.zzz() != "b_base") return "Fail5"
+            if (this@A.zzz() != "a") return "Fail6"
+            if (this@B.zzz() != "b") return "Fail7"
 
-            if(this.z != "d") return "Fail8"
+            if (this.z != "d") return "Fail8"
 
             return "OK"
         }

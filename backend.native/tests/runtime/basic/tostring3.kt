@@ -74,5 +74,4 @@ fun testDouble() {
     testLong()
     testFloat()
     testDouble()
-
 }

@@ -107,7 +107,7 @@ internal class ObjCExport(val context: Context, symbolTable: SymbolTable) {
 
     private fun produceFrameworkSpecific(headerLines: List<String>) {
         val framework = File(context.config.outputFile)
-        val frameworkContents = when(target.family) {
+        val frameworkContents = when (target.family) {
             Family.IOS,
             Family.WATCHOS,
             Family.TVOS -> framework

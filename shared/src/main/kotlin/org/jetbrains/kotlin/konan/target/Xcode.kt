@@ -73,7 +73,7 @@ private object CurrentXcode : Xcode {
 
     private fun xcrun(vararg args: String): String = try {
             Command("/usr/bin/xcrun", *args).getOutputLines().first()
-        } catch(e: KonanExternalToolFailure) {
+        } catch (e: KonanExternalToolFailure) {
             throw MissingXcodeException("An error occurred during an xcrun execution. Make sure that Xcode and its command line tools are properly installed.", e)
         }
 

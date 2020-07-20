@@ -7,7 +7,6 @@ package kotlin
 
 import kotlin.native.concurrent.FreezeAwareLazyImpl
 import kotlin.native.internal.FixmeConcurrency
-import kotlin.reflect.KProperty
 
 /**
  * Creates a new instance of the [Lazy] that uses the specified initialization function [initializer]

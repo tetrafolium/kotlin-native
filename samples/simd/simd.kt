@@ -45,7 +45,7 @@ fun main() {
 
 
     // Using library function (MacOS Accelerate framework)
-    val sum = vS128Add(vectorOf(1,2,3,4), vectorOf(4,3,2,1))
+    val sum = vS128Add(vectorOf(1, 2, 3, 4), vectorOf(4, 3, 2, 1))
     println(sum)
     // More Accelerate framework
     val q = vectorOf(1f, 9f, 25f, 49f)
@@ -53,6 +53,4 @@ fun main() {
     println("vsqrtf$q = ${sq.toStringFloat()}")
     val f4 = vectorOf(1f, 3.162f, 10f, 31f)
     println("vlog10f($f4) = ${vlog10f(vf4).toStringFloat()}")
-
-
 }

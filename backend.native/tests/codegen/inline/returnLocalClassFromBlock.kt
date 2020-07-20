@@ -7,7 +7,7 @@ package codegen.inline.returnLocalClassFromBlock
 
 import kotlin.test.*
 
-inline fun <R> call(block: ()->R): R {
+inline fun <R> call(block: () -> R): R {
     try {
         return block()
     } finally {

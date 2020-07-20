@@ -40,7 +40,7 @@ fun fib(n: Int): Int {
 
 tailrec fun one(delay: Int, result: Int = delay + 1): Int = if (delay > 0) one(delay - 1) else result
 
-tailrec fun countdown(iterations: Int): Unit {
+tailrec fun countdown(iterations: Int) {
     if (iterations > 0) {
         println("$iterations ...")
         countdown(iterations - 1)
@@ -59,7 +59,6 @@ tailrec fun <T> List<T>.indexOf(x: T, startIndex: Int = 0): Int {
     }
 
     return startIndex
-
 }
 
 open class Integer(val value: Int) {

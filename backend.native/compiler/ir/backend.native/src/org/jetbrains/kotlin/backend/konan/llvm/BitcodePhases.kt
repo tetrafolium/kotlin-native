@@ -161,8 +161,8 @@ internal val dcePhase = makeKonanModuleOpPhase(
 
                 override fun visitFunction(declaration: IrFunction) {
                     // TODO: Generalize somehow, not that graceful.
-                    if (declaration.name == OperatorNameConventions.INVOKE
-                            && declaration.parent.let { it is IrClass && it.defaultType.isFunction() }) {
+                    if (declaration.name == OperatorNameConventions.INVOKE &&
+                            declaration.parent.let { it is IrClass && it.defaultType.isFunction() }) {
                         referencedFunctions.add(declaration)
                     }
                     super.visitFunction(declaration)

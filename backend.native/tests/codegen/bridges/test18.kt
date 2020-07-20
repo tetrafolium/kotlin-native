@@ -13,7 +13,7 @@ open class A {
 }
 
 open class B: A() {
-    override fun foo(): Unit { }
+    override fun foo() { }
 }
 
 @Test fun runTest() {

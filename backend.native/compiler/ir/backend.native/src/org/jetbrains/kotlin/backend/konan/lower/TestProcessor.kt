@@ -50,7 +50,7 @@ internal class TestProcessor (val context: Context) {
         val COMPANION_GETTER_NAME = Name.identifier("getCompanion")
         val INSTANCE_GETTER_NAME = Name.identifier("createInstance")
 
-        val IGNORE_FQ_NAME = FqName.fromSegments(listOf("kotlin", "test" , "Ignore"))
+        val IGNORE_FQ_NAME = FqName.fromSegments(listOf("kotlin", "test", "Ignore"))
     }
 
     private val symbols = context.ir.symbols
@@ -408,9 +408,9 @@ internal class TestProcessor (val context: Context) {
     }
 
     private val baseClassSuiteConstructor = baseClassSuite.constructors.single {
-        it.valueParameters.size == 2
-                && it.valueParameters[0].type.isString()  // name: String
-                && it.valueParameters[1].type.isBoolean() // ignored: Boolean
+        it.valueParameters.size == 2 &&
+                it.valueParameters[0].type.isString() &&  // name: String
+                it.valueParameters[1].type.isBoolean() // ignored: Boolean
     }
 
     /**
@@ -444,15 +444,15 @@ internal class TestProcessor (val context: Context) {
                     simpleFunctions().single { it.name.asString() == name && predicate(it) }
 
             val registerTestCase = baseClassSuite.getFunction("registerTestCase") {
-                it.valueParameters.size == 3
-                        && it.valueParameters[0].type.isString()   // name: String
-                        && it.valueParameters[1].type.isFunction() // function: testClassType.() -> Unit
-                        && it.valueParameters[2].type.isBoolean()  // ignored: Boolean
+                it.valueParameters.size == 3 &&
+                        it.valueParameters[0].type.isString() &&   // name: String
+                        it.valueParameters[1].type.isFunction() && // function: testClassType.() -> Unit
+                        it.valueParameters[2].type.isBoolean()  // ignored: Boolean
             }
             val registerFunction = baseClassSuite.getFunction("registerFunction") {
-                it.valueParameters.size == 2
-                        && it.valueParameters[0].type.isTestFunctionKind() // kind: TestFunctionKind
-                        && it.valueParameters[1].type.isFunction()         // function: () -> Unit
+                it.valueParameters.size == 2 &&
+                        it.valueParameters[0].type.isTestFunctionKind() && // kind: TestFunctionKind
+                        it.valueParameters[1].type.isFunction()         // function: () -> Unit
             }
 
             body = context.createIrBuilder(symbol, symbol.owner.startOffset, symbol.owner.endOffset).irBlockBody {
@@ -534,7 +534,7 @@ internal class TestProcessor (val context: Context) {
 
     // region IR generation methods
     private fun generateClassSuite(irFile: IrFile, testClass: TestClass) =
-            with(buildClassSuite(testClass.ownerClass, testClass.companion,testClass.functions)) {
+            with(buildClassSuite(testClass.ownerClass, testClass.companion, testClass.functions)) {
                 irFile.addChild(this)
                 val irConstructor = constructors.single()
                 context.createIrBuilder(irFile.symbol, testClass.ownerClass.startOffset, testClass.ownerClass.endOffset).run {
@@ -557,21 +557,21 @@ internal class TestProcessor (val context: Context) {
 
     private val topLevelSuite = symbols.topLevelSuite.owner
     private val topLevelSuiteConstructor = topLevelSuite.constructors.single {
-        it.valueParameters.size == 1
-                && it.valueParameters[0].type.isString()
+        it.valueParameters.size == 1 &&
+                it.valueParameters[0].type.isString()
     }
     private val topLevelSuiteRegisterFunction = topLevelSuite.simpleFunctions().single {
-        it.name.asString() == "registerFunction"
-                && it.valueParameters.size == 2
-                && it.valueParameters[0].type.isTestFunctionKind()
-                && it.valueParameters[1].type.isFunction()
+        it.name.asString() == "registerFunction" &&
+                it.valueParameters.size == 2 &&
+                it.valueParameters[0].type.isTestFunctionKind() &&
+                it.valueParameters[1].type.isFunction()
     }
     private val topLevelSuiteRegisterTestCase = topLevelSuite.simpleFunctions().single {
-        it.name.asString() == "registerTestCase"
-                && it.valueParameters.size == 3
-                && it.valueParameters[0].type.isString()
-                && it.valueParameters[1].type.isFunction()
-                && it.valueParameters[2].type.isBoolean()
+        it.name.asString() == "registerTestCase" &&
+                it.valueParameters.size == 3 &&
+                it.valueParameters[0].type.isString() &&
+                it.valueParameters[1].type.isFunction() &&
+                it.valueParameters[2].type.isBoolean()
     }
 
     private fun generateTopLevelSuite(irFile: IrFile, functions: Collection<TestFunction>) {

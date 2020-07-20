@@ -93,11 +93,11 @@ internal fun IrFunction.hasReferenceAt(index: Int): Boolean {
     }
 }
 
-private fun IrFunction.needBridgeToAt(target: IrFunction, index: Int)
-        = hasValueTypeAt(index) xor target.hasValueTypeAt(index)
+private fun IrFunction.needBridgeToAt(target: IrFunction, index: Int) =
+        hasValueTypeAt(index) xor target.hasValueTypeAt(index)
 
-internal fun IrFunction.needBridgeTo(target: IrFunction)
-        = (0..this.valueParameters.size + 2).any { needBridgeToAt(target, it) }
+internal fun IrFunction.needBridgeTo(target: IrFunction) =
+        (0..this.valueParameters.size + 2).any { needBridgeToAt(target, it) }
 
 internal enum class BridgeDirection {
     NOT_NEEDED,
@@ -105,8 +105,8 @@ internal enum class BridgeDirection {
     TO_VALUE_TYPE
 }
 
-private fun IrFunction.bridgeDirectionToAt(target: IrFunction, index: Int)
-       = when {
+private fun IrFunction.bridgeDirectionToAt(target: IrFunction, index: Int) =
+       when {
             hasValueTypeAt(index) && target.hasReferenceAt(index) -> BridgeDirection.FROM_VALUE_TYPE
             hasReferenceAt(index) && target.hasValueTypeAt(index) -> BridgeDirection.TO_VALUE_TYPE
             else -> BridgeDirection.NOT_NEEDED
@@ -133,8 +133,8 @@ internal class BridgeDirections(val array: Array<BridgeDirection>) {
         if (this === other) return true
         if (other !is BridgeDirections) return false
 
-        return array.size == other.array.size
-                && array.indices.all { array[it] == other.array[it] }
+        return array.size == other.array.size &&
+                array.indices.all { array[it] == other.array[it] }
     }
 
     override fun hashCode(): Int {
@@ -167,9 +167,9 @@ internal fun IrSimpleFunction.bridgeDirectionsTo(
         ourDirections.array[index] = this.bridgeDirectionToAt(overriddenDescriptor, index)
 
     val target = this.target
-    if (!this.isReal && modality != Modality.ABSTRACT
-            && target.overrides(overriddenDescriptor)
-            && ourDirections == target.bridgeDirectionsTo(overriddenDescriptor)) {
+    if (!this.isReal && modality != Modality.ABSTRACT &&
+            target.overrides(overriddenDescriptor) &&
+            ourDirections == target.bridgeDirectionsTo(overriddenDescriptor)) {
         // Bridge is inherited from superclass.
         return BridgeDirections(this.valueParameters.size)
     }

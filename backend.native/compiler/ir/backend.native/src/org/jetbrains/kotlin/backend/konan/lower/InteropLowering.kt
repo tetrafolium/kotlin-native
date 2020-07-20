@@ -763,8 +763,8 @@ private class InteropLoweringPart1(val context: Context) : BaseInteropIrTransfor
                 } else {
                     val irClass = classSymbol.owner
 
-                    val companionObject = irClass.companionObject() ?:
-                            error("native variable class ${irClass.descriptor} must have the companion object")
+                    val companionObject = irClass.companionObject()
+                            ?: error("native variable class ${irClass.descriptor} must have the companion object")
 
                     builder.at(expression).irGetObject(companionObject.symbol)
                 }
@@ -980,8 +980,8 @@ private class InteropTransformer(val context: Context, override val irFile: IrFi
                 IntrinsicType.INTEROP_STATIC_C_FUNCTION -> {
                     val irCallableReference = unwrapStaticFunctionArgument(expression.getValueArgument(0)!!)
 
-                    if (irCallableReference == null || irCallableReference.getArguments().isNotEmpty()
-                            || irCallableReference.symbol !is IrSimpleFunctionSymbol) {
+                    if (irCallableReference == null || irCallableReference.getArguments().isNotEmpty() ||
+                            irCallableReference.symbol !is IrSimpleFunctionSymbol) {
                         context.reportCompilationError(
                                 "${function.fqNameForIrSerialization} must take an unbound, non-capturing function or lambda",
                                 irFile, expression
@@ -1230,7 +1230,7 @@ private class InteropTransformer(val context: Context, override val irFile: IrFi
     }
 
     val IrValueParameter.isDispatchReceiver: Boolean
-        get() = when(val parent = this.parent) {
+        get() = when (val parent = this.parent) {
             is IrClass -> true
             is IrFunction -> parent.dispatchReceiverParameter == this
             else -> false
@@ -1238,7 +1238,6 @@ private class InteropTransformer(val context: Context, override val irFile: IrFi
 
     private fun IrValueDeclaration.isDispatchReceiverFor(irClass: IrClass): Boolean =
         this is IrValueParameter && isDispatchReceiver && type.getClass() == irClass
-
 }
 
 private fun IrCall.getSingleTypeArgument(): IrType {

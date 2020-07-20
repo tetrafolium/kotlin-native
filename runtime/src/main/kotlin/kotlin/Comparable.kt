@@ -5,8 +5,6 @@
 
 package kotlin
 
-import kotlin.Comparator
-
 /**
  * Classes which inherit from this interface have a defined total ordering between their instances.
  */

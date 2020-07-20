@@ -29,8 +29,7 @@ class BasicAssertionsTest {
        withDefaultAsserter run@ {
            try {
                assertFailsWith<IllegalStateException> { throw IllegalArgumentException() }
-           }
-           catch (e: AssertionError) {
+           } catch (e: AssertionError) {
                return@run
            }
            throw AssertionError("Expected to fail")
@@ -38,8 +37,7 @@ class BasicAssertionsTest {
        withDefaultAsserter run@ {
            try {
                assertFailsWith<IllegalStateException> {  }
-           }
-           catch (e: AssertionError) {
+           } catch (e: AssertionError) {
                return@run
            }
            throw AssertionError("Expected to fail")

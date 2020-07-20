@@ -290,7 +290,7 @@ internal class ObjCExportTranslatorImpl(
 
         fun superClassGenerics(genericExportScope: ObjCExportScope): List<ObjCNonNullReferenceType> {
             val parentType = computeSuperClassType(descriptor)
-            return if(parentType != null) {
+            return if (parentType != null) {
                 parentType.arguments.map { typeProjection ->
                     mapReferenceTypeIgnoringNullability(typeProjection.type, genericExportScope)
                 }
@@ -621,8 +621,8 @@ internal class ObjCExportTranslatorImpl(
         val attributes = mutableListOf<String>()
 
         attributes += swiftNameAttribute(swiftName)
-        if (baseMethodBridge.returnBridge is MethodBridge.ReturnValue.WithError.ZeroForError
-                && baseMethodBridge.returnBridge.successMayBeZero) {
+        if (baseMethodBridge.returnBridge is MethodBridge.ReturnValue.WithError.ZeroForError &&
+                baseMethodBridge.returnBridge.successMayBeZero) {
 
             // Method may return zero on success, but
             // standard Objective-C convention doesn't suppose this happening.
@@ -731,8 +731,8 @@ internal class ObjCExportTranslatorImpl(
             val successReturnType = mapReturnType(returnBridge.successBridge, method, objCExportScope)
 
             if (!returnBridge.successMayBeZero) {
-                check(successReturnType is ObjCNonNullReferenceType
-                        || (successReturnType is ObjCPointerType && !successReturnType.nullable)) {
+                check(successReturnType is ObjCNonNullReferenceType ||
+                        (successReturnType is ObjCPointerType && !successReturnType.nullable)) {
                     "Unexpected return type: $successReturnType in $method"
                 }
             }
@@ -788,9 +788,9 @@ internal class ObjCExportTranslatorImpl(
             return it.mapper.mapType(it.type, this, objCExportScope)
         }
 
-        if(objcGenerics && kotlinType.isTypeParameter()){
+        if (objcGenerics && kotlinType.isTypeParameter()){
             val genericTypeDeclaration = objCExportScope.getGenericDeclaration(TypeUtils.getTypeParameterDescriptorOrNull(kotlinType))
-            if(genericTypeDeclaration != null)
+            if (genericTypeDeclaration != null)
                 return genericTypeDeclaration
         }
 
@@ -1062,7 +1062,6 @@ abstract class ObjCExportHeaderGenerator internal constructor(
                             topLevel.getOrPut(it.findSourceFile(), { mutableListOf() }) += it
                         }
                     }
-
         }
 
         fun MemberScope.translateClasses() {
@@ -1194,7 +1193,7 @@ interface ObjCExportScope{
 }
 
 internal class ObjCClassExportScope constructor(container:DeclarationDescriptor, val namer: ObjCExportNamer): ObjCExportScope {
-    private val typeNames = if(container is ClassDescriptor && !container.isInterface) {
+    private val typeNames = if (container is ClassDescriptor && !container.isInterface) {
         container.typeConstructor.parameters
     } else {
         emptyList<TypeParameterDescriptor>()
@@ -1206,7 +1205,7 @@ internal class ObjCClassExportScope constructor(container:DeclarationDescriptor,
                     (it == typeParameterDescriptor || (it.isCapturedFromOuterDeclaration && it.original == typeParameterDescriptor))
         }
 
-        return if(localTypeParam == null) {
+        return if (localTypeParam == null) {
             null
         } else {
             ObjCGenericTypeDeclaration(localTypeParam, namer)
@@ -1218,7 +1217,7 @@ internal object ObjCNoneExportScope: ObjCExportScope{
     override fun getGenericDeclaration(typeParameterDescriptor: TypeParameterDescriptor?): ObjCGenericTypeDeclaration? = null
 }
 
-internal fun Variance.objcDeclaration():String = when(this){
+internal fun Variance.objcDeclaration():String = when (this){
     Variance.OUT_VARIANCE -> "__covariant "
     Variance.IN_VARIANCE -> "__contravariant "
     else -> ""

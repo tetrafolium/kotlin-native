@@ -17,9 +17,9 @@ fun blinky(value: Int) {
 
     while (true) {
          /* Set pin to HIGH/LOW every 1 second */
-         gpio_pin_write(dev, led.convert(), if (toggler) 1U else 0U);
+         gpio_pin_write(dev, led.convert(), if (toggler) 1U else 0U)
          toggler = !toggler
-         k_sleep(1000 * value);
+         k_sleep(1000 * value)
    }
 }
 

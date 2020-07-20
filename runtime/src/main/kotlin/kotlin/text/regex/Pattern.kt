@@ -81,10 +81,10 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
     /** A->(a|)+ */
     private fun processAlternations(last: AbstractSet): AbstractSet {
         val auxRange = CharClass(hasFlag(Pattern.CASE_INSENSITIVE))
-        while (!lexemes.isEmpty() && lexemes.isLetter()
-                && (lexemes.lookAhead == 0
-                    || lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR
-                    || lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS)) {
+        while (!lexemes.isEmpty() && lexemes.isLetter() &&
+                (lexemes.lookAhead == 0 ||
+                    lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR ||
+                    lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS)) {
             auxRange.add(lexemes.next())
             if (lexemes.currentChar == Lexer.CHAR_VERTICAL_BAR) {
                 lexemes.next()
@@ -186,15 +186,15 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
      */
     private fun processSequence(): AbstractSet {
         val substring = StringBuilder()
-        while (!lexemes.isEmpty()
-                && lexemes.isLetter()
-                && !lexemes.isSurrogate()
-                && (!lexemes.isNextSpecial && lexemes.lookAhead == 0 // End of a pattern.
-                    || !lexemes.isNextSpecial && Lexer.isLetter(lexemes.lookAhead)
-                    || lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS
-                    || lexemes.lookAhead and 0x8000ffff.toInt() == Lexer.CHAR_LEFT_PARENTHESIS
-                    || lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR
-                    || lexemes.lookAhead == Lexer.CHAR_DOLLAR)) {
+        while (!lexemes.isEmpty() &&
+                lexemes.isLetter() &&
+                !lexemes.isSurrogate() &&
+                (!lexemes.isNextSpecial && lexemes.lookAhead == 0 || // End of a pattern.
+                    !lexemes.isNextSpecial && Lexer.isLetter(lexemes.lookAhead) ||
+                    lexemes.lookAhead == Lexer.CHAR_RIGHT_PARENTHESIS ||
+                    lexemes.lookAhead and 0x8000ffff.toInt() == Lexer.CHAR_LEFT_PARENTHESIS ||
+                    lexemes.lookAhead == Lexer.CHAR_VERTICAL_BAR ||
+                    lexemes.lookAhead == Lexer.CHAR_DOLLAR)) {
             val ch = lexemes.next()
 
             if (Char.isSupplementaryCodePoint(ch)) {
@@ -263,9 +263,9 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
         } else {
             readCodePoints++
 
-            while (readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH
-                    && !lexemes.isEmpty() && lexemes.isLetter()
-                    && !Lexer.isDecomposedCharBoundary(lexemes.currentChar)) {
+            while (readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH &&
+                    !lexemes.isEmpty() && lexemes.isLetter() &&
+                    !Lexer.isDecomposedCharBoundary(lexemes.currentChar)) {
                 codePoints[readCodePoints++] = lexemes.next()
             }
 
@@ -290,10 +290,10 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 when {
                     hasFlag(Pattern.CANON_EQ) -> {
                         cur = processDecomposedChar()
-                        if (!lexemes.isEmpty()
-                            && (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet)
-                            && lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR
-                            && !lexemes.isLetter()) {
+                        if (!lexemes.isEmpty() &&
+                            (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet) &&
+                            lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR &&
+                            !lexemes.isLetter()) {
 
                             cur = processQuantifier(last, cur)
                         }
@@ -319,16 +319,16 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
             }
         }
 
-        if (!lexemes.isEmpty()
-            && (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet)
-            && lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR) {
+        if (!lexemes.isEmpty() &&
+            (lexemes.currentChar != Lexer.CHAR_RIGHT_PARENTHESIS || last is FinalSet) &&
+            lexemes.currentChar != Lexer.CHAR_VERTICAL_BAR) {
 
             val next = processSubExpression(last)
-            if (cur is LeafQuantifierSet
+            if (cur is LeafQuantifierSet &&
                 // '*' or '{0,}' quantifier
-                && cur.max == Quantifier.INF
-                && cur.min == 0
-                && !next.first(cur.innerSet)) {
+                cur.max == Quantifier.INF &&
+                cur.min == 0 &&
+                !next.first(cur.innerSet)) {
                 // An Optimizer node for the case where there is no intersection with the next node
                 cur = UnifiedQuantifierSet(cur)
             }
@@ -508,7 +508,6 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 Lexer.CHAR_DOLLAR -> { // End of the string: $
                     lexemes.next()
                     term = EOLSet(consumersCount++, AbstractLineTerminator.getInstance(flags), hasFlag(MULTILINE))
-
                 }
 
                 // Word / non-word boundary.
@@ -691,10 +690,10 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                 }
 
                 Lexer.CHAR_HYPHEN -> {
-                    if (firstInClass
-                        || lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET
-                        || lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET
-                        || buffer < 0) {
+                    if (firstInClass ||
+                        lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET ||
+                        lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET ||
+                        buffer < 0) {
                         // Treat the hypen as a normal character.
                         if (buffer >= 0) {
                             result.add(buffer)
@@ -706,11 +705,11 @@ internal class Pattern(val pattern: String, flags: Int = 0) {
                         lexemes.next()
                         var cur = lexemes.currentChar
 
-                        if (!lexemes.isSpecial
-                            && (cur >= 0
-                                || lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET
-                                || lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET
-                                || buffer < 0)) {
+                        if (!lexemes.isSpecial &&
+                            (cur >= 0 ||
+                                lexemes.lookAhead == Lexer.CHAR_RIGHT_SQUARE_BRACKET ||
+                                lexemes.lookAhead == Lexer.CHAR_LEFT_SQUARE_BRACKET ||
+                                buffer < 0)) {
 
                             try {
                                 if (!Lexer.isLetter(cur)) {

@@ -80,8 +80,8 @@ internal object Devirtualization {
                 else {
                     // In a library every public function and every function accessible via virtual call belongs to the rootset.
                     moduleDFG.symbolTable.functionMap.values.filter {
-                        it is DataFlowIR.FunctionSymbol.Public
-                                || (it as? DataFlowIR.FunctionSymbol.External)?.isExported == true
+                        it is DataFlowIR.FunctionSymbol.Public ||
+                                (it as? DataFlowIR.FunctionSymbol.External)?.isExported == true
                     } +
                             moduleDFG.symbolTable.classMap.values
                                     .filterIsInstance<DataFlowIR.Type.Declared>()
@@ -643,13 +643,12 @@ internal object Devirtualization {
                             possibleReceivers.map { possibleReceiverType ->
                                 val callee = possibleReceiverType.calleeAt(virtualCall)
                                 if (callee is DataFlowIR.FunctionSymbol.Declared && callee.symbolTableIndex < 0)
-                                    error("Function ${possibleReceiverType}.$callee cannot be called virtually," +
+                                    error("Function $possibleReceiverType.$callee cannot be called virtually," +
                                             " but actually is at call site: " +
                                             (virtualCall.irCallSite?.let { ir2stringWhole(it) }
                                                     ?: virtualCall.toString()))
                                 DevirtualizedCallee(possibleReceiverType, callee)
                             }) to function.symbol
-
                 }
             }
 
@@ -785,8 +784,8 @@ internal object Devirtualization {
                                     .sumBy { function ->
                                         function.body.nodes.count { node ->
                                             // A cast if types are different.
-                                            node is DataFlowIR.Node.Call
-                                                    && node.returnType.resolved() != node.callee.returnParameter.type.resolved()
+                                            node is DataFlowIR.Node.Call &&
+                                                    node.returnType.resolved() != node.callee.returnParameter.type.resolved()
                                         }
                                     }
 
@@ -1267,7 +1266,6 @@ internal object Devirtualization {
                 }
             }
         }
-
     }
 
     class DevirtualizedCallee(val receiverType: DataFlowIR.Type, val callee: DataFlowIR.FunctionSymbol)
@@ -1364,8 +1362,7 @@ internal object Devirtualization {
                     val coercion = expression as IrCall
                     PossiblyCoercedValue(
                             irTemporary(coercion.getValueArgument(0)!!, tempName,
-                                    coercion.symbol.owner.explicitParameters.single().type)
-                            , coercion.symbol)
+                                    coercion.symbol.owner.explicitParameters.single().type), coercion.symbol)
                 }
 
         fun getTypeConversion(actualType: DataFlowIR.FunctionParameter,
@@ -1458,9 +1455,9 @@ internal object Devirtualization {
 
                 val devirtualizedCallSite = devirtualizedCallSites[expression]
                 val possibleCallees = devirtualizedCallSite?.possibleCallees
-                if (possibleCallees == null
-                        || possibleCallees.any { it.callee is DataFlowIR.FunctionSymbol.External }
-                        || possibleCallees.any { it.receiverType is DataFlowIR.Type.External })
+                if (possibleCallees == null ||
+                        possibleCallees.any { it.callee is DataFlowIR.FunctionSymbol.External } ||
+                        possibleCallees.any { it.receiverType is DataFlowIR.Type.External })
                     return expression
 
                 val callee = expression.symbol.owner
@@ -1615,7 +1612,6 @@ internal object Devirtualization {
 
                 super.visitReturn(expression)
             }
-
         })
 
         irModule.transformChildrenVoid(object: IrElementTransformerVoid() {
@@ -1747,9 +1743,9 @@ internal object Devirtualization {
                     }
 
                     is IrTypeOperatorCall ->
-                        if (expression.operator != IrTypeOperator.CAST
-                                && expression.operator != IrTypeOperator.IMPLICIT_CAST
-                                && expression.operator != IrTypeOperator.SAFE_CAST)
+                        if (expression.operator != IrTypeOperator.CAST &&
+                                expression.operator != IrTypeOperator.IMPLICIT_CAST &&
+                                expression.operator != IrTypeOperator.SAFE_CAST)
                             PossiblyFoldedExpression(expression.transformIfAsked(), false)
                         else {
                             if (expression.typeOperand.getInlinedClassNative() != coercionDeclaringClass)

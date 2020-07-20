@@ -107,11 +107,11 @@ actual class ComplexNumbersBenchmark actual constructor() {
             val base = Complex(cos(angle), sin(angle))
             for (i in 0 until complexNumbersSequence.size / 2 step length) {
                 var value = Complex(1.0, 1.0)
-                for (j in 0 until length/2) {
+                for (j in 0 until length / 2) {
                     val first = sequence[i + j]
-                    val second = sequence[i + j + length/2].mul(value)
+                    val second = sequence[i + j + length / 2].mul(value)
                     sequence[i + j] = first.add(second) as Complex
-                    sequence[i + j + length/2] = first.sub(second) as Complex
+                    sequence[i + j + length / 2] = first.sub(second) as Complex
                     value = value.mul(base)
                 }
             }

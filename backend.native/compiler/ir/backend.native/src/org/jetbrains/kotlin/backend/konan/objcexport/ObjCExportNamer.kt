@@ -259,7 +259,6 @@ internal class ObjCExportNamerImpl(
 
                 override val objcGenerics: Boolean
                     get() = objcGenerics
-
             },
             builtIns,
             mapper,
@@ -418,7 +417,6 @@ internal class ObjCExportNamerImpl(
                 if (containingDeclaration is ClassDescriptor) {
                     append(getClassOrProtocolObjCName(containingDeclaration))
                             .append(descriptor.name.asString().toIdentifier().capitalize())
-
                 } else if (containingDeclaration is PackageFragmentDescriptor) {
                     append(topLevelNamePrefix).appendTopLevelClassBaseName(descriptor)
                 } else {
@@ -757,7 +755,6 @@ internal class ObjCExportNamerImpl(
             elementToName[element] = name
         }
     }
-
 }
 
 private inline fun StringBuilder.mangledSequence(crossinline mangle: StringBuilder.() -> Unit) =
@@ -860,7 +857,7 @@ private fun ObjCExportMapper.canHaveSameName(first: PropertyDescriptor, second: 
 internal val ModuleDescriptor.namePrefix: String get() {
     if (this.isNativeStdlib()) return "Kotlin"
 
-    val fullPrefix = when(val module = this.klibModuleOrigin) {
+    val fullPrefix = when (val module = this.klibModuleOrigin) {
         CurrentKlibModuleOrigin, SyntheticModulesOrigin ->
             this.name.asString().let { it.substring(1, it.lastIndex) }
         is DeserializedKlibModuleOrigin ->

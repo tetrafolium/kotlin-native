@@ -30,7 +30,6 @@ data class Pinned<out T : Any> internal constructor(private val stablePtr: COpaq
      * Returns the underlying pinned object.
      */
     fun get(): T = @Suppress("UNCHECKED_CAST") (derefStablePointer(stablePtr) as T)
-
 }
 
 fun <T : Any> T.pin() = Pinned<T>(createStablePointer(this))

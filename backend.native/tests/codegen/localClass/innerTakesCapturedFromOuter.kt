@@ -9,7 +9,7 @@ import kotlin.test.*
 
 fun box() {
     var previous: Any? = null
-    for (i in 0 .. 2) {
+    for (i in 0..2) {
         class Outer {
             inner class Inner {
                 override fun toString() = i.toString()

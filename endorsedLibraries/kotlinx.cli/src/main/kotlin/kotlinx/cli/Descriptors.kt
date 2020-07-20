@@ -138,7 +138,7 @@ internal class ArgDescriptor<T : Any, TResult>(
     override val helpMessage: String
         get() {
             val result = StringBuilder()
-            result.append("    ${fullName}")
+            result.append("    $fullName")
             valueDescription(defaultValue)?.let {
                 result.append(it)
             }

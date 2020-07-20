@@ -40,7 +40,7 @@ abstract class ObjCObjectBase protected constructor() : ObjCObject {
     @Retention(AnnotationRetention.SOURCE)
     annotation class OverrideInit
 }
-abstract class ObjCObjectBaseMeta protected constructor() : ObjCObjectBase(), ObjCObjectMeta {}
+abstract class ObjCObjectBaseMeta protected constructor() : ObjCObjectBase(), ObjCObjectMeta
 
 fun optional(): Nothing = throw RuntimeException("Do not call me!!!")
 

@@ -52,9 +52,8 @@ open class PropertiesAsEnvVariablesTest {
                 prefix = target.family.staticPrefix
                 suffix = target.family.staticSuffix
             }
-
         }
-        return "$prefix${baseName}.$suffix"
+        return "$prefix$baseName.$suffix"
     }
 
     private fun assertFileExists(directory: File, filename: String) = assert(directory.list().contains(filename)) {
@@ -97,7 +96,7 @@ open class PropertiesAsEnvVariablesTest {
             }
         """.trimIndent())
         project.createRunner()
-                .withArguments("assertEnableDebug", "-P${property}=${value}")
+                .withArguments("assertEnableDebug", "-P$property=$value")
                 .build()
     }
 

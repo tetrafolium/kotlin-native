@@ -14,6 +14,5 @@ fun main(args: Array<String>) {
         Color.CYAN -> println("c")
         Color.MAGENTA -> println("m")
         Color.YELLOW -> println("y")
-
     }
 }

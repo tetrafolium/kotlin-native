@@ -189,7 +189,6 @@ fun main(args: Array<String>) {
                     add(benchsReport.getResultsByMetric(BenchmarkResult.Metric.CODE_SIZE,
                             codesize == "geomean", filterCodesize, codesizeNormalize).joinToString(";"))
                 }
-
             }
             println(results.joinToString())
         }

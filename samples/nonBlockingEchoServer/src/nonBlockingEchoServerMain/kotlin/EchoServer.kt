@@ -134,9 +134,9 @@ fun acceptClientsAndRun(serverFd: Int, block: suspend Client.() -> Unit) {
             loop@for (socketFd in 0..maxfd) {
                 val waitingFor = waitingList[socketFd]
                 val errorOccured = posix_FD_ISSET(socketFd, errorfds.ptr) != 0
-                if (posix_FD_ISSET(socketFd, readfds.ptr) != 0
-		    || posix_FD_ISSET(socketFd, writefds.ptr) != 0
-		    || errorOccured) {
+                if (posix_FD_ISSET(socketFd, readfds.ptr) != 0 ||
+		    posix_FD_ISSET(socketFd, writefds.ptr) != 0 ||
+		    errorOccured) {
                     when (waitingFor) {
                         is WaitingFor.Accept -> {
                             if (errorOccured)

@@ -68,8 +68,8 @@ internal class Linker(val context: Context) {
                 .getFullList(TopologicalLibraryOrder)
                 .filter {
                     require(it is KonanLibrary)
-                    context.llvmImports.bitcodeIsUsed(it)
-                            && it !in context.config.cacheSupport.librariesToCache // Skip loops.
+                    context.llvmImports.bitcodeIsUsed(it) &&
+                            it !in context.config.cacheSupport.librariesToCache // Skip loops.
                 }.cast<List<KonanLibrary>>()
         bitcodeDependenciesFile.writeLines(bitcodeDependencies.map { it.uniqueName })
     }
@@ -169,7 +169,6 @@ internal class Linker(val context: Context) {
         }
         return executable
     }
-
 }
 
 private class CachesToLink(val static: List<String>, val dynamic: List<String>)

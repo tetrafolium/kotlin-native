@@ -98,7 +98,7 @@ class KonanTestSuiteReportEnvironment(val name: String, val project: Project, va
 class KonanTestGroupReportEnvironment(val project:Project) {
     val statistics = Statistics()
     val suiteReports = mutableListOf<KonanTestSuiteReport>()
-    fun suite(suiteName:String, action:(KonanTestSuiteReportEnvironment)->Unit) {
+    fun suite(suiteName:String, action:(KonanTestSuiteReportEnvironment) -> Unit) {
         val konanTestSuiteEnvironment = KonanTestSuiteReportEnvironment(suiteName, project, statistics)
         konanTestSuiteEnvironment {
             action(it)

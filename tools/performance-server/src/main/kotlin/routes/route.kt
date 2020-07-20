@@ -202,8 +202,8 @@ fun prepareBuildsResponse(builds: Collection<String>, type: String, branch: Stri
     val buildsObjects = mutableListOf<Build>()
     builds.forEach {
         val tokens = buildDescriptionToTokens(it)
-        if ((checkBuildType(tokens[5], type) || type == "day") && (branch == tokens[3] || branch == "all")
-                || tokens[0] == buildNumber) {
+        if ((checkBuildType(tokens[5], type) || type == "day") && (branch == tokens[3] || branch == "all") ||
+                tokens[0] == buildNumber) {
             buildsObjects.add(Build(tokens[0], tokens[1], tokens[2], tokens[3],
                     tokens[4], tokens[5], tokens[6].toInt(), tokens[7], tokens[8], tokens[9],
                     if (tokens[10] == "-") null else tokens[10]))
@@ -261,7 +261,7 @@ fun router() {
                 "${register.bundleSize ?: "-"}\n"
 
         // Upload new version of file.
-        val uploadUrl = "$artifactoryUrl/$artifactoryBuildsDirectory/${register.target}/${buildsFileName}"
+        val uploadUrl = "$artifactoryUrl/$artifactoryBuildsDirectory/${register.target}/$buildsFileName"
         sendUploadRequest(uploadUrl, buildsDescription, extraHeaders = listOf(getArtifactoryHeader(register.artifactoryApiKey)))
 
         LocalCache.clean(register.target)
@@ -381,6 +381,6 @@ fun sendUploadRequest(url: String, fileContent: String, user: String? = null, pa
     )
     if (response.statusCode != 201) {
         error("Error during uploading to $url\n" +
-                "${response}")
+                "$response")
     }
 }

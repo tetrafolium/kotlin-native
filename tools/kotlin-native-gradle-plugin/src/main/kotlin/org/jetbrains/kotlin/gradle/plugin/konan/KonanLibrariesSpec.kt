@@ -25,9 +25,7 @@ import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanArtifactWithLibrariesTask
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanBuildingTask
 import org.jetbrains.kotlin.konan.*
-import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.library.defaultResolver
-import org.jetbrains.kotlin.konan.library.impl.KonanLibraryImpl
 import org.jetbrains.kotlin.konan.target.Distribution
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.library.SearchPathResolver
@@ -86,8 +84,8 @@ open class KonanLibrariesSpec(
             throw InvalidUserDataException("Config ${lib.name} is not a library")
         }
 
-        val libraryTask = lib[target] ?:
-            throw InvalidUserDataException("Library ${lib.name} has no target ${target.visibleName}")
+        val libraryTask = lib[target]
+            ?: throw InvalidUserDataException("Library ${lib.name} has no target ${target.visibleName}")
 
         if (libraryTask == task) {
             throw InvalidUserDataException("Attempt to use a library as its own dependency: " +

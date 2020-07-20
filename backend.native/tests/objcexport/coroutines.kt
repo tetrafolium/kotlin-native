@@ -8,7 +8,6 @@ package coroutines
 import kotlin.coroutines.*
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.intrinsics.*
-import kotlin.native.concurrent.isFrozen
 import kotlin.native.internal.ObjCErrorException
 import kotlin.test.*
 
@@ -141,7 +140,7 @@ fun callSuspendBridge(bridge: AbstractSuspendBridge, resultHolder: ResultHolder<
     }.startCoroutine(ResultHolderCompletion(resultHolder))
 }
 
-suspend fun throwCancellationException(): Unit {
+suspend fun throwCancellationException() {
     val exception = CancellationException("coroutine is cancelled")
 
     // Note: frontend checker hardcodes fq names of CancellationException super classes (see NativeThrowsChecker).

@@ -7,14 +7,11 @@
 
 package org.jetbrains.kotlin
 
-import groovy.lang.Closure
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskState
 import org.gradle.api.execution.TaskExecutionListener
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetPreset
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.report.*
 import org.jetbrains.report.json.*
@@ -99,7 +96,7 @@ fun createJsonReport(projectProperties: Map<String, Any>): String {
     val jdk = Environment.JDKInstance(getValue("jdkVersion"), getValue("jdkVendor"))
     val env = Environment(machine, jdk)
     val flags = (projectProperties["flags"] ?: emptyList<String>()) as List<String>
-    val backend = Compiler.Backend(Compiler.backendTypeFromString(getValue("type"))!! ,
+    val backend = Compiler.Backend(Compiler.backendTypeFromString(getValue("type"))!!,
                                     getValue("compilerVersion"), flags)
     val kotlin = Compiler(backend, getValue("kotlinVersion"))
     val benchDesc = getValue("benchmarks")
@@ -122,7 +119,7 @@ fun mergeReports(reports: List<File>): String {
         structuredReports.getOrPut(it.first) { mutableListOf<BenchmarksReport>() }.add(it.second)
     }
     val jsons = structuredReports.map { (_, value) -> value.reduce { result, it -> result + it }.toJson() }
-    return when(jsons.size) {
+    return when (jsons.size) {
         0 -> ""
         1 -> jsons[0]
         else -> jsons.joinToString(prefix = "[", postfix = "]")
@@ -194,7 +191,7 @@ fun createRunTask(
     return subproject.tasks.create(name, RunKotlinNativeTask::class.java, linkTask, executable, outputFileName)
 }
 
-fun getJvmCompileTime(subproject: Project,programName: String): BenchmarkResult =
+fun getJvmCompileTime(subproject: Project, programName: String): BenchmarkResult =
         TaskTimerListener.getTimerListenerOfSubproject(subproject)
                 .getBenchmarkResult(programName, listOf("compileKotlinMetadata", "jvmJar"))
 

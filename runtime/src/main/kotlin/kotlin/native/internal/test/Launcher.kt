@@ -14,7 +14,7 @@ private object GeneratedSuites {
    fun add(suite: TestSuite) = suites.add(suite)
 }
 
-public fun registerSuite(suite: TestSuite): Unit {
+public fun registerSuite(suite: TestSuite) {
     GeneratedSuites.add(suite)
 }
 

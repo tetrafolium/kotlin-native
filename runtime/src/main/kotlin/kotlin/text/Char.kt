@@ -107,7 +107,7 @@ external internal fun Char.getType(): Int
  */
 @PublishedApi
 internal actual fun checkRadix(radix: Int): Int {
-    if(radix !in Char.MIN_RADIX..Char.MAX_RADIX) {
+    if (radix !in Char.MIN_RADIX..Char.MAX_RADIX) {
         throw IllegalArgumentException("radix $radix was not in valid range ${Char.MIN_RADIX..Char.MAX_RADIX}")
     }
     return radix

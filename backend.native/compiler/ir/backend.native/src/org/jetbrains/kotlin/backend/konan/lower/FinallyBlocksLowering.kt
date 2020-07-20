@@ -43,13 +43,13 @@ internal class FinallyBlocksLowering(val context: Context): FileLoweringPass, Ir
     }
 
     private data class Return(val target: IrReturnTargetSymbol): HighLevelJump {
-        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression)
-                = IrReturnImpl(startOffset, endOffset, context.irBuiltIns.nothingType, target, value)
+        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression) =
+                IrReturnImpl(startOffset, endOffset, context.irBuiltIns.nothingType, target, value)
     }
 
     private data class Break(val loop: IrLoop): HighLevelJump {
-        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression)
-                = IrBlockImpl(startOffset, endOffset, context.irBuiltIns.nothingType, null,
+        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression) =
+                IrBlockImpl(startOffset, endOffset, context.irBuiltIns.nothingType, null,
                 statements = listOf(
                         value,
                         IrBreakImpl(startOffset, endOffset, context.irBuiltIns.nothingType, loop)
@@ -57,8 +57,8 @@ internal class FinallyBlocksLowering(val context: Context): FileLoweringPass, Ir
     }
 
     private data class Continue(val loop: IrLoop): HighLevelJump {
-        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression)
-                = IrBlockImpl(startOffset, endOffset, context.irBuiltIns.nothingType, null,
+        override fun toIr(context: Context, startOffset: Int, endOffset: Int, value: IrExpression) =
+                IrBlockImpl(startOffset, endOffset, context.irBuiltIns.nothingType, null,
                 statements = listOf(
                         value,
                         IrContinueImpl(startOffset, endOffset, context.irBuiltIns.nothingType, loop)

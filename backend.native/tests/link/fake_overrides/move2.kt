@@ -4,12 +4,10 @@ open class X {
     fun bar() = "Moved"
 }
 
-class Y: X() {
-}
+class Y: X()
 
 class B: A() {
     override fun qux() = "Child"
 }
 
-class C: A() {
-}
+class C: A()

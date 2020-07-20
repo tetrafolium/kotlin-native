@@ -140,7 +140,7 @@ internal val IrClass.typeInfoHasVtableAttached: Boolean
     get() = !this.isAbstract() && !this.isExternalObjCClass()
 
 internal val String.moduleConstructorName
-    get() = "_Konan_init_${this}"
+    get() = "_Konan_init_$this"
 
 internal val KonanLibrary.moduleConstructorName
     get() = uniqueName.moduleConstructorName

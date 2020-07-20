@@ -16,7 +16,7 @@ data class WorkerResult(val intResult: Int, val stringResult: String)
     val COUNT = 5
     val workers = Array(COUNT, { _ -> Worker.start()})
 
-    for (attempt in 1 .. 3) {
+    for (attempt in 1..3) {
         val futures = Array(workers.size, { workerIndex -> workers[workerIndex].execute(TransferMode.SAFE, {
             WorkerArgument(workerIndex, "attempt $attempt") }) { input ->
                 var sum = 0

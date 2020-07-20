@@ -108,7 +108,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                 value
             }
         }
-
     }
 
     internal fun getHeaderId(file: CXFile?): HeaderId = getHeaderId(this.library, file)
@@ -333,7 +332,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }) {
             addChildrenToObjCContainer(cursor, it)
         }
-
     }
 
     private fun getObjCProtocolAt(cursor: CValue<CXCursor>): ObjCProtocolImpl {
@@ -381,7 +379,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             addChildrenToObjCContainer(cursor, category)
             category
         }
-
     }
 
     private fun addChildrenToObjCContainer(cursor: CValue<CXCursor>, result: ObjCContainerImpl) {
@@ -634,7 +631,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
                                 getProtocols(type)
                         )
 
-                    else -> TODO("${declarationKind.toString()} ${clang_getTypeSpelling(type).convertAndDispose()}")
+                    else -> TODO("$declarationKind ${clang_getTypeSpelling(type).convertAndDispose()}")
                 }
             }
 
@@ -784,7 +781,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
     }
 
-    fun indexDeclaration(info: CXIdxDeclInfo): Unit {
+    fun indexDeclaration(info: CXIdxDeclInfo) {
         val cursor = info.cursor.readValue()
         val entityInfo = info.entityInfo!!.pointed
         val entityName = entityInfo.name?.toKString()
@@ -984,7 +981,6 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
         }
         return result
     }
-
 }
 
 fun buildNativeIndexImpl(library: NativeLibrary, verbose: Boolean): IndexerResult {

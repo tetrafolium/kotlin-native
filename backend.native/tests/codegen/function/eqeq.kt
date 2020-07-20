@@ -36,12 +36,12 @@ fun helloString()   =  "Hello"
 fun goodbyeString() =  "Goodbye"
 
 @Test fun runTest() {
-    if (!eqeqB(3   , 3   )) throw Error()
-    if (!eqeqS(3   , 3   )) throw Error()
-    if (!eqeqI(3   , 3   )) throw Error()
-    if (!eqeqL(3L , 3L   )) throw Error()
+    if (!eqeqB(3, 3   )) throw Error()
+    if (!eqeqS(3, 3   )) throw Error()
+    if (!eqeqI(3, 3   )) throw Error()
+    if (!eqeqL(3L, 3L   )) throw Error()
     if (!eqeqF(3.0f, 3.0f)) throw Error()
-    if (!eqeqD(3.0 , 3.0 )) throw Error()
+    if (!eqeqD(3.0, 3.0 )) throw Error()
 
     if (!eqeqStr(helloString(), helloString()))   throw Error()
 
@@ -50,15 +50,15 @@ fun goodbyeString() =  "Goodbye"
     if (!eqeqeq(helloString(),  helloString()))   throw Error()
     if (eqeqeq(helloString(),   goodbyeString())) throw Error()
 
-    if (gtI   (2   , 3   )) throw Error()
-    if (ltI   (3   , 2   )) throw Error()
-    if (geI   (2   , 3   )) throw Error()
-    if (leI   (3   , 2   )) throw Error()
-    if (neI   (2   , 2   )) throw Error()
+    if (gtI   (2, 3   )) throw Error()
+    if (ltI   (3, 2   )) throw Error()
+    if (geI   (2, 3   )) throw Error()
+    if (leI   (3, 2   )) throw Error()
+    if (neI   (2, 2   )) throw Error()
 
-    if (gtF   (2.0f , 3.0f )) throw Error()
-    if (ltF   (3.0f , 2.0f )) throw Error()
-    if (geF   (2.0f , 3.0f )) throw Error()
-    if (leF   (3.0f , 2.0f )) throw Error()
-    if (neF   (2.0f , 2.0f )) throw Error()
+    if (gtF   (2.0f, 3.0f )) throw Error()
+    if (ltF   (3.0f, 2.0f )) throw Error()
+    if (geF   (2.0f, 3.0f )) throw Error()
+    if (leF   (3.0f, 2.0f )) throw Error()
+    if (neF   (2.0f, 2.0f )) throw Error()
 }

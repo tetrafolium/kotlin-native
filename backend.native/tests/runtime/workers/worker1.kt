@@ -13,7 +13,7 @@ import kotlin.native.concurrent.*
     val COUNT = 5
     val workers = Array(COUNT, { _ -> Worker.start()})
 
-    for (attempt in 1 .. 3) {
+    for (attempt in 1..3) {
         val futures = Array(workers.size,
                 { i -> workers[i].execute(TransferMode.SAFE, { "$attempt: Input $i" })
                 { input -> input + " processed" }

@@ -96,5 +96,4 @@ internal class KonanSharedVariablesManager(val context: KonanBackendContext) : S
                 )
                 putValueArgument(0, originalSet.value)
             }
-
 }

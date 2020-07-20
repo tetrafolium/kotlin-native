@@ -4,8 +4,6 @@
  */
 package kotlin.native
 
-import kotlin.native.SymbolName
-
 /**
  * Those operations allows to extract primitive values out of the [ByteArray] byte buffers.
  * Data is treated as if it was in Least-Significant-Byte first (little-endian) byte order.

@@ -64,7 +64,6 @@ class HeaderExclusionPolicyImpl(
     override fun excludeAll(headerId: HeaderId): Boolean {
         return headerId in importsImpl.headerIdToPackage
     }
-
 }
 
 private fun String.matchesToGlob(glob: String): Boolean =

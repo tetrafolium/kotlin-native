@@ -69,5 +69,4 @@ enum class Bar(override val value: Foo) : Base<Foo> {
     assertEquals(Bar.E.value.a, 1)
     assertEquals(Bar.E.value.b, 1)
     assertEquals(Bar.E.value.c, 1)
-
 }

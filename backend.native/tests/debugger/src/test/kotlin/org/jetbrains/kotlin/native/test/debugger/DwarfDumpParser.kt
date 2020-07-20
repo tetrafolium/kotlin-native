@@ -87,7 +87,7 @@ sealed class DwarfTag(val tag: Tag) {
     operator fun DwarfAttribute.unaryPlus() { attributes[this.attribute] = this }
     companion object {
         fun by(name: String)  = by(Tag.valueOf(name))
-        fun by(tag: Tag) = when(tag) {
+        fun by(tag: Tag) = when (tag) {
             Tag.DW_TAG_subprogram -> DwarfTagSubprogram()
             else -> DwarfTagDefault(tag)
         }

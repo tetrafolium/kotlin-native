@@ -46,7 +46,7 @@ constructor (internal val input: CharSequence,
     val enterCounters: IntArray = IntArray( maxOf(nativePattern.groupQuantifierCount, 0) )
 
     var startIndex: Int = 0
-        set (startIndex: Int) {
+        set(startIndex: Int) {
             field = startIndex
             if (previousMatch < 0) {
                 previousMatch = startIndex

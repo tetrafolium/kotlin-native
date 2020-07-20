@@ -152,5 +152,4 @@ class SplitTest {
         assertEquals("b", s[3])
         assertEquals("", s[4])
     }
-
 }

@@ -54,9 +54,9 @@ val IrProperty.isReal: Boolean get() = this.descriptor.kind.isReal
 val IrField.isReal: Boolean get() = this.descriptor.kind.isReal
 
 val IrSimpleFunction.isOverridable: Boolean
-    get() = visibility != Visibilities.PRIVATE
-            && modality != Modality.FINAL
-            && (parent as? IrClass)?.isFinalClass != true
+    get() = visibility != Visibilities.PRIVATE &&
+            modality != Modality.FINAL &&
+            (parent as? IrClass)?.isFinalClass != true
 
 val IrFunction.isOverridable get() = this is IrSimpleFunction && this.isOverridable
 

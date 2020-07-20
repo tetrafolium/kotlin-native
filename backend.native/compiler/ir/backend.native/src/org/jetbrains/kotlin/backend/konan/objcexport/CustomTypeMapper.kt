@@ -47,7 +47,6 @@ internal object CustomTypeMappers {
             if (classId != null) {
                 result += Simple(classId, { namer.numberBoxName(classId).objCName })
             }
-
         }
 
         result += Simple(ClassId.topLevel(string.toSafe()), "NSString")

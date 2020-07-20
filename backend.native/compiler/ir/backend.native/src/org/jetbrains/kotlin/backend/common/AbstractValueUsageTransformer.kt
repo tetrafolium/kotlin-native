@@ -264,6 +264,5 @@ internal abstract class AbstractValueUsageTransformer(
     }
 
     // TODO: IrStringConcatenation, IrEnumEntry?
-
 }
 

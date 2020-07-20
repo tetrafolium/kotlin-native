@@ -69,8 +69,8 @@ class CoordinatesSolverBenchmark {
 
                 for (y in rows.indices) {
                     val row = rows[y]
-                    for (p in y*width until y*width + width) {
-                        fields[p] = row[p-y*width]
+                    for (p in y * width until y * width + width) {
+                        fields[p] = row[p - y * width]
                     }
                 }
 
@@ -185,7 +185,6 @@ class CoordinatesSolverBenchmark {
             return if (!(x == input.labyrinth.width - 1 && y == input.labyrinth.height - 1)) { // Jobb also a cel
                 false
             } else steps.containsAll(objects)
-
         }
 
         private fun getPossibleSteps(now: Coordinate, previous: Coordinate?): ArrayList<Coordinate> {

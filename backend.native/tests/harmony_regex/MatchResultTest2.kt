@@ -113,5 +113,4 @@ class MatchResultTest2 {
         } catch (e: IllegalArgumentException) {
         }
     }
-
 }

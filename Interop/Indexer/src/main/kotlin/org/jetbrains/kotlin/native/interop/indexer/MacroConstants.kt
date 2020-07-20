@@ -240,7 +240,7 @@ private fun processCodeSnippet(
         val type = typeOrNull!!
         return if (evalResultOrNull == null) {
             // The macro cannot be evaluated as a constant so we will wrap it in a bridge.
-            when(type.unwrapTypedefs()) {
+            when (type.unwrapTypedefs()) {
                 is PrimitiveType,
                 is PointerType,
                 is ObjCPointer -> WrappedMacroDef(name, type)
@@ -272,7 +272,6 @@ private fun processCodeSnippet(
                 CXEvalResultKind.CXEval_UnExposed -> null
             }
         }
-
     } finally {
         evalResultOrNull?.let { clang_EvalResult_dispose(it) }
     }

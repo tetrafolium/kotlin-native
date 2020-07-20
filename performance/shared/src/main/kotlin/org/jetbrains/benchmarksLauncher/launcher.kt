@@ -150,8 +150,8 @@ abstract class BenchmarkArguments(argParser: ArgParser)
 class BaseBenchmarkArguments(argParser: ArgParser): BenchmarkArguments(argParser) {
     val warmup by argParser.option(ArgType.Int, shortName = "w", description = "Number of warm up iterations")
             .default(20)
-    val repeat by argParser.option(ArgType.Int, shortName = "r", description = "Number of each benchmark run").
-            default(60)
+    val repeat by argParser.option(ArgType.Int, shortName = "r", description = "Number of each benchmark run")
+            .default(60)
     val prefix by argParser.option(ArgType.String, shortName = "p", description = "Prefix added to benchmark name")
             .default("")
     val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
@@ -163,7 +163,7 @@ class BaseBenchmarkArguments(argParser: ArgParser): BenchmarkArguments(argParser
 }
 
 object BenchmarksRunner {
-    fun parse(args: Array<String>, benchmarksListAction: ()->Unit): BenchmarkArguments? {
+    fun parse(args: Array<String>, benchmarksListAction: () -> Unit): BenchmarkArguments? {
         class List: Subcommand("list", "Show list of benchmarks") {
             override fun execute() {
                 benchmarksListAction()
@@ -185,9 +185,9 @@ object BenchmarksRunner {
 
     fun runBenchmarks(args: Array<String>,
                       run: (parser: BenchmarkArguments) -> List<BenchmarkResult>,
-                      parseArgs: (args: Array<String>, benchmarksListAction: ()->Unit) -> BenchmarkArguments? = this::parse,
+                      parseArgs: (args: Array<String>, benchmarksListAction: () -> Unit) -> BenchmarkArguments? = this::parse,
                       collect: (results: List<BenchmarkResult>, arguments: BenchmarkArguments) -> Unit = this::collect,
-                      benchmarksListAction: ()->Unit) {
+                      benchmarksListAction: () -> Unit) {
         val arguments = parseArgs(args, benchmarksListAction)
         arguments?.let {
             val results = run(arguments)

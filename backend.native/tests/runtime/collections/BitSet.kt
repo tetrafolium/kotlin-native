@@ -161,23 +161,23 @@ fun testSet() {
     try {
         b.set(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.clear(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.clear(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.set(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b[-1]
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun testFlip() {
@@ -234,11 +234,11 @@ fun testFlip() {
     try {
         b.flip(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.flip(-1..0)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun testNextBit() {
@@ -325,19 +325,19 @@ fun testNextBit() {
     try {
         b.previousSetBit(-2)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.previousClearBit(-2)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.nextSetBit(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
     try {
         b.nextClearBit(-1)
         fail()
-    } catch(e: IndexOutOfBoundsException) {}
+    } catch (e: IndexOutOfBoundsException) {}
 }
 
 fun BitSet.setBits(vararg indices: Int, value: Boolean = true) {

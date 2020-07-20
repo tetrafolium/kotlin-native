@@ -92,7 +92,6 @@ internal class HexStringParser(private val EXPONENT_WIDTH: Int, private val MANT
         } catch (e: NumberFormatException) {
             exponent = expSign * Long.MAX_VALUE
         }
-
     }
 
     /*
@@ -134,7 +133,6 @@ internal class HexStringParser(private val EXPONENT_WIDTH: Int, private val MANT
         } else {
             processSubNormalNumber()
         }
-
     }
 
     private fun setInfinite() {

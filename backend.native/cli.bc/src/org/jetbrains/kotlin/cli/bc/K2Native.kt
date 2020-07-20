@@ -217,9 +217,9 @@ class K2Native : CLICompiler<K2NativeCompilerArguments>() {
                 // We need to download dependencies only if we use them ( = there are files to compile).
                 put(
                     CHECK_DEPENDENCIES,
-                    configuration.kotlinSourceRoots.isNotEmpty()
-                            || !arguments.includes.isNullOrEmpty()
-                            || arguments.checkDependencies
+                    configuration.kotlinSourceRoots.isNotEmpty() ||
+                            !arguments.includes.isNullOrEmpty() ||
+                            arguments.checkDependencies
                 )
                 if (arguments.friendModules != null)
                     put(FRIEND_MODULES, arguments.friendModules!!.split(File.pathSeparator).filterNot(String::isEmpty))

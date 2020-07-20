@@ -21,8 +21,7 @@ internal class CharProgressionIterator(first: Char, last: Char, val step: Int) :
         if (value == finalElement) {
             if (!hasNext) throw kotlin.NoSuchElementException()
             hasNext = false
-        }
-        else {
+        } else {
             next += step
         }
         return value.toChar()
@@ -45,8 +44,7 @@ internal class IntProgressionIterator(first: Int, last: Int, val step: Int) : In
         if (value == finalElement) {
             if (!hasNext) throw kotlin.NoSuchElementException()
             hasNext = false
-        }
-        else {
+        } else {
             next += step
         }
         return value
@@ -69,8 +67,7 @@ internal class LongProgressionIterator(first: Long, last: Long, val step: Long) 
         if (value == finalElement) {
             if (!hasNext) throw kotlin.NoSuchElementException()
             hasNext = false
-        }
-        else {
+        } else {
             next += step
         }
         return value

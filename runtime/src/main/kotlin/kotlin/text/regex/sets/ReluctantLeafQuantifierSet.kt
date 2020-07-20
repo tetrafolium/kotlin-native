@@ -64,7 +64,6 @@ internal class ReluctantLeafQuantifierSet(
                 index += shift
                 occurrences++
             }
-
         } while (shift >= 1 && (max == Quantifier.INF || occurrences <= max))
 
         return -1

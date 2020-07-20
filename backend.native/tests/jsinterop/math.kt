@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     val pi = Math.PI
 
     val sin_pi = Math.sin(pi)
-    val sin_pi_2 = Math.sin(pi/2)
+    val sin_pi_2 = Math.sin(pi / 2)
     val ln_1 = Math.log(1.0)
     val ln_e = Math.log(e)
 

@@ -91,8 +91,8 @@ internal abstract class AbstractSet(val type: Int = 0) {
      * @param matchResult - result of the match.
      * @return last searched index.
      */
-    open fun find(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int
-        = (startIndex..testString.length).firstOrNull { index -> matches(index, testString, matchResult) >= 0 }
+    open fun find(startIndex: Int, testString: CharSequence, matchResult: MatchResultImpl): Int =
+        (startIndex..testString.length).firstOrNull { index -> matches(index, testString, matchResult) >= 0 }
           ?: -1
 
     /**
@@ -103,8 +103,8 @@ internal abstract class AbstractSet(val type: Int = 0) {
      * @return an index to start back search next time if this search fails(new left bound);
      *         if this search fails the value is negative.
      */
-    open fun findBack(leftLimit: Int, rightLimit: Int, testString: CharSequence, matchResult: MatchResultImpl): Int
-        = (rightLimit downTo leftLimit).firstOrNull { index -> matches(index, testString, matchResult) >= 0 }
+    open fun findBack(leftLimit: Int, rightLimit: Int, testString: CharSequence, matchResult: MatchResultImpl): Int =
+        (rightLimit downTo leftLimit).firstOrNull { index -> matches(index, testString, matchResult) >= 0 }
           ?: -1
 
     /**

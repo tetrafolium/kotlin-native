@@ -14,8 +14,8 @@ internal class SimpleCalleeMatcher(
         restrictions: IrFunctionMatcherContainer.() -> Unit
 ) : IrCallMatcher {
 
-    private val calleeRestriction: IrFunctionMatcher
-            = createIrFunctionRestrictions(restrictions)
+    private val calleeRestriction: IrFunctionMatcher =
+            createIrFunctionRestrictions(restrictions)
 
     override fun invoke(call: IrCall) = calleeRestriction(call.symbol.owner)
 }

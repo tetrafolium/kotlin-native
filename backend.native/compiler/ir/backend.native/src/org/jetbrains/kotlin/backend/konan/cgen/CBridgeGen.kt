@@ -73,7 +73,6 @@ private class KotlinToCCallBuilder(
     val cBridgeBodyLines = mutableListOf<String>()
     val cCallBuilder = CCallBuilder()
     val cFunctionBuilder = CFunctionBuilder()
-
 }
 
 private fun KotlinToCCallBuilder.passThroughBridge(argument: IrExpression, kotlinType: IrType, cType: CType): CVariable {
@@ -414,7 +413,6 @@ private class CCallbackBuilder(
     val cBridgeCallBuilder = CCallBuilder()
     val cBodyLines = mutableListOf<String>()
     val cFunctionBuilder = CFunctionBuilder()
-
 }
 
 private fun CCallbackBuilder.passThroughBridge(
@@ -614,9 +612,9 @@ internal fun IrType.isCEnumType(): Boolean {
 
 // Make sure external stubs always get proper annotaions.
 private fun IrDeclaration.hasCCallAnnotation(name: String): Boolean =
-        this.annotations.hasAnnotation(cCall.child(Name.identifier(name)))
+        this.annotations.hasAnnotation(cCall.child(Name.identifier(name))) ||
                 // LazyIr doesn't pass annotations from descriptor to IrValueParameter.
-                || this.descriptor.annotations.hasAnnotation(cCall.child(Name.identifier(name)))
+                this.descriptor.annotations.hasAnnotation(cCall.child(Name.identifier(name)))
 
 
 private fun IrValueParameter.isWCStringParameter() = hasCCallAnnotation("WCString")
@@ -760,8 +758,8 @@ private fun KotlinStubs.mapBlockType(
 private fun KotlinStubs.mapType(type: IrType, retained: Boolean, variadic: Boolean, location: TypeLocation): ValuePassing =
         mapType(type, retained, variadic, location, { reportUnsupportedType(it, type, location) })
 
-private fun IrType.isTypeOfNullLiteral(): Boolean = this is IrSimpleType && hasQuestionMark
-        && classifier.isClassWithFqName(KotlinBuiltIns.FQ_NAMES.nothing)
+private fun IrType.isTypeOfNullLiteral(): Boolean = this is IrSimpleType && hasQuestionMark &&
+        classifier.isClassWithFqName(KotlinBuiltIns.FQ_NAMES.nothing)
 
 internal fun IrType.isVector(): Boolean {
     if (this is IrSimpleType && !this.hasQuestionMark) {
@@ -1046,7 +1044,6 @@ private class StructValuePassing(private val kotlinClass: IrClass, override val 
                     kotlinClass.declarations.filterIsInstance<IrClass>()
                             .single { it.isCompanion }.symbol
             )
-
 }
 
 private class CEnumValuePassing(
@@ -1127,7 +1124,6 @@ private class ObjCReferenceValuePassing(
 
     override fun bridgedToC(expression: String): String = expression
     override fun cToBridged(expression: String): String = expression
-
 }
 
 private fun IrBuilderWithScope.convertPossiblyRetainedObjCPointer(
@@ -1392,7 +1388,6 @@ private class ObjCBlockPointerValuePassing(
     }
 
     override fun cToBridged(expression: String) = expression
-
 }
 
 private class WCStringArgumentPassing : KotlinToCArgumentPassing {
@@ -1405,7 +1400,6 @@ private class WCStringArgumentPassing : KotlinToCArgumentPassing {
         }
         return with(CValuesRefArgumentPassing) { passValue(wcstr) }
     }
-
 }
 
 private class CStringArgumentPassing : KotlinToCArgumentPassing {
@@ -1418,7 +1412,6 @@ private class CStringArgumentPassing : KotlinToCArgumentPassing {
         }
         return with(CValuesRefArgumentPassing) { passValue(cstr) }
     }
-
 }
 
 private object CValuesRefArgumentPassing : KotlinToCArgumentPassing {

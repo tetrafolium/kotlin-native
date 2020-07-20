@@ -189,7 +189,6 @@ sealed class TypeInfo {
 
         override fun constructPointedType(valueType: KotlinType) =
                 clazz.nested("Var").type // TODO: improve
-
     }
 
     class Pointer(val pointee: KotlinType, val cPointee: Type) : TypeInfo() {
@@ -490,7 +489,6 @@ fun mirror(declarationMapper: DeclarationMapper, type: Type): TypeMirror = when 
                     baseType.info
             )
         }
-
     }
 
     is ObjCPointer -> objCPointerMirror(declarationMapper, type)

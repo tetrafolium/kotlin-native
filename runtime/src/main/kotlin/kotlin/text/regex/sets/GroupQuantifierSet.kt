@@ -84,7 +84,6 @@ open internal class GroupQuantifierSet(
         } else {
             nextIndex
         }
-
     }
 
     override val name: String

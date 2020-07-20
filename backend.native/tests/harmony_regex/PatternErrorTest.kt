@@ -40,5 +40,4 @@ class PatternErrorTest {
                 RegexOption.DOT_MATCHES_ALL)
         Regex("foo", options)
     }
-
 }

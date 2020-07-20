@@ -20,7 +20,7 @@ class D (i: Int, j:Int) : C(i, j){
    constructor():this(1, 2)
 }
 
-fun foo(i:Int) : Unit {}
+fun foo(i:Int) {}
 
 
 fun foo(i:Int, j:Int):Int {

@@ -5,8 +5,6 @@
 
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
 import kotlin.test.*
 
 class ErrorTests {

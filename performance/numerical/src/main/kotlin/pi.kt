@@ -11,8 +11,8 @@
 import kotlin.math.ln
 import kotlin.math.sqrt
 
-private fun mul_mod(a: Int, b: Int, m: Int)
-        = ((a.toLong() * b.toLong()) % m).toInt()
+private fun mul_mod(a: Int, b: Int, m: Int) =
+        ((a.toLong() * b.toLong()) % m).toInt()
 
 /* return the inverse of x mod y */
 private fun inv_mod(x: Int, y: Int): Int {
@@ -139,7 +139,6 @@ fun pi_nth_digit(n: Int): Int {
                     s -= av
             }
             k++
-
         }
 
         t = pow_mod(10, n - 1, av)

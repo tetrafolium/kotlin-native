@@ -242,9 +242,9 @@ class GameField(val width: Int, val height: Int, val visualizer: GameFieldVisual
         for (i in field.indices) {
             val row = field[i]
             for (j in row.indices) {
-                if (i >= (MARGIN + height) // Bottom (field is flipped over).
-                        || (j < MARGIN) // Left
-                        || (j >= MARGIN + width)) // Right
+                if (i >= (MARGIN + height) || // Bottom (field is flipped over).
+                        (j < MARGIN) || // Left
+                        (j >= MARGIN + width)) // Right
                     row[j] = BRICK
             }
         }
@@ -486,6 +486,5 @@ class Game(width: Int, height: Int, val visualizer: GameFieldVisualizer, val use
             ticks -= speed
         }
     }
-
 }
 

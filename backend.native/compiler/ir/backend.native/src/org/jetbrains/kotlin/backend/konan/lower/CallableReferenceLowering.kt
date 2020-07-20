@@ -113,8 +113,8 @@ internal class CallableReferenceLowering(val context: Context): FileLoweringPass
                     break
                 }
 
-                if (!expression.type.isFunction() && !expression.type.isKFunction()
-                        && !expression.type.isKSuspendFunction()) {
+                if (!expression.type.isFunction() && !expression.type.isKFunction() &&
+                        !expression.type.isKSuspendFunction()) {
                     // Not a subject of this lowering.
                     return expression
                 }
@@ -161,7 +161,7 @@ internal class CallableReferenceLowering(val context: Context): FileLoweringPass
 
         private val functionReferenceClass: IrClass = WrappedClassDescriptor().let {
             IrClassImpl(
-                    startOffset,endOffset,
+                    startOffset, endOffset,
                     DECLARATION_ORIGIN_FUNCTION_REFERENCE_IMPL,
                     IrClassSymbolImpl(it),
                     "${referencedFunction.name}\$FUNCTION_REFERENCE\$${context.functionReferenceCount++}".synthesizedName,
@@ -218,8 +218,7 @@ internal class CallableReferenceLowering(val context: Context): FileLoweringPass
                 superTypes += functionClass.typeWith(functionParameterTypes + continuationType + irBuiltIns.anyNType)
                 suspendFunctionClass = symbols.kSuspendFunctionN(numberOfParameters).owner
                 superTypes += suspendFunctionClass.typeWith(functionParameterTypes + referencedFunction.returnType)
-            }
-            else {
+            } else {
                 superTypes += if (isKFunction)
                     kFunctionImplSymbol.typeWith(referencedFunction.returnType)
                 else

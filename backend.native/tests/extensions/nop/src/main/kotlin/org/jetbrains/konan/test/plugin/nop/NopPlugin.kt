@@ -9,6 +9,5 @@ open class NopExtension : IrGenerationExtension {
             moduleFragment: IrModuleFragment,
             pluginContext: IrPluginContext
     ) {
-
     }
 }

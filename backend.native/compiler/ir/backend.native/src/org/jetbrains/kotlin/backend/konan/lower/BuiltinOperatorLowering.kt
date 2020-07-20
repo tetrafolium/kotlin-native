@@ -253,7 +253,7 @@ internal class BuiltinOperatorLowering(val context: Context) : FileLoweringPass,
             from.atMostOne {
                 val leftParamType = it.owner.valueParameters[0].type
                 val rightParamType = it.owner.valueParameters[1].type
-                (lhsType.isSubtypeOf(leftParamType) || (allowNullable && lhsType.isSubtypeOf(leftParamType.makeNullable())))
-                        && (rhsType.isSubtypeOf(rightParamType) || (allowNullable && rhsType.isSubtypeOf(rightParamType.makeNullable())))
+                (lhsType.isSubtypeOf(leftParamType) || (allowNullable && lhsType.isSubtypeOf(leftParamType.makeNullable()))) &&
+                        (rhsType.isSubtypeOf(rightParamType) || (allowNullable && rhsType.isSubtypeOf(rightParamType.makeNullable())))
             }
 }

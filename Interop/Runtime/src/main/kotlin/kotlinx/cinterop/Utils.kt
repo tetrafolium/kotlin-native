@@ -94,7 +94,6 @@ public open class ArenaBase(private val parent: NativeFreeablePlacement = native
             chunk = interpretNullableOpaquePointed(nextChunk)
         }
     }
-
 }
 
 public class Arena(parent: NativeFreeablePlacement = nativeHeap) : ArenaBase(parent) {
@@ -143,10 +142,10 @@ public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Int
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Long,
-                                                              initializer: T.(index: Long)->Unit): CArrayPointer<T> {
+                                                              initializer: T.(index: Long) -> Unit): CArrayPointer<T> {
     val res = allocArray<T>(length)
 
-    (0 .. length - 1).forEach { index ->
+    (0..length - 1).forEach { index ->
         res[index].initializer(index)
     }
 
@@ -159,7 +158,7 @@ public inline fun <reified T : CVariable> NativePlacement.allocArray(length: Lon
  * @param T must not be abstract
  */
 public inline fun <reified T : CVariable> NativePlacement.allocArray(
-        length: Int, initializer: T.(index: Int)->Unit): CArrayPointer<T> = allocArray(length.toLong()) { index ->
+        length: Int, initializer: T.(index: Int) -> Unit): CArrayPointer<T> = allocArray(length.toLong()) { index ->
             this.initializer(index.toInt())
         }
 
@@ -236,7 +235,6 @@ internal class ZeroValue<T: CVariable>(private val sizeBytes: Int, private val a
     override val size get() = sizeBytes
 
     override val align get() = alignBytes
-
 }
 @Suppress("NOTHING_TO_INLINE")
 public inline fun <T : CVariable> zeroValue(size: Int, align: Int): CValue<T> = ZeroValue(size, align)
@@ -623,7 +621,7 @@ public class MemScope : ArenaBase() {
  * Runs given [block] providing allocation of memory
  * which will be automatically disposed at the end of this scope.
  */
-public inline fun <R> memScoped(block: MemScope.()->R): R {
+public inline fun <R> memScoped(block: MemScope.() -> R): R {
     val memScope = MemScope()
     try {
         return memScope.block()

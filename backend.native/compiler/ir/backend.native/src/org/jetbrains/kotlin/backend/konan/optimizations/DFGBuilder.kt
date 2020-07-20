@@ -491,8 +491,8 @@ internal class ModuleDFGBuilder(val context: Context, val irModule: IrModuleFrag
             return when (classifier) {
                 is IrClassSymbol -> this
                 is IrTypeParameterSymbol -> {
-                    val upperBound = classifier.owner.superTypes.singleOrNull() ?:
-                    TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
+                    val upperBound = classifier.owner.superTypes.singleOrNull()
+                    ?: TODO("${classifier.descriptor} : ${classifier.descriptor.upperBounds}")
 
                     if (this.hasQuestionMark) {
                         // `T?`
@@ -672,8 +672,8 @@ internal class ModuleDFGBuilder(val context: Context, val irModule: IrModuleFrag
                                             val actualReceiverClassifier = actualReceiverType.classifierOrFail
 
                                             val receiverType =
-                                                    if (actualReceiverClassifier is IrTypeParameterSymbol
-                                                            || !callee.isReal /* Could be a bridge. */)
+                                                    if (actualReceiverClassifier is IrTypeParameterSymbol ||
+                                                            !callee.isReal /* Could be a bridge. */)
                                                         symbolTable.mapClassReferenceType(owner)
                                                     else {
                                                         val actualClassAtCallsite =

@@ -140,7 +140,7 @@ internal val buildCExportsPhase = konanUnitPhase(
 internal val psiToIrPhase = konanUnitPhase(
         op = {
             // Translate AST to high level IR.
-            val expectActualLinker = config.configuration.get(CommonConfigurationKeys.EXPECT_ACTUAL_LINKER)?:false
+            val expectActualLinker = config.configuration.get(CommonConfigurationKeys.EXPECT_ACTUAL_LINKER) ?: false
 
             val symbolTable = symbolTable!!
 
@@ -306,7 +306,7 @@ internal val copyDefaultValuesToActualPhase = konanUnitPhase(
 
 internal val serializerPhase = konanUnitPhase(
         op = {
-            val expectActualLinker = config.configuration.get(CommonConfigurationKeys.EXPECT_ACTUAL_LINKER)?:false
+            val expectActualLinker = config.configuration.get(CommonConfigurationKeys.EXPECT_ACTUAL_LINKER) ?: false
 
             serializedIr = irModule?.let { ir ->
                 KonanIrModuleSerializer(

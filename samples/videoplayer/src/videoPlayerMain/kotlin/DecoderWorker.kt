@@ -47,8 +47,8 @@ private fun AVFormatContext.streamAt(index: Int): AVStream? =
 private fun AVStream.openCodec(tag: String): AVCodecContext {
     // Get codec context for the video stream.
     val codecContext = codec!!.pointed
-    val codec = avcodec_find_decoder(codecContext.codec_id)?.pointed ?:
-        throw Error("Unsupported $tag codec with id ${codecContext.codec_id}...")
+    val codec = avcodec_find_decoder(codecContext.codec_id)?.pointed
+        ?: throw Error("Unsupported $tag codec with id ${codecContext.codec_id}...")
     // Open codec.
     if (avcodec_open2(codecContext.ptr, codec.ptr, null) < 0)
         throw Error("Couldn't open $tag codec with id ${codecContext.codec_id}")
@@ -153,7 +153,6 @@ private class VideoDecoder(
             videoQueue.push(VideoFrame(buffer, scaledVideoFrame.linesize[0], ts))
         }
     }
-
 }
 
 private fun SampleFormat.toAVSampleFormat(): AVSampleFormat? = when (this) {

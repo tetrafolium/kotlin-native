@@ -8,7 +8,6 @@ package runtime.workers.worker11
 import kotlin.test.*
 
 import kotlin.native.concurrent.*
-import kotlinx.cinterop.convert
 
 data class Job(val index: Int, var input: Int, var counter: Int)
 
@@ -102,7 +101,7 @@ val counters = Array(COUNT) { AtomicInt(0) }
         }
     }
     workers.forEach {
-        it.executeAfter(1000*1000, {
+        it.executeAfter(1000 * 1000, {
             println("DELAY EXECUTED")
             assert(false)
         }.freeze())

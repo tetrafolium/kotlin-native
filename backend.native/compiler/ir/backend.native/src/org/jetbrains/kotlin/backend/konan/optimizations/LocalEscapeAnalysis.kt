@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.backend.konan.llvm.Lifetime
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.descriptors.isArrayWithFixedSizeItems
-import org.jetbrains.kotlin.backend.konan.descriptors.isBuiltInOperator
 
 internal object LocalEscapeAnalysis {
     private val DEBUG = 0
@@ -188,7 +187,7 @@ internal object LocalEscapeAnalysis {
                 }
                 ir?.let {
                     lifetimes.put(it, Lifetime.LOCAL)
-                    DEBUG_OUTPUT(3) { println("${ir} does not escape") }
+                    DEBUG_OUTPUT(3) { println("$ir does not escape") }
                 }
             }
         }

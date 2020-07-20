@@ -25,7 +25,7 @@ fun builder(c: suspend () -> Unit) {
     c.startCoroutine(EmptyContinuation)
 }
 
-inline suspend fun inline_s2(x: Int): Unit {
+inline suspend fun inline_s2(x: Int) {
     println(x)
     s1()
 }

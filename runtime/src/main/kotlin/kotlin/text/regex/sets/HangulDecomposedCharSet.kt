@@ -122,9 +122,9 @@ internal class HangulDecomposedCharSet(
                  * We deal with LV syllable at testString, so
                  * compare it to this
                  */
-                return if (decomposedCharLength == 2
-                        && decompSyllable[0] == decomposedChar[0].toInt()
-                        && decompSyllable[1] == decomposedChar[1].toInt())
+                return if (decomposedCharLength == 2 &&
+                        decompSyllable[0] == decomposedChar[0].toInt() &&
+                        decompSyllable[1] == decomposedChar[1].toInt())
                     next.matches(index, testString, matchResult)
                 else
                     -1
@@ -136,10 +136,10 @@ internal class HangulDecomposedCharSet(
              * We deal with LVT syllable at testString, so
              * compare it to this
              */
-            return if (decomposedCharLength == 3
-                    && decompSyllable[0] == decomposedChar[0].toInt()
-                    && decompSyllable[1] == decomposedChar[1].toInt()
-                    && decompSyllable[2] == decomposedChar[2].toInt())
+            return if (decomposedCharLength == 3 &&
+                    decompSyllable[0] == decomposedChar[0].toInt() &&
+                    decompSyllable[1] == decomposedChar[1].toInt() &&
+                    decompSyllable[2] == decomposedChar[2].toInt())
                 next.matches(index, testString, matchResult)
             else
                 -1

@@ -11,7 +11,7 @@ import kotlin.comparisons.compareBy
 enum class Transport { CAR, UNDERGROUND, BUS, TROLLEYBUS, TRAM, TAXI, FOOT }
 enum class Interest { SIGHT, CULTURE, PARK, ENTERTAINMENT }
 
-class PlaceAbsenceException(message: String): Exception(message) {}
+class PlaceAbsenceException(message: String): Exception(message)
 
 data class RouteCost(val moneyCost: Double, val timeCost: Double, val interests: Set<Interest>, val transport: Set<Transport>): Cost {
     private val comparator = compareBy<RouteCost>({ it.moneyCost }, { it.timeCost }, { it.interests.size }, { it.transport.size })

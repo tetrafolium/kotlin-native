@@ -1636,13 +1636,13 @@ fun clang_getCString(string: CValue<CXString>): CPointer<ByteVar>? {
     }
 }
 
-fun clang_disposeString(string: CValue<CXString>): Unit {
+fun clang_disposeString(string: CValue<CXString>) {
     memScoped {
         return kniBridge1(string.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_disposeStringSet(set: CValuesRef<CXStringSet>?): Unit {
+fun clang_disposeStringSet(set: CValuesRef<CXStringSet>?) {
     memScoped {
         return kniBridge2(set?.getPointer(memScope).rawValue)
     }
@@ -1672,13 +1672,13 @@ fun clang_VirtualFileOverlay_writeToBuffer(arg0: CXVirtualFileOverlay?, options:
     }
 }
 
-fun clang_free(buffer: CValuesRef<*>?): Unit {
+fun clang_free(buffer: CValuesRef<*>?) {
     memScoped {
         return kniBridge8(buffer?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_VirtualFileOverlay_dispose(arg0: CXVirtualFileOverlay?): Unit {
+fun clang_VirtualFileOverlay_dispose(arg0: CXVirtualFileOverlay?) {
     return kniBridge9(arg0.rawValue)
 }
 
@@ -1704,7 +1704,7 @@ fun clang_ModuleMapDescriptor_writeToBuffer(arg0: CXModuleMapDescriptor?, option
     }
 }
 
-fun clang_ModuleMapDescriptor_dispose(arg0: CXModuleMapDescriptor?): Unit {
+fun clang_ModuleMapDescriptor_dispose(arg0: CXModuleMapDescriptor?) {
     return kniBridge14(arg0.rawValue)
 }
 
@@ -1712,11 +1712,11 @@ fun clang_createIndex(excludeDeclarationsFromPCH: Int, displayDiagnostics: Int):
     return interpretCPointer<COpaque>(kniBridge15(excludeDeclarationsFromPCH, displayDiagnostics))
 }
 
-fun clang_disposeIndex(index: CXIndex?): Unit {
+fun clang_disposeIndex(index: CXIndex?) {
     return kniBridge16(index.rawValue)
 }
 
-fun clang_CXIndex_setGlobalOptions(arg0: CXIndex?, options: Int): Unit {
+fun clang_CXIndex_setGlobalOptions(arg0: CXIndex?, options: Int) {
     return kniBridge17(arg0.rawValue, options)
 }
 
@@ -1724,7 +1724,7 @@ fun clang_CXIndex_getGlobalOptions(arg0: CXIndex?): Int {
     return kniBridge18(arg0.rawValue)
 }
 
-fun clang_CXIndex_setInvocationEmissionPathOption(arg0: CXIndex?, Path: String?): Unit {
+fun clang_CXIndex_setInvocationEmissionPathOption(arg0: CXIndex?, Path: String?) {
     memScoped {
         return kniBridge19(arg0.rawValue, Path?.cstr?.getPointer(memScope).rawValue)
     }
@@ -1848,31 +1848,31 @@ fun clang_Range_isNull(range: CValue<CXSourceRange>): Int {
     }
 }
 
-fun clang_getExpansionLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?): Unit {
+fun clang_getExpansionLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge38(location.getPointer(memScope).rawValue, file?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue, offset?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_getPresumedLocation(location: CValue<CXSourceLocation>, filename: CValuesRef<CXString>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?): Unit {
+fun clang_getPresumedLocation(location: CValue<CXSourceLocation>, filename: CValuesRef<CXString>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge39(location.getPointer(memScope).rawValue, filename?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_getInstantiationLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?): Unit {
+fun clang_getInstantiationLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge40(location.getPointer(memScope).rawValue, file?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue, offset?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_getSpellingLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?): Unit {
+fun clang_getSpellingLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge41(location.getPointer(memScope).rawValue, file?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue, offset?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_getFileLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?): Unit {
+fun clang_getFileLocation(location: CValue<CXSourceLocation>, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge42(location.getPointer(memScope).rawValue, file?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue, offset?.getPointer(memScope).rawValue)
     }
@@ -1906,7 +1906,7 @@ fun clang_getAllSkippedRanges(tu: CXTranslationUnit?): CPointer<CXSourceRangeLis
     return interpretCPointer<CXSourceRangeList>(kniBridge46(tu.rawValue))
 }
 
-fun clang_disposeSourceRangeList(ranges: CValuesRef<CXSourceRangeList>?): Unit {
+fun clang_disposeSourceRangeList(ranges: CValuesRef<CXSourceRangeList>?) {
     memScoped {
         return kniBridge47(ranges?.getPointer(memScope).rawValue)
     }
@@ -1926,7 +1926,7 @@ fun clang_loadDiagnostics(file: String?, error: CValuesRef<CXLoadDiag_Error.Var>
     }
 }
 
-fun clang_disposeDiagnosticSet(Diags: CXDiagnosticSet?): Unit {
+fun clang_disposeDiagnosticSet(Diags: CXDiagnosticSet?) {
     return kniBridge51(Diags.rawValue)
 }
 
@@ -1946,7 +1946,7 @@ fun clang_getDiagnosticSetFromTU(Unit: CXTranslationUnit?): CXDiagnosticSet? {
     return interpretCPointer<COpaque>(kniBridge55(Unit.rawValue))
 }
 
-fun clang_disposeDiagnostic(Diagnostic: CXDiagnostic?): Unit {
+fun clang_disposeDiagnostic(Diagnostic: CXDiagnostic?) {
     return kniBridge56(Diagnostic.rawValue)
 }
 
@@ -2100,7 +2100,7 @@ fun clang_suspendTranslationUnit(arg0: CXTranslationUnit?): Int {
     return kniBridge80(arg0.rawValue)
 }
 
-fun clang_disposeTranslationUnit(arg0: CXTranslationUnit?): Unit {
+fun clang_disposeTranslationUnit(arg0: CXTranslationUnit?) {
     return kniBridge81(arg0.rawValue)
 }
 
@@ -2126,7 +2126,7 @@ fun clang_getCXTUResourceUsage(TU: CXTranslationUnit?): CValue<CXTUResourceUsage
     } finally { nativeHeap.free(kniRetVal) }
 }
 
-fun clang_disposeCXTUResourceUsage(usage: CValue<CXTUResourceUsage>): Unit {
+fun clang_disposeCXTUResourceUsage(usage: CValue<CXTUResourceUsage>) {
     memScoped {
         return kniBridge86(usage.getPointer(memScope).rawValue)
     }
@@ -2136,7 +2136,7 @@ fun clang_getTranslationUnitTargetInfo(CTUnit: CXTranslationUnit?): CXTargetInfo
     return interpretCPointer<CXTargetInfoImpl>(kniBridge87(CTUnit.rawValue))
 }
 
-fun clang_TargetInfo_dispose(Info: CXTargetInfo?): Unit {
+fun clang_TargetInfo_dispose(Info: CXTargetInfo?) {
     return kniBridge88(Info.rawValue)
 }
 
@@ -2264,7 +2264,7 @@ fun clang_getCursorPlatformAvailability(cursor: CValue<CXCursor>, always_depreca
     }
 }
 
-fun clang_disposeCXPlatformAvailability(availability: CValuesRef<CXPlatformAvailability>?): Unit {
+fun clang_disposeCXPlatformAvailability(availability: CValuesRef<CXPlatformAvailability>?) {
     memScoped {
         return kniBridge112(availability?.getPointer(memScope).rawValue)
     }
@@ -2292,7 +2292,7 @@ fun clang_createCXCursorSet(): CXCursorSet? {
     return interpretCPointer<CXCursorSetImpl>(kniBridge116())
 }
 
-fun clang_disposeCXCursorSet(cset: CXCursorSet?): Unit {
+fun clang_disposeCXCursorSet(cset: CXCursorSet?) {
     return kniBridge117(cset.rawValue)
 }
 
@@ -2328,13 +2328,13 @@ fun clang_getCursorLexicalParent(cursor: CValue<CXCursor>): CValue<CXCursor> {
     }
 }
 
-fun clang_getOverriddenCursors(cursor: CValue<CXCursor>, overridden: CValuesRef<CPointerVar<CXCursor>>?, num_overridden: CValuesRef<IntVar>?): Unit {
+fun clang_getOverriddenCursors(cursor: CValue<CXCursor>, overridden: CValuesRef<CPointerVar<CXCursor>>?, num_overridden: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge122(cursor.getPointer(memScope).rawValue, overridden?.getPointer(memScope).rawValue, num_overridden?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_disposeOverriddenCursors(overridden: CValuesRef<CXCursor>?): Unit {
+fun clang_disposeOverriddenCursors(overridden: CValuesRef<CXCursor>?) {
     memScoped {
         return kniBridge123(overridden?.getPointer(memScope).rawValue)
     }
@@ -2984,7 +2984,7 @@ fun clang_PrintingPolicy_getProperty(Policy: CXPrintingPolicy?, Property: CXPrin
     return kniBridge205(Policy.rawValue, Property)
 }
 
-fun clang_PrintingPolicy_setProperty(Policy: CXPrintingPolicy?, Property: CXPrintingPolicyProperty, Value: Int): Unit {
+fun clang_PrintingPolicy_setProperty(Policy: CXPrintingPolicy?, Property: CXPrintingPolicyProperty, Value: Int) {
     return kniBridge206(Policy.rawValue, Property, Value)
 }
 
@@ -2994,7 +2994,7 @@ fun clang_getCursorPrintingPolicy(arg0: CValue<CXCursor>): CXPrintingPolicy? {
     }
 }
 
-fun clang_PrintingPolicy_dispose(Policy: CXPrintingPolicy?): Unit {
+fun clang_PrintingPolicy_dispose(Policy: CXPrintingPolicy?) {
     return kniBridge208(Policy.rawValue)
 }
 
@@ -3364,19 +3364,19 @@ fun clang_getTokenExtent(arg0: CXTranslationUnit?, arg1: CValue<CXToken>): CValu
     }
 }
 
-fun clang_tokenize(TU: CXTranslationUnit?, Range: CValue<CXSourceRange>, Tokens: CValuesRef<CPointerVar<CXToken>>?, NumTokens: CValuesRef<IntVar>?): Unit {
+fun clang_tokenize(TU: CXTranslationUnit?, Range: CValue<CXSourceRange>, Tokens: CValuesRef<CPointerVar<CXToken>>?, NumTokens: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge260(TU.rawValue, Range.getPointer(memScope).rawValue, Tokens?.getPointer(memScope).rawValue, NumTokens?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_annotateTokens(TU: CXTranslationUnit?, Tokens: CValuesRef<CXToken>?, NumTokens: Int, Cursors: CValuesRef<CXCursor>?): Unit {
+fun clang_annotateTokens(TU: CXTranslationUnit?, Tokens: CValuesRef<CXToken>?, NumTokens: Int, Cursors: CValuesRef<CXCursor>?) {
     memScoped {
         return kniBridge261(TU.rawValue, Tokens?.getPointer(memScope).rawValue, NumTokens, Cursors?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_disposeTokens(TU: CXTranslationUnit?, Tokens: CValuesRef<CXToken>?, NumTokens: Int): Unit {
+fun clang_disposeTokens(TU: CXTranslationUnit?, Tokens: CValuesRef<CXToken>?, NumTokens: Int) {
     memScoped {
         return kniBridge262(TU.rawValue, Tokens?.getPointer(memScope).rawValue, NumTokens)
     }
@@ -3390,17 +3390,17 @@ fun clang_getCursorKindSpelling(Kind: CXCursorKind): CValue<CXString> {
     } finally { nativeHeap.free(kniRetVal) }
 }
 
-fun clang_getDefinitionSpellingAndExtent(arg0: CValue<CXCursor>, startBuf: CValuesRef<CPointerVar<ByteVar>>?, endBuf: CValuesRef<CPointerVar<ByteVar>>?, startLine: CValuesRef<IntVar>?, startColumn: CValuesRef<IntVar>?, endLine: CValuesRef<IntVar>?, endColumn: CValuesRef<IntVar>?): Unit {
+fun clang_getDefinitionSpellingAndExtent(arg0: CValue<CXCursor>, startBuf: CValuesRef<CPointerVar<ByteVar>>?, endBuf: CValuesRef<CPointerVar<ByteVar>>?, startLine: CValuesRef<IntVar>?, startColumn: CValuesRef<IntVar>?, endLine: CValuesRef<IntVar>?, endColumn: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge264(arg0.getPointer(memScope).rawValue, startBuf?.getPointer(memScope).rawValue, endBuf?.getPointer(memScope).rawValue, startLine?.getPointer(memScope).rawValue, startColumn?.getPointer(memScope).rawValue, endLine?.getPointer(memScope).rawValue, endColumn?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_enableStackTraces(): Unit {
+fun clang_enableStackTraces() {
     return kniBridge265()
 }
 
-fun clang_executeOnThread(fn: CPointer<CFunction<(COpaquePointer?) -> Unit>>?, user_data: CValuesRef<*>?, stack_size: Int): Unit {
+fun clang_executeOnThread(fn: CPointer<CFunction<(COpaquePointer?) -> Unit>>?, user_data: CValuesRef<*>?, stack_size: Int) {
     memScoped {
         return kniBridge266(fn.rawValue, user_data?.getPointer(memScope).rawValue, stack_size)
     }
@@ -3496,13 +3496,13 @@ fun clang_codeCompleteAt(TU: CXTranslationUnit?, complete_filename: String?, com
     }
 }
 
-fun clang_sortCodeCompletionResults(Results: CValuesRef<CXCompletionResult>?, NumResults: Int): Unit {
+fun clang_sortCodeCompletionResults(Results: CValuesRef<CXCompletionResult>?, NumResults: Int) {
     memScoped {
         return kniBridge282(Results?.getPointer(memScope).rawValue, NumResults)
     }
 }
 
-fun clang_disposeCodeCompleteResults(Results: CValuesRef<CXCodeCompleteResults>?): Unit {
+fun clang_disposeCodeCompleteResults(Results: CValuesRef<CXCodeCompleteResults>?) {
     memScoped {
         return kniBridge283(Results?.getPointer(memScope).rawValue)
     }
@@ -3560,11 +3560,11 @@ fun clang_getClangVersion(): CValue<CXString> {
     } finally { nativeHeap.free(kniRetVal) }
 }
 
-fun clang_toggleCrashRecovery(isEnabled: Int): Unit {
+fun clang_toggleCrashRecovery(isEnabled: Int) {
     return kniBridge291(isEnabled)
 }
 
-fun clang_getInclusions(tu: CXTranslationUnit?, visitor: CXInclusionVisitor?, client_data: CXClientData?): Unit {
+fun clang_getInclusions(tu: CXTranslationUnit?, visitor: CXInclusionVisitor?, client_data: CXClientData?) {
     return kniBridge292(tu.rawValue, visitor.rawValue, client_data.rawValue)
 }
 
@@ -3602,7 +3602,7 @@ fun clang_EvalResult_getAsStr(E: CXEvalResult?): CPointer<ByteVar>? {
     return interpretCPointer<ByteVar>(kniBridge300(E.rawValue))
 }
 
-fun clang_EvalResult_dispose(E: CXEvalResult?): Unit {
+fun clang_EvalResult_dispose(E: CXEvalResult?) {
     return kniBridge301(E.rawValue)
 }
 
@@ -3622,13 +3622,13 @@ fun clang_remap_getNumFiles(arg0: CXRemapping?): Int {
     return kniBridge304(arg0.rawValue)
 }
 
-fun clang_remap_getFilenames(arg0: CXRemapping?, index: Int, original: CValuesRef<CXString>?, transformed: CValuesRef<CXString>?): Unit {
+fun clang_remap_getFilenames(arg0: CXRemapping?, index: Int, original: CValuesRef<CXString>?, transformed: CValuesRef<CXString>?) {
     memScoped {
         return kniBridge305(arg0.rawValue, index, original?.getPointer(memScope).rawValue, transformed?.getPointer(memScope).rawValue)
     }
 }
 
-fun clang_remap_dispose(arg0: CXRemapping?): Unit {
+fun clang_remap_dispose(arg0: CXRemapping?) {
     return kniBridge306(arg0.rawValue)
 }
 
@@ -3696,7 +3696,7 @@ fun clang_index_getClientContainer(arg0: CValuesRef<CXIdxContainerInfo>?): CXIdx
     }
 }
 
-fun clang_index_setClientContainer(arg0: CValuesRef<CXIdxContainerInfo>?, arg1: CXIdxClientContainer?): Unit {
+fun clang_index_setClientContainer(arg0: CValuesRef<CXIdxContainerInfo>?, arg1: CXIdxClientContainer?) {
     memScoped {
         return kniBridge318(arg0?.getPointer(memScope).rawValue, arg1.rawValue)
     }
@@ -3708,7 +3708,7 @@ fun clang_index_getClientEntity(arg0: CValuesRef<CXIdxEntityInfo>?): CXIdxClient
     }
 }
 
-fun clang_index_setClientEntity(arg0: CValuesRef<CXIdxEntityInfo>?, arg1: CXIdxClientEntity?): Unit {
+fun clang_index_setClientEntity(arg0: CValuesRef<CXIdxEntityInfo>?, arg1: CXIdxClientEntity?) {
     memScoped {
         return kniBridge320(arg0?.getPointer(memScope).rawValue, arg1.rawValue)
     }
@@ -3718,7 +3718,7 @@ fun clang_IndexAction_create(CIdx: CXIndex?): CXIndexAction? {
     return interpretCPointer<COpaque>(kniBridge321(CIdx.rawValue))
 }
 
-fun clang_IndexAction_dispose(arg0: CXIndexAction?): Unit {
+fun clang_IndexAction_dispose(arg0: CXIndexAction?) {
     return kniBridge322(arg0.rawValue)
 }
 
@@ -3740,7 +3740,7 @@ fun clang_indexTranslationUnit(arg0: CXIndexAction?, client_data: CXClientData?,
     }
 }
 
-fun clang_indexLoc_getFileLocation(loc: CValue<CXIdxLoc>, indexFile: CValuesRef<CXIdxClientFileVar>?, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?): Unit {
+fun clang_indexLoc_getFileLocation(loc: CValue<CXIdxLoc>, indexFile: CValuesRef<CXIdxClientFileVar>?, file: CValuesRef<CXFileVar>?, line: CValuesRef<IntVar>?, column: CValuesRef<IntVar>?, offset: CValuesRef<IntVar>?) {
     memScoped {
         return kniBridge326(loc.getPointer(memScope).rawValue, indexFile?.getPointer(memScope).rawValue, file?.getPointer(memScope).rawValue, line?.getPointer(memScope).rawValue, column?.getPointer(memScope).rawValue, offset?.getPointer(memScope).rawValue)
     }

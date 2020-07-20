@@ -91,7 +91,7 @@ open class KotlinBuildPusher : DefaultTask() {
     }
 }
 
-internal fun StringBuilder.paired(tag:String, body:StringBuilder.()->Unit) {
+internal fun StringBuilder.paired(tag:String, body:StringBuilder.() -> Unit) {
     appendln("<$tag>")
     body()
     appendln("</$tag>")

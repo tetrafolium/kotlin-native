@@ -44,18 +44,18 @@ abstract class KonanPropertiesLoader(override val target: KonanTarget,
         dependencyProcessor!!.run()
     }
 
-    override fun targetString(key: String): String? 
-        = properties.targetString(key, target)
-    override fun targetList(key: String): List<String>
-        = properties.targetList(key, target)
-    override fun hostString(key: String): String? 
-        = properties.hostString(key, host)
-    override fun hostList(key: String): List<String> 
-        = properties.hostList(key, host)
-    override fun hostTargetString(key: String): String? 
-        = properties.hostTargetString(key, target, host)
-    override fun hostTargetList(key: String): List<String> 
-        = properties.hostTargetList(key, target, host)
+    override fun targetString(key: String): String? = 
+        properties.targetString(key, target)
+    override fun targetList(key: String): List<String> =
+        properties.targetList(key, target)
+    override fun hostString(key: String): String? = 
+        properties.hostString(key, host)
+    override fun hostList(key: String): List<String> = 
+        properties.hostList(key, host)
+    override fun hostTargetString(key: String): String? = 
+        properties.hostTargetString(key, target, host)
+    override fun hostTargetList(key: String): List<String> = 
+        properties.hostTargetList(key, target, host)
 
     override fun absolute(value: String?): String =
             dependencyProcessor!!.resolveRelative(value!!).absolutePath

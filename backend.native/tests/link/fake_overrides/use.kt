@@ -1,7 +1,6 @@
 package serialization.fake_overrides
 
-class Z: X() {
-}
+class Z: X()
 
 fun test0() = println(Y().bar())
 fun test2() = println(B().qux())

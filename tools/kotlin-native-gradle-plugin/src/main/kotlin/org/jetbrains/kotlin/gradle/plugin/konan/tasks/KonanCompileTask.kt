@@ -184,7 +184,7 @@ abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
 
         addAll(secondStageExtraOpts())
 
-        add("-Xinclude=${klibPath}")
+        add("-Xinclude=$klibPath")
     }
 
     /** Args passed to the compiler at both stages of the two-stage compilation and during the singe-stage compilation. */
@@ -405,7 +405,6 @@ open class KonanCompileProgramTask: KonanCompileNativeBinary() {
             }
         }
     }
-
 }
 
 open class KonanCompileDynamicTask: KonanCompileNativeBinary() {

@@ -75,7 +75,6 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
 
     override fun toString(): String =
         "${meanBenchmark.score.format()} ± ${varianceBenchmark.score.format()}"
-
 }
 
 fun geometricMean(values: Collection<Double>, totalNumber: Int = values.size) =

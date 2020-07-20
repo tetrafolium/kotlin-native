@@ -464,7 +464,6 @@ internal class ObjCExportCodeGenerator(
             ),
             Int32(reverseAdapters.size)
     )
-
 }
 
 private fun ObjCExportCodeGenerator.replaceExternalWeakOrCommonGlobal(
@@ -1184,8 +1183,8 @@ private fun ObjCExportCodeGenerator.vtableIndex(irFunction: IrSimpleFunction): I
 private fun ObjCExportCodeGenerator.itablePlace(irFunction: IrSimpleFunction): ClassLayoutBuilder.InterfaceTablePlace? {
     assert(irFunction.isOverridable)
     val irClass = irFunction.parentAsClass
-    return if (irClass.isInterface && context.ghaEnabled()
-            && (irFunction.isReal || irFunction.resolveFakeOverrideMaybeAbstract().parent != context.irBuiltIns.anyClass.owner)) {
+    return if (irClass.isInterface && context.ghaEnabled() &&
+            (irFunction.isReal || irFunction.resolveFakeOverrideMaybeAbstract().parent != context.irBuiltIns.anyClass.owner)) {
         context.getLayoutBuilder(irClass).itablePlace(irFunction)
     } else {
         null
@@ -1351,15 +1350,14 @@ private fun ObjCExportCodeGenerator.createReverseAdapters(
                 val functionName = it.functionName
                 val itablePlace = itablePlace(it)
 
-                if (vtableIndex !in presentVtableBridges || functionName !in presentMethodTableBridges
-                        || itablePlace !in presentItableBridges) {
+                if (vtableIndex !in presentVtableBridges || functionName !in presentMethodTableBridges ||
+                        itablePlace !in presentItableBridges) {
                     presentVtableBridges += vtableIndex
                     presentMethodTableBridges += functionName
                     presentItableBridges += itablePlace
                     result += createReverseAdapter(it, baseMethod, functionName, vtableIndex, itablePlace)
                 }
             }
-
         } else {
             // Mark it as non-overridable:
             baseMethods.distinctBy { namer.getSelector(it.descriptor) }.forEach { baseMethod ->

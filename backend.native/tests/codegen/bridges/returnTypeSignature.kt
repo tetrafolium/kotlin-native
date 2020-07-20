@@ -7,11 +7,11 @@ package codegen.bridges.signature
 
 import kotlin.test.*
 
-class A { }
+class A
 
-class B { }
+class B
 
-class C { }
+class C
 
 interface Parser<in IN: Any, out OUT: Any> {
     fun parse(source: IN): OUT

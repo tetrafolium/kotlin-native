@@ -81,9 +81,9 @@ fun String.quoteAsKotlinLiteral(): KotlinExpression = buildString {
 // TODO: improve literal readability by preserving more characters.
 
 private val charactersAllowedInKotlinStringLiterals: Set<Char> = mutableSetOf<Char>().apply {
-    addAll('a' .. 'z')
-    addAll('A' .. 'Z')
-    addAll('0' .. '9')
+    addAll('a'..'z')
+    addAll('A'..'Z')
+    addAll('0'..'9')
     addAll(listOf('_', '@', ':', ';', '.', ',', '{', '}', '=', '[', ']', '^', '#', '*', ' ', '(', ')'))
 }
 

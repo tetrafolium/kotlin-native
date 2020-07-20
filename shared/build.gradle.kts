@@ -24,7 +24,7 @@ plugins {
 }
 
 val rootBuildDirectory by extra(file(".."))
-apply(from="../gradle/loadRootProperties.gradle")
+apply(from = "../gradle/loadRootProperties.gradle")
 
 val kotlinVersion: String by extra
 val buildKotlinVersion: String by extra

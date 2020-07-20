@@ -32,7 +32,7 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
             shortName = "-trn", description = "Produce a runner for unit tests not forcing exit")
     var generateNoExitTestRunner = false
 
-    @Argument(value="-include-binary", deprecatedName = "-includeBinary", shortName = "-ib", valueDescription = "<path>", description = "Pack external binary within the klib")
+    @Argument(value = "-include-binary", deprecatedName = "-includeBinary", shortName = "-ib", valueDescription = "<path>", description = "Pack external binary within the klib")
     var includeBinaries: Array<String>? = null
 
     @Argument(value = "-library", shortName = "-l", valueDescription = "<path>", description = "Link with the library", delimiter = "")
@@ -47,10 +47,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-manifest", valueDescription = "<path>", description = "Provide a maniferst addend file")
     var manifestFile: String? = null
 
-    @Argument(value="-memory-model", valueDescription = "<model>", description = "Memory model to use, 'strict' and 'relaxed' are currently supported")
+    @Argument(value = "-memory-model", valueDescription = "<model>", description = "Memory model to use, 'strict' and 'relaxed' are currently supported")
     var memoryModel: String? = "strict"
 
-    @Argument(value="-module-name", deprecatedName = "-module_name", valueDescription = "<name>", description = "Specify a name for the compilation module")
+    @Argument(value = "-module-name", deprecatedName = "-module_name", valueDescription = "<name>", description = "Specify a name for the compilation module")
     var moduleName: String? = null
 
     @Argument(value = "-native-library", deprecatedName = "-nativelibrary", shortName = "-nl",
@@ -69,10 +69,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-nopack", description = "Don't pack the library into a klib file")
     var nopack: Boolean = false
 
-    @Argument(value="-linker-options", deprecatedName = "-linkerOpts", valueDescription = "<arg>", description = "Pass arguments to linker", delimiter = " ")
+    @Argument(value = "-linker-options", deprecatedName = "-linkerOpts", valueDescription = "<arg>", description = "Pass arguments to linker", delimiter = " ")
     var linkerArguments: Array<String>? = null
 
-    @Argument(value="-linker-option", valueDescription = "<arg>", description = "Pass argument to linker", delimiter = "")
+    @Argument(value = "-linker-option", valueDescription = "<arg>", description = "Pass argument to linker", delimiter = "")
     var singleLinkerArguments: Array<String>? = null
 
     @Argument(value = "-nostdlib", description = "Don't link with stdlib")
@@ -118,10 +118,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     )
     var cachedLibraries: Array<String>? = null
 
-    @Argument(value="-Xcheck-dependencies", deprecatedName = "--check_dependencies", description = "Check dependencies and download the missing ones")
+    @Argument(value = "-Xcheck-dependencies", deprecatedName = "--check_dependencies", description = "Check dependencies and download the missing ones")
     var checkDependencies: Boolean = false
 
-    @Argument(value="-Xcompatible-compiler-version", valueDescription = "<version>", description = "Assume the given compiler version to be binary compatible")
+    @Argument(value = "-Xcompatible-compiler-version", valueDescription = "<version>", description = "Assume the given compiler version to be binary compatible")
     var compatibleCompilerVersions: Array<String>? = null
 
     @Argument(value = EMBED_BITCODE_FLAG, description = "Embed LLVM IR bitcode as data")
@@ -145,7 +145,7 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     )
     var exportedLibraries: Array<String>? = null
 
-    @Argument(value="-Xdisable-fake-override-validator", description = "Disable IR fake override validator")
+    @Argument(value = "-Xdisable-fake-override-validator", description = "Disable IR fake override validator")
     var disableFakeOverrideValidator: Boolean = false
 
     @Argument(
@@ -199,7 +199,7 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-Xprint-locations", deprecatedName = "--print_locations", description = "Print locations")
     var printLocations: Boolean = false
 
-    @Argument(value="-Xpurge-user-libs", deprecatedName = "--purge_user_libs", description = "Don't link unused libraries even explicitly specified")
+    @Argument(value = "-Xpurge-user-libs", deprecatedName = "--purge_user_libs", description = "Don't link unused libraries even explicitly specified")
     var purgeUserLibs: Boolean = false
 
     @Argument(value = "-Xruntime", deprecatedName = "--runtime", valueDescription = "<path>", description = "Override standard 'runtime.bc' location")
@@ -259,10 +259,10 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
     @Argument(value = "-Xno-objc-generics", description = "Disable generics support for framework header")
     var noObjcGenerics: Boolean = false
 
-    @Argument(value="-Xoverride-clang-options", valueDescription = "<arg1,arg2,...>", description = "Explicit list of Clang options")
+    @Argument(value = "-Xoverride-clang-options", valueDescription = "<arg1,arg2,...>", description = "Explicit list of Clang options")
     var clangOptions: Array<String>? = null
 
-    @Argument(value="-Xallocator", valueDescription = "std | mimalloc", description = "Allocator used in runtime")
+    @Argument(value = "-Xallocator", valueDescription = "std | mimalloc", description = "Allocator used in runtime")
     var allocator: String = "std"
 
     @Argument(value = "-Xmetadata-klib", description = "Produce a klib that only contains the declarations metadata")
@@ -280,8 +280,8 @@ class K2NativeCompilerArguments : CommonCompilerArguments() {
             }
 
     override fun checkIrSupport(languageVersionSettings: LanguageVersionSettings, collector: MessageCollector) {
-        if (languageVersionSettings.languageVersion < LanguageVersion.KOTLIN_1_4
-                || languageVersionSettings.apiVersion < ApiVersion.KOTLIN_1_4
+        if (languageVersionSettings.languageVersion < LanguageVersion.KOTLIN_1_4 ||
+                languageVersionSettings.apiVersion < ApiVersion.KOTLIN_1_4
         ) {
             collector.report(
                     severity = CompilerMessageSeverity.ERROR,

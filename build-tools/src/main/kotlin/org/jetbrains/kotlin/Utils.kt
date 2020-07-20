@@ -214,7 +214,7 @@ fun sendGetRequest(url: String, username: String? = null, password: String? = nu
         val auth = Base64.getEncoder().encode(("$username:$password").toByteArray()).toString(Charsets.UTF_8)
         connection.addRequestProperty("Authorization", "Basic $auth")
     }
-    connection.setRequestProperty("Accept", "application/json");
+    connection.setRequestProperty("Accept", "application/json")
     connection.connect()
     return connection.inputStream.use { it.reader().use { reader -> reader.readText() } }
 }

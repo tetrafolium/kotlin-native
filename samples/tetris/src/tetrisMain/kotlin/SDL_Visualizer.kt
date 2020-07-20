@@ -94,8 +94,8 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
         }
 
         private fun inside(rect: SDL_Rect, x: Int, y: Int): Boolean {
-            return x >= stretch(rect.x) && x <= stretch(rect.x + rect.w)
-                    && y >= stretch(rect.y) && y <= stretch(rect.y + rect.h)
+            return x >= stretch(rect.x) && x <= stretch(rect.x + rect.w) &&
+                    y >= stretch(rect.y) && y <= stretch(rect.y + rect.h)
         }
 
         fun destroy() {
@@ -203,7 +203,7 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
     }
 
     private fun loadImage(win: CPointer<SDL_Window>, ren: CPointer<SDL_Renderer>, imagePath: String): CPointer<SDL_Texture> {
-        val bmp = SDL_LoadBMP_RW(SDL_RWFromFile(imagePath, "rb"), 1);
+        val bmp = SDL_LoadBMP_RW(SDL_RWFromFile(imagePath, "rb"), 1)
         if (bmp == null) {
             SDL_DestroyRenderer(ren)
             SDL_DestroyWindow(win)
@@ -298,7 +298,6 @@ class SDL_Visualizer(val width: Int, val height: Int): GameFieldVisualizer, User
         for (i in 0..width - 1) {
             copyRect(srcX, srcY, destX, destY, CELL_SIZE + MARGIN, BORDER_WIDTH)
             destX += CELL_SIZE + MARGIN
-
         }
         // Right-down corner.
         srcX += CELL_SIZE + MARGIN

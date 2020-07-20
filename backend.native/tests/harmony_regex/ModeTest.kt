@@ -113,5 +113,4 @@ class ModeTest {
         assertEquals("4", result!!.groupValues[1])
         assertNull(result.next())
     }
-
 }

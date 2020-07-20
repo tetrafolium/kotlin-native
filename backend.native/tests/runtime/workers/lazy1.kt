@@ -35,7 +35,7 @@ class Lazy {
 
 @Test fun runTest2() {
     var sum = 0
-    for (i in 1 .. 100) {
+    for (i in 1..100) {
         val self = Lazy().freeze()
         assertEquals(self, self.self)
         sum += self.self.hashCode()

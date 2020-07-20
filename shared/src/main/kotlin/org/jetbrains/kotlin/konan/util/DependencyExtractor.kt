@@ -69,5 +69,4 @@ class DependencyExtractor(
         val extractionTimeout = 3600L
         val extractionTimeoutUntis = TimeUnit.SECONDS
     }
-
 }

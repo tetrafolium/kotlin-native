@@ -46,8 +46,8 @@ class KonanConfig(val project: Project, val configuration: CompilerConfiguration
     val memoryModel: MemoryModel get() = configuration.get(KonanConfigKeys.MEMORY_MODEL)!!
 
     val needCompilerVerification: Boolean
-        get() = configuration.get(KonanConfigKeys.VERIFY_COMPILER) ?:
-            (configuration.getBoolean(KonanConfigKeys.OPTIMIZATION) ||
+        get() = configuration.get(KonanConfigKeys.VERIFY_COMPILER)
+            ?: (configuration.getBoolean(KonanConfigKeys.OPTIMIZATION) ||
                 CompilerVersion.CURRENT.meta != MetaVersion.RELEASE)
 
     init {
@@ -101,9 +101,9 @@ class KonanConfig(val project: Project, val configuration: CompilerConfiguration
     val shortModuleName: String?
         get() = configuration.get(KonanConfigKeys.SHORT_MODULE_NAME)
 
-    val infoArgsOnly = configuration.kotlinSourceRoots.isEmpty()
-            && configuration[KonanConfigKeys.INCLUDED_LIBRARIES].isNullOrEmpty()
-            && librariesToCache.isEmpty()
+    val infoArgsOnly = configuration.kotlinSourceRoots.isEmpty() &&
+            configuration[KonanConfigKeys.INCLUDED_LIBRARIES].isNullOrEmpty() &&
+            librariesToCache.isEmpty()
 
     fun librariesWithDependencies(moduleDescriptor: ModuleDescriptor?): List<KonanLibrary> {
         if (moduleDescriptor == null) error("purgeUnneeded() only works correctly after resolve is over, and we have successfully marked package files as needed or not needed.")
@@ -164,5 +164,5 @@ class KonanConfig(val project: Project, val configuration: CompilerConfiguration
     internal val isInteropStubs: Boolean get() = manifestProperties?.getProperty("interop") == "true"
 }
 
-fun CompilerConfiguration.report(priority: CompilerMessageSeverity, message: String) 
-    = this.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY).report(priority, message)
+fun CompilerConfiguration.report(priority: CompilerMessageSeverity, message: String) = 
+    this.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY).report(priority, message)

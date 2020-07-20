@@ -515,13 +515,13 @@ class HTMLRender: Render() {
                             td { +"${report.regressions.size}" }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        maximumRegression/maxOf(maximumRegression, abs(maximumImprovement)))
+                                        maximumRegression / maxOf(maximumRegression, abs(maximumImprovement)))
                                         .backgroundStyle
                                 +formatValue(maximumRegression, true)
                             }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        regressionsGeometricMean/maxOf(regressionsGeometricMean,
+                                        regressionsGeometricMean / maxOf(regressionsGeometricMean,
                                                             abs(improvementsGeometricMean)))
                                         .backgroundStyle
                                 +formatValue(report.regressionsGeometricMean, true)
@@ -534,13 +534,13 @@ class HTMLRender: Render() {
                             td { +"${report.improvements.size}" }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        maximumImprovement/maxOf(maximumRegression, abs(maximumImprovement)))
+                                        maximumImprovement / maxOf(maximumRegression, abs(maximumImprovement)))
                                         .backgroundStyle
                                 +formatValue(report.maximumImprovement, true)
                             }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        improvementsGeometricMean/maxOf(regressionsGeometricMean,
+                                        improvementsGeometricMean / maxOf(regressionsGeometricMean,
                                                         abs(improvementsGeometricMean)))
                                         .backgroundStyle
                                 +formatValue(report.improvementsGeometricMean, true)
@@ -618,8 +618,8 @@ class HTMLRender: Render() {
                     th { +"Ratio" }
                 }
             }
-            val geoMeanChangeMap = report.geoMeanScoreChange?.
-                    let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
+            val geoMeanChangeMap = report.geoMeanScoreChange
+                    ?.let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
 
             tbody {
                 renderBenchmarksDetails(
@@ -654,7 +654,7 @@ class HTMLRender: Render() {
     class ColoredCell(val scaledValue: Double?, val reverse: Boolean = false,
                       val borderPositive: (cellValue: Double) -> Boolean = { cellValue -> cellValue > 0 }) {
         val value: Double
-        val neutralColor = Color(1.0,1.0 , 1.0)
+        val neutralColor = Color(1.0, 1.0, 1.0)
         val negativeColor = Color(0.0, 1.0, 0.0)
         val positiveColor = Color(1.0, 0.0, 0.0)
 

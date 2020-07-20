@@ -5,10 +5,6 @@
 @file:OptIn(ExperimentalCli::class)
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
-import kotlinx.cli.ExperimentalCli
-import kotlinx.cli.Subcommand
 import kotlin.test.*
 
 class SubcommandsTests {

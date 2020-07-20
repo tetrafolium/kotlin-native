@@ -43,7 +43,6 @@ class TestCollection(): AbstractMutableCollection<Int>() {
     override fun clear() {
         len = 0
     }
-
 }
 
 fun assertEquals(a: TestCollection, b: List<Int>) {

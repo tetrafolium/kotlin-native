@@ -20,8 +20,7 @@ class C1: C() {
         }
 }
 
-open class C2: C() {
-}
+open class C2: C()
 
 class C3: C2() {
     override var p2 = super<C2>.p2 + "<prop:C3>"

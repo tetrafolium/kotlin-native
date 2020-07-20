@@ -22,7 +22,7 @@ internal object NativeRandom : Random() {
 
     private fun mult(value: Long) = (value xor MULTIPLIER) and ((1L shl 48) - 1)
 
-    private fun update(seed: Long): Unit {
+    private fun update(seed: Long) {
         _seed.value = seed
     }
 

@@ -58,14 +58,14 @@ public class AtomicInt(private var value_: Int) {
     /**
      * Increments value by one.
      */
-    public fun increment(): Unit {
+    public fun increment() {
         addAndGet(1)
     }
 
     /**
      * Decrements value by one.
      */
-    public fun decrement(): Unit {
+    public fun decrement() {
         addAndGet(-1)
     }
 
@@ -133,14 +133,14 @@ public class AtomicLong(private var value_: Long = 0)  {
     /**
      * Increments value by one.
      */
-    public fun increment(): Unit {
+    public fun increment() {
         addAndGet(1L)
     }
 
     /**
      * Decrements value by one.
      */
-    fun decrement(): Unit {
+    fun decrement() {
         addAndGet(-1L)
     }
 

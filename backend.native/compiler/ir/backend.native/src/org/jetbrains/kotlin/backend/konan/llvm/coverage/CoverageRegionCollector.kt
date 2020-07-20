@@ -103,8 +103,8 @@ private class IrFunctionRegionsCollector(
     override fun visitConstructor(declaration: IrConstructor) {
         val statements = declaration.body?.statements ?: return
         visitInStatementContext(statements) { statement ->
-            if (statement is IrDelegatingConstructorCall && !declaration.isPrimary
-                    || statement !is IrDelegatingConstructorCall && statement !is IrReturn) {
+            if (statement is IrDelegatingConstructorCall && !declaration.isPrimary ||
+                    statement !is IrDelegatingConstructorCall && statement !is IrReturn) {
                 recordRegion(statement)
                 statement.acceptVoid(this)
             }
@@ -209,12 +209,12 @@ private class IrFunctionRegionsCollector(
         }
     }
 
-    private fun recordRegion(irElement: IrElement, kind: RegionKind = RegionKind.Code)
-            = Region.fromIr(irElement, currentFile, kind)?.also { regions[irElement] = it }
+    private fun recordRegion(irElement: IrElement, kind: RegionKind = RegionKind.Code) =
+            Region.fromIr(irElement, currentFile, kind)?.also { regions[irElement] = it }
 
-    private fun recordRegion(irElement: IrElement, startOffset: Int, endOffset: Int, kind: RegionKind = RegionKind.Code)
-            = Region.fromOffset(startOffset, endOffset, currentFile, kind)?.also { regions[irElement] = it }
+    private fun recordRegion(irElement: IrElement, startOffset: Int, endOffset: Int, kind: RegionKind = RegionKind.Code) =
+            Region.fromOffset(startOffset, endOffset, currentFile, kind)?.also { regions[irElement] = it }
 
-    private fun IrElement.hasValidOffsets() = startOffset != UNDEFINED_OFFSET && endOffset != UNDEFINED_OFFSET
-            && startOffset != endOffset
+    private fun IrElement.hasValidOffsets() = startOffset != UNDEFINED_OFFSET && endOffset != UNDEFINED_OFFSET &&
+            startOffset != endOffset
 }

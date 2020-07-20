@@ -166,7 +166,7 @@ public enum class CharCategory(public val value: Int, public val code: String) {
     public companion object {
         public fun valueOf(category: Int): CharCategory =
             when {
-                category >=0 && category <= 16 -> values()[category]
+                category >= 0 && category <= 16 -> values()[category]
                 category >= 18 && category <= 30 -> values()[category - 1]
                 else -> throw IllegalArgumentException("Category #$category is not defined.")
             }

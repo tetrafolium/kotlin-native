@@ -258,7 +258,7 @@ class MyException : Exception()
 class MyError : Error()
 
 @Throws(MyException::class, MyError::class)
-fun throwException(error: Boolean): Unit {
+fun throwException(error: Boolean) {
     throw if (error) MyError() else MyException()
 }
 
@@ -306,7 +306,7 @@ open class Throwing : MethodsWithThrows {
 class NotThrowing : MethodsWithThrows {
     @Throws(MyException::class) constructor() {}
 
-    override fun unit(): Unit {}
+    override fun unit() {}
     override fun nothing(): Nothing = throw MyException()
     override fun nothingN(): Nothing? = null
     override fun any(): Any = Any()
@@ -796,7 +796,6 @@ open class TestDeprecation() {
 
     @Suppress("DEPRECATION_ERROR") fun test(extendingHiddenNested: ExtendingHidden.Nested) {}
     @Suppress("DEPRECATION_ERROR") fun test(extendingNestedInHidden: ExtendingNestedInHidden) {}
-
 }
 
 @Deprecated("hidden", level = DeprecationLevel.HIDDEN) class TopLevelHidden {

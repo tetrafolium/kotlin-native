@@ -110,8 +110,8 @@ internal class ObjCExportLazyImpl(
         val result = mutableListOf<ObjCClass<*>>()
         container.declarations.forEach { declaration ->
             // Supposed to be true if ObjCExportMapper.shouldBeVisible is true.
-            if (declaration is KtClassOrObject && declaration.isPublic && declaration !is KtEnumEntry
-                    && !declaration.hasExpectModifier()) {
+            if (declaration is KtClassOrObject && declaration.isPublic && declaration !is KtEnumEntry &&
+                    !declaration.hasExpectModifier()) {
 
                 if (!declaration.isAnnotation() && !declaration.hasModifier(KtTokens.INLINE_KEYWORD)) {
                     result += translateClass(declaration)

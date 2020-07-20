@@ -44,9 +44,9 @@ internal class OverriddenFunctionInfo(
         }
 
     val inheritsBridge: Boolean
-        get() = !function.isReal
-                && function.target.overrides(overriddenFunction)
-                && function.bridgeDirectionsTo(overriddenFunction).allNotNeeded()
+        get() = !function.isReal &&
+                function.target.overrides(overriddenFunction) &&
+                function.bridgeDirectionsTo(overriddenFunction).allNotNeeded()
 
     fun getImplementation(context: Context): IrSimpleFunction? {
 

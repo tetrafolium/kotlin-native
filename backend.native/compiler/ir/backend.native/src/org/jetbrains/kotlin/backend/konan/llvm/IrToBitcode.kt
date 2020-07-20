@@ -294,7 +294,7 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
     }
 
     private fun <T:IrElement> findCodeContext(entry: T, context:CodeContext?, predicate: CodeContext.(T) -> Boolean): CodeContext? {
-        if(context == null)
+        if (context == null)
             //TODO: replace `return null` with `throw NoContextFound()` ASAP.
             return null
         if (context.predicate(entry))
@@ -318,7 +318,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
             override fun location(offset: Int): LocationInfo? = functionContext.location(offset)
 
             override fun scope(): DIScopeOpaqueRef? = functionContext.scope()
-
         }) {
             return block()
         }
@@ -702,9 +701,9 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
 
         val body = declaration.body
 
-        if ((declaration as? IrSimpleFunction)?.modality == Modality.ABSTRACT
-                || declaration.isExternal
-                || body == null)
+        if ((declaration as? IrSimpleFunction)?.modality == Modality.ABSTRACT ||
+                declaration.isExternal ||
+                body == null)
             return
 
         generateFunction(codegen, declaration,
@@ -1200,8 +1199,8 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
     // Checks if the branch is unconditional
 
     private fun isUnconditional(branch: IrBranch): Boolean =
-            branch.condition is IrConst<*>                            // If branch condition is constant.
-                    && (branch.condition as IrConst<*>).value as Boolean  // If condition is "true"
+            branch.condition is IrConst<*> &&                            // If branch condition is constant.
+                    (branch.condition as IrConst<*>).value as Boolean  // If condition is "true"
 
     //-------------------------------------------------------------------------//
 
@@ -1220,7 +1219,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
 
             functionGenerationContext.br(loopScope.loopCheck)
             functionGenerationContext.positionAtEnd(loopScope.loopExit)
-
         }
 
         assert(loop.type.isUnit())
@@ -1297,7 +1295,7 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
         }
     }
 
-    private fun shouldGenerateDebugInfo(variable: IrVariable) = when(variable.origin) {
+    private fun shouldGenerateDebugInfo(variable: IrVariable) = when (variable.origin) {
         IrDeclarationOrigin.FOR_LOOP_IMPLICIT_VARIABLE,
         IrDeclarationOrigin.FOR_LOOP_ITERATOR,
         IrDeclarationOrigin.IR_TEMPORARY_VARIABLE -> false
@@ -1504,8 +1502,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
             }.let {
                 functionGenerationContext.icmpNe(it, kFalse)
             }
-
-
         } else {
             // e.g. ObjCObject, ObjCObjectBase etc.
             if (dstClass.isObjCMetaClass()) {
@@ -1564,7 +1560,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
         }.also {
             if (value.type.classifierOrNull?.isClassWithFqName(vectorType) == true)
                 LLVMSetAlignment(it, 8)
-
         }
     }
 
@@ -1728,7 +1723,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
         }
 
         override fun scope() = scope
-
     }
 
     //-------------------------------------------------------------------------//
@@ -1939,7 +1933,6 @@ internal class CodeGeneratorVisitor(val context: Context, val lifetimes: Map<IrE
                 }
             } as DIScopeOpaqueRef
         }
-
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -2496,7 +2489,7 @@ private val underscoreThisName = Name.identifier("_this")
  *   1. <this> isn't accepted by libclang as valid variable name.
  *   2. this is reserved name and compiled in special way.
  */
-private fun Name.debugNameConversion(): Name = when(this) {
+private fun Name.debugNameConversion(): Name = when (this) {
     thisName -> underscoreThisName
     else -> this
 }

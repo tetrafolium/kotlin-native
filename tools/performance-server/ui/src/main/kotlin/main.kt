@@ -165,16 +165,16 @@ fun customizeChart(chart: dynamic, chartContainer: String, jquerySelector: dynam
             if (currentBuild.failuresNumber > 0) {
                 val svgParameters: dynamic = object{}
                 svgParameters["d"] = arrayOf("M", data.x, data.y - pointSize,
-                        "L", data.x - pointSize, data.y + pointSize/2,
-                        "L", data.x + pointSize, data.y + pointSize/2, "z").joinToString(" ")
+                        "L", data.x - pointSize, data.y + pointSize / 2,
+                        "L", data.x + pointSize, data.y + pointSize / 2, "z").joinToString(" ")
                 svgParameters["style"] = "fill:rgb(255,0,0);stroke-width:0"
                 val triangle = Chartist.Svg("path", svgParameters, chartContainer)
                 element = data.element.replace(triangle)
             } else if (currentBuild.buildNumber == parameters["build"]) {
                 // Higlight choosen build.
                 val svgParameters: dynamic = object{}
-                svgParameters["x"] = data.x - pointSize/2
-                svgParameters["y"] = data.y - pointSize/2
+                svgParameters["x"] = data.x - pointSize / 2
+                svgParameters["y"] = data.y - pointSize / 2
                 svgParameters["height"] = pointSize
                 svgParameters["width"] = pointSize
                 svgParameters["style"] = "fill:rgb(0,0,255);stroke-width:0"
@@ -202,7 +202,6 @@ fun customizeChart(chart: dynamic, chartContainer: String, jquerySelector: dynam
                     if (!it.isEmpty())
                         append("${it.substringBefore("by").substring(0, 7)} by ${it.substringAfter("by ")}<br>")
                 }
-
             }
             element._node.setAttribute("title", information)
             element._node.setAttribute("data-chart-tooltip", chartContainer)

@@ -87,7 +87,7 @@ public actual fun <T, K> Grouping<T, K>.eachCount(): Map<K, Int> = eachCountTo(m
  * Each element in the list gets replaced with the [value].
  */
 @SinceKotlin("1.2")
-public actual fun <T> MutableList<T>.fill(value: T): Unit {
+public actual fun <T> MutableList<T>.fill(value: T) {
     for (index in 0..lastIndex) {
         this[index] = value
     }
@@ -99,7 +99,7 @@ public actual fun <T> MutableList<T>.fill(value: T): Unit {
  * See: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
  */
 @SinceKotlin("1.2")
-public actual fun <T> MutableList<T>.shuffle(): Unit {
+public actual fun <T> MutableList<T>.shuffle() {
     for (i in lastIndex downTo 1) {
         val j = Random.nextInt(i + 1)
         val copy = this[i]

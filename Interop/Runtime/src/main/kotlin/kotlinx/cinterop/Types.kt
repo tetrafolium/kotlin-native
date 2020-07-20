@@ -99,7 +99,7 @@ public abstract class CValues<T : CVariable> : CValuesRef<T>() {
             return false
         }
 
-        for (index in 0 .. thisBytes.size - 1) {
+        for (index in 0..thisBytes.size - 1) {
             if (thisBytes[index] != otherBytes[index]) {
                 return false
             }
@@ -221,7 +221,6 @@ public abstract class CVariable(rawPtr: NativePtr) : CPointed(rawPtr) {
         init {
             require(size % align == 0L)
         }
-
     }
 }
 

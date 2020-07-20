@@ -8,8 +8,7 @@ fun exception() {
 fun main() {
     try {
         exception()
-    }
-    catch (e:Exception) {
+    } catch (e:Exception) {
         val stackTrace = e.getStackTrace()
         stackTrace.take(6).forEach(::checkFrame)
     }

@@ -190,7 +190,7 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
      *
      * @return An instance of [MatchResult] if the entire input matches or `null` otherwise.
      */
-    actual fun matchEntire(input: CharSequence): MatchResult?= doMatch(input, Mode.MATCH)
+    actual fun matchEntire(input: CharSequence): MatchResult? = doMatch(input, Mode.MATCH)
 
     private fun processReplacement(match: MatchResult, replacement: String): String {
         val result = StringBuilder(replacement.length)
@@ -230,8 +230,8 @@ public actual class Regex internal constructor(internal val nativePattern: Patte
      *
      * @param replacement A replacement expression that can include substitutions.
      */
-    actual fun replace(input: CharSequence, replacement: String): String
-            = replace(input) { match -> processReplacement(match, replacement) }
+    actual fun replace(input: CharSequence, replacement: String): String =
+            replace(input) { match -> processReplacement(match, replacement) }
 
     /**
      * Replaces all occurrences of this regular expression in the specified [input] string with the result of

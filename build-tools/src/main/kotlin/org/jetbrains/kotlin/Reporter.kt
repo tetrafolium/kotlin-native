@@ -26,7 +26,6 @@ internal object Tc {
     val buildTypeId = buildConfig?.getProperty("teamcity.buildType.id")
     val konanReporterToken = buildConfig?.getProperty("konan-reporter-token")
     val konanChannelName = buildConfig?.getProperty("konan-channel-name")
-
 }
 
 private fun buildLogUrlTab(buildId: String?, buildTypeId: String?): String = tabUrl(buildId, buildTypeId, "buildLog")
@@ -77,8 +76,8 @@ open class Reporter : DefaultTask() {
     }
 }
 
-private fun DefaultTask.doSlackSending() = !project.hasProperty("build.reporter.noSlack")
-        || !project.property("build.reporter.noSlack").toString().toBoolean()
+private fun DefaultTask.doSlackSending() = !project.hasProperty("build.reporter.noSlack") ||
+        !project.property("build.reporter.noSlack").toString().toBoolean()
 
 open class NightlyReporter: DefaultTask() {
     @Input

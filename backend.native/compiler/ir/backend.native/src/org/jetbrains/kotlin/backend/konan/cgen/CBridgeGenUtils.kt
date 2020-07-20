@@ -63,7 +63,6 @@ internal class CFunctionBuilder {
         }
         append(')')
     })
-
 }
 
 internal class KotlinBridgeBuilder(

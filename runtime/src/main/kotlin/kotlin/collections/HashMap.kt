@@ -509,7 +509,6 @@ actual class HashMap<K, V> private constructor(
             initNext()
             return result
         }
-
     }
 
     internal class ValuesItr<K, V>(map: HashMap<K, V>) : Itr<K, V>(map), MutableIterator<V> {

@@ -125,7 +125,7 @@ fun <T: Any> checkThrows(e: KClass<T>, string: String, action: () -> Unit) {
         exception = e
     }
     assertNotNull(exception, "No exception was thrown for string: $string")
-    assertTrue(e.isInstance(exception),"""
+    assertTrue(e.isInstance(exception), """
                 Wrong exception was thrown for string: $string
                 Expected: ${e.qualifiedName}
                 Actual: ${exception::class.qualifiedName}: $exception}
@@ -141,8 +141,8 @@ fun checkUtf16to8Throws(string: String, start: Int, size: Int) {
 
 
 // Utils for checking malformed UTF-8 to UTF-16 conversion.
-fun <T: Any> checkUtf8to16Throws(e: KClass<T>, string: String, array: IntArray, conversion: ByteArray.() -> String)
-        = checkThrows(e, string) {
+fun <T: Any> checkUtf8to16Throws(e: KClass<T>, string: String, array: IntArray, conversion: ByteArray.() -> String) =
+        checkThrows(e, string) {
     array.forEach {
         assertTrue(it in Byte.MIN_VALUE..Byte.MAX_VALUE, "Expected array contains illegal values")
     }
@@ -369,7 +369,7 @@ fun test8to16() {
 fun test8to16CustomBorders() {
     // Valid strings.
     checkValidUtf8to16("He",
-            intArrayOf('H'.toInt(), 'e'.toInt(), 'l'.toInt(), 'l'.toInt(), 'o'.toInt()),0, 2)
+            intArrayOf('H'.toInt(), 'e'.toInt(), 'l'.toInt(), 'l'.toInt(), 'o'.toInt()), 0, 2)
     checkValidUtf8to16("ll",
             intArrayOf('H'.toInt(), 'e'.toInt(), 'l'.toInt(), 'l'.toInt(), 'o'.toInt()), 2, 2)
     checkValidUtf8to16("lo",

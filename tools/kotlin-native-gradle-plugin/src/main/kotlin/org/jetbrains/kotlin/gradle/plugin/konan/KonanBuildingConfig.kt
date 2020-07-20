@@ -56,7 +56,7 @@ abstract class KonanBuildingConfig<T: KonanBuildingTask>(private val name_: Stri
                 continue
             }
             if (!targetIsSupported(konanTarget)) {
-                project.logger.info("The target ${targetName} is not supported by the artifact $name")
+                project.logger.info("The target $targetName is not supported by the artifact $name")
                 continue
             }
             if (this[konanTarget] == null) {
@@ -143,7 +143,7 @@ abstract class KonanBuildingConfig<T: KonanBuildingTask>(private val name_: Stri
 
     internal operator fun get(target: KonanTarget) = targetToTask[target]
 
-    fun getByTarget(target: String) = findByTarget(target) ?: throw NoSuchElementException("No such target for artifact $name: ${target}")
+    fun getByTarget(target: String) = findByTarget(target) ?: throw NoSuchElementException("No such target for artifact $name: $target")
     fun findByTarget(target: String) = this[project.hostManager.targetByName(target)]
 
     fun getArtifactByTarget(target: String) = getByTarget(target).artifact
@@ -177,8 +177,8 @@ abstract class KonanBuildingConfig<T: KonanBuildingTask>(private val name_: Stri
             return
         }
 
-        val task = this[target] ?:
-                throw InvalidUserDataException("Target '$targetString' is not declared. Please add it into project.konanTasks list")
+        val task = this[target]
+                ?: throw InvalidUserDataException("Target '$targetString' is not declared. Please add it into project.konanTasks list")
         task.configureAction()
     }
     fun target(targetString: String, configureAction: Action<T>) =

@@ -43,7 +43,7 @@ class KonanLibrariesResolveSupport(
     private val resolverLogger =
             object : Logger {
                 private val collector = configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY)
-                override fun warning(message: String)= collector.report(CompilerMessageSeverity.STRONG_WARNING, message)
+                override fun warning(message: String) = collector.report(CompilerMessageSeverity.STRONG_WARNING, message)
                 override fun error(message: String) = collector.report(CompilerMessageSeverity.ERROR, message)
                 override fun log(message: String) = collector.report(CompilerMessageSeverity.LOGGING, message)
                 override fun fatal(message: String): Nothing {

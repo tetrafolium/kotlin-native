@@ -135,7 +135,7 @@ private object PredefinedTypesHandler {
     }
 
     private fun expandCOpaquePointerVar(nullable: Boolean): AbbreviatedType {
-        val typeArgument = TypeArgumentStub(expandCOpaquePointer(nullable=false))
+        val typeArgument = TypeArgumentStub(expandCOpaquePointer(nullable = false))
         val underlyingType = ClassifierStubType(
                 KotlinTypes.cPointerVarOf, listOf(typeArgument), nullable = nullable
         )

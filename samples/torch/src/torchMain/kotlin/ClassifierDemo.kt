@@ -22,8 +22,8 @@ fun List<Float>.maxIndex() = withIndex().maxBy { it.value }!!.index
 fun accuracy(predictionBatch: FloatMatrix, labelBatch: FloatMatrix): Float {
     val resultIndexes = predictionBatch.toList().map { it.maxIndex() }
     val labelBatchIndexes = labelBatch.toList().map { it.maxIndex() }
-    return resultIndexes.zip(labelBatchIndexes).
-            count { (result, label) -> result == label }.toFloat() / resultIndexes.size
+    return resultIndexes.zip(labelBatchIndexes)
+            .count { (result, label) -> result == label }.toFloat() / resultIndexes.size
 }
 
 fun Backpropagatable<FloatMatrix, FloatMatrix>.trainClassifier(

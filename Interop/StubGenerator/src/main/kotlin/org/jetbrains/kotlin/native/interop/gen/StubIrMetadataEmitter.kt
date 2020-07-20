@@ -345,8 +345,8 @@ private class MappingExtensions(
                 Flag.IS_PUBLIC,
                 Flag.IS_OPEN.takeIf { this is ClassStub.Simple && modality == ClassStubModality.OPEN },
                 Flag.IS_FINAL.takeIf { this is ClassStub.Simple && modality == ClassStubModality.NONE },
-                Flag.IS_ABSTRACT.takeIf { this is ClassStub.Simple
-                        && (modality == ClassStubModality.ABSTRACT || modality == ClassStubModality.INTERFACE) },
+                Flag.IS_ABSTRACT.takeIf { this is ClassStub.Simple &&
+                        (modality == ClassStubModality.ABSTRACT || modality == ClassStubModality.INTERFACE) },
                 Flag.Class.IS_INTERFACE.takeIf { this is ClassStub.Simple && modality == ClassStubModality.INTERFACE },
                 Flag.Class.IS_COMPANION_OBJECT.takeIf { this is ClassStub.Companion },
                 Flag.Class.IS_CLASS.takeIf { this is ClassStub.Simple && modality != ClassStubModality.INTERFACE },

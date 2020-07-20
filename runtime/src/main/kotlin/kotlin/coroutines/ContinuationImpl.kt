@@ -6,7 +6,6 @@
 package kotlin.coroutines.native.internal
 
 import kotlin.coroutines.*
-import kotlin.coroutines.intrinsics.CoroutineSingletons
 import kotlin.coroutines.intrinsics.*
 
 @SinceKotlin("1.3")

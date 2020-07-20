@@ -148,7 +148,7 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
     protected open fun KotlinNativeTarget.configureNativeOutput(project: Project) {
         binaries.executable(NATIVE_EXECUTABLE_NAME, listOf(project.benchmark.buildType)) {
             if (HostManager.hostIsMingw) {
-                linkerOpts.add("-L${mingwPath}/lib")
+                linkerOpts.add("-L$mingwPath/lib")
             }
 
             runTask!!.apply {

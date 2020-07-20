@@ -69,10 +69,10 @@ internal val <T : CallableMemberDescriptor> T.allOverriddenDescriptors: List<T>
     }
 
 internal val ClassDescriptor.contributedMethods: List<FunctionDescriptor>
-    get () = unsubstitutedMemberScope.contributedMethods
+    get() = unsubstitutedMemberScope.contributedMethods
 
 internal val MemberScope.contributedMethods: List<FunctionDescriptor>
-    get () {
+    get() {
         val contributedDescriptors = this.getContributedDescriptors()
 
         val functions = contributedDescriptors.filterIsInstance<FunctionDescriptor>()

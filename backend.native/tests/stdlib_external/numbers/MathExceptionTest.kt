@@ -17,5 +17,4 @@ class MathExceptionTest {
         assertFails { Float.NaN.roundToLong() }
         assertFails { Float.NaN.roundToInt() }
     }
-
 }

@@ -88,7 +88,6 @@ class MatchResultTest {
                 assertEquals(groupResults[i][j], result.groupValues[j + 1], "i: $i j: $j")
             }
         }
-
     }
 
     @Test fun testGroup() {
@@ -399,7 +398,6 @@ class MatchResultTest {
         assertTrue(Regex("[a-d\\p{Lu}]").matches("K"))
 
         assertFalse(Regex("[\\p{L}&&[^\\p{Lu}&&[^G]]]").matches("K"))
-
     }
 
     @Test fun testSplitEmpty() {

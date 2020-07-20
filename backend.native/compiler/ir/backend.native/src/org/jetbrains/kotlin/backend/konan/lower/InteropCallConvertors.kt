@@ -64,13 +64,13 @@ private class InteropCallContext(
     fun IrType.isStoredInMemoryDirectly(): Boolean =
             isPrimitiveType() || isUnsigned() || isVector()
 
-    fun IrType.isSupportedReference(): Boolean = isObjCObjectType()
-            || getClass()?.isAny() == true
-            || isStringClassType()
-            || classOrNull == symbols.list
-            || classOrNull == symbols.mutableList
-            || classOrNull == symbols.set
-            || classOrNull == symbols.map
+    fun IrType.isSupportedReference(): Boolean = isObjCObjectType() ||
+            getClass()?.isAny() == true ||
+            isStringClassType() ||
+            classOrNull == symbols.list ||
+            classOrNull == symbols.mutableList ||
+            classOrNull == symbols.set ||
+            classOrNull == symbols.map
 
     val irBuiltIns: IrBuiltIns = builder.context.irBuiltIns
 }

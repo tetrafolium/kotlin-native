@@ -16,15 +16,13 @@
 
 package org.jetbrains.benchmarksLauncher
 
-import org.jetbrains.report.BenchmarkResult
-
 interface AbstractBenchmarkEntry {
     open val useAutoEvaluatedNumberOfMeasure: Boolean
 }
 
-class BenchmarkEntryWithInit(val ctor: ()->Any, val lambda: (Any) -> Any?): AbstractBenchmarkEntry {
+class BenchmarkEntryWithInit(val ctor: () -> Any, val lambda: (Any) -> Any?): AbstractBenchmarkEntry {
     companion object {
-        inline fun <T: Any> create(noinline ctor: ()->T, crossinline lambda: T.() -> Any?) = BenchmarkEntryWithInit(ctor) { (it as T).lambda() }
+        inline fun <T: Any> create(noinline ctor: () -> T, crossinline lambda: T.() -> Any?) = BenchmarkEntryWithInit(ctor) { (it as T).lambda() }
     }
 
     override val useAutoEvaluatedNumberOfMeasure: Boolean = true

@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.konan.exec.Command
 import org.jetbrains.kotlin.konan.file.*
 import org.jetbrains.kotlin.konan.target.ClangArgs
-import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.KonanTarget
 
 class CStubsManager(private val target: KonanTarget) {

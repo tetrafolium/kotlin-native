@@ -9,7 +9,6 @@ class A(val prop: Int) {
     }
 
     fun action2() {
-
     }
 }
 

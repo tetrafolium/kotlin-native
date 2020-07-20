@@ -207,7 +207,6 @@ class SimpleBridgeGeneratorImpl(
         insertNativeBridge(nativeBacked, kotlinLines, nativeLines)
 
         return "$symbolName(${nativeValues.joinToString { it.value }})"
-
     }
 
     override fun insertNativeBridge(nativeBacked: NativeBacked, kotlinLines: List<String>, nativeLines: List<String>) {

@@ -6,7 +6,7 @@ enum class GenerationMode {
     SOURCE_CODE, METADATA
 }
 
-fun parseGenerationMode(mode: String): GenerationMode? = when(mode) {
+fun parseGenerationMode(mode: String): GenerationMode? = when (mode) {
     CommonInteropArguments.MODE_METADATA -> GenerationMode.METADATA
     CommonInteropArguments.MODE_SOURCECODE -> GenerationMode.SOURCE_CODE
     else -> null

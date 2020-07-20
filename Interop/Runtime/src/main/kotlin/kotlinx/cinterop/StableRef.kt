@@ -68,7 +68,6 @@ public inline class StableRef<out T : Any> @PublishedApi internal constructor(
      */
     @Suppress("UNCHECKED_CAST")
     fun get() = derefStablePointer(this.stablePtr) as T
-
 }
 
 /**

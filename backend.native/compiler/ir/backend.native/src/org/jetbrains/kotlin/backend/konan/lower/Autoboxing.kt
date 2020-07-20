@@ -47,7 +47,6 @@ internal class Autoboxing(val context: Context) : FileLoweringPass {
         irFile.transformChildrenVoid(transformer)
         irFile.transform(InlineClassTransformer(context), data = null)
     }
-
 }
 
 private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTransformer(
@@ -204,7 +203,6 @@ private class AutoboxingTransformer(val context: Context) : AbstractValueUsageTr
             else -> super.visitCall(expression)
         }
     }
-
 }
 
 private class InlineClassTransformer(private val context: Context) : IrBuildingTransformer(context) {
@@ -479,7 +477,6 @@ private class InlineClassTransformer(private val context: Context) : IrBuildingT
 
                         return expression
                     }
-
                 }, null)
             }
             +irReturn(irGet(thisVar))

@@ -98,8 +98,8 @@ open class BuildRegister : DefaultTask() {
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))
@@ -111,7 +111,7 @@ open class BuildRegister : DefaultTask() {
 
         // Get branch.
         val currentBuild = getBuild("id:$buildId", teamCityUser, teamCityPassword)
-        val branch = getBuildProperty(currentBuild,"branchName")
+        val branch = getBuildProperty(currentBuild, "branchName")
 
         val target = System.getProperty("os.name").replace("\\s".toRegex(), "")
 
@@ -196,6 +196,5 @@ open class BuildRegister : DefaultTask() {
         } else {
             println("Skipping registration. Current branch $branch, need registration for $onlyBranch!")
         }
-
     }
 }

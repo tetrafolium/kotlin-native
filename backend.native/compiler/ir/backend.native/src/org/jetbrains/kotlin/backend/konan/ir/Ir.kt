@@ -304,10 +304,10 @@ internal class KonanSymbols(
         val functionDescriptor = kotlinCollectionsPackageScope
                 .getContributedFunctions(Name.identifier(name), NoLookupLocation.FROM_BACKEND)
                 .singleOrNull {
-                    it.valueParameters.isEmpty()
-                            && it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == descriptor
-                            && it.extensionReceiverParameter?.type?.isMarkedNullable == false
-                            && !it.isExpect
+                    it.valueParameters.isEmpty() &&
+                            it.extensionReceiverParameter?.type?.constructor?.declarationDescriptor == descriptor &&
+                            it.extensionReceiverParameter?.type?.isMarkedNullable == false &&
+                            !it.isExpect
                 } ?: error(descriptor.toString())
         return symbolTable.referenceSimpleFunction(functionDescriptor)
     }

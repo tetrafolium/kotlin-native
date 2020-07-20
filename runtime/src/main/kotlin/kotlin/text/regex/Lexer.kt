@@ -88,7 +88,7 @@ internal class Lexer(val patternString: String, flags: Int) {
     private var savedMode = Mode.PATTERN
 
     fun setModeWithReread(value: Mode) {
-        if(value == Mode.PATTERN || value == Mode.RANGE) {
+        if (value == Mode.PATTERN || value == Mode.RANGE) {
             mode = value
         }
         if (mode == Mode.PATTERN) {
@@ -560,7 +560,7 @@ internal class Lexer(val patternString: String, flags: Int) {
             }
         }
 
-        if (min < 0 || max >=0 && max < min) {
+        if (min < 0 || max >= 0 && max < min) {
             throw PatternSyntaxException("Incorrect Quantifier Syntax", patternString, curTokenIndex)
         }
 

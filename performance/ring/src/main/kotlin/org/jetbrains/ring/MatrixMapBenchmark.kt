@@ -16,18 +16,17 @@
 
 package org.jetbrains.ring
 
-import org.jetbrains.benchmarksLauncher.Blackhole
 import org.jetbrains.benchmarksLauncher.Random
 
 /**
  * This class emulates matrix behaviour using a hash map as its implementation
  */
 class KMatrix internal constructor(val rows: Int, val columns: Int) {
-    private val matrix: MutableMap<Pair<Int, Int>, Double> = HashMap();
+    private val matrix: MutableMap<Pair<Int, Int>, Double> = HashMap()
 
     init {
-        for (row in 0..rows-1) {
-            for (col in 0..columns-1) {
+        for (row in 0..rows - 1) {
+            for (col in 0..columns - 1) {
                 matrix.put(Pair(row, col), Random.nextDouble())
             }
         }
@@ -70,5 +69,4 @@ open class MatrixMapBenchmark {
         a += b
         return a
     }
-
 }

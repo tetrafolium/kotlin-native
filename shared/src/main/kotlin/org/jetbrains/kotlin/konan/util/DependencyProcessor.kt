@@ -27,8 +27,6 @@ import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
 import java.nio.file.Paths
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 private val Properties.dependenciesUrl : String
     get() = getProperty("dependenciesUrl")

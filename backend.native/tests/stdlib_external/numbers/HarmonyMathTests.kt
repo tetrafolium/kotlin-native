@@ -371,8 +371,8 @@ class HarmonyMath {
         var d = 10.0
         while (d >= -10) {
             val answer = ln(exp(d))
-            assertTrue("Answer does not equal expected answer for d = " + d
-                    + " answer = " + answer, abs(answer - d) <= abs(d * 0.00000001))
+            assertTrue("Answer does not equal expected answer for d = " + d +
+                    " answer = " + answer, abs(answer - d) <= abs(d * 0.00000001))
             d -= 0.5
         }
     }
@@ -546,7 +546,6 @@ class HarmonyMath {
         assertEquals("Incorrect int min value", 20, min(20, 19088976))
         assertEquals("Incorrect int min value",
                 -19088976, min(-20, -19088976))
-
     }
 
     /**
@@ -676,7 +675,6 @@ class HarmonyMath {
         // Test for tan(Double): Double
         assertEquals("Incorrect answer", 0.0, tan(0.0), 0.0)
         assertEquals("Incorrect answer", 1.5574077246549023, tan(1.0))
-
     }
 
     /**

@@ -8,8 +8,8 @@ package codegen.basics.check_type
 import kotlin.test.*
 
 interface I
-class A() : I {}
-class B() {}
+class A() : I
+class B()
 
 //-----------------------------------------------------------------------------//
 

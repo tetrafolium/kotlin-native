@@ -4,7 +4,7 @@
  */
 package org.jetbrains.complexNumbers
 
-actual class ComplexNumber() {}
+actual class ComplexNumber()
 
 actual class ComplexNumbersBenchmark actual constructor() {
     actual fun generateNumbersSequence(): List<ComplexNumber> {

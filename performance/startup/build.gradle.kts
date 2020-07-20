@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-import org.jetbrains.kotlin.RunKotlinNativeTask
 import org.jetbrains.kotlin.BenchmarkRepeatingType
 
 /*

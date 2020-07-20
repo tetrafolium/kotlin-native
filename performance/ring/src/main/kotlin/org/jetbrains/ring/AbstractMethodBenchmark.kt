@@ -30,9 +30,9 @@ open class AbstractMethodBenchmark {
     private val sequenceMap = HashMap<Char, Int>()
 
     init {
-        var i = 0;
+        var i = 0
         for (ch in sequence) {
-            sequenceMap[ch] = i++;
+            sequenceMap[ch] = i++
         }
     }
 

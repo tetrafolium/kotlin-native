@@ -30,7 +30,7 @@ open class StringBenchmark {
             list.add(n)
         _data = list
         csv = ""
-        for (i in 1..BENCHMARK_SIZE-1) {
+        for (i in 1..BENCHMARK_SIZE - 1) {
             val elem = Random.nextDouble()
             csv += elem
             csv += ","

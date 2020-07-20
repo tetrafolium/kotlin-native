@@ -9,7 +9,6 @@ import kotlin.native.internal.DescribeObjectForDebugging
 import kotlin.native.internal.ExportForCppRuntime
 import kotlin.native.internal.debugDescription
 import kotlin.native.identityHashCode
-import kotlin.reflect.KClass
 import kotlinx.cinterop.*
 
 // Implementation details.
