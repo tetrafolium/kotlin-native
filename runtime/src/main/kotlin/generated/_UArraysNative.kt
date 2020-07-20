@@ -11,11 +11,10 @@ package kotlin.collections
 //
 
 import kotlin.ranges.contains
-import kotlin.ranges.reversed
 
 /**
  * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this array.
- * 
+ *
  * @sample samples.collections.Collections.Elements.elementAt
  */
 @SinceKotlin("1.3")
@@ -27,7 +26,7 @@ public actual inline fun UIntArray.elementAt(index: Int): UInt {
 
 /**
  * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this array.
- * 
+ *
  * @sample samples.collections.Collections.Elements.elementAt
  */
 @SinceKotlin("1.3")
@@ -39,7 +38,7 @@ public actual inline fun ULongArray.elementAt(index: Int): ULong {
 
 /**
  * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this array.
- * 
+ *
  * @sample samples.collections.Collections.Elements.elementAt
  */
 @SinceKotlin("1.3")
@@ -51,7 +50,7 @@ public actual inline fun UByteArray.elementAt(index: Int): UByte {
 
 /**
  * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this array.
- * 
+ *
  * @sample samples.collections.Collections.Elements.elementAt
  */
 @SinceKotlin("1.3")
@@ -124,4 +123,3 @@ public actual fun UShortArray.asList(): List<UShort> {
         override fun lastIndexOf(element: UShort): Int = this@asList.lastIndexOf(element)
     }
 }
-

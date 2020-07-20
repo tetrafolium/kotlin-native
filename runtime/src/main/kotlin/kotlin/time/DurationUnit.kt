@@ -5,7 +5,6 @@
 
 package kotlin.time
 
-
 @SinceKotlin("1.3")
 @ExperimentalTime
 public actual enum class DurationUnit(internal val scale: Double) {

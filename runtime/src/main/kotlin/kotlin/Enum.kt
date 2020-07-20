@@ -13,18 +13,18 @@ import kotlin.native.internal.enumValuesIntrinsic
  * See the [Kotlin language documentation](https://kotlinlang.org/docs/reference/enum-classes.html) for more
  * information on enum classes.
  */
-public abstract class Enum<E: Enum<E>>(public val name: String, public val ordinal: Int): Comparable<E> {
+public abstract class Enum<E : Enum<E>>(public val name: String, public val ordinal: Int) : Comparable<E> {
 
     public companion object {
     }
 
-    public override final fun compareTo(other: E): Int { return ordinal - other.ordinal }
+    public final override fun compareTo(other: E): Int { return ordinal - other.ordinal }
 
-    public override final fun equals(other: Any?): Boolean {
+    public final override fun equals(other: Any?): Boolean {
         return this === other
     }
 
-    public override final fun hashCode(): Int {
+    public final override fun hashCode(): Int {
         return ordinal
     }
 
@@ -36,9 +36,9 @@ public abstract class Enum<E: Enum<E>>(public val name: String, public val ordin
 /**
  * Returns an enum entry with specified name.
  */
-public inline fun <reified T: Enum<T>> enumValueOf(name: String): T = enumValueOfIntrinsic<T>(name)
+public inline fun <reified T : Enum<T>> enumValueOf(name: String): T = enumValueOfIntrinsic<T>(name)
 
 /**
  * Returns an array containing enum T entries.
  */
-public inline fun <reified T: Enum<T>> enumValues(): Array<T> = enumValuesIntrinsic<T>()
+public inline fun <reified T : Enum<T>> enumValues(): Array<T> = enumValuesIntrinsic<T>()

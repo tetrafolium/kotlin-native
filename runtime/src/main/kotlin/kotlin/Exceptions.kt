@@ -169,13 +169,13 @@ public actual open class NumberFormatException : IllegalArgumentException {
 @Deprecated("Use CharacterCodingException instead", ReplaceWith("CharacterCodingException"), DeprecationLevel.ERROR)
 public open class IllegalCharacterConversionException : IllegalArgumentException {
 
-    constructor(): super()
+    constructor() : super()
 
     constructor(message: String?) : super(message)
 }
 
 public actual open class ConcurrentModificationException actual constructor(message: String?, cause: Throwable?) :
-        RuntimeException(message, cause) {
+    RuntimeException(message, cause) {
 
     actual constructor() : this(null, null)
 

@@ -7,7 +7,6 @@ package kotlin
 
 import kotlin.native.concurrent.FreezeAwareLazyImpl
 import kotlin.native.internal.FixmeConcurrency
-import kotlin.reflect.KProperty
 
 /**
  * Creates a new instance of the [Lazy] that uses the specified initialization function [initializer]
@@ -32,11 +31,11 @@ public actual fun <T> lazy(initializer: () -> T): Lazy<T> = FreezeAwareLazyImpl(
  */
 @FixmeConcurrency
 public actual fun <T> lazy(mode: LazyThreadSafetyMode, initializer: () -> T): Lazy<T> =
-        when (mode) {
-            LazyThreadSafetyMode.SYNCHRONIZED -> throw UnsupportedOperationException()
-            LazyThreadSafetyMode.PUBLICATION -> FreezeAwareLazyImpl(initializer)
-            LazyThreadSafetyMode.NONE -> UnsafeLazyImpl(initializer)
-        }
+    when (mode) {
+        LazyThreadSafetyMode.SYNCHRONIZED -> throw UnsupportedOperationException()
+        LazyThreadSafetyMode.PUBLICATION -> FreezeAwareLazyImpl(initializer)
+        LazyThreadSafetyMode.NONE -> UnsafeLazyImpl(initializer)
+    }
 
 /**
  * Creates a new instance of the [Lazy] that uses the specified initialization function [initializer]

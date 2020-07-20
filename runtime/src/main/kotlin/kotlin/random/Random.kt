@@ -22,7 +22,7 @@ internal object NativeRandom : Random() {
 
     private fun mult(value: Long) = (value xor MULTIPLIER) and ((1L shl 48) - 1)
 
-    private fun update(seed: Long): Unit {
+    private fun update(seed: Long) {
         _seed.value = seed
     }
 
@@ -37,4 +37,4 @@ internal object NativeRandom : Random() {
 internal actual fun defaultPlatformRandom(): Random = NativeRandom
 
 internal actual fun doubleFromParts(hi26: Int, low27: Int): Double =
-        (hi26.toLong().shl(27) + low27) / (1L shl 53).toDouble()
+    (hi26.toLong().shl(27) + low27) / (1L shl 53).toDouble()

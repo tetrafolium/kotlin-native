@@ -40,7 +40,7 @@ public open class Throwable(open val message: String?, open val cause: Throwable
     public fun getStackTrace(): Array<String> = stackTraceStrings
 
     internal fun getStackTraceAddressesInternal(): List<Long> =
-            (0 until stackTrace.size).map { index -> stackTrace[index].toLong() }
+        (0 until stackTrace.size).map { index -> stackTrace[index].toLong() }
 
     /**
      * Prints the [detailed description][Throwable.stackTraceToString] of this throwable to the standard output.
@@ -123,7 +123,6 @@ public open class Throwable(open val message: String?, open val cause: Throwable
             return frame
         }
     }
-
 
     /**
      * Returns the short description of this throwable consisting of

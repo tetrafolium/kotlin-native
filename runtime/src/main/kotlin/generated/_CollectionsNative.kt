@@ -11,12 +11,11 @@ package kotlin.collections
 //
 
 import kotlin.ranges.contains
-import kotlin.ranges.reversed
 
 /**
  * Reverses elements in the list in-place.
  */
-public actual fun <T> MutableList<T>.reverse(): Unit {
+public actual fun <T> MutableList<T>.reverse() {
     val midPoint = (size / 2) - 1
     if (midPoint < 0) return
     var reverseIndex = lastIndex
@@ -27,4 +26,3 @@ public actual fun <T> MutableList<T>.reverse(): Unit {
         reverseIndex--
     }
 }
-

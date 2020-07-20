@@ -6,15 +6,15 @@
 package kotlin.coroutines
 
 import kotlin.*
-import kotlin.coroutines.intrinsics.CoroutineSingletons.*
 import kotlin.coroutines.intrinsics.*
+import kotlin.coroutines.intrinsics.CoroutineSingletons.*
 
 @PublishedApi
 @SinceKotlin("1.3")
 internal actual class SafeContinuation<in T>
 internal actual constructor(
-        private val delegate: Continuation<T>,
-        initialResult: Any?
+    private val delegate: Continuation<T>,
+    initialResult: Any?
 ) : Continuation<T> {
     @PublishedApi
     internal actual constructor(delegate: Continuation<T>) : this(delegate, UNDECIDED)

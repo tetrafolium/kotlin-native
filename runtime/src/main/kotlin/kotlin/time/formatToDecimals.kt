@@ -5,7 +5,6 @@
 
 package kotlin.time
 
-
 @SymbolName("Kotlin_DurationValue_formatToExactDecimals")
 internal actual external fun formatToExactDecimals(value: Double, decimals: Int): String
 

@@ -13,11 +13,10 @@ import kotlin.internal.getProgressionLastElement
  * A progression of values of type `Char`.
  */
 public open class CharProgression
-internal constructor
-(
-        start: Char,
-        endInclusive: Char,
-        step: Int
+internal constructor(
+    start: Char,
+    endInclusive: Char,
+    step: Int
 ) : Iterable<Char> {
     init {
         if (step == 0) throw kotlin.IllegalArgumentException("Step must be non-zero.")
@@ -45,11 +44,13 @@ internal constructor
     public open fun isEmpty(): Boolean = if (step > 0) first > last else first < last
 
     override fun equals(other: Any?): Boolean =
-            other is CharProgression && (isEmpty() && other.isEmpty() ||
-                    first == other.first && last == other.last && step == other.step)
+        other is CharProgression && (
+            isEmpty() && other.isEmpty() ||
+                first == other.first && last == other.last && step == other.step
+            )
 
     override fun hashCode(): Int =
-            if (isEmpty()) -1 else (31 * (31 * first.toInt() + last.toInt()) + step)
+        if (isEmpty()) -1 else (31 * (31 * first.toInt() + last.toInt()) + step)
 
     override fun toString(): String = if (step > 0) "$first..$last step $step" else "$first downTo $last step ${-step}"
 
@@ -70,11 +71,10 @@ internal constructor
  * A progression of values of type `Int`.
  */
 public open class IntProgression
-internal constructor
-(
-        start: Int,
-        endInclusive: Int,
-        step: Int
+internal constructor(
+    start: Int,
+    endInclusive: Int,
+    step: Int
 ) : Iterable<Int> {
     init {
         if (step == 0) throw kotlin.IllegalArgumentException("Step must be non-zero.")
@@ -102,11 +102,13 @@ internal constructor
     public open fun isEmpty(): Boolean = if (step > 0) first > last else first < last
 
     override fun equals(other: Any?): Boolean =
-            other is IntProgression && (isEmpty() && other.isEmpty() ||
-                    first == other.first && last == other.last && step == other.step)
+        other is IntProgression && (
+            isEmpty() && other.isEmpty() ||
+                first == other.first && last == other.last && step == other.step
+            )
 
     override fun hashCode(): Int =
-            if (isEmpty()) -1 else (31 * (31 * first + last) + step)
+        if (isEmpty()) -1 else (31 * (31 * first + last) + step)
 
     override fun toString(): String = if (step > 0) "$first..$last step $step" else "$first downTo $last step ${-step}"
 
@@ -127,11 +129,10 @@ internal constructor
  * A progression of values of type `Long`.
  */
 public open class LongProgression
-internal constructor
-(
-        start: Long,
-        endInclusive: Long,
-        step: Long
+internal constructor(
+    start: Long,
+    endInclusive: Long,
+    step: Long
 ) : Iterable<Long> {
     init {
         if (step == 0L) throw kotlin.IllegalArgumentException("Step must be non-zero.")
@@ -159,11 +160,13 @@ internal constructor
     public open fun isEmpty(): Boolean = if (step > 0) first > last else first < last
 
     override fun equals(other: Any?): Boolean =
-            other is LongProgression && (isEmpty() && other.isEmpty() ||
-                    first == other.first && last == other.last && step == other.step)
+        other is LongProgression && (
+            isEmpty() && other.isEmpty() ||
+                first == other.first && last == other.last && step == other.step
+            )
 
     override fun hashCode(): Int =
-            if (isEmpty()) -1 else (31 * (31 * (first xor (first ushr 32)) + (last xor (last ushr 32))) + (step xor (step ushr 32))).toInt()
+        if (isEmpty()) -1 else (31 * (31 * (first xor (first ushr 32)) + (last xor (last ushr 32))) + (step xor (step ushr 32))).toInt()
 
     override fun toString(): String = if (step > 0) "$first..$last step $step" else "$first downTo $last step ${-step}"
 

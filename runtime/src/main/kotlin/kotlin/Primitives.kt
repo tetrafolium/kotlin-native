@@ -4,7 +4,6 @@
  */
 @file:Suppress("OVERRIDE_BY_INLINE", "NOTHING_TO_INLINE")
 
-
 package kotlin
 
 import kotlin.native.internal.CanBePrecreated
@@ -47,154 +46,154 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
      * or a positive number if it's greater than other.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_COMPARE_TO)
-    external public override operator fun compareTo(other: Byte): Int
+    public external override operator fun compareTo(other: Byte): Int
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Short): Int =
-            this.toShort().compareTo(other)
+        this.toShort().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Int): Int =
-            this.toInt().compareTo(other)
+        this.toInt().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Long): Int =
-            this.toLong().compareTo(other)
+        this.toLong().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Float): Int =
-            this.toFloat().compareTo(other)
+        this.toFloat().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Double): Int =
-            this.toDouble().compareTo(other)
+        this.toDouble().compareTo(other)
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Int =
-            this.toInt() + other.toInt()
+        this.toInt() + other.toInt()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Int =
-            this.toInt() + other.toInt()
+        this.toInt() + other.toInt()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Int): Int =
-            this.toInt() + other
+        this.toInt() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Long): Long =
-            this.toLong() + other
+        this.toLong() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Float): Float =
-            this.toFloat() + other
+        this.toFloat() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Double): Double =
-            this.toDouble() + other
+        this.toDouble() + other
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Int =
-            this.toInt() - other.toInt()
+        this.toInt() - other.toInt()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Int =
-            this.toInt() - other.toInt()
+        this.toInt() - other.toInt()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Int): Int =
-            this.toInt() - other
+        this.toInt() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Long): Long =
-            this.toLong() - other
+        this.toLong() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Float): Float =
-            this.toFloat() - other
+        this.toFloat() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Double): Double =
-            this.toDouble() - other
+        this.toDouble() - other
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Int =
-            this.toInt() * other.toInt()
+        this.toInt() * other.toInt()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Int =
-            this.toInt() * other.toInt()
+        this.toInt() * other.toInt()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Int): Int =
-            this.toInt() * other
+        this.toInt() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Long): Long =
-            this.toLong() * other
+        this.toLong() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Float): Float =
-            this.toFloat() * other
+        this.toFloat() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Double): Double =
-            this.toDouble() * other
+        this.toDouble() * other
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Int =
-            this.toInt() / other.toInt()
+        this.toInt() / other.toInt()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Int =
-            this.toInt() / other.toInt()
+        this.toInt() / other.toInt()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Int): Int =
-            this.toInt() / other
+        this.toInt() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Long): Long =
-            this.toLong() / other
+        this.toLong() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Float): Float =
-            this.toFloat() / other
+        this.toFloat() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Double): Double =
-            this.toDouble() / other
+        this.toDouble() / other
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Int =
-            this.toInt() % other.toInt()
+        this.toInt() % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Int =
-            this.toInt() % other.toInt()
+        this.toInt() % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Int): Int =
-            this.toInt() % other
+        this.toInt() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Long): Long =
-            this.toLong() % other
+        this.toLong() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Float): Float =
-            this.toFloat() % other
+        this.toFloat() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Double): Double =
-            this.toDouble() % other
+        this.toDouble() % other
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Byte
+    public external operator fun inc(): Byte
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Byte
+    public external operator fun dec(): Byte
     /** Returns this value. */
     public inline operator fun unaryPlus(): Int =
-            this.toInt()
+        this.toInt()
     /** Returns the negative of this value. */
     public inline operator fun unaryMinus(): Int =
-            -this.toInt()
+        -this.toInt()
 
     /** Returns this value. */
-    public inline override fun toByte(): Byte =
-            this
+    public override inline fun toByte(): Byte =
+        this
     /**
      * Converts this [Byte] value to [Char].
      *
@@ -204,7 +203,7 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
      * whereas the most significant 8 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toChar(): Char
+    public external override fun toChar(): Char
     /**
      * Converts this [Byte] value to [Short].
      *
@@ -214,7 +213,7 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
      * whereas the most significant 8 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toShort(): Short
+    public external override fun toShort(): Short
     /**
      * Converts this [Byte] value to [Int].
      *
@@ -224,7 +223,7 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
      * whereas the most significant 24 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toInt(): Int
+    public external override fun toInt(): Int
     /**
      * Converts this [Byte] value to [Long].
      *
@@ -234,21 +233,21 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
      * whereas the most significant 56 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toLong(): Long
+    public external override fun toLong(): Long
     /**
      * Converts this [Byte] value to [Float].
      *
      * The resulting `Float` value represents the same numerical value as this `Byte`.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toFloat(): Float
+    public external override fun toFloat(): Float
     /**
      * Converts this [Byte] value to [Double].
      *
      * The resulting `Double` value represents the same numerical value as this `Byte`.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toDouble(): Double
+    public external override fun toDouble(): Double
 
     /** Creates a range from this value to the specified [other] value. */
     public operator fun rangeTo(other: Byte): IntRange {
@@ -271,10 +270,10 @@ public final class Byte private constructor() : Number(), Comparable<Byte> {
     public fun equals(other: Byte): Boolean = kotlin.native.internal.areEqualByValue(this, other)
 
     public override fun equals(other: Any?): Boolean =
-            other is Byte && kotlin.native.internal.areEqualByValue(this, other)
+        other is Byte && kotlin.native.internal.areEqualByValue(this, other)
 
     @SymbolName("Kotlin_Byte_toString")
-    external public override fun toString(): String
+    public external override fun toString(): String
 
     public override fun hashCode(): Int {
         return this.toInt()
@@ -316,150 +315,150 @@ public final class Short private constructor() : Number(), Comparable<Short> {
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Byte): Int =
-            this.compareTo(other.toShort())
+        this.compareTo(other.toShort())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_COMPARE_TO)
-    external public override operator fun compareTo(other: Short): Int
+    public external override operator fun compareTo(other: Short): Int
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Int): Int =
-            this.toInt().compareTo(other)
+        this.toInt().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Long): Int =
-            this.toLong().compareTo(other)
+        this.toLong().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Float): Int =
-            this.toFloat().compareTo(other)
+        this.toFloat().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Double): Int =
-            this.toDouble().compareTo(other)
+        this.toDouble().compareTo(other)
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Int =
-            this.toInt() + other.toInt()
+        this.toInt() + other.toInt()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Int =
-            this.toInt() + other.toInt()
+        this.toInt() + other.toInt()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Int): Int =
-            this.toInt() + other
+        this.toInt() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Long): Long =
-            this.toLong() + other
+        this.toLong() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Float): Float =
-            this.toFloat() + other
+        this.toFloat() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Double): Double =
-            this.toDouble() + other
+        this.toDouble() + other
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Int =
-            this.toInt() - other.toInt()
+        this.toInt() - other.toInt()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Int =
-            this.toInt() - other.toInt()
+        this.toInt() - other.toInt()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Int): Int =
-            this.toInt() - other
+        this.toInt() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Long): Long =
-            this.toLong() - other
+        this.toLong() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Float): Float =
-            this.toFloat() - other
+        this.toFloat() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Double): Double =
-            this.toDouble() - other
+        this.toDouble() - other
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Int =
-            this.toInt() * other.toInt()
+        this.toInt() * other.toInt()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Int =
-            this.toInt() * other.toInt()
+        this.toInt() * other.toInt()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Int): Int =
-            this.toInt() * other
+        this.toInt() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Long): Long =
-            this.toLong() * other
+        this.toLong() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Float): Float =
-            this.toFloat() * other
+        this.toFloat() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Double): Double =
-            this.toDouble() * other
+        this.toDouble() * other
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Int =
-            this.toInt() / other.toInt()
+        this.toInt() / other.toInt()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Int =
-            this.toInt() / other.toInt()
+        this.toInt() / other.toInt()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Int): Int =
-            this.toInt() / other
+        this.toInt() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Long): Long =
-            this.toLong() / other
+        this.toLong() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Float): Float =
-            this.toFloat() / other
+        this.toFloat() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Double): Double =
-            this.toDouble() / other
+        this.toDouble() / other
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Int =
-            this.toInt() % other.toInt()
+        this.toInt() % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Int =
-            this.toInt() % other.toInt()
+        this.toInt() % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Int): Int =
-            this.toInt() % other
+        this.toInt() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Long): Long =
-            this.toLong() % other
+        this.toLong() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Float): Float =
-            this.toFloat() % other
+        this.toFloat() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Double): Double =
-            this.toDouble() % other
+        this.toDouble() % other
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Short
+    public external operator fun inc(): Short
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Short
+    public external operator fun dec(): Short
     /** Returns this value. */
     public operator fun unaryPlus(): Int =
-            this.toInt()
+        this.toInt()
     /** Returns the negative of this value. */
     public inline operator fun unaryMinus(): Int =
-            -this.toInt()
+        -this.toInt()
 
     /** Creates a range from this value to the specified [other] value. */
     public operator fun rangeTo(other: Byte): IntRange {
@@ -474,7 +473,7 @@ public final class Short private constructor() : Number(), Comparable<Short> {
         return IntRange(this.toInt(), other.toInt())
     }
     /** Creates a range from this value to the specified [other] value. */
-    public operator fun rangeTo(other: Long): LongRange  {
+    public operator fun rangeTo(other: Long): LongRange {
         return LongRange(this.toLong(), other.toLong())
     }
 
@@ -487,7 +486,7 @@ public final class Short private constructor() : Number(), Comparable<Short> {
      * The resulting `Byte` value is represented by the least significant 8 bits of this `Short` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toByte(): Byte
+    public external override fun toByte(): Byte
     /**
      * Converts this [Short] value to [Char].
      *
@@ -495,11 +494,11 @@ public final class Short private constructor() : Number(), Comparable<Short> {
      * i.e. it has the same binary representation as this `Short`.
      */
     @TypedIntrinsic(IntrinsicType.ZERO_EXTEND)
-    external public override fun toChar(): Char
+    public external override fun toChar(): Char
 
     /** Returns this value. */
-    public inline override fun toShort(): Short =
-            this
+    public override inline fun toShort(): Short =
+        this
     /**
      * Converts this [Short] value to [Int].
      *
@@ -509,7 +508,7 @@ public final class Short private constructor() : Number(), Comparable<Short> {
      * whereas the most significant 16 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toInt(): Int
+    public external override fun toInt(): Int
     /**
      * Converts this [Short] value to [Long].
      *
@@ -519,21 +518,21 @@ public final class Short private constructor() : Number(), Comparable<Short> {
      * whereas the most significant 48 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toLong(): Long
+    public external override fun toLong(): Long
     /**
      * Converts this [Short] value to [Float].
      *
      * The resulting `Float` value represents the same numerical value as this `Short`.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toFloat(): Float
+    public external override fun toFloat(): Float
     /**
      * Converts this [Short] value to [Double].
      *
      * The resulting `Double` value represents the same numerical value as this `Short`.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toDouble(): Double
+    public external override fun toDouble(): Double
 
     // Konan-specific.
     public fun equals(other: Short): Boolean = kotlin.native.internal.areEqualByValue(this, other)
@@ -542,7 +541,7 @@ public final class Short private constructor() : Number(), Comparable<Short> {
         other is Short && kotlin.native.internal.areEqualByValue(this, other)
 
     @SymbolName("Kotlin_Short_toString")
-    external public override fun toString(): String
+    public external override fun toString(): String
 
     public override fun hashCode(): Int {
         return this.toInt()
@@ -584,172 +583,172 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Byte): Int =
-            this.compareTo(other.toInt())
+        this.compareTo(other.toInt())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Short): Int =
-            this.compareTo(other.toInt())
+        this.compareTo(other.toInt())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_COMPARE_TO)
-    external public override operator fun compareTo(other: Int): Int
+    public external override operator fun compareTo(other: Int): Int
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Long): Int =
-            this.toLong().compareTo(other)
+        this.toLong().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Float): Int =
-            this.toFloat().compareTo(other)
+        this.toFloat().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Double): Int =
-            this.toDouble().compareTo(other)
+        this.toDouble().compareTo(other)
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Int =
-            this + other.toInt()
+        this + other.toInt()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Int =
-            this + other.toInt()
+        this + other.toInt()
     /** Adds the other value to this value. */
     @TypedIntrinsic(IntrinsicType.PLUS)
-    external public operator fun plus(other: Int): Int
+    public external operator fun plus(other: Int): Int
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Long): Long =
-            this.toLong() + other
+        this.toLong() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Float): Float =
-            this.toFloat() + other
+        this.toFloat() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Double): Double =
-            this.toDouble() + other
+        this.toDouble() + other
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Int =
-            this - other.toInt()
+        this - other.toInt()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Int =
-            this - other.toInt()
+        this - other.toInt()
     /** Subtracts the other value from this value. */
     @TypedIntrinsic(IntrinsicType.MINUS)
-    external public operator fun minus(other: Int): Int
+    public external operator fun minus(other: Int): Int
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Long): Long =
-            this.toLong() - other
+        this.toLong() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Float): Float =
-            this.toFloat() - other
+        this.toFloat() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Double): Double =
-            this.toDouble() - other
+        this.toDouble() - other
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Int =
-            this * other.toInt()
+        this * other.toInt()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Int =
-            this * other.toInt()
+        this * other.toInt()
     /** Multiplies this value by the other value. */
     @TypedIntrinsic(IntrinsicType.TIMES)
-    external public operator fun times(other: Int): Int
+    public external operator fun times(other: Int): Int
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Long): Long =
-            this.toLong() * other
+        this.toLong() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Float): Float =
-            this.toFloat() * other
+        this.toFloat() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Double): Double =
-            this.toDouble() * other
+        this.toDouble() * other
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Int =
-            this / other.toInt()
+        this / other.toInt()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Int =
-            this / other.toInt()
+        this / other.toInt()
     /** Divides this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_DIV)
-    external public operator fun div(other: Int): Int
+    public external operator fun div(other: Int): Int
     /** Divides this value by the other value. */
     public inline operator fun div(other: Long): Long =
-            this.toLong() / other
+        this.toLong() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Float): Float =
-            this.toFloat() / other
+        this.toFloat() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Double): Double =
-            this.toDouble() / other
+        this.toDouble() / other
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Int =
-            this % other.toInt()
+        this % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Int =
-            this % other.toInt()
+        this % other.toInt()
     /** Calculates the remainder of dividing this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_REM)
-    external public operator fun rem(other: Int): Int
+    public external operator fun rem(other: Int): Int
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Long): Long =
-            this.toLong() % other
+        this.toLong() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Float): Float =
-            this.toFloat() % other
+        this.toFloat() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Double): Double =
-            this.toDouble() % other
+        this.toDouble() % other
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Int
+    public external operator fun inc(): Int
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Int
+    public external operator fun dec(): Int
     /** Returns this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_PLUS)
-    external public operator fun unaryPlus(): Int
+    public external operator fun unaryPlus(): Int
     /** Returns the negative of this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_MINUS)
-    external public operator fun unaryMinus(): Int
+    public external operator fun unaryMinus(): Int
 
     /** Shifts this value left by the [bitCount] number of bits. */
     @TypedIntrinsic(IntrinsicType.SHL)
-    external public infix fun shl(bitCount: Int): Int
+    public external infix fun shl(bitCount: Int): Int
     /** Shifts this value right by the [bitCount] number of bits, filling the leftmost bits with copies of the sign bit. */
     @TypedIntrinsic(IntrinsicType.SHR)
-    external public infix fun shr(bitCount: Int): Int
+    public external infix fun shr(bitCount: Int): Int
     /** Shifts this value right by the [bitCount] number of bits, filling the leftmost bits with zeros. */
     @TypedIntrinsic(IntrinsicType.USHR)
-    external public infix fun ushr(bitCount: Int): Int
+    public external infix fun ushr(bitCount: Int): Int
     /** Performs a bitwise AND operation between the two values. */
     @TypedIntrinsic(IntrinsicType.AND)
-    external public infix fun and(other: Int): Int
+    public external infix fun and(other: Int): Int
     /** Performs a bitwise OR operation between the two values. */
     @TypedIntrinsic(IntrinsicType.OR)
-    external public infix fun or(other: Int): Int
+    public external infix fun or(other: Int): Int
     /** Performs a bitwise XOR operation between the two values. */
     @TypedIntrinsic(IntrinsicType.XOR)
-    external public infix fun xor(other: Int): Int
+    public external infix fun xor(other: Int): Int
     /** Inverts the bits in this value. */
     @TypedIntrinsic(IntrinsicType.INV)
-    external public fun inv(): Int
+    public external fun inv(): Int
 
     /** Creates a range from this value to the specified [other] value. */
     public operator fun rangeTo(other: Byte): IntRange {
@@ -760,7 +759,7 @@ public final class Int private constructor() : Number(), Comparable<Int> {
         return IntRange(this, other.toInt())
     }
     /** Creates a range from this value to the specified [other] value. */
-    public operator fun rangeTo(other: Int): IntRange  {
+    public operator fun rangeTo(other: Int): IntRange {
         return IntRange(this, other.toInt())
     }
     /** Creates a range from this value to the specified [other] value. */
@@ -777,7 +776,7 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * The resulting `Byte` value is represented by the least significant 8 bits of this `Int` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toByte(): Byte
+    public external override fun toByte(): Byte
     /**
      * Converts this [Int] value to [Char].
      *
@@ -787,7 +786,7 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * The resulting `Char` code is represented by the least significant 16 bits of this `Int` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toChar(): Char
+    public external override fun toChar(): Char
     /**
      * Converts this [Int] value to [Short].
      *
@@ -797,11 +796,11 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * The resulting `Short` value is represented by the least significant 16 bits of this `Int` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toShort(): Short
+    public external override fun toShort(): Short
 
     /** Returns this value. */
-    public inline override fun toInt(): Int =
-            this
+    public override inline fun toInt(): Int =
+        this
     /**
      * Converts this [Int] value to [Long].
      *
@@ -811,7 +810,7 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * whereas the most significant 32 bits are filled with the sign bit of this value.
      */
     @TypedIntrinsic(IntrinsicType.SIGN_EXTEND)
-    external public override fun toLong(): Long
+    public external override fun toLong(): Long
     /**
      * Converts this [Int] value to [Float].
      *
@@ -820,23 +819,23 @@ public final class Int private constructor() : Number(), Comparable<Int> {
      * the one with zero at least significant bit of mantissa is selected.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toFloat(): Float
+    public external override fun toFloat(): Float
     /**
      * Converts this [Int] value to [Double].
      *
      * The resulting `Double` value represents the same numerical value as this `Int`.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toDouble(): Double
+    public external override fun toDouble(): Double
 
     // Konan-specific.
     public fun equals(other: Int): Boolean = kotlin.native.internal.areEqualByValue(this, other)
 
     public override fun equals(other: Any?): Boolean =
-         other is Int && kotlin.native.internal.areEqualByValue(this, other)
+        other is Int && kotlin.native.internal.areEqualByValue(this, other)
 
     @SymbolName("Kotlin_Int_toString")
-    external public override fun toString(): String
+    public external override fun toString(): String
 
     public override fun hashCode(): Int {
         return this
@@ -878,157 +877,157 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Byte): Int =
-            this.compareTo(other.toLong())
+        this.compareTo(other.toLong())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Short): Int =
-            this.compareTo(other.toLong())
+        this.compareTo(other.toLong())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Int): Int =
-            this.compareTo(other.toLong())
+        this.compareTo(other.toLong())
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_COMPARE_TO)
-    external public override operator fun compareTo(other: Long): Int
+    public external override operator fun compareTo(other: Long): Int
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Float): Int =
-            this.toFloat().compareTo(other)
+        this.toFloat().compareTo(other)
     /**
      * Compares this value with the specified value for order.
      * Returns zero if this value is equal to the specified other value, a negative number if it's less than other,
      * or a positive number if it's greater than other.
      */
     public inline operator fun compareTo(other: Double): Int =
-            this.toDouble().compareTo(other)
+        this.toDouble().compareTo(other)
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Long =
-            this + other.toLong()
+        this + other.toLong()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Long =
-            this + other.toLong()
+        this + other.toLong()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Int): Long =
-            this + other.toLong()
+        this + other.toLong()
     /** Adds the other value to this value. */
     @TypedIntrinsic(IntrinsicType.PLUS)
-    external public operator fun plus(other: Long): Long
+    public external operator fun plus(other: Long): Long
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Float): Float =
-            this.toFloat() + other
+        this.toFloat() + other
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Double): Double =
-            this.toDouble() + other
+        this.toDouble() + other
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Long =
-            this - other.toLong()
+        this - other.toLong()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Long =
-            this - other.toLong()
+        this - other.toLong()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Int): Long =
-            this - other.toLong()
+        this - other.toLong()
     /** Subtracts the other value from this value. */
     @TypedIntrinsic(IntrinsicType.MINUS)
-    external public operator fun minus(other: Long): Long
+    public external operator fun minus(other: Long): Long
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Float): Float =
-            this.toFloat() - other
+        this.toFloat() - other
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Double): Double =
-            this.toDouble() - other
+        this.toDouble() - other
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Long =
-            this * other.toLong()
+        this * other.toLong()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Long =
-            this * other.toLong()
+        this * other.toLong()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Int): Long =
-            this * other.toLong()
+        this * other.toLong()
     /** Multiplies this value by the other value. */
     @TypedIntrinsic(IntrinsicType.TIMES)
-    external public operator fun times(other: Long): Long
+    public external operator fun times(other: Long): Long
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Float): Float =
-            this.toFloat() * other
+        this.toFloat() * other
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Double): Double =
-            this.toDouble() * other
+        this.toDouble() * other
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Long =
-            this / other.toLong()
+        this / other.toLong()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Long =
-            this / other.toLong()
+        this / other.toLong()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Int): Long =
-            this / other.toLong()
+        this / other.toLong()
     /** Divides this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_DIV)
-    external public operator fun div(other: Long): Long
+    public external operator fun div(other: Long): Long
     /** Divides this value by the other value. */
     public inline operator fun div(other: Float): Float =
-            this.toFloat() / other
+        this.toFloat() / other
     /** Divides this value by the other value. */
     public inline operator fun div(other: Double): Double =
-            this.toDouble() / other
+        this.toDouble() / other
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Long =
-            this % other.toLong()
+        this % other.toLong()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Long =
-            this % other.toLong()
+        this % other.toLong()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Int): Long =
-            this % other.toLong()
+        this % other.toLong()
     /** Calculates the remainder of dividing this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_REM)
-    external public operator fun rem(other: Long): Long
+    public external operator fun rem(other: Long): Long
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Float): Float =
-            this.toFloat() % other
+        this.toFloat() % other
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Double): Double =
-            this.toDouble() % other
+        this.toDouble() % other
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Long
+    public external operator fun inc(): Long
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Long
+    public external operator fun dec(): Long
     /** Returns this value. */
     public inline operator fun unaryPlus(): Long =
-            this
+        this
     /** Returns the negative of this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_MINUS)
-    external public operator fun unaryMinus(): Long
+    public external operator fun unaryMinus(): Long
 
     /** Creates a range from this value to the specified [other] value. */
     public operator fun rangeTo(other: Byte): LongRange {
         return LongRange(this, other.toLong())
     }
     /** Creates a range from this value to the specified [other] value. */
-    public operator fun rangeTo(other: Short): LongRange  {
+    public operator fun rangeTo(other: Short): LongRange {
         return LongRange(this, other.toLong())
     }
     /** Creates a range from this value to the specified [other] value. */
@@ -1036,31 +1035,31 @@ public final class Long private constructor() : Number(), Comparable<Long> {
         return LongRange(this, other.toLong())
     }
     /** Creates a range from this value to the specified [other] value. */
-    public operator fun rangeTo(other: Long): LongRange  {
+    public operator fun rangeTo(other: Long): LongRange {
         return LongRange(this, other.toLong())
     }
 
     /** Shifts this value left by the [bitCount] number of bits. */
     @TypedIntrinsic(IntrinsicType.SHL)
-    external public infix fun shl(bitCount: Int): Long
+    public external infix fun shl(bitCount: Int): Long
     /** Shifts this value right by the [bitCount] number of bits, filling the leftmost bits with copies of the sign bit. */
     @TypedIntrinsic(IntrinsicType.SHR)
-    external public infix fun shr(bitCount: Int): Long
+    public external infix fun shr(bitCount: Int): Long
     /** Shifts this value right by the [bitCount] number of bits, filling the leftmost bits with zeros. */
     @TypedIntrinsic(IntrinsicType.USHR)
-    external public infix fun ushr(bitCount: Int): Long
+    public external infix fun ushr(bitCount: Int): Long
     /** Performs a bitwise AND operation between the two values. */
     @TypedIntrinsic(IntrinsicType.AND)
-    external public infix fun and(other: Long): Long
+    public external infix fun and(other: Long): Long
     /** Performs a bitwise OR operation between the two values. */
     @TypedIntrinsic(IntrinsicType.OR)
-    external public infix fun or(other: Long): Long
+    public external infix fun or(other: Long): Long
     /** Performs a bitwise XOR operation between the two values. */
     @TypedIntrinsic(IntrinsicType.XOR)
-    external public infix fun xor(other: Long): Long
+    public external infix fun xor(other: Long): Long
     /** Inverts the bits in this value. */
     @TypedIntrinsic(IntrinsicType.INV)
-    external public fun inv(): Long
+    public external fun inv(): Long
 
     /**
      * Converts this [Long] value to [Byte].
@@ -1071,7 +1070,7 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * The resulting `Byte` value is represented by the least significant 8 bits of this `Long` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toByte(): Byte
+    public external override fun toByte(): Byte
     /**
      * Converts this [Long] value to [Char].
      *
@@ -1081,7 +1080,7 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * The resulting `Char` code is represented by the least significant 16 bits of this `Long` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toChar(): Char
+    public external override fun toChar(): Char
     /**
      * Converts this [Long] value to [Short].
      *
@@ -1091,7 +1090,7 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * The resulting `Short` value is represented by the least significant 16 bits of this `Long` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toShort(): Short
+    public external override fun toShort(): Short
     /**
      * Converts this [Long] value to [Int].
      *
@@ -1101,11 +1100,11 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * The resulting `Int` value is represented by the least significant 32 bits of this `Long` value.
      */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public override fun toInt(): Int
+    public external override fun toInt(): Int
 
     /** Returns this value. */
-    public inline override fun toLong(): Long =
-            this
+    public override inline fun toLong(): Long =
+        this
     /**
      * Converts this [Long] value to [Float].
      *
@@ -1114,7 +1113,7 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * the one with zero at least significant bit of mantissa is selected.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toFloat(): Float
+    public external override fun toFloat(): Float
     /**
      * Converts this [Long] value to [Double].
      *
@@ -1123,19 +1122,19 @@ public final class Long private constructor() : Number(), Comparable<Long> {
      * the one with zero at least significant bit of mantissa is selected.
      */
     @TypedIntrinsic(IntrinsicType.SIGNED_TO_FLOAT)
-    external public override fun toDouble(): Double
+    public external override fun toDouble(): Double
 
     // Konan-specific.
     public fun equals(other: Long): Boolean = kotlin.native.internal.areEqualByValue(this, other)
 
     public override fun equals(other: Any?): Boolean =
-            other is Long && kotlin.native.internal.areEqualByValue(this, other)
+        other is Long && kotlin.native.internal.areEqualByValue(this, other)
 
     @SymbolName("Kotlin_Long_toString")
-    external public override fun toString(): String
+    public external override fun toString(): String
 
     public override fun hashCode(): Int {
-       return ((this ushr 32) xor this).toInt()
+        return ((this ushr 32) xor this).toInt()
     }
 }
 
@@ -1235,111 +1234,111 @@ public final class Float private constructor() : Number(), Comparable<Float> {
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Float =
-            this + other.toFloat()
+        this + other.toFloat()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Float =
-            this + other.toFloat()
+        this + other.toFloat()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Int): Float =
-            this + other.toFloat()
+        this + other.toFloat()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Long): Float =
-            this + other.toFloat()
+        this + other.toFloat()
     /** Adds the other value to this value. */
     @TypedIntrinsic(IntrinsicType.PLUS)
-    external public operator fun plus(other: Float): Float
+    public external operator fun plus(other: Float): Float
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Double): Double =
-            this.toDouble() + other
+        this.toDouble() + other
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Float =
-            this - other.toFloat()
+        this - other.toFloat()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Float =
-            this - other.toFloat()
+        this - other.toFloat()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Int): Float =
-            this - other.toFloat()
+        this - other.toFloat()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Long): Float =
-            this - other.toFloat()
+        this - other.toFloat()
     /** Subtracts the other value from this value. */
     @TypedIntrinsic(IntrinsicType.MINUS)
-    external public operator fun minus(other: Float): Float
+    public external operator fun minus(other: Float): Float
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Double): Double =
-            this.toDouble() - other
+        this.toDouble() - other
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Float =
-            this * other.toFloat()
+        this * other.toFloat()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Float =
-            this * other.toFloat()
+        this * other.toFloat()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Int): Float =
-            this * other.toFloat()
+        this * other.toFloat()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Long): Float =
-            this * other.toFloat()
+        this * other.toFloat()
     /** Multiplies this value by the other value. */
     @TypedIntrinsic(IntrinsicType.TIMES)
-    external public operator fun times(other: Float): Float
+    public external operator fun times(other: Float): Float
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Double): Double =
-            this.toDouble() * other
+        this.toDouble() * other
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Float =
-            this / other.toFloat()
+        this / other.toFloat()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Float =
-            this / other.toFloat()
+        this / other.toFloat()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Int): Float =
-            this / other.toFloat()
+        this / other.toFloat()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Long): Float =
-            this / other.toFloat()
+        this / other.toFloat()
     /** Divides this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_DIV)
-    external public operator fun div(other: Float): Float
+    public external operator fun div(other: Float): Float
     /** Divides this value by the other value. */
     public inline operator fun div(other: Double): Double =
-            this.toDouble() / other
+        this.toDouble() / other
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Float =
-            this % other.toFloat()
+        this % other.toFloat()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Float =
-            this % other.toFloat()
+        this % other.toFloat()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Int): Float =
-            this % other.toFloat()
+        this % other.toFloat()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Long): Float =
-            this % other.toFloat()
+        this % other.toFloat()
     /** Calculates the remainder of dividing this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_REM)
-    external public operator fun rem(other: Float): Float
+    public external operator fun rem(other: Float): Float
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Double): Double =
-            this.toDouble() % other
+        this.toDouble() % other
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Float
+    public external operator fun inc(): Float
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Float
+    public external operator fun dec(): Float
     /** Returns this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_PLUS)
-    external public operator fun unaryPlus(): Float
+    public external operator fun unaryPlus(): Float
     /** Returns the negative of this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_MINUS)
-    external public operator fun unaryMinus(): Float
+    public external operator fun unaryMinus(): Float
 
     /**
      * Converts this [Float] value to [Byte].
@@ -1372,7 +1371,7 @@ public final class Float private constructor() : Number(), Comparable<Float> {
      * [Int.MAX_VALUE] if it's bigger than `Int.MAX_VALUE`.
      */
     @SymbolName("Kotlin_Float_toInt")
-    external public override fun toInt(): Int
+    public external override fun toInt(): Int
     /**
      * Converts this [Float] value to [Long].
      *
@@ -1381,18 +1380,18 @@ public final class Float private constructor() : Number(), Comparable<Float> {
      * [Long.MAX_VALUE] if it's bigger than `Long.MAX_VALUE`.
      */
     @SymbolName("Kotlin_Float_toLong")
-    external public override fun toLong(): Long
+    public external override fun toLong(): Long
 
     /** Returns this value. */
-    public inline override fun toFloat(): Float =
-            this
+    public override inline fun toFloat(): Float =
+        this
     /**
      * Converts this [Float] value to [Double].
      *
      * The resulting `Double` value represents the same numerical value as this `Float`.
      */
     @TypedIntrinsic(IntrinsicType.FLOAT_EXTEND)
-    external public override fun toDouble(): Double
+    public external override fun toDouble(): Double
 
     public fun equals(other: Float): Boolean = toBits() == other.toBits()
 
@@ -1406,7 +1405,7 @@ public final class Float private constructor() : Number(), Comparable<Float> {
 
     @TypedIntrinsic(IntrinsicType.REINTERPRET)
     @PublishedApi
-    external internal fun bits(): Int
+    internal external fun bits(): Int
 }
 
 /**
@@ -1509,111 +1508,111 @@ public final class Double private constructor() : Number(), Comparable<Double> {
 
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Byte): Double =
-            this + other.toDouble()
+        this + other.toDouble()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Short): Double =
-            this + other.toDouble()
+        this + other.toDouble()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Int): Double =
-            this + other.toDouble()
+        this + other.toDouble()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Long): Double =
-            this + other.toDouble()
+        this + other.toDouble()
     /** Adds the other value to this value. */
     public inline operator fun plus(other: Float): Double =
-            this + other.toDouble()
+        this + other.toDouble()
     /** Adds the other value to this value. */
     @TypedIntrinsic(IntrinsicType.PLUS)
-    external public operator fun plus(other: Double): Double
+    public external operator fun plus(other: Double): Double
 
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Byte): Double =
-            this - other.toDouble()
+        this - other.toDouble()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Short): Double =
-            this - other.toDouble()
+        this - other.toDouble()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Int): Double =
-            this - other.toDouble()
+        this - other.toDouble()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Long): Double =
-            this - other.toDouble()
+        this - other.toDouble()
     /** Subtracts the other value from this value. */
     public inline operator fun minus(other: Float): Double =
-            this - other.toDouble()
+        this - other.toDouble()
     /** Subtracts the other value from this value. */
     @TypedIntrinsic(IntrinsicType.MINUS)
-    external public operator fun minus(other: Double): Double
+    public external operator fun minus(other: Double): Double
 
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Byte): Double =
-            this * other.toDouble()
+        this * other.toDouble()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Short): Double =
-            this * other.toDouble()
+        this * other.toDouble()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Int): Double =
-            this * other.toDouble()
+        this * other.toDouble()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Long): Double =
-            this * other.toDouble()
+        this * other.toDouble()
     /** Multiplies this value by the other value. */
     public inline operator fun times(other: Float): Double =
-            this * other.toDouble()
+        this * other.toDouble()
     /** Multiplies this value by the other value. */
     @TypedIntrinsic(IntrinsicType.TIMES)
-    external public operator fun times(other: Double): Double
+    public external operator fun times(other: Double): Double
 
     /** Divides this value by the other value. */
     public inline operator fun div(other: Byte): Double =
-            this / other.toDouble()
+        this / other.toDouble()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Short): Double =
-            this / other.toDouble()
+        this / other.toDouble()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Int): Double =
-            this / other.toDouble()
+        this / other.toDouble()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Long): Double =
-            this / other.toDouble()
+        this / other.toDouble()
     /** Divides this value by the other value. */
     public inline operator fun div(other: Float): Double =
-            this / other.toDouble()
+        this / other.toDouble()
     /** Divides this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_DIV)
-    external public operator fun div(other: Double): Double
+    public external operator fun div(other: Double): Double
 
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Byte): Double =
-            this % other.toDouble()
+        this % other.toDouble()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Short): Double =
-            this % other.toDouble()
+        this % other.toDouble()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Int): Double =
-            this % other.toDouble()
+        this % other.toDouble()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Long): Double =
-            this % other.toDouble()
+        this % other.toDouble()
     /** Calculates the remainder of dividing this value by the other value. */
     public inline operator fun rem(other: Float): Double =
-            this % other.toDouble()
+        this % other.toDouble()
     /** Calculates the remainder of dividing this value by the other value. */
     @TypedIntrinsic(IntrinsicType.SIGNED_REM)
-    external public operator fun rem(other: Double): Double
+    public external operator fun rem(other: Double): Double
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Double
+    public external operator fun inc(): Double
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Double
+    public external operator fun dec(): Double
     /** Returns this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_PLUS)
-    external public operator fun unaryPlus(): Double
+    public external operator fun unaryPlus(): Double
     /** Returns the negative of this value. */
     @TypedIntrinsic(IntrinsicType.UNARY_MINUS)
-    external public operator fun unaryMinus(): Double
+    public external operator fun unaryMinus(): Double
 
     /**
      * Converts this [Double] value to [Byte].
@@ -1646,7 +1645,7 @@ public final class Double private constructor() : Number(), Comparable<Double> {
      * [Int.MAX_VALUE] if it's bigger than `Int.MAX_VALUE`.
      */
     @SymbolName("Kotlin_Double_toInt")
-    external public override fun toInt(): Int
+    public external override fun toInt(): Int
     /**
      * Converts this [Double] value to [Long].
      *
@@ -1655,7 +1654,7 @@ public final class Double private constructor() : Number(), Comparable<Double> {
      * [Long.MAX_VALUE] if it's bigger than `Long.MAX_VALUE`.
      */
     @SymbolName("Kotlin_Double_toLong")
-    external public override fun toLong(): Long
+    public external override fun toLong(): Long
     /**
      * Converts this [Double] value to [Float].
      *
@@ -1664,11 +1663,11 @@ public final class Double private constructor() : Number(), Comparable<Double> {
      * the one with zero at least significant bit of mantissa is selected.
      */
     @TypedIntrinsic(IntrinsicType.FLOAT_TRUNCATE)
-    external public override fun toFloat(): Float
+    public external override fun toFloat(): Float
 
     /** Returns this value. */
-    public inline override fun toDouble(): Double =
-            this
+    public override inline fun toDouble(): Double =
+        this
 
     public fun equals(other: Double): Boolean = toBits() == other.toBits()
 
@@ -1680,5 +1679,5 @@ public final class Double private constructor() : Number(), Comparable<Double> {
 
     @TypedIntrinsic(IntrinsicType.REINTERPRET)
     @PublishedApi
-    external internal fun bits(): Long
+    internal external fun bits(): Long
 }

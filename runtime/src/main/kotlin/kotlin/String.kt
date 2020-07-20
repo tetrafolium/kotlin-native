@@ -15,13 +15,13 @@ public final class String : Comparable<String>, CharSequence {
     }
 
     @SymbolName("Kotlin_String_hashCode")
-    external public override fun hashCode(): Int
+    public external override fun hashCode(): Int
 
     public operator fun plus(other: Any?): String {
         return plusImpl(other.toString())
     }
 
-    override public fun toString(): String {
+    public override fun toString(): String {
         return this
     }
 
@@ -34,26 +34,25 @@ public final class String : Comparable<String>, CharSequence {
      * If the [index] is out of bounds of this string, throws an [IndexOutOfBoundsException].
      */
     @SymbolName("Kotlin_String_get")
-    external override public fun get(index: Int): Char
+    public external override fun get(index: Int): Char
 
     @SymbolName("Kotlin_String_subSequence")
-    external override public fun subSequence(startIndex: Int, endIndex: Int): CharSequence
+    public external override fun subSequence(startIndex: Int, endIndex: Int): CharSequence
 
     @SymbolName("Kotlin_String_compareTo")
-    override external public fun compareTo(other: String): Int
+    public external override fun compareTo(other: String): Int
 
     @SymbolName("Kotlin_String_getStringLength")
-    external private fun getStringLength(): Int
+    private external fun getStringLength(): Int
 
     @SymbolName("Kotlin_String_plusImpl")
-    external private fun plusImpl(other: String): String
+    private external fun plusImpl(other: String): String
 
     @SymbolName("Kotlin_String_equals")
-    external public override fun equals(other: Any?): Boolean
+    public external override fun equals(other: Any?): Boolean
 }
 
 public inline operator fun kotlin.String?.plus(other: kotlin.Any?): kotlin.String =
     (this?.toString() ?: "null").plus(other?.toString() ?: "null")
-
 
 public inline fun Any?.toString() = this?.toString() ?: "null"

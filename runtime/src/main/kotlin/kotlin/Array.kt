@@ -26,7 +26,7 @@ public final class Array<T> {
      * It should return the value for an array element given its index.
      */
     @Suppress("TYPE_PARAMETER_AS_REIFIED")
-    public constructor(size: Int, init: (Int) -> T): this(size) {
+    public constructor(size: Int, init: (Int) -> T) : this(size) {
         var index = 0
         while (index < size) {
             this[index] = init(index)
@@ -55,7 +55,7 @@ public final class Array<T> {
      */
     @SymbolName("Kotlin_Array_get")
     @PointsTo(0b0100, 0, 0b0001) // <this> points to <return>, <return> points to <this>.
-    external public operator fun get(index: Int): T
+    public external operator fun get(index: Int): T
 
     /**
      * Sets the array element at the specified [index] to the specified [value]. This method can
@@ -68,7 +68,7 @@ public final class Array<T> {
      */
     @SymbolName("Kotlin_Array_set")
     @PointsTo(0b0100, 0, 0b0001) // <this> points to <value>, <value> points to <this>.
-    external public operator fun set(index: Int, value: T): Unit
+    public external operator fun set(index: Int, value: T): Unit
 
     /**
      * Creates an [Iterator] for iterating over the elements of the array.
@@ -78,11 +78,11 @@ public final class Array<T> {
     }
 
     @SymbolName("Kotlin_Array_getArrayLength")
-    external private fun getArrayLength(): Int
+    private external fun getArrayLength(): Int
 }
 
 private class IteratorImpl<T>(val collection: Array<T>) : Iterator<T> {
-    var index : Int = 0
+    var index: Int = 0
 
     public override fun next(): T {
         if (!hasNext()) throw NoSuchElementException("$index")

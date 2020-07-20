@@ -24,7 +24,7 @@ import kotlin.native.internal.*
 @Suppress("UNCHECKED_CAST")
 @kotlin.internal.InlineOnly
 public actual inline fun <T> (suspend () -> T).startCoroutineUninterceptedOrReturn(
-        completion: Continuation<T>
+    completion: Continuation<T>
 ): Any? = (this as Function1<Continuation<T>, Any?>).invoke(completion)
 
 /**
@@ -42,20 +42,19 @@ public actual inline fun <T> (suspend () -> T).startCoroutineUninterceptedOrRetu
 @Suppress("UNCHECKED_CAST")
 @kotlin.internal.InlineOnly
 public actual inline fun <R, T> (suspend R.() -> T).startCoroutineUninterceptedOrReturn(
-        receiver: R,
-        completion: Continuation<T>
+    receiver: R,
+    completion: Continuation<T>
 ): Any? = (this as Function2<R, Continuation<T>, Any?>).invoke(receiver, completion)
 
 @Suppress("UNCHECKED_CAST")
 @kotlin.internal.InlineOnly
 internal actual inline fun <R, P, T> (suspend R.(P) -> T).startCoroutineUninterceptedOrReturn(
-        receiver: R,
-        param: P,
-        completion: Continuation<T>
+    receiver: R,
+    param: P,
+    completion: Continuation<T>
 ): Any? = (this as Function3<R, P, Continuation<T>, Any?>).invoke(receiver, param, completion)
 
 private object CoroutineSuspendedMarker
-
 
 /**
  * Creates unintercepted coroutine without receiver and with result type [T].
@@ -81,7 +80,7 @@ private object CoroutineSuspendedMarker
 @SinceKotlin("1.3")
 @Suppress("UNCHECKED_CAST")
 public actual fun <T> (suspend () -> T).createCoroutineUnintercepted(
-        completion: Continuation<T>
+    completion: Continuation<T>
 ): Continuation<Unit> {
     val probeCompletion = probeCoroutineCreated(completion)
     return if (this is BaseContinuationImpl)
@@ -116,8 +115,8 @@ public actual fun <T> (suspend () -> T).createCoroutineUnintercepted(
 @SinceKotlin("1.3")
 @Suppress("UNCHECKED_CAST")
 public actual fun <R, T> (suspend R.() -> T).createCoroutineUnintercepted(
-        receiver: R,
-        completion: Continuation<T>
+    receiver: R,
+    completion: Continuation<T>
 ): Continuation<Unit> {
     val probeCompletion = probeCoroutineCreated(completion)
     return if (this is BaseContinuationImpl)
@@ -140,7 +139,7 @@ public actual fun <R, T> (suspend R.() -> T).createCoroutineUnintercepted(
  */
 @SinceKotlin("1.3")
 public actual fun <T> Continuation<T>.intercepted(): Continuation<T> =
-        (this as? ContinuationImpl)?.intercepted() ?: this
+    (this as? ContinuationImpl)?.intercepted() ?: this
 
 // INTERNAL DEFINITIONS
 
@@ -160,8 +159,8 @@ public actual fun <T> Continuation<T>.intercepted(): Continuation<T> =
 @SinceKotlin("1.3")
 @Suppress("UNCHECKED_CAST")
 private inline fun <T> createCoroutineFromSuspendFunction(
-        completion: Continuation<T>,
-        crossinline block: (Continuation<T>) -> Any?
+    completion: Continuation<T>,
+    crossinline block: (Continuation<T>) -> Any?
 ): Continuation<Unit> {
     val context = completion.context
     // label == 0 when coroutine is not started yet (initially) or label == 1 when it was
@@ -170,36 +169,36 @@ private inline fun <T> createCoroutineFromSuspendFunction(
             private var label = 0
 
             override fun invokeSuspend(result: Result<Any?>): Any? =
-                    when (label) {
-                        0 -> {
-                            label = 1
-                            result.getOrThrow() // Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
-                            block(this) // run the block, may return or suspend
-                        }
-                        1 -> {
-                            label = 2
-                            result.getOrThrow() // this is the result if the block had suspended
-                        }
-                        else -> error("This coroutine had already completed")
+                when (label) {
+                    0 -> {
+                        label = 1
+                        result.getOrThrow() // Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
+                        block(this) // run the block, may return or suspend
                     }
+                    1 -> {
+                        label = 2
+                        result.getOrThrow() // this is the result if the block had suspended
+                    }
+                    else -> error("This coroutine had already completed")
+                }
         }
     else
         object : ContinuationImpl(completion as Continuation<Any?>, context) {
             private var label = 0
 
             override fun invokeSuspend(result: Result<Any?>): Any? =
-                    when (label) {
-                        0 -> {
-                            label = 1
-                            result.getOrThrow() // Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
-                            block(this) // run the block, may return or suspend
-                        }
-                        1 -> {
-                            label = 2
-                            result.getOrThrow() // this is the result if the block had suspended
-                        }
-                        else -> error("This coroutine had already completed")
+                when (label) {
+                    0 -> {
+                        label = 1
+                        result.getOrThrow() // Rethrow exception if trying to start with exception (will be caught by BaseContinuationImpl.resumeWith
+                        block(this) // run the block, may return or suspend
                     }
+                    1 -> {
+                        label = 2
+                        result.getOrThrow() // this is the result if the block had suspended
+                    }
+                    else -> error("This coroutine had already completed")
+                }
         }
 }
 
@@ -219,8 +218,8 @@ private inline fun <T> createCoroutineFromSuspendFunction(
  */
 @Suppress("UNCHECKED_CAST")
 internal inline fun createContinuationArgumentFromCallback(
-        completion: Continuation<Unit>,
-        crossinline callback: (Result<Any?>) -> Unit
+    completion: Continuation<Unit>,
+    crossinline callback: (Result<Any?>) -> Unit
 ): Continuation<Any?> = object : ContinuationImpl(completion as Continuation<Any?>) {
     private var invoked = false
 

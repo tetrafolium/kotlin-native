@@ -5,8 +5,6 @@
 
 package kotlin.reflect
 
-import kotlin.native.internal.FixmeReflection
-
 /**
  * Represents a property, such as a named `val` or `var` declaration.
  * Instances of this class are obtainable by the `::` operator.
@@ -22,7 +20,7 @@ public actual interface KProperty0<out V> : kotlin.reflect.KProperty<V>, () -> V
 
     public actual fun get(): V
 
-    public override abstract operator fun invoke(): V
+    public abstract override operator fun invoke(): V
 }
 
 public actual interface KProperty1<T, out V> : kotlin.reflect.KProperty<V>, (T) -> V {

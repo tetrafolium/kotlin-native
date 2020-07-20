@@ -26,7 +26,7 @@ public open class Any {
      * Read more about [equality](https://kotlinlang.org/docs/reference/equality.html) in Kotlin.
      */
     @SymbolName("Kotlin_Any_equals")
-    external public open operator fun equals(other: Any?): Boolean
+    public open external operator fun equals(other: Any?): Boolean
 
     /**
      * Returns a hash code value for the object.  The general contract of `hashCode` is:

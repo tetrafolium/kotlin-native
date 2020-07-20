@@ -38,4 +38,4 @@ public annotation class AssociatedObjectKey
  */
 @ExperimentalAssociatedObjects
 public inline fun <reified T : Annotation> KClass<*>.findAssociatedObject(): Any? =
-        this.findAssociatedObject(T::class)
+    this.findAssociatedObject(T::class)

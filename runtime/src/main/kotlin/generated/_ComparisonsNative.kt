@@ -10,10 +10,9 @@ package kotlin.comparisons
 // See: https://github.com/JetBrains/kotlin/tree/master/libraries/stdlib
 //
 
-
 /**
  * Returns the greater of two values.
- * 
+ *
  * If values are equal, returns the first one.
  */
 @SinceKotlin("1.1")
@@ -59,7 +58,7 @@ public actual inline fun maxOf(a: Long, b: Long): Long {
 
 /**
  * Returns the greater of two values.
- * 
+ *
  * If either value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -70,7 +69,7 @@ public actual inline fun maxOf(a: Float, b: Float): Float {
 
 /**
  * Returns the greater of two values.
- * 
+ *
  * If either value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -81,7 +80,7 @@ public actual inline fun maxOf(a: Double, b: Double): Double {
 
 /**
  * Returns the greater of three values.
- * 
+ *
  * If there are multiple equal maximal values, returns the first of them.
  */
 @SinceKotlin("1.1")
@@ -127,7 +126,7 @@ public actual inline fun maxOf(a: Long, b: Long, c: Long): Long {
 
 /**
  * Returns the greater of three values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -138,7 +137,7 @@ public actual inline fun maxOf(a: Float, b: Float, c: Float): Float {
 
 /**
  * Returns the greater of three values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -149,7 +148,7 @@ public actual inline fun maxOf(a: Double, b: Double, c: Double): Double {
 
 /**
  * Returns the greater of the given values.
- * 
+ *
  * If there are multiple equal maximal values, returns the first of them.
  */
 @SinceKotlin("1.4")
@@ -201,7 +200,7 @@ public actual fun maxOf(a: Long, vararg other: Long): Long {
 
 /**
  * Returns the greater of the given values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.4")
@@ -213,7 +212,7 @@ public actual fun maxOf(a: Float, vararg other: Float): Float {
 
 /**
  * Returns the greater of the given values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.4")
@@ -225,7 +224,7 @@ public actual fun maxOf(a: Double, vararg other: Double): Double {
 
 /**
  * Returns the smaller of two values.
- * 
+ *
  * If values are equal, returns the first one.
  */
 @SinceKotlin("1.1")
@@ -271,7 +270,7 @@ public actual inline fun minOf(a: Long, b: Long): Long {
 
 /**
  * Returns the smaller of two values.
- * 
+ *
  * If either value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -286,7 +285,7 @@ public actual inline fun minOf(a: Float, b: Float): Float {
 
 /**
  * Returns the smaller of two values.
- * 
+ *
  * If either value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -301,7 +300,7 @@ public actual inline fun minOf(a: Double, b: Double): Double {
 
 /**
  * Returns the smaller of three values.
- * 
+ *
  * If there are multiple equal minimal values, returns the first of them.
  */
 @SinceKotlin("1.1")
@@ -347,7 +346,7 @@ public actual inline fun minOf(a: Long, b: Long, c: Long): Long {
 
 /**
  * Returns the smaller of three values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -358,7 +357,7 @@ public actual inline fun minOf(a: Float, b: Float, c: Float): Float {
 
 /**
  * Returns the smaller of three values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.1")
@@ -369,7 +368,7 @@ public actual inline fun minOf(a: Double, b: Double, c: Double): Double {
 
 /**
  * Returns the smaller of the given values.
- * 
+ *
  * If there are multiple equal minimal values, returns the first of them.
  */
 @SinceKotlin("1.4")
@@ -421,7 +420,7 @@ public actual fun minOf(a: Long, vararg other: Long): Long {
 
 /**
  * Returns the smaller of the given values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.4")
@@ -433,7 +432,7 @@ public actual fun minOf(a: Float, vararg other: Float): Float {
 
 /**
  * Returns the smaller of the given values.
- * 
+ *
  * If any value is `NaN`, returns `NaN`.
  */
 @SinceKotlin("1.4")
@@ -442,4 +441,3 @@ public actual fun minOf(a: Double, vararg other: Double): Double {
     for (e in other) min = minOf(min, e)
     return min
 }
-

@@ -25,23 +25,22 @@ public actual inline fun todo(block: () -> Unit) {
 @PublishedApi
 internal actual fun <T : Throwable> checkResultIsFailure(exceptionClass: KClass<T>, message: String?, blockResult: Result<Unit>): T {
     blockResult.fold(
-            onSuccess = {
-                asserter.fail(messagePrefix(message) + "Expected an exception of ${exceptionClass.qualifiedName} to be thrown, but was completed successfully.")
-            },
-            onFailure = { e ->
-                if (exceptionClass.isInstance(e)) {
-                    @Suppress("UNCHECKED_CAST")
-                    return e as T
-                }
-                asserter.fail(messagePrefix(message) + "Expected an exception of ${exceptionClass.qualifiedName} to be thrown, but was $e", e)
+        onSuccess = {
+            asserter.fail(messagePrefix(message) + "Expected an exception of ${exceptionClass.qualifiedName} to be thrown, but was completed successfully.")
+        },
+        onFailure = { e ->
+            if (exceptionClass.isInstance(e)) {
+                @Suppress("UNCHECKED_CAST")
+                return e as T
             }
+            asserter.fail(messagePrefix(message) + "Expected an exception of ${exceptionClass.qualifiedName} to be thrown, but was $e", e)
+        }
     )
 }
 
 /** Platform-specific construction of AssertionError with cause */
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun AssertionErrorWithCause(message: String?, cause: Throwable?): AssertionError =
-        AssertionError(message, cause)
-
+    AssertionError(message, cause)
 
 internal actual fun lookupAsserter(): Asserter = DefaultAsserter

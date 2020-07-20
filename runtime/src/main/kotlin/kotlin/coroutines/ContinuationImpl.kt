@@ -6,7 +6,6 @@
 package kotlin.coroutines.native.internal
 
 import kotlin.coroutines.*
-import kotlin.coroutines.intrinsics.CoroutineSingletons
 import kotlin.coroutines.intrinsics.*
 
 @SinceKotlin("1.3")
@@ -93,7 +92,7 @@ internal abstract class ContinuationImpl(
     constructor(completion: Continuation<Any?>?) : this(completion, completion?.context)
 
     public override val context: CoroutineContext
-        get() = _context!! 
+        get() = _context!!
 
     private var intercepted: Continuation<Any?>? = null
 

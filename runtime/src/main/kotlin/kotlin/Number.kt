@@ -44,4 +44,3 @@ public abstract class Number {
      */
     public abstract fun toByte(): Byte
 }
-

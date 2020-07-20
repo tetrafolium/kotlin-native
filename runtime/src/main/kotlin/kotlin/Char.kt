@@ -6,8 +6,8 @@
 
 package kotlin
 
-import kotlin.native.internal.TypedIntrinsic
 import kotlin.native.internal.IntrinsicType
+import kotlin.native.internal.TypedIntrinsic
 
 /**
  * Represents a 16-bit Unicode character.
@@ -20,24 +20,24 @@ public class Char private constructor() : Comparable<Char> {
      * or a positive number if it's greater than other.
      */
     @TypedIntrinsic(IntrinsicType.UNSIGNED_COMPARE_TO)
-    external public override fun compareTo(other: Char): Int
+    public external override fun compareTo(other: Char): Int
 
     /** Adds the other Int value to this value resulting a Char. */
     public inline operator fun plus(other: Int): Char =
-            (this.toInt() + other).toChar()
+        (this.toInt() + other).toChar()
     /** Subtracts the other Char value from this value resulting an Int. */
     public inline operator fun minus(other: Char): Int =
-            this.toInt() - other.toInt()
+        this.toInt() - other.toInt()
     /** Subtracts the other Int value from this value resulting a Char. */
     public inline operator fun minus(other: Int): Char =
-            (this.toInt() - other).toChar()
+        (this.toInt() - other).toChar()
 
     /** Increments this value. */
     @TypedIntrinsic(IntrinsicType.INC)
-    external public operator fun inc(): Char
+    public external operator fun inc(): Char
     /** Decrements this value. */
     @TypedIntrinsic(IntrinsicType.DEC)
-    external public operator fun dec(): Char
+    public external operator fun dec(): Char
 
     /** Creates a range from this value to the specified [other] value. */
     public operator fun rangeTo(other: Char): CharRange {
@@ -46,24 +46,24 @@ public class Char private constructor() : Comparable<Char> {
 
     /** Returns the value of this character as a `Byte`. */
     @TypedIntrinsic(IntrinsicType.INT_TRUNCATE)
-    external public fun toByte(): Byte
+    public external fun toByte(): Byte
     /** Returns the value of this character as a `Char`. */
     public inline fun toChar(): Char = this
     /** Returns the value of this character as a `Short`. */
     @TypedIntrinsic(IntrinsicType.ZERO_EXTEND)
-    external public fun toShort(): Short
+    public external fun toShort(): Short
     /** Returns the value of this character as a `Int`. */
     @TypedIntrinsic(IntrinsicType.ZERO_EXTEND)
-    external public fun toInt(): Int
+    public external fun toInt(): Int
     /** Returns the value of this character as a `Long`. */
     @TypedIntrinsic(IntrinsicType.ZERO_EXTEND)
-    external public fun toLong(): Long
+    public external fun toLong(): Long
     /** Returns the value of this character as a `Float`. */
     @TypedIntrinsic(IntrinsicType.UNSIGNED_TO_FLOAT)
-    external public fun toFloat(): Float
+    public external fun toFloat(): Float
     /** Returns the value of this character as a `Double`. */
     @TypedIntrinsic(IntrinsicType.UNSIGNED_TO_FLOAT)
-    external public fun toDouble(): Double
+    public external fun toDouble(): Double
 
     @kotlin.native.internal.CanBePrecreated
     companion object {
@@ -149,13 +149,12 @@ public class Char private constructor() : Comparable<Char> {
     public fun equals(other: Char): Boolean = this == other
 
     public override fun equals(other: Any?): Boolean =
-            other is Char && this.equals(other)
+        other is Char && this.equals(other)
 
     @SymbolName("Kotlin_Char_toString")
-    external public override fun toString(): String
+    public external override fun toString(): String
 
     public override fun hashCode(): Int {
-        return this.toInt();
+        return this.toInt()
     }
 }
-
