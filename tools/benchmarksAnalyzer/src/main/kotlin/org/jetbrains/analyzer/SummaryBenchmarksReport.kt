@@ -27,7 +27,7 @@ typealias BenchmarksTable = Map<String, MeanVarianceBenchmark>
 typealias SummaryBenchmarksTable = Map<String, SummaryBenchmark>
 typealias ScoreChange = Pair<MeanVariance, MeanVariance>
 
-// Summary report with comparasion of separate benchmarks results.
+// Summary report with comparison of separate benchmarks results.
 class SummaryBenchmarksReport(
     val currentReport: BenchmarksReport,
     val previousReport: BenchmarksReport? = null,
@@ -218,7 +218,7 @@ class SummaryBenchmarksReport(
             mergedTable.apply {
                 currentBenchmarks.forEach { (name, current) ->
                     val currentBenchmark = current.meanBenchmark
-                    // Check existance of benchmark in previous results.
+                    // Check existence of benchmark in previous results.
                     if (previousBenchmarks == null || name !in previousBenchmarks) {
                         getOrPut(name) { SummaryBenchmark(current, null) }
                     } else {
@@ -267,7 +267,7 @@ class SummaryBenchmarksReport(
         return null
     }
 
-    // Analyze and collect changes in performance between same becnhmarks.
+    // Analyze and collect changes in performance between same benchmarks.
     private fun analyzePerformanceChanges() {
         val performanceChanges = mergedReport.asSequence().map { (name, element) ->
             getBenchmarkPerfomanceChange(name, element)

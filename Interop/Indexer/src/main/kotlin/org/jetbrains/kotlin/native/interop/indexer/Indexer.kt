@@ -957,7 +957,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
             nsReturnsRetained = clang_Cursor_isObjCReturningRetainedMethod(cursor) != 0,
             isOptional = (clang_Cursor_isObjCOptional(cursor) != 0),
             isInit = (clang_Cursor_isObjCInitMethod(cursor) != 0),
-            isExplicitlyDesignatedInitializer = hasAttribute(cursor, OBJC_DESGINATED_INITIALIZER)
+            isExplicitlyDesignatedInitializer = hasAttribute(cursor, OBJC_DESIGNATED_INITIALIZER)
         )
     }
 
@@ -985,7 +985,7 @@ internal class NativeIndexImpl(val library: NativeLibrary, val verbose: Boolean 
     }
 
     private val NS_CONSUMED = "ns_consumed"
-    private val OBJC_DESGINATED_INITIALIZER = "objc_designated_initializer"
+    private val OBJC_DESIGNATED_INITIALIZER = "objc_designated_initializer"
 
     private fun hasAttribute(cursor: CValue<CXCursor>, name: String): Boolean {
         var result = false

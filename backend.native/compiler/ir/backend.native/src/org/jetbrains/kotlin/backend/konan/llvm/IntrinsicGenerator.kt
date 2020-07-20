@@ -270,7 +270,7 @@ internal class IntrinsicGenerator(private val environment: IntrinsicGeneratorEnv
         context.reportCompilationError("$intrinsicType should be handled by `tryEvaluateSpecialCall`")
 
     private fun reportNonLoweredIntrinsic(intrinsicType: IntrinsicType): Nothing =
-        context.reportCompilationError("Intrinsic of type $intrinsicType should be handled by previos lowering phase")
+        context.reportCompilationError("Intrinsic of type $intrinsicType should be handled by previous lowering phase")
 
     private fun FunctionGenerationContext.emitGetContinuation(): LLVMValueRef =
         environment.continuation

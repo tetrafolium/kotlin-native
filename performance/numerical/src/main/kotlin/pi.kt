@@ -65,7 +65,7 @@ private fun is_prime(n: Int): Boolean {
     return true
 }
 
-/* return the prime number immediatly after n */
+/* return the prime number immediately after n */
 private fun next_prime(n: Int): Int {
     var n = n
     do {

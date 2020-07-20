@@ -67,7 +67,7 @@ public class DetachedObjectGraph<T> internal constructor(pointer: NativePtr) {
     public constructor(pointer: COpaquePointer?) : this(pointer?.rawValue ?: NativePtr.NULL)
 
     /**
-     * Returns raw C pointer value, usable for interoperability with C scenarious.
+     * Returns raw C pointer value, usable for interoperability with C scenarios.
      */
     public fun asCPointer(): COpaquePointer? = interpretCPointer<COpaque>(stable.value)
 }

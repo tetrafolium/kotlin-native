@@ -97,7 +97,7 @@ fun computeMeanVariance(samples: List<Double>): MeanVariance {
     return MeanVariance(mean, confidenceInterval)
 }
 
-// Calculate avarage results for bencmarks (each becnhmark can be run several times).
+// Calculate avarage results for bencmarks (each benchmark can be run several times).
 fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): BenchmarksTable {
     return benchmarks.map { (name, resultsSet) ->
         val repeatedSequence = IntArray(resultsSet.size)
@@ -105,7 +105,7 @@ fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): Benchmar
         var currentStatus = BenchmarkResult.Status.PASSED
         var currentWarmup = -1
 
-        // Collect common becnhmark values and check them.
+        // Collect common benchmark values and check them.
         resultsSet.forEachIndexed { index, result ->
             // If there was at least one failure, summary is marked as failure.
             if (result.status == BenchmarkResult.Status.FAILED) {

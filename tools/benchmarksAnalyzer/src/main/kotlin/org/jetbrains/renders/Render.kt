@@ -128,7 +128,7 @@ class TextRender : Render() {
             printBucketInfo(addedBenchmarks, "Added benchmarks")
             printBucketInfo(removedBenchmarks, "Removed benchmarks")
         }
-        append("Total becnhmarks number: ${report.benchmarksNumber}")
+        append("Total benchmarks number: ${report.benchmarksNumber}")
         append()
     }
 
@@ -209,7 +209,7 @@ class TextRender : Render() {
 
         if (onlyChanges) {
             if (report.regressions.isEmpty() && report.improvements.isEmpty()) {
-                append("All becnhmarks are stable.")
+                append("All benchmarks are stable.")
             }
         }
 

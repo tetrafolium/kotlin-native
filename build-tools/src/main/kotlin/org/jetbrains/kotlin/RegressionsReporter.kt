@@ -16,7 +16,7 @@ import java.util.Properties
  * Task to produce regressions report and send it to slack. Requires a report with current benchmarks result
  * and path to analyzer tool
  *
- * @property currentBenchmarksReportFile  path to file with becnhmarks result
+ * @property currentBenchmarksReportFile  path to file with benchmarks result
  * @property analyzer path to analyzer tool
  * @property htmlReport name of result html report
  * @property defaultBranch name of default branch
@@ -128,9 +128,9 @@ open class RegressionsReporter : DefaultTask() {
 
         if (output.contains("Uncaught exception")) {
             error(
-                "Error during comparasion of $currentBenchmarksReportFile and " +
+                "Error during comparison of $currentBenchmarksReportFile and " +
                     "artifactory:$compareToBuildNumber:$target:$artifactoryFileName with $analyzer! " +
-                    "Please check files existance and their correctness."
+                    "Please check files existence and their correctness."
             )
         }
         arrayOf("$analyzer", "-r", "statistics", "$currentBenchmarksReportFile", "artifactory:$compareToBuildNumber:$target:$artifactoryFileName", "-o", "$summaryFile")

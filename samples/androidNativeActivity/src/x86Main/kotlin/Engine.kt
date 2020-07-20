@@ -55,7 +55,7 @@ class Engine(val state: NativeActivityState) : DisposableContainer() {
                 val id = ALooper_pollAll(if (needRedraw || animating) 0 else -1, fd.ptr, null, null)
                 if (id < 0) break@eventLoop
                 when (id) {
-                    LOOPER_ID_SYS -> if (!processSysEvent(fd)) return // An error occured.
+                    LOOPER_ID_SYS -> if (!processSysEvent(fd)) return // An error occurred.
                     LOOPER_ID_INPUT -> processUserInput()
                     else -> logError("Unprocessed event: $id")
                 }

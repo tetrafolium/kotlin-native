@@ -8,7 +8,7 @@
  * to get a running time of O(n^2) instead of O(n^3log(n)^3).
  *
  * This program uses mostly integer arithmetic. It may be slow on some
- * hardwares where integer multiplications and divisons must be done
+ * hardwares where integer multiplications and divisions must be done
  * by software. We have supposed that 'int' has a size of 32 bits. If
  * your compiler supports 'long long' integers of 64 bits, you may use
  * the integer version of 'mul_mod' (see HAS_LONG_LONG).
@@ -83,7 +83,7 @@ static int is_prime(int n)
     return 1;
 }
 
-/* return the prime number immediatly after n */
+/* return the prime number immediately after n */
 static int next_prime(int n)
 {
     do {

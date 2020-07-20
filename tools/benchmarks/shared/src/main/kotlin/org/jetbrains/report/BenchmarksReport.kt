@@ -59,7 +59,7 @@ class BenchmarksReport(val env: Environment, benchmarksList: List<BenchmarkResul
             }
         }
 
-        // Made a map of becnhmarks with name as key from list.
+        // Made a map of benchmarks with name as key from list.
         private fun structBenchmarks(benchmarksList: List<BenchmarkResult>) =
             benchmarksList.groupBy { it.name }
     }

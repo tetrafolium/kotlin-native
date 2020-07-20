@@ -29,12 +29,12 @@ actual fun writeToFile(fileName: String, text: String) {
     }
 }
 
-// Wrapper for assert funtion in stdlib
+// Wrapper for assert function in stdlib
 actual fun assert(value: Boolean) {
     kotlin.assert(value)
 }
 
-// Wrapper for measureNanoTime funtion in stdlib
+// Wrapper for measureNanoTime function in stdlib
 actual inline fun measureNanoTime(block: () -> Unit): Long {
     return kotlin.system.measureNanoTime(block)
 }
