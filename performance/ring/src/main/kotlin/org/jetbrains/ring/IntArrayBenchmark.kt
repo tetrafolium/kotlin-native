@@ -29,12 +29,12 @@ open class IntArrayBenchmark {
         _data = list
     }
 
-    //Benchmark
+    // Benchmark
     fun copy(): List<Int> {
         return data.toList()
     }
 
-    //Benchmark
+    // Benchmark
     fun copyManual(): ArrayList<Int> {
         val list = ArrayList<Int>(data.size)
         for (item in data) {
@@ -43,22 +43,22 @@ open class IntArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndCount(): Int {
         return data.filter { filterLoad(it) }.count()
     }
 
-    //Benchmark
+    // Benchmark
     fun filterSomeAndCount(): Int {
         return data.filter { filterSome(it) }.count()
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndMap(): List<String> {
         return data.filter { filterLoad(it) }.map { mapLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndMapManual(): ArrayList<String> {
         val list = ArrayList<String>()
         for (it in data) {
@@ -70,22 +70,22 @@ open class IntArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun filter(): List<Int> {
         return data.filter { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterSome(): List<Int> {
         return data.filter { filterSome(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterPrime(): List<Int> {
         return data.filter { filterPrime(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterManual(): ArrayList<Int> {
         val list = ArrayList<Int>()
         for (it in data) {
@@ -95,7 +95,7 @@ open class IntArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun filterSomeManual(): ArrayList<Int> {
         val list = ArrayList<Int>()
         for (it in data) {
@@ -105,7 +105,7 @@ open class IntArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredManual(): Int {
         var count = 0
         for (it in data) {
@@ -115,7 +115,7 @@ open class IntArrayBenchmark {
         return count
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredSomeManual(): Int {
         var count = 0
         for (it in data) {
@@ -125,7 +125,7 @@ open class IntArrayBenchmark {
         return count
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredPrimeManual(): Int {
         var count = 0
         for (it in data) {
@@ -135,37 +135,35 @@ open class IntArrayBenchmark {
         return count
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun countFiltered(): Int {
         return data.count { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredSome(): Int {
         return data.count { filterSome(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredPrime(): Int {
         val res = data.count { filterPrime(it) }
-        //println(res)
+        // println(res)
         return res
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredLocal(): Int {
         return data.cnt { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredSomeLocal(): Int {
         return data.cnt { filterSome(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun reduce(): Int {
         return data.fold(0) { acc, it -> if (filterLoad(it)) acc + 1 else acc }
     }
 }
-

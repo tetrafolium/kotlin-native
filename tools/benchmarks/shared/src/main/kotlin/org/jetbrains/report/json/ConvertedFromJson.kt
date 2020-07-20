@@ -20,29 +20,29 @@ package org.jetbrains.report.json
 interface ConvertedFromJson {
     // Methods for conversion to expected type with checks of possibility of such conversions.
     fun elementToDouble(element: JsonElement, name: String): Double =
-            if (element is JsonPrimitive)
-                element.double
-            else
-                error("Field '$name' in '$element' is expected to be a double number. Please, check origin files.")
+        if (element is JsonPrimitive)
+            element.double
+        else
+            error("Field '$name' in '$element' is expected to be a double number. Please, check origin files.")
 
     fun elementToInt(element: JsonElement, name: String): Int =
-            if (element is JsonPrimitive)
-                element.int
-            else
-                error("Field '$name' in '$element' is expected to be an integer number. Please, check origin files.")
+        if (element is JsonPrimitive)
+            element.int
+        else
+            error("Field '$name' in '$element' is expected to be an integer number. Please, check origin files.")
 
-    fun elementToString(element: JsonElement, name:String): String =
-            if (element is JsonLiteral)
-                element.unquoted()
-            else
-                error("Field '$name' in '$element' is expected to be a string. Please, check origin files.")
+    fun elementToString(element: JsonElement, name: String): String =
+        if (element is JsonLiteral)
+            element.unquoted()
+        else
+            error("Field '$name' in '$element' is expected to be a string. Please, check origin files.")
 
-    fun elementToStringOrNull(element: JsonElement, name:String): String? =
-            when (element) {
-                is JsonLiteral -> element.unquoted()
-                is JsonNull -> null
-                else -> error("Field '$name' in '$element' is expected to be a string. Please, check origin files.")
-            }
+    fun elementToStringOrNull(element: JsonElement, name: String): String? =
+        when (element) {
+            is JsonLiteral -> element.unquoted()
+            is JsonNull -> null
+            else -> error("Field '$name' in '$element' is expected to be a string. Please, check origin files.")
+        }
 }
 
 fun JsonObject.getRequiredField(fieldName: String): JsonElement {

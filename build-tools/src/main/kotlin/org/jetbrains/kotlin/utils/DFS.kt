@@ -13,31 +13,34 @@ object DFS {
     }
 
     fun <N, R> dfs(
-            nodes: Collection<N>,
-            neighbors: Neighbors<N>,
-            handler: NodeHandler<N, R>
+        nodes: Collection<N>,
+        neighbors: Neighbors<N>,
+        handler: NodeHandler<N, R>
     ): R {
         return dfs(nodes, neighbors, VisitedWithSet(), handler)
     }
 
     fun <N> ifAny(
-            nodes: Collection<N>,
-            neighbors: Neighbors<N>,
-            predicate: Function1<N, Boolean>
+        nodes: Collection<N>,
+        neighbors: Neighbors<N>,
+        predicate: Function1<N, Boolean>
     ): Boolean {
         val result = BooleanArray(1)
-        return dfs(nodes, neighbors, object : AbstractNodeHandler<N, Boolean?>() {
-            override fun beforeChildren(current: N): Boolean {
-                if (predicate.invoke(current)) {
-                    result[0] = true
+        return dfs(
+            nodes, neighbors,
+            object : AbstractNodeHandler<N, Boolean?>() {
+                override fun beforeChildren(current: N): Boolean {
+                    if (predicate.invoke(current)) {
+                        result[0] = true
+                    }
+                    return !result[0]
                 }
-                return !result[0]
-            }
 
-            override fun result(): Boolean {
-                return result[0]
+                override fun result(): Boolean {
+                    return result[0]
+                }
             }
-        })!!
+        )!!
     }
 
     fun <N, R> dfsFromNode(node: N, neighbors: Neighbors<N>, visited: Visited<N>, handler: NodeHandler<N, R>): R {
@@ -46,15 +49,18 @@ object DFS {
     }
 
     fun <N> dfsFromNode(
-            node: N,
-            neighbors: Neighbors<N>,
-            visited: Visited<N>
+        node: N,
+        neighbors: Neighbors<N>,
+        visited: Visited<N>
     ) {
-        dfsFromNode(node, neighbors, visited, object : AbstractNodeHandler<N, Void?>() {
-            override fun result(): Void? {
-                return null
+        dfsFromNode(
+            node, neighbors, visited,
+            object : AbstractNodeHandler<N, Void?>() {
+                override fun result(): Void? {
+                    return null
+                }
             }
-        })
+        )
     }
 
     fun <N> topologicalOrder(nodes: Iterable<N>, neighbors: Neighbors<N>, visited: Visited<N>): List<N> {

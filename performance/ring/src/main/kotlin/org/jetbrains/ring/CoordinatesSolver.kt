@@ -6,7 +6,8 @@ class CoordinatesSolverBenchmark {
     val solver: Solver
 
     init {
-        val inputValue = """
+        val inputValue =
+            """
             12 5 3 25 3 9 3 9 1 3
             13 3 12 6 10 10 12 2 10 10
             9 2 9 5 6 12 5 0 2 10
@@ -17,7 +18,8 @@ class CoordinatesSolverBenchmark {
             8 5 6 8 3 12 7 10 10 11
             12 3 13 6 12 3 9 6 12 2
             13 4 5 5 5 6 12 5 5 2
-            1""".trimIndent()
+            1
+            """.trimIndent()
         val input = readTillParsed(inputValue)
 
         solver = Solver(input!!)
@@ -59,7 +61,7 @@ class CoordinatesSolverBenchmark {
     class Output(val steps: List<Coordinate?>)
 
     class InputParser {
-        private val rows : MutableList<Array<Field>> = mutableListOf()
+        private val rows: MutableList<Array<Field>> = mutableListOf()
         private var numObjects: Int = 0
 
         private val input: Input
@@ -69,8 +71,8 @@ class CoordinatesSolverBenchmark {
 
                 for (y in rows.indices) {
                     val row = rows[y]
-                    for (p in y*width until y*width + width) {
-                        fields[p] = row[p-y*width]
+                    for (p in y * width until y * width + width) {
+                        fields[p] = row[p - y * width]
                     }
                 }
 
@@ -100,7 +102,6 @@ class CoordinatesSolverBenchmark {
             return null
         }
     }
-
 
     class Solver(private val input: Input) {
         private val objects: List<Coordinate>
@@ -164,8 +165,8 @@ class CoordinatesSolverBenchmark {
         }
 
         private fun createOutput(steps: List<Coordinate>): Output {
-            val objects : MutableList<Coordinate> = this.objects.toMutableList()
-            val outSteps : MutableList<Coordinate?> = mutableListOf()
+            val objects: MutableList<Coordinate> = this.objects.toMutableList()
+            val outSteps: MutableList<Coordinate?> = mutableListOf()
 
             for (step in steps) {
                 outSteps.add(step)
@@ -185,7 +186,6 @@ class CoordinatesSolverBenchmark {
             return if (!(x == input.labyrinth.width - 1 && y == input.labyrinth.height - 1)) { // Jobb also a cel
                 false
             } else steps.containsAll(objects)
-
         }
 
         private fun getPossibleSteps(now: Coordinate, previous: Coordinate?): ArrayList<Coordinate> {
@@ -225,7 +225,6 @@ class CoordinatesSolverBenchmark {
 
         private fun findFirstLegitSteps(startPrev: Coordinate?, start: Coordinate, num: Int): MutableList<Coordinate>? {
             var steps: MutableList<Coordinate>? = ArrayList()
-
 
             var i = 0
             while (i < num) {

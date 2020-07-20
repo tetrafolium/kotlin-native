@@ -5,21 +5,26 @@
 
 package org.jetbrains.kotlin
 
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.options.Option
-import org.gradle.api.tasks.Input
 import org.jetbrains.kotlin.benchmark.LogLevel
 import org.jetbrains.kotlin.benchmark.Logger
 import org.jetbrains.report.json.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 
-data class ExecParameters(val warmupCount: Int, val repeatCount: Int,
-                          val filterArgs: List<String>, val filterRegexArgs: List<String>,
-                          val verbose: Boolean, val outputFileName: String?)
+data class ExecParameters(
+    val warmupCount: Int,
+    val repeatCount: Int,
+    val filterArgs: List<String>,
+    val filterRegexArgs: List<String>,
+    val verbose: Boolean,
+    val outputFileName: String?
+)
 
-open class RunJvmTask: JavaExec() {
+open class RunJvmTask : JavaExec() {
     @Input
     @Option(option = "filter", description = "Benchmarks to run (comma-separated)")
     var filter: String = ""
@@ -76,22 +81,31 @@ open class RunJvmTask: JavaExec() {
         val logger = if (verbose) Logger(LogLevel.DEBUG) else Logger()
         logger.log("Warm up iterations for benchmark $benchmark\n")
         for (i in 0.until(warmupCount)) {
-            executeTask(ExecParameters(0, 1, listOf("-f", benchmark),
-                    emptyList(), false, null))
+            executeTask(
+                ExecParameters(
+                    0, 1, listOf("-f", benchmark),
+                    emptyList(), false, null
+                )
+            )
         }
         val result = mutableListOf<String>()
         logger.log("Running benchmark $benchmark ")
         for (i in 0.until(repeatCount)) {
             logger.log(".", usePrefix = false)
             val benchmarkReport = JsonTreeParser.parse(
-                    executeTask(ExecParameters(0, 1, listOf("-f", benchmark),
-                            emptyList(), false, null)
-                    ).removePrefix("[").removeSuffix("]")
+                executeTask(
+                    ExecParameters(
+                        0, 1, listOf("-f", benchmark),
+                        emptyList(), false, null
+                    )
+                ).removePrefix("[").removeSuffix("]")
             ).jsonObject
-            val modifiedBenchmarkReport = JsonObject(HashMap(benchmarkReport.content).apply {
-                put("repeat", JsonLiteral(i))
-                put("warmup", JsonLiteral(warmupCount))
-            })
+            val modifiedBenchmarkReport = JsonObject(
+                HashMap(benchmarkReport.content).apply {
+                    put("repeat", JsonLiteral(i))
+                    put("warmup", JsonLiteral(warmupCount))
+                }
+            )
             result.add(modifiedBenchmarkReport.toString())
         }
         logger.log("\n", usePrefix = false)
@@ -116,10 +130,9 @@ open class RunJvmTask: JavaExec() {
         val filterRegexArgs = filterRegex.splitCommaSeparatedOption("-fr")
         when (repeatingType) {
             BenchmarkRepeatingType.INTERNAL -> executeTask(
-                    ExecParameters(warmupCount, repeatCount, filterArgs, filterRegexArgs, verbose, outputFileName)
+                ExecParameters(warmupCount, repeatCount, filterArgs, filterRegexArgs, verbose, outputFileName)
             )
             BenchmarkRepeatingType.EXTERNAL -> execBenchmarksRepeatedly(filterArgs, filterRegexArgs)
         }
-
     }
 }

@@ -46,7 +46,7 @@ internal interface EnvironmentVariables {
     val enableOptimizations: Boolean
 }
 
-internal class EnvironmentVariablesUnused: EnvironmentVariables {
+internal class EnvironmentVariablesUnused : EnvironmentVariables {
     override val configurationBuildDir: File?
         get() = null
 
@@ -57,7 +57,7 @@ internal class EnvironmentVariablesUnused: EnvironmentVariables {
         get() = false
 }
 
-internal class EnvironmentVariablesImpl(val project: Project):  EnvironmentVariables {
+internal class EnvironmentVariablesImpl(val project: Project) : EnvironmentVariables {
     override val configurationBuildDir: File?
         get() = System.getenv("CONFIGURATION_BUILD_DIR")?.let {
             project.file(it)
@@ -75,7 +75,7 @@ internal class EnvironmentVariablesImpl(val project: Project):  EnvironmentVaria
  * variables in Java 9. Until Gradle API for environment variables is provided
  * we use project properties instead of them. TODO: Return to using env vars when the issue is fixed.
  */
-internal class EnvironmentVariablesFromProperties(val project: Project): EnvironmentVariables {
+internal class EnvironmentVariablesFromProperties(val project: Project) : EnvironmentVariables {
     override val configurationBuildDir: File?
         get() = project.findProperty(ProjectProperty.KONAN_CONFIGURATION_BUILD_DIR)?.let {
             project.file(it)

@@ -34,12 +34,14 @@ open class CompatibilityTests {
     fun `Plugin should fail if running with Gradle prior to the required one`() {
         val project = KonanProject.createEmpty(projectDirectory)
         val result = project
-                .createRunner()
-                .withGradleDistribution(URI.create(
+            .createRunner()
+            .withGradleDistribution(
+                URI.create(
                     "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-4.5-bin.zip"
-                ))
-                .withArguments("tasks")
-                .buildAndFail()
+                )
+            )
+            .withArguments("tasks")
+            .buildAndFail()
         println(result.output)
         assertTrue("Build doesn't show the warning message") {
             result.output.contains("Kotlin/Native Gradle plugin is incompatible with this version of Gradle.")

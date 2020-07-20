@@ -30,43 +30,43 @@ open class StringBenchmark {
             list.add(n)
         _data = list
         csv = ""
-        for (i in 1..BENCHMARK_SIZE-1) {
+        for (i in 1..BENCHMARK_SIZE - 1) {
             val elem = Random.nextDouble()
             csv += elem
             csv += ","
         }
         csv += 0.0
     }
-    
-    //Benchmark
+
+    // Benchmark
     open fun stringConcat(): String? {
         var string: String = ""
         for (it in data) string += it
         return string
     }
-    
-    //Benchmark
+
+    // Benchmark
     open fun stringConcatNullable(): String? {
         var string: String? = ""
         for (it in data) string += it
         return string
     }
-    
-    //Benchmark
+
+    // Benchmark
     open fun stringBuilderConcat(): String {
-        var string : StringBuilder = StringBuilder("")
+        var string: StringBuilder = StringBuilder("")
         for (it in data) string.append(it)
         return string.toString()
     }
-    
-    //Benchmark
+
+    // Benchmark
     open fun stringBuilderConcatNullable(): String {
-        var string : StringBuilder? = StringBuilder("")
+        var string: StringBuilder? = StringBuilder("")
         for (it in data) string?.append(it)
         return string.toString()
     }
-    
-    //Benchmark
+
+    // Benchmark
     open fun summarizeSplittedCsv(): Double {
         val fields = csv.split(",")
         var sum = 0.0

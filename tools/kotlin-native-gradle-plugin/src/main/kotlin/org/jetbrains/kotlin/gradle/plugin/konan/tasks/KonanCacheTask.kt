@@ -4,10 +4,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.gradle.plugin.konan.KonanCompilerRunner
-import org.jetbrains.kotlin.gradle.plugin.konan.hostManager
 import org.jetbrains.kotlin.gradle.plugin.konan.konanHome
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
-import org.jetbrains.kotlin.konan.target.HostManager
 import java.io.File
 
 enum class KonanCacheKind(val outputKind: CompilerOutputKind) {
@@ -15,7 +13,7 @@ enum class KonanCacheKind(val outputKind: CompilerOutputKind) {
     DYNAMIC(CompilerOutputKind.DYNAMIC_CACHE)
 }
 
-open class KonanCacheTask: DefaultTask() {
+open class KonanCacheTask : DefaultTask() {
     @InputDirectory
     lateinit var originalKlib: File
 
@@ -35,7 +33,7 @@ open class KonanCacheTask: DefaultTask() {
     protected val cacheFile: File
         get() {
             val klibName = originalKlib.nameWithoutExtension
-            return cacheDirectory.resolve("${klibName}-cache")
+            return cacheDirectory.resolve("$klibName-cache")
         }
 
     @Input

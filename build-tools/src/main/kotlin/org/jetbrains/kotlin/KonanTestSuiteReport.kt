@@ -1,9 +1,9 @@
 package org.jetbrains.kotlin
 
 import com.google.gson.annotations.Expose
+import org.gradle.api.Project
 import java.io.PrintWriter
 import java.io.StringWriter
-import org.gradle.api.Project
 
 enum class TestStatus {
     PASSED,
@@ -13,11 +13,11 @@ enum class TestStatus {
 }
 
 data class Statistics(
-        @Expose var passed: Int = 0,
-        @Expose var failed: Int = 0,
-        @Expose var error: Int = 0,
-        @Expose var skipped: Int = 0) {
-
+    @Expose var passed: Int = 0,
+    @Expose var failed: Int = 0,
+    @Expose var error: Int = 0,
+    @Expose var skipped: Int = 0
+) {
 
     fun pass(count: Int = 1) { passed += count }
 
@@ -38,8 +38,7 @@ data class Statistics(
 val Statistics.total: Int
     get() = passed + failed + error + skipped
 
-class TestFailedException(msg:String) : RuntimeException(msg)
-
+class TestFailedException(msg: String) : RuntimeException(msg)
 
 data class KonanTestGroupReport(@Expose val name: String, val suites: List<KonanTestSuiteReport>)
 
@@ -50,7 +49,7 @@ data class KonanTestCaseReport(@Expose val name: String, @Expose val status: Tes
 class KonanTestSuiteReportEnvironment(val name: String, val project: Project, val statistics: Statistics) {
     private val tc = if (Tc.enabled) TeamCityTestPrinter(project) else null
     val tests = mutableListOf<KonanTestCaseReport>()
-    fun executeTest(testName: String, action:() -> Unit) {
+    fun executeTest(testName: String, action: () -> Unit) {
         var test: KonanTestCaseReport?
         try {
             tc?.startTest(testName)
@@ -58,12 +57,12 @@ class KonanTestSuiteReportEnvironment(val name: String, val project: Project, va
             tc?.passTest(testName)
             statistics.pass()
             test = KonanTestCaseReport(testName, TestStatus.PASSED)
-        } catch (e:TestFailedException) {
+        } catch (e: TestFailedException) {
             tc?.failedTest(testName, e)
             statistics.fail()
             test = KonanTestCaseReport(testName, TestStatus.FAILED, "Exception: ${e.message}. Cause: ${e.cause?.message}")
             project.logger.quiet("test: $testName failed")
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             tc?.errorTest(testName, e)
             statistics.error()
             test = KonanTestCaseReport(testName, TestStatus.ERROR, "Exception: ${e.message}. Cause: ${e.cause?.message}")
@@ -83,7 +82,7 @@ class KonanTestSuiteReportEnvironment(val name: String, val project: Project, va
         tests += KonanTestCaseReport(name, TestStatus.SKIPPED)
     }
 
-    fun abort(throwable: Throwable, count:Int) {
+    fun abort(throwable: Throwable, count: Int) {
         statistics.error(count)
         project.logger.quiet("suite `$name` aborted with exception", throwable)
     }
@@ -95,10 +94,10 @@ class KonanTestSuiteReportEnvironment(val name: String, val project: Project, va
     }
 }
 
-class KonanTestGroupReportEnvironment(val project:Project) {
+class KonanTestGroupReportEnvironment(val project: Project) {
     val statistics = Statistics()
     val suiteReports = mutableListOf<KonanTestSuiteReport>()
-    fun suite(suiteName:String, action:(KonanTestSuiteReportEnvironment)->Unit) {
+    fun suite(suiteName: String, action: (KonanTestSuiteReportEnvironment) -> Unit) {
         val konanTestSuiteEnvironment = KonanTestSuiteReportEnvironment(suiteName, project, statistics)
         konanTestSuiteEnvironment {
             action(it)
@@ -107,7 +106,7 @@ class KonanTestGroupReportEnvironment(val project:Project) {
     }
 }
 
-private class TeamCityTestPrinter(val project:Project) {
+private class TeamCityTestPrinter(val project: Project) {
     fun suiteStart(name: String) {
         teamcityReport("testSuiteStarted name='$name'")
     }
@@ -122,7 +121,6 @@ private class TeamCityTestPrinter(val project:Project) {
 
     fun passTest(testName: String) = teamcityFinish(testName)
 
-
     fun failedTest(testName: String, testFailedException: TestFailedException) {
         teamcityReport("testFailed type='comparisonFailure' name='$testName' message='${testFailedException.message.toTeamCityFormat()}'")
         teamcityFinish(testName)
@@ -131,10 +129,12 @@ private class TeamCityTestPrinter(val project:Project) {
     fun errorTest(testName: String, exception: Exception) {
         val writer = StringWriter()
         exception.printStackTrace(PrintWriter(writer))
-        val rawString  = writer.toString()
+        val rawString = writer.toString()
 
-        teamcityReport("testFailed name='$testName' message='${exception.message.toTeamCityFormat()}' " +
-                "details='${rawString.toTeamCityFormat()}'")
+        teamcityReport(
+            "testFailed name='$testName' message='${exception.message.toTeamCityFormat()}' " +
+                "details='${rawString.toTeamCityFormat()}'"
+        )
         teamcityFinish(testName)
     }
 
@@ -143,7 +143,7 @@ private class TeamCityTestPrinter(val project:Project) {
         teamcityFinish(testName)
     }
 
-    private fun teamcityFinish(testName:String) {
+    private fun teamcityFinish(testName: String) {
         teamcityReport("testFinished name='$testName'")
     }
 
@@ -153,11 +153,12 @@ private class TeamCityTestPrinter(val project:Project) {
      */
     private fun String?.toTeamCityFormat(): String = this?.let {
         it.replace("\\|", "||")
-                .replace("\r", "|r")
-                .replace("\n", "|n")
-                .replace("'", "|'")
-                .replace("\\[", "|[")
-                .replace("]", "|]")} ?: "null"
+            .replace("\r", "|r")
+            .replace("\n", "|n")
+            .replace("'", "|'")
+            .replace("\\[", "|[")
+            .replace("]", "|]")
+    } ?: "null"
     private fun teamcityReport(msg: String) {
         project.logger.quiet("##teamcity[$msg]")
     }

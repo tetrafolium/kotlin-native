@@ -5,13 +5,12 @@
 
 package org.jetbrains.kotlin.cli.utilities
 
-import org.jetbrains.kotlin.cli.bc.K2Native
-import org.jetbrains.kotlin.konan.file.File
-import java.util.concurrent.*
 import kotlinx.cli.*
 import org.jetbrains.kotlin.backend.konan.CachedLibraries
 import org.jetbrains.kotlin.backend.konan.OutputFiles
 import org.jetbrains.kotlin.backend.konan.files.renameAtomic
+import org.jetbrains.kotlin.cli.bc.K2Native
+import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
@@ -25,6 +24,7 @@ import org.jetbrains.kotlin.native.interop.tool.CommonInteropArguments.Companion
 import org.jetbrains.kotlin.native.interop.tool.SHORT_MODULE_NAME
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.exitProcess
 import java.io.File as JFile
@@ -69,54 +69,57 @@ fun generatePlatformLibraries(args: Array<String>) {
     // See org.jetbrains.kotlin.gradle.targets.native.internal.PlatformLibrariesGenerator in the Big Kotlin repo.
     val argParser = ArgParser("generate-platform", prefixStyle = ArgParser.OptionPrefixStyle.JVM)
     val inputDirectoryPath by argParser.option(
-            ArgType.String,
-            "input-directory", "i",
-            "Input directory. Default value is <dist>/konan/platformDef/<target>"
+        ArgType.String,
+        "input-directory", "i",
+        "Input directory. Default value is <dist>/konan/platformDef/<target>"
     )
     val outputDirectoryPath by argParser.option(
-            ArgType.String,
-            "output-directory", "o",
-            "Output directory. Default value is <dist>/klib/platform/<target>"
+        ArgType.String,
+        "output-directory", "o",
+        "Output directory. Default value is <dist>/klib/platform/<target>"
     )
     val targetName by argParser.option(
-            ArgType.String, "target", "t", "Compilation target").required()
+        ArgType.String, "target", "t", "Compilation target"
+    ).required()
     val saveTemps by argParser.option(
-            ArgType.Boolean, "save-temps", "s", "Save temporary files").default(false)
+        ArgType.Boolean, "save-temps", "s", "Save temporary files"
+    ).default(false)
     val stdlibPath by argParser.option(
-            ArgType.String,
-            "stdlib-path", "S",
-            "Place where stdlib is located. Default value is <dist>/klib/common/stdlib"
+        ArgType.String,
+        "stdlib-path", "S",
+        "Place where stdlib is located. Default value is <dist>/klib/common/stdlib"
     )
 
     val dynamicCacheKind = CompilerOutputKind.DYNAMIC_CACHE.visibleName
     val staticCacheKind = CompilerOutputKind.STATIC_CACHE.visibleName
     val cacheKind by argParser.option(
-            ArgType.Choice(listOf(dynamicCacheKind, staticCacheKind)), "cache-kind", "k", "Type of cache."
+        ArgType.Choice(listOf(dynamicCacheKind, staticCacheKind)), "cache-kind", "k", "Type of cache."
     ).default(dynamicCacheKind)
 
     val cacheDirectoryPath by argParser.option(
-            ArgType.String, "cache-directory", "c", "Cache output directory")
+        ArgType.String, "cache-directory", "c", "Cache output directory"
+    )
 
     val mode by argParser.option(
-            ArgType.Choice(listOf(MODE_METADATA, MODE_SOURCECODE)),
-            fullName = "mode",
-            shortName = "m",
-            description = "The way interop library is generated."
+        ArgType.Choice(listOf(MODE_METADATA, MODE_SOURCECODE)),
+        fullName = "mode",
+        shortName = "m",
+        description = "The way interop library is generated."
     ).default(DEFAULT_MODE)
 
     val verbose by argParser.option(
-            ArgType.Boolean,
-            "verbose", "v",
-            "Show verbose log messages"
+        ArgType.Boolean,
+        "verbose", "v",
+        "Show verbose log messages"
     ).default(false)
 
     val cacheArgs by argParser.option(
-            ArgType.String, "cache-arg",
-            description = "An argument passed to compiler during cache building. Used only if -cache-directory is specified."
+        ArgType.String, "cache-arg",
+        description = "An argument passed to compiler during cache building. Used only if -cache-directory is specified."
     ).multiple()
 
     val rebuild by argParser.option(
-            ArgType.Boolean, fullName = "rebuild", description = "Rebuild already existing libraries"
+        ArgType.Boolean, fullName = "rebuild", description = "Rebuild already existing libraries"
     ).default(false)
 
     argParser.parse(args)
@@ -125,10 +128,10 @@ fun generatePlatformLibraries(args: Array<String>) {
     val target = HostManager(distribution).targetByName(targetName)
 
     val inputDirectory = inputDirectoryPath?.File()
-            ?: File(distribution.konanSubdir, "platformDef").child(target.visibleName)
+        ?: File(distribution.konanSubdir, "platformDef").child(target.visibleName)
 
     val outputDirectory = outputDirectoryPath?.File()
-            ?: File(distribution.klib, "platform").child(target.visibleName)
+        ?: File(distribution.klib, "platform").child(target.visibleName)
 
     val cacheDirectory = cacheDirectoryPath?.File()
 
@@ -147,22 +150,22 @@ fun generatePlatformLibraries(args: Array<String>) {
     val cacheInfo = cacheDirectory?.let { CacheInfo(it, cacheKind, cacheArgs) }
 
     generatePlatformLibraries(
-            target, mode,
-            DirectoriesInfo(inputDirectory, outputDirectory, stdlibFile), cacheInfo,
-            rebuild, saveTemps, logger
+        target, mode,
+        DirectoriesInfo(inputDirectory, outputDirectory, stdlibFile), cacheInfo,
+        rebuild, saveTemps, logger
     )
 }
 
 private sealed class ProcessingStatus {
-    object WAIT: ProcessingStatus()
-    object SUCCESS: ProcessingStatus()
-    object FAILED_DEPENDENCIES: ProcessingStatus()
+    object WAIT : ProcessingStatus()
+    object SUCCESS : ProcessingStatus()
+    object FAILED_DEPENDENCIES : ProcessingStatus()
     class FAIL(val error: Throwable) : ProcessingStatus()
 }
 
 private data class DirectoriesInfo(val inputDirectory: File, val outputDirectory: File, val stdlib: File)
 
-private data class CacheInfo(val cacheDirectory: File,  val cacheKind: String,  val cacheArgs: List<String>)
+private data class CacheInfo(val cacheDirectory: File, val cacheKind: String, val cacheArgs: List<String>)
 
 private class DefFile(val name: String, val depends: MutableList<DefFile>) {
     override fun toString(): String = "$name: [${depends.joinToString(separator = ", ") { it.name }}]"
@@ -175,7 +178,7 @@ private class DefFile(val name: String, val depends: MutableList<DefFile>) {
 }
 
 private fun createTempDir(prefix: String, parent: File): File =
-        File(createTempDir(prefix, directory = JFile(parent.absolutePath)).absolutePath)
+    File(createTempDir(prefix, directory = JFile(parent.absolutePath)).absolutePath)
 
 private fun File.deleteAtomicallyIfPossible(tmpDirectory: File) {
     // Try to atomically delete the old directory.
@@ -214,13 +217,13 @@ private fun topoSort(defFiles: List<DefFile>): List<DefFile> {
 }
 
 private fun generateLibrary(
-        target: KonanTarget,
-        mode: String,
-        def: DefFile,
-        directories: DirectoriesInfo,
-        tmpDirectory: File,
-        rebuild: Boolean,
-        logger: Logger
+    target: KonanTarget,
+    mode: String,
+    def: DefFile,
+    directories: DirectoriesInfo,
+    tmpDirectory: File,
+    rebuild: Boolean,
+    logger: Logger
 ) = with(directories) {
     val defFile = inputDirectory.child("${def.name}.def")
     val outKlib = outputDirectory.child(def.libraryName)
@@ -234,15 +237,15 @@ private fun generateLibrary(
 
     try {
         val cinteropArgs = arrayOf(
-                "-o", tmpKlib.absolutePath,
-                "-target", target.visibleName,
-                "-def", defFile.absolutePath,
-                "-compiler-option", "-fmodules-cache-path=${tmpDirectory.child("clangModulesCache").absolutePath}",
-                "-repo", outputDirectory.absolutePath,
-                "-no-default-libs", "-no-endorsed-libs", "-Xpurge-user-libs", "-nopack",
-                "-mode", mode,
-                "-$SHORT_MODULE_NAME", def.shortLibraryName,
-                *def.depends.flatMap { listOf("-l", "$outputDirectory/${it.libraryName}") }.toTypedArray()
+            "-o", tmpKlib.absolutePath,
+            "-target", target.visibleName,
+            "-def", defFile.absolutePath,
+            "-compiler-option", "-fmodules-cache-path=${tmpDirectory.child("clangModulesCache").absolutePath}",
+            "-repo", outputDirectory.absolutePath,
+            "-no-default-libs", "-no-endorsed-libs", "-Xpurge-user-libs", "-nopack",
+            "-mode", mode,
+            "-$SHORT_MODULE_NAME", def.shortLibraryName,
+            *def.depends.flatMap { listOf("-l", "$outputDirectory/${it.libraryName}") }.toTypedArray()
         )
         logger.verbose("Run cinterop with args: ${cinteropArgs.joinToString(separator = " ")}")
         invokeInterop("native", cinteropArgs)?.let { K2Native.mainNoExit(it) }
@@ -261,10 +264,10 @@ private fun generateLibrary(
 }
 
 private fun getLibraryCacheDir(
-        libraryName: String,
-        target: KonanTarget,
-        cacheDirectory: File,
-        cacheKind: String
+    libraryName: String,
+    target: KonanTarget,
+    cacheDirectory: File,
+    cacheKind: String
 ): File {
     val cacheBaseName = CachedLibraries.getCachedLibraryName(libraryName)
     val cacheOutputKind = CompilerOutputKind.valueOf(cacheKind.toUpperCase())
@@ -272,12 +275,12 @@ private fun getLibraryCacheDir(
 }
 
 private fun buildCache(
-        target: KonanTarget,
-        def: DefFile,
-        outputDirectory: File,
-        cacheInfo: CacheInfo,
-        rebuild: Boolean,
-        logger: Logger
+    target: KonanTarget,
+    def: DefFile,
+    outputDirectory: File,
+    cacheInfo: CacheInfo,
+    rebuild: Boolean,
+    logger: Logger
 ) = with(cacheInfo) {
     val libraryCacheDir = getLibraryCacheDir(def.name, target, cacheDirectory, cacheKind)
     if (libraryCacheDir.listFilesOrEmpty.isNotEmpty() && !rebuild) {
@@ -290,22 +293,22 @@ private fun buildCache(
     }
 
     val compilerArgs = arrayOf(
-            "-p", cacheKind,
-            "-target", target.visibleName,
-            "-repo", outputDirectory.absolutePath,
-            "-Xadd-cache=${outputDirectory.absolutePath}/${def.libraryName}",
-            "-Xcache-directory=${cacheDirectory.absolutePath}",
-            *cacheArgs.toTypedArray()
+        "-p", cacheKind,
+        "-target", target.visibleName,
+        "-repo", outputDirectory.absolutePath,
+        "-Xadd-cache=${outputDirectory.absolutePath}/${def.libraryName}",
+        "-Xcache-directory=${cacheDirectory.absolutePath}",
+        *cacheArgs.toTypedArray()
     )
     logger.verbose("Run compiler with args: ${compilerArgs.joinToString(separator = " ")}")
     K2Native.mainNoExit(compilerArgs)
 }
 
 private fun buildStdlibCache(
-        target: KonanTarget,
-        stdlib: File,
-        cacheInfo: CacheInfo,
-        logger: Logger
+    target: KonanTarget,
+    stdlib: File,
+    cacheInfo: CacheInfo,
+    logger: Logger
 ) = with(cacheInfo) {
     val stdlibCacheFile = getLibraryCacheDir("stdlib", target, cacheDirectory, cacheKind)
     if (stdlibCacheFile.exists) {
@@ -315,19 +318,25 @@ private fun buildStdlibCache(
 
     logger.log("Precompiling standard library...")
     val compilerArgs = arrayOf(
-            "-p", cacheKind,
-            "-target", target.visibleName,
-            "-Xadd-cache=${stdlib.absolutePath}",
-            "-Xcache-directory=${cacheDirectory.absolutePath}",
-            *cacheArgs.toTypedArray()
+        "-p", cacheKind,
+        "-target", target.visibleName,
+        "-Xadd-cache=${stdlib.absolutePath}",
+        "-Xcache-directory=${cacheDirectory.absolutePath}",
+        *cacheArgs.toTypedArray()
     )
     logger.verbose("Run compiler with args: ${compilerArgs.joinToString(separator = " ")}")
     K2Native.mainNoExit(compilerArgs)
 }
 
-private fun generatePlatformLibraries(target: KonanTarget, mode: String,
-                                      directories: DirectoriesInfo, cacheInfo: CacheInfo?,
-                                      rebuild: Boolean, saveTemps: Boolean, logger: Logger) = with(directories) {
+private fun generatePlatformLibraries(
+    target: KonanTarget,
+    mode: String,
+    directories: DirectoriesInfo,
+    cacheInfo: CacheInfo?,
+    rebuild: Boolean,
+    saveTemps: Boolean,
+    logger: Logger
+) = with(directories) {
     if (cacheInfo != null) {
         buildStdlibCache(target, stdlib, cacheInfo, logger)
     }
@@ -358,21 +367,26 @@ private fun generatePlatformLibraries(target: KonanTarget, mode: String,
             val match = dependsRegex.matchEntire(line)
             if (match != null) {
                 match.groupValues[1].split(" ").forEach { dependency ->
-                    def.depends.add(defFiles.getOrPut(dependency) {
-                        DefFile(dependency, mutableListOf())
-                    })
+                    def.depends.add(
+                        defFiles.getOrPut(dependency) {
+                            DefFile(dependency, mutableListOf())
+                        }
+                    )
                 }
             }
         }
     }
     val sorted = topoSort(defFiles.values.toList())
     val numCores = Runtime.getRuntime().availableProcessors()
-    val executorPool = ThreadPoolExecutor(numCores, numCores,
-            10, TimeUnit.SECONDS, ArrayBlockingQueue(1000),
-            Executors.defaultThreadFactory(), RejectedExecutionHandler { r, _ ->
-        logger.log("Execution rejected: $r")
-        throw Error("Must not happen!")
-    })
+    val executorPool = ThreadPoolExecutor(
+        numCores, numCores,
+        10, TimeUnit.SECONDS, ArrayBlockingQueue(1000),
+        Executors.defaultThreadFactory(),
+        RejectedExecutionHandler { r, _ ->
+            logger.log("Execution rejected: $r")
+            throw Error("Must not happen!")
+        }
+    )
     val built = ConcurrentHashMap(sorted.associateWith<DefFile, ProcessingStatus> { ProcessingStatus.WAIT })
     // Now run interop tool on toposorted dependencies.
     val countTotal = sorted.size
@@ -411,7 +425,6 @@ private fun generatePlatformLibraries(target: KonanTarget, mode: String,
             logger.logFailedLibraries(built)
             exitProcess(-1)
         }
-
     } finally {
         if (!saveTemps) {
             tmpDirectory.deleteRecursively()

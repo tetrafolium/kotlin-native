@@ -21,7 +21,7 @@ annotation class B
 
 class Foo
 
-fun f1(x: Foo): Unit {}
+fun f1(x: Foo) {}
 fun f2(x: Foo, y: Foo) = 0
 
 // inline
@@ -40,7 +40,7 @@ fun <T> t1(x: Foo) {}
 fun <T> t2(x: T) {}
 fun <T, F> t3(x: T, y: F) {}
 inline fun <reified T> t4(x: T) {}
-fun <T: Number> t5(x: T) {}
+fun <T : Number> t5(x: T) {}
 
 // extension
 fun Foo.e() {}

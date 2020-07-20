@@ -15,11 +15,10 @@ open class AllocationBenchmark {
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun allocateObjects() {
         repeat(BENCHMARK_SIZE) {
             MyClass().inc()
         }
     }
-
 }

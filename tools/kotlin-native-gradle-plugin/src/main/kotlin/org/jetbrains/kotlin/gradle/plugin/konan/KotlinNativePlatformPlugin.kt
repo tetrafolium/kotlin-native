@@ -8,14 +8,14 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformImplementationPluginBase
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanCompileTask
 import javax.inject.Inject
 
-open class KotlinNativePlatformPlugin: KotlinPlatformImplementationPluginBase("native") {
+open class KotlinNativePlatformPlugin : KotlinPlatformImplementationPluginBase("native") {
 
     private val Project.konanMultiplatformTasks: Collection<KonanCompileTask>
         get() = tasks.withType(KonanCompileTask::class.java).filter { it.enableMultiplatform }
 
     override fun configurationsForCommonModuleDependency(project: Project) = emptyList<Configuration>()
 
-    open class RequestedCommonSourceSet @Inject constructor(private val name: String): Named {
+    open class RequestedCommonSourceSet @Inject constructor(private val name: String) : Named {
         override fun getName() = name
     }
 

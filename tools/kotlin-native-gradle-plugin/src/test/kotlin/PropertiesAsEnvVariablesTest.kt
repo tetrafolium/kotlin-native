@@ -52,9 +52,8 @@ open class PropertiesAsEnvVariablesTest {
                 prefix = target.family.staticPrefix
                 suffix = target.family.staticSuffix
             }
-
         }
-        return "$prefix${baseName}.$suffix"
+        return "$prefix$baseName.$suffix"
     }
 
     private fun assertFileExists(directory: File, filename: String) = assert(directory.list().contains(filename)) {
@@ -75,13 +74,14 @@ open class PropertiesAsEnvVariablesTest {
     )
     @Spockito.Name("[{row}]: {variable}={value}")
     fun `Plugin should support enabling and disabling debug and opt options via a project property`(
-            property: String,
-            value: String,
-            assertion: String,
-            message: String
+        property: String,
+        value: String,
+        assertion: String,
+        message: String
     ) {
         val project = KonanProject.createEmpty(projectDirectory)
-        project.buildFile.appendText("""
+        project.buildFile.appendText(
+            """
 
             apply plugin: 'konan'
             konanArtifacts {
@@ -95,10 +95,11 @@ open class PropertiesAsEnvVariablesTest {
                     }
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         project.createRunner()
-                .withArguments("assertEnableDebug", "-P${property}=${value}")
-                .build()
+            .withArguments("assertEnableDebug", "-P$property=$value")
+            .build()
     }
 
     @Test
@@ -106,7 +107,8 @@ open class PropertiesAsEnvVariablesTest {
         val project = KonanProject.createEmpty(projectDirectory)
         val newDestinationDir = project.createSubDir("newDestination")
         val newDestinationPath = newDestinationDir.absolutePath
-        project.buildFile.appendText("""
+        project.buildFile.appendText(
+            """
             apply plugin: 'konan'
             konanArtifacts {
                 program('program')
@@ -128,11 +130,12 @@ open class PropertiesAsEnvVariablesTest {
                     }
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         project.generateSrcFile("main.kt")
         project.createRunner()
-                .withArguments("assertDestinationDir", "build", "-Pkonan.configuration.build.dir=$newDestinationPath")
-                .build()
+            .withArguments("assertDestinationDir", "build", "-Pkonan.configuration.build.dir=$newDestinationPath")
+            .build()
 
         assertFileExists(newDestinationDir, artifactFileName("program", ArtifactType.PROGRAM))
         assertFileExists(newDestinationDir, artifactFileName("library", ArtifactType.LIBRARY))
@@ -148,20 +151,22 @@ open class PropertiesAsEnvVariablesTest {
         val destination1 = project.createSubDir("destination1", "subdir")
         val destination2 = project.createSubDir("destination2", "subdir")
 
-        project.buildFile.appendText("""
+        project.buildFile.appendText(
+            """
             apply plugin: 'konan'
             konanArtifacts {
                 library('main')
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         project.generateSrcFile("main.kt")
 
         project.createRunner()
-                .withArguments("build", "-Pkonan.configuration.build.dir=${destination1.absolutePath}")
-                .build()
+            .withArguments("build", "-Pkonan.configuration.build.dir=${destination1.absolutePath}")
+            .build()
         project.createRunner()
-                .withArguments("build", "-Pkonan.configuration.build.dir=${destination2.absolutePath}")
-                .build()
+            .withArguments("build", "-Pkonan.configuration.build.dir=${destination2.absolutePath}")
+            .build()
 
         assertFileExists(destination1, artifactFileName("main", ArtifactType.LIBRARY))
         assertFileExists(destination2, artifactFileName("main", ArtifactType.LIBRARY))
@@ -172,7 +177,8 @@ open class PropertiesAsEnvVariablesTest {
         val project = KonanProject.createEmpty(projectDirectory)
         val fooDir = project.createSubDir("foo")
         val barDir = project.createSubDir("bar")
-        project.buildFile.appendText("""
+        project.buildFile.appendText(
+            """
             apply plugin: 'konan'
 
             konanArtifacts {
@@ -188,17 +194,18 @@ open class PropertiesAsEnvVariablesTest {
                     }
                 }
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
         project.generateSrcFile("main.kt")
 
         project.createRunner()
-                .withArguments("compileKonanFoo", "-Pkonan.configuration.build.dir=${fooDir.absolutePath}")
-                .build()
+            .withArguments("compileKonanFoo", "-Pkonan.configuration.build.dir=${fooDir.absolutePath}")
+            .build()
         project.createRunner()
-                .withArguments("compileKonanBar", "-Pkonan.configuration.build.dir=${barDir.absolutePath}")
-                .build()
+            .withArguments("compileKonanBar", "-Pkonan.configuration.build.dir=${barDir.absolutePath}")
+            .build()
         project.createRunner()
-                .withArguments("assertUpToDate", "-Pkonan.configuration.build.dir=${fooDir.absolutePath}")
-                .build()
+            .withArguments("assertUpToDate", "-Pkonan.configuration.build.dir=${fooDir.absolutePath}")
+            .build()
     }
 }

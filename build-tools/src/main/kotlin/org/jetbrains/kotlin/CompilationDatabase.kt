@@ -5,39 +5,38 @@
 
 package org.jetbrains.kotlin
 
-import java.io.File
-import javax.inject.Inject
-import org.gradle.api.GradleException
 import com.google.gson.annotations.Expose
+import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.jetbrains.kotlin.konan.target.HostManager
+import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
+import javax.inject.Inject
 
 internal data class Entry(
-        @Expose val directory: String,
-        @Expose val file: String,
-        @Expose val arguments: List<String>,
-        @Expose val output: String
+    @Expose val directory: String,
+    @Expose val file: String,
+    @Expose val arguments: List<String>,
+    @Expose val output: String
 ) {
     companion object {
         fun create(
-                directory: File,
-                file: File,
-                args: List<String>,
-                outputDir: File
+            directory: File,
+            file: File,
+            args: List<String>,
+            outputDir: File
         ): Entry {
             return Entry(
-                    directory.absolutePath,
-                    file.absolutePath,
-                    args + listOf(file.absolutePath),
-                    File(outputDir, file.name + ".o").absolutePath
+                directory.absolutePath,
+                file.absolutePath,
+                args + listOf(file.absolutePath),
+                File(outputDir, file.name + ".o").absolutePath
             )
         }
 
@@ -51,12 +50,13 @@ internal data class Entry(
     }
 }
 
-open class GenerateCompilationDatabase @Inject constructor(@Input val target: String,
-                                                           @Input val srcRoot: File,
-                                                           @Input val files: Iterable<File>,
-                                                           @Input val executable: String,
-                                                           @Input val compilerFlags: List<String>,
-                                                           @Input val outputDir: File
+open class GenerateCompilationDatabase @Inject constructor(
+    @Input val target: String,
+    @Input val srcRoot: File,
+    @Input val files: Iterable<File>,
+    @Input val executable: String,
+    @Input val compilerFlags: List<String>,
+    @Input val outputDir: File
 ) : DefaultTask() {
     @OutputFile
     var outputFile = File(outputDir, "compile_commands.json")
@@ -110,17 +110,19 @@ fun mergeCompilationDatabases(project: Project, name: String, paths: List<String
 fun createCompilationDatabasesFromCompileToBitcodeTasks(project: Project, name: String) {
     val compileTasks = project.tasks.withType(CompileToBitcode::class.java).toList()
     val compdbTasks = compileTasks.groupBy({ task -> task.target }) { task ->
-        project.tasks.create("${task.name}_CompilationDatabase",
-                GenerateCompilationDatabase::class.java,
-                task.target,
-                task.srcRoot,
-                task.inputFiles,
-                task.executable,
-                task.compilerFlags,
-                task.objDir)
+        project.tasks.create(
+            "${task.name}_CompilationDatabase",
+            GenerateCompilationDatabase::class.java,
+            task.target,
+            task.srcRoot,
+            task.inputFiles,
+            task.executable,
+            task.compilerFlags,
+            task.objDir
+        )
     }
     for ((target, tasks) in compdbTasks) {
-        project.tasks.create("${target}${name}", MergeCompilationDatabases::class.java) { task ->
+        project.tasks.create("${target}$name", MergeCompilationDatabases::class.java) { task ->
             task.dependsOn(tasks)
             task.inputFiles.addAll(tasks.map { it.outputFile })
             task.outputFile = File(File(project.buildDir, target), "compile_commands.json")

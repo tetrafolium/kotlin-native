@@ -29,53 +29,53 @@ open class DefaultArgumentBenchmark {
         arg = Random.nextInt()
     }
 
-    
     fun sumTwo(first: Int, second: Int = 0): Int {
         return first + second
     }
 
-    
     fun sumFour(first: Int, second: Int = 0, third: Int = 1, fourth: Int = third): Int {
         return first + second + third + fourth
     }
 
-    
-    fun sumEight(first: Int, second: Int = 0, third: Int = 1, fourth: Int = third,
-                 fifth: Int = fourth, sixth: Int = fifth, seventh: Int = second, eighth: Int = seventh): Int {
+    fun sumEight(
+        first: Int,
+        second: Int = 0,
+        third: Int = 1,
+        fourth: Int = third,
+        fifth: Int = fourth,
+        sixth: Int = fifth,
+        seventh: Int = second,
+        eighth: Int = seventh
+    ): Int {
         return first + second + third + fourth + fifth + sixth + seventh + eighth
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun testOneOfTwo() {
         sumTwo(arg)
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun testTwoOfTwo() {
         sumTwo(arg, arg)
     }
-    
-    //Benchmark
+
+    // Benchmark
     fun testOneOfFour() {
         sumFour(arg)
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun testFourOfFour() {
         sumFour(arg, arg, arg, arg)
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun testOneOfEight() {
         sumEight(arg)
     }
 
-    
-    //Benchmark
+    // Benchmark
     fun testEightOfEight() {
         sumEight(arg, arg, arg, arg, arg, arg, arg, arg)
     }

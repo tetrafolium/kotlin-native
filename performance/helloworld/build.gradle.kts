@@ -3,8 +3,8 @@
  * that can be found in the LICENSE file.
  */
 
-import org.jetbrains.kotlin.getNativeProgramExtension
 import org.jetbrains.kotlin.getCompileOnlyBenchmarksOpts
+import org.jetbrains.kotlin.getNativeProgramExtension
 
 plugins {
     id("compile-benchmarking")
@@ -13,7 +13,7 @@ plugins {
 val dist = file(findProperty("kotlin.native.home") ?: "dist")
 val toolSuffix = if (System.getProperty("os.name").startsWith("Windows")) ".bat" else ""
 val binarySuffix = getNativeProgramExtension()
-val defaultCompilerOpts =  listOf("-g")
+val defaultCompilerOpts = listOf("-g")
 val buildOpts = getCompileOnlyBenchmarksOpts(project, defaultCompilerOpts)
 
 compileBenchmark {
@@ -22,8 +22,10 @@ compileBenchmark {
     compilerOpts = buildOpts
     buildSteps {
         step("runKonanc") {
-            command("$dist/bin/konanc$toolSuffix", "$projectDir/src/main/kotlin/main.kt", "-o",
-                    "$buildDir/program$binarySuffix", *(buildOpts.toTypedArray()))
+            command(
+                "$dist/bin/konanc$toolSuffix", "$projectDir/src/main/kotlin/main.kt", "-o",
+                "$buildDir/program$binarySuffix", *(buildOpts.toTypedArray())
+            )
         }
     }
 }

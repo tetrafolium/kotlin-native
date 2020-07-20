@@ -11,7 +11,7 @@ class Logger(val level: LogLevel = LogLevel.OFF) {
     }
 
     private fun currentTime(): String =
-            SimpleDateFormat("HH:mm:ss").format(Date())
+        SimpleDateFormat("HH:mm:ss").format(Date())
 
     fun log(message: String, messageLevel: LogLevel = LogLevel.DEBUG, usePrefix: Boolean = true) {
         if (messageLevel == level) {

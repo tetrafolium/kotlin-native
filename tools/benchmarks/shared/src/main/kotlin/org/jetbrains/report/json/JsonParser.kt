@@ -233,10 +233,12 @@ internal class Parser(val source: String) {
     private fun appendHex(source: String, startPos: Int): Int {
         var curPos = startPos
         append(
-                ((fromHexChar(source, curPos++) shl 12) +
-                        (fromHexChar(source, curPos++) shl 8) +
-                        (fromHexChar(source, curPos++) shl 4) +
-                        fromHexChar(source, curPos++)).toChar()
+            (
+                (fromHexChar(source, curPos++) shl 12) +
+                    (fromHexChar(source, curPos++) shl 8) +
+                    (fromHexChar(source, curPos++) shl 4) +
+                    fromHexChar(source, curPos++)
+                ).toChar()
         )
         return curPos
     }

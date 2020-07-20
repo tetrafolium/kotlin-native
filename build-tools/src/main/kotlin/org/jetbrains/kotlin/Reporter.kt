@@ -12,10 +12,9 @@ import org.gradle.api.tasks.TaskAction
 import java.io.FileInputStream
 import java.util.*
 
-
 internal object Tc {
     private val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
-    val enabled:Boolean = (teamcityConfig != null)
+    val enabled: Boolean = (teamcityConfig != null)
     private val buildConfig by lazy {
         teamcityConfig ?: return@lazy null
         val properties = Properties()
@@ -26,21 +25,22 @@ internal object Tc {
     val buildTypeId = buildConfig?.getProperty("teamcity.buildType.id")
     val konanReporterToken = buildConfig?.getProperty("konan-reporter-token")
     val konanChannelName = buildConfig?.getProperty("konan-channel-name")
-
 }
 
 private fun buildLogUrlTab(buildId: String?, buildTypeId: String?): String = tabUrl(buildId, buildTypeId, "buildLog")
 
 private fun tabUrl(buildId: String?, buildTypeId: String?, tab: String?): String =
-        "http://buildserver.labs.intellij.net/viewLog.html?buildId=$buildId&buildTypeId=$buildTypeId&tab=$tab"
+    "http://buildserver.labs.intellij.net/viewLog.html?buildId=$buildId&buildTypeId=$buildTypeId&tab=$tab"
 
 private fun testReportUrl(buildId: String?, buildTypeId: String?): String = tabUrl(buildId, buildTypeId, "testsInfo")
 
 private fun sendTextToSlack(report: String) {
     with(SlackSessionFactory.createWebSocketSlackSession(Tc.konanReporterToken)) {
         connect()
-        sendMessage(findChannelByName(Tc.konanChannelName),
-                "Hello, аборигены Котлина!\n текущий статус:\n$report")
+        sendMessage(
+            findChannelByName(Tc.konanChannelName),
+            "Hello, аборигены Котлина!\n текущий статус:\n$report"
+        )
         disconnect()
     }
 }
@@ -52,11 +52,10 @@ private fun reportEpilogue(): String {
 }
 
 private val Statistics.report
-        get() = "total: $total\npassed: $passed\nfailed: $failed\nerror: $error\nskipped: $skipped"
+    get() = "total: $total\npassed: $passed\nfailed: $failed\nerror: $error\nskipped: $skipped"
 
 private val Statistics.oneLineReport
     get() = "(total: $total, passed: $passed, failed: $failed, error: $error, skipped: $skipped)"
-
 
 open class Reporter : DefaultTask() {
 
@@ -77,16 +76,16 @@ open class Reporter : DefaultTask() {
     }
 }
 
-private fun DefaultTask.doSlackSending() = !project.hasProperty("build.reporter.noSlack")
-        || !project.property("build.reporter.noSlack").toString().toBoolean()
+private fun DefaultTask.doSlackSending() = !project.hasProperty("build.reporter.noSlack") ||
+    !project.property("build.reporter.noSlack").toString().toBoolean()
 
-open class NightlyReporter: DefaultTask() {
+open class NightlyReporter : DefaultTask() {
     @Input
-    lateinit var externalMacosReport:String
+    lateinit var externalMacosReport: String
     @Input
-    lateinit var externalLinuxReport:String
+    lateinit var externalLinuxReport: String
     @Input
-    lateinit var externalWindowsReport:String
+    lateinit var externalWindowsReport: String
 
     @TaskAction
     fun report() {

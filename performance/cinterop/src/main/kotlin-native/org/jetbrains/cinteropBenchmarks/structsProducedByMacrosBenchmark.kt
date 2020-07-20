@@ -30,8 +30,10 @@ actual fun macrosBenchmark() {
         // Copy integer list to float one.
         ints?.pointed?.apply {
             var current = _first
-            while(current != null) {
-                list_push_front_float(floats, current?.pointed?._data?.toFloat()
+            while (current != null) {
+                list_push_front_float(
+                    floats,
+                    current?.pointed?._data?.toFloat()
                         ?: error("Null elements in list are not expected!")
                 )
                 current = current?.pointed?._next

@@ -17,7 +17,7 @@
 package org.jetbrains.ring
 
 open class CompanionObjectBenchmark {
-    //Benchmark
+    // Benchmark
     fun invokeRegularFunction() {
         regularCompanionObjectFunction("")
     }

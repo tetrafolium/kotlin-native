@@ -26,28 +26,28 @@ import org.jetbrains.kotlin.gradle.plugin.konan.KonanInteropSpec.IncludeDirector
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanInteropTask
 import java.io.File
 
-open class KonanInteropLibrary(name: String,
-                               project: ProjectInternal,
-                               targets: Iterable<String> = project.konanExtension.targets
+open class KonanInteropLibrary(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
 ) : KonanBuildingConfig<KonanInteropTask>(name, KonanInteropTask::class.java, project, targets),
-    KonanInteropSpec
-{
+    KonanInteropSpec {
 
     override fun generateTaskDescription(task: KonanInteropTask) =
-            "Build the Kotlin/Native interop library '${task.name}' for target '${task.konanTarget}'"
+        "Build the Kotlin/Native interop library '${task.name}' for target '${task.konanTarget}'"
 
     override fun generateAggregateTaskDescription(task: Task) =
-            "Build the Kotlin/Native interop library '${task.name}' for all supported and declared targets'"
+        "Build the Kotlin/Native interop library '${task.name}' for all supported and declared targets'"
 
     override fun generateTargetAliasTaskDescription(task: Task, targetName: String) =
-            "Build the Kotlin/Native interop library '${task.name}' for '$targetName'"
+        "Build the Kotlin/Native interop library '${task.name}' for '$targetName'"
 
     override val defaultBaseDir: File
         get() = project.konanLibsBaseDir
 
     // DSL
 
-    inner class IncludeDirectoriesSpecImpl: IncludeDirectoriesSpec {
+    inner class IncludeDirectoriesSpecImpl : IncludeDirectoriesSpec {
         override fun allHeaders(vararg includeDirs: Any) = allHeaders(includeDirs.toList())
         override fun allHeaders(includeDirs: Collection<Any>) = forEach {
             it.includeDirs.allHeaders(includeDirs)
@@ -82,5 +82,4 @@ open class KonanInteropLibrary(name: String,
     override fun link(vararg files: Any) = forEach { it.link(*files) }
     override fun link(files: FileCollection) = forEach { it.link(files) }
     override fun dependencies(closure: Closure<Unit>) = forEach { it.dependencies(closure) }
-
 }

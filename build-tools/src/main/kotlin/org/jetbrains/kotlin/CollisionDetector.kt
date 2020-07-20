@@ -6,10 +6,10 @@
 package org.jetbrains.kotlin
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.util.zip.ZipFile
 
@@ -42,9 +42,9 @@ open class CollisionDetector : DefaultTask() {
                 ZipFile(processedFile).use { zip ->
                     zip.entries().asSequence().filterNot {
                         it.isDirectory ||
-                        it.name.equals("META-INF/MANIFEST.MF", ignoreCase = true) ||
-                        it.name.equals("META-INF/versions/9/module-info.class", ignoreCase = true) ||
-                        it.name.startsWith("META-INF/services/", ignoreCase = true)
+                            it.name.equals("META-INF/MANIFEST.MF", ignoreCase = true) ||
+                            it.name.equals("META-INF/versions/9/module-info.class", ignoreCase = true) ||
+                            it.name.startsWith("META-INF/services/", ignoreCase = true)
                     }.forEach {
                         val outputPath = it.name
                         if (outputPath in filesInfo.keys) {

@@ -45,9 +45,11 @@ private tailrec fun ChunkBuffer.remainingAll(n: Long): Long {
     return next.remainingAll(rem)
 }
 
-class LinkedListOfBuffers(var head: ChunkBuffer = ChunkBuffer(0,0),
-                          var remaining: Long = head.remainingAll()) {
-     var tailRemaining: Long = remaining - head.readRemaining
+class LinkedListOfBuffers(
+    var head: ChunkBuffer = ChunkBuffer(0, 0),
+    var remaining: Long = head.remainingAll()
+) {
+    var tailRemaining: Long = remaining - head.readRemaining
         set(newValue) {
             if (newValue < 0) {
                 error("tailRemaining is negative: $newValue")
@@ -67,7 +69,7 @@ open class LinkedListWithAtomicsBenchmark {
     val list: LinkedListOfBuffers
     init {
         val chunks: MutableList<ChunkBuffer> = ArrayList()
-        (0..BENCHMARK_SIZE/2).forEachIndexed { index, i ->
+        (0..BENCHMARK_SIZE / 2).forEachIndexed { index, i ->
             val chunk = ChunkBuffer(Random.nextInt())
             chunks.add(chunk)
             if (i > 0)
@@ -87,4 +89,3 @@ open class LinkedListWithAtomicsBenchmark {
         }
     }
 }
-

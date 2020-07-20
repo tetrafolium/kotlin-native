@@ -73,7 +73,7 @@ open class CoverageTest : DefaultTask() {
         val suffix = target.family.exeSuffix
         val pathToBinary = "$outputDir/$binaryName/$target/$binaryName.$suffix"
         runProcess({ project.executor.execute(it) }, pathToBinary)
-                .ensureSuccessful(pathToBinary)
+            .ensureSuccessful(pathToBinary)
         exec("llvm-profdata", "merge", profrawFile, "-o", profdataFile)
         val llvmCovResult = exec("llvm-cov", "export", pathToBinary, "-instr-profile", profdataFile)
         val jsonReport = llvmCovResult.stdOut
@@ -84,10 +84,12 @@ open class CoverageTest : DefaultTask() {
             // Show report in message to make debug easier.
             val show = exec("llvm-cov", "show", pathToBinary, "-instr-profile", profdataFile).stdOut
             // llvm-cov output contains '|' so another symbol is used as margin prefix.
-            throw TestFailedException("""
+            throw TestFailedException(
+                """
                 >${e.message}
                 >$show
-            """.trimMargin(">"))
+            """.trimMargin(">")
+            )
         }
     }
 
@@ -100,22 +102,24 @@ open class CoverageTest : DefaultTask() {
 
     private fun ProcessOutput.ensureSuccessful(executable: String) {
         if (exitCode != 0) {
-            println("""
+            println(
+                """
                     $executable failed.
                     exitCode: $exitCode
                     stdout:
                     $stdOut
                     stderr:
                     $stdErr
-                """.trimIndent())
+                """.trimIndent()
+            )
             error("$executable failed")
         }
     }
 }
 
 private class CoverageValidator(
-        val numberOfCoveredFunctions: Int?,
-        val numberOfCoveredLines: Int?
+    val numberOfCoveredFunctions: Int?,
+    val numberOfCoveredLines: Int?
 ) {
     fun validateReport(report: LlvmCovReport) {
         val data = report.data

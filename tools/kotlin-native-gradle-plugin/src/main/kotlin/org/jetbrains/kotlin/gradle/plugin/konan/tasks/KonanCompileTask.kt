@@ -34,7 +34,7 @@ import java.io.File
 /**
  * A task compiling the target executable/library using Kotlin/Native compiler
  */
-abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
+abstract class KonanCompileTask : KonanBuildingTask(), KonanCompileSpec {
 
     @get:Internal
     override val toolRunner = KonanCompilerRunner(project, project.konanExtension.jvmArgs)
@@ -71,28 +71,28 @@ abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
 
     private val allSourceFiles: List<File>
         get() = allSources
-                .flatMap { it.files }
-                .filter { it.name.endsWith(".kt") }
+            .flatMap { it.files }
+            .filter { it.name.endsWith(".kt") }
 
     @InputFiles val nativeLibraries = mutableSetOf<FileCollection>()
 
     @Input val linkerOpts = mutableListOf<String>()
 
     @Input var enableDebug = project.findProperty("enableDebug")?.toString()?.toBoolean()
-            ?: project.environmentVariables.debuggingSymbols
+        ?: project.environmentVariables.debuggingSymbols
 
-    @Input var noStdLib            = false
-    @Input var noMain              = false
+    @Input var noStdLib = false
+    @Input var noMain = false
     @Input var enableOptimizations = project.environmentVariables.enableOptimizations
-    @Input var enableAssertions    = false
+    @Input var enableAssertions = false
 
     @Optional @Input var entryPoint: String? = null
 
-    @Console var measureTime       = false
+    @Console var measureTime = false
 
-    val languageVersion : String?
+    val languageVersion: String?
         @Optional @Input get() = project.konanExtension.languageVersion
-    val apiVersion      : String?
+    val apiVersion: String?
         @Optional @Input get() = project.konanExtension.apiVersion
 
     /**
@@ -184,7 +184,7 @@ abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
 
         addAll(secondStageExtraOpts())
 
-        add("-Xinclude=${klibPath}")
+        add("-Xinclude=$klibPath")
     }
 
     /** Args passed to the compiler at both stages of the two-stage compilation and during the singe-stage compilation. */
@@ -333,15 +333,15 @@ abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
         )
 
         return KonanModelArtifactImpl(
-                artifactName,
-                artifact,
-                produce,
-                konanTarget.name,
-                name,
-                allSources.filterIsInstance(ConfigurableFileTree::class.java).map { it.dir },
-                allSourceFiles,
-                libraries.asFiles(resolver),
-                repos.toList()
+            artifactName,
+            artifact,
+            produce,
+            konanTarget.name,
+            name,
+            allSources.filterIsInstance(ConfigurableFileTree::class.java).map { it.dir },
+            allSourceFiles,
+            libraries.asFiles(resolver),
+            repos.toList()
         )
     }
     // endregion
@@ -370,18 +370,18 @@ abstract class KonanCompileTask: KonanBuildingTask(), KonanCompileSpec {
     }
 }
 
-abstract class KonanCompileNativeBinary: KonanCompileTask() {
+abstract class KonanCompileNativeBinary : KonanCompileTask() {
     @Input
     override var enableTwoStageCompilation: Boolean = false
 }
 
-open class KonanCompileProgramTask: KonanCompileNativeBinary() {
+open class KonanCompileProgramTask : KonanCompileNativeBinary() {
     override val produce: CompilerOutputKind get() = CompilerOutputKind.PROGRAM
 
     @Internal
     var runTask: Exec? = null
 
-    inner class RunArgumentProvider(): CommandLineArgumentProvider {
+    inner class RunArgumentProvider() : CommandLineArgumentProvider {
         override fun asArguments() = project.findProperty("runArgs")?.let {
             it.toString().split(' ')
         } ?: emptyList()
@@ -405,28 +405,27 @@ open class KonanCompileProgramTask: KonanCompileNativeBinary() {
             }
         }
     }
-
 }
 
-open class KonanCompileDynamicTask: KonanCompileNativeBinary() {
+open class KonanCompileDynamicTask : KonanCompileNativeBinary() {
     override val produce: CompilerOutputKind get() = CompilerOutputKind.DYNAMIC
 
     val headerFile: File
         @OutputFile get() = destinationDir.resolve("$artifactPrefix${artifactName}_api.h")
 }
 
-open class KonanCompileFrameworkTask: KonanCompileNativeBinary() {
+open class KonanCompileFrameworkTask : KonanCompileNativeBinary() {
     override val produce: CompilerOutputKind get() = CompilerOutputKind.FRAMEWORK
 
     override val artifact
         @OutputDirectory get() = super.artifact
 }
 
-open class KonanCompileLibraryTask: KonanCompileTask() {
+open class KonanCompileLibraryTask : KonanCompileTask() {
     override val produce: CompilerOutputKind get() = CompilerOutputKind.LIBRARY
     override val enableTwoStageCompilation: Boolean = false
 }
 
-open class KonanCompileBitcodeTask: KonanCompileNativeBinary() {
+open class KonanCompileBitcodeTask : KonanCompileNativeBinary() {
     override val produce: CompilerOutputKind get() = CompilerOutputKind.BITCODE
 }

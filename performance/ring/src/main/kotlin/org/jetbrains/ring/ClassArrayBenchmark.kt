@@ -28,12 +28,12 @@ open class ClassArrayBenchmark {
         _data = list.toTypedArray()
     }
 
-    //Benchmark
+    // Benchmark
     fun copy(): List<Value> {
         return data.toList()
     }
 
-    //Benchmark
+    // Benchmark
     fun copyManual(): List<Value> {
         val list = ArrayList<Value>(data.size)
         for (item in data) {
@@ -42,17 +42,17 @@ open class ClassArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndCount(): Int {
         return data.filter { filterLoad(it) }.count()
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndMap(): List<String> {
         return data.filter { filterLoad(it) }.map { mapLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterAndMapManual(): ArrayList<String> {
         val list = ArrayList<String>()
         for (it in data) {
@@ -64,12 +64,12 @@ open class ClassArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun filter(): List<Value> {
         return data.filter { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun filterManual(): List<Value> {
         val list = ArrayList<Value>()
         for (it in data) {
@@ -79,7 +79,7 @@ open class ClassArrayBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredManual(): Int {
         var count = 0
         for (it in data) {
@@ -89,17 +89,17 @@ open class ClassArrayBenchmark {
         return count
     }
 
-    //Benchmark
+    // Benchmark
     fun countFiltered(): Int {
         return data.count { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
     fun countFilteredLocal(): Int {
         return data.cnt { filterLoad(it) }
     }
 
-    //Benchmark
+    // Benchmark
 //    fun reduce(): Int {
 //        return data.fold(0) { acc, it -> if (filterLoad(it)) acc + 1 else acc }
 //    }

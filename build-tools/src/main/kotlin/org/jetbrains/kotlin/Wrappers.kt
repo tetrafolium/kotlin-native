@@ -25,9 +25,9 @@ class GradleWrappers : Plugin<Project> {
     override fun apply(project: Project): Unit = with(project) {
         val mainWrapperTask = tasks.findByName("wrapper") as? Wrapper ?: return@with
         val wrappers = extensions.create(
-                WrappersExtension::class.java,
-                "wrappers",
-                WrappersExtension::class.java
+            WrappersExtension::class.java,
+            "wrappers",
+            WrappersExtension::class.java
         )
         afterEvaluate {
             wrappers.projects.map { file(it) }.forEach {

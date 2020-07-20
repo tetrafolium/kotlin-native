@@ -15,20 +15,18 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.process.ExecSpec
-
-import java.io.File
-import java.io.ByteArrayOutputStream
-import java.util.regex.Pattern
-
 import org.jetbrains.kotlin.konan.target.HostManager
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.util.regex.Pattern
 
 abstract class KonanTest : DefaultTask(), KonanTestExecutable {
     enum class Logger {
-        EMPTY,    // Built without test runner
-        GTEST,    // Google test log output
+        EMPTY, // Built without test runner
+        GTEST, // Google test log output
         TEAMCITY, // TeamCity log output
-        SIMPLE,   // Prints simple messages of passed/failed tests
-        SILENT    // Prints no log of passed/failed tests
+        SIMPLE, // Prints simple messages of passed/failed tests
+        SILENT // Prints no log of passed/failed tests
     }
 
     var disabled: Boolean
@@ -107,34 +105,36 @@ abstract class KonanTest : DefaultTask(), KonanTestExecutable {
 
     internal fun ProcessOutput.print(prepend: String = "") {
         if (project.verboseTest)
-            println(prepend + """
+            println(
+                prepend + """
                 |stdout:
                 |$stdOut
                 |stderr:
                 |$stdErr
                 |exit code: $exitCode
-                """.trimMargin())
+                """.trimMargin()
+            )
     }
 }
 
 /**
  * Create a test task of the given type. Supports configuration with Closure passed form build.gradle file.
  */
-fun <T: KonanTestExecutable> Project.createTest(name: String, type: Class<T>, config: Closure<*>): T =
-        project.tasks.create(name, type).apply {
-            // Apply closure set in build.gradle to get all parameters.
-            this.configure(config)
-            if (enabled) {
-                // If run task depends on something, build tasks should also depend on this.
-                buildTasks.forEach { buildTask ->
-                    buildTask.sameDependenciesAs(this)
-                    // Run task should depend on compile task
-                    this.dependsOn(buildTask)
-                    doBeforeBuild?.let { buildTask.doFirst(it) }
-                    buildTask.enabled = enabled
-                }
+fun <T : KonanTestExecutable> Project.createTest(name: String, type: Class<T>, config: Closure<*>): T =
+    project.tasks.create(name, type).apply {
+        // Apply closure set in build.gradle to get all parameters.
+        this.configure(config)
+        if (enabled) {
+            // If run task depends on something, build tasks should also depend on this.
+            buildTasks.forEach { buildTask ->
+                buildTask.sameDependenciesAs(this)
+                // Run task should depend on compile task
+                this.dependsOn(buildTask)
+                doBeforeBuild?.let { buildTask.doFirst(it) }
+                buildTask.enabled = enabled
             }
         }
+    }
 
 /**
  * Task to run tests compiled with TestRunner.
@@ -155,33 +155,37 @@ open class KonanGTest : KonanTest() {
     override fun run() {
         doBeforeRun?.execute(this)
         runProcess(
-                executor = {project.executor.execute(it)},
-                executable = executable,
-                args = arguments
+            executor = { project.executor.execute(it) },
+            executable = executable,
+            args = arguments
         ).run {
             parse(stdOut)
-            println("""
+            println(
+                """
                 |stdout:
                 |$stdOut
                 |stderr:
                 |$stdErr
                 |exit code: $exitCode
-                """.trimMargin())
+                """.trimMargin()
+            )
             check(exitCode == 0) { "Test $executable exited with $exitCode" }
         }
     }
 
     private fun parse(output: String) = statistics.apply {
         Pattern.compile("\\[  PASSED  ] ([0-9]*) tests\\.").matcher(output)
-                .apply { if (find()) pass(group(1).toInt()) }
+            .apply { if (find()) pass(group(1).toInt()) }
 
         Pattern.compile("\\[  FAILED  ] ([0-9]*) tests.*").matcher(output)
-                .apply { if (find()) fail(group(1).toInt()) }
+            .apply { if (find()) fail(group(1).toInt()) }
         if (total == 0) {
             // No test were run. Try to find if we've tried to run something
-            error(Pattern.compile("\\[={10}] Running ([0-9]*) tests from ([0-9]*) test cases\\..*")
+            error(
+                Pattern.compile("\\[={10}] Running ([0-9]*) tests from ([0-9]*) test cases\\..*")
                     .matcher(output)
-                    .run { if (find()) group(1).toInt() else 1 })
+                    .run { if (find()) group(1).toInt() else 1 }
+            )
         }
     }
 }
@@ -248,9 +252,9 @@ open class KonanLocalTest : KonanTest() {
         for (i in 1..times) {
             val args = arguments + (multiArguments?.get(i - 1) ?: emptyList())
             output += if (testData != null)
-                runProcessWithInput({project.executor.execute(it)}, executable, args, testData!!)
+                runProcessWithInput({ project.executor.execute(it) }, executable, args, testData!!)
             else
-                runProcess({project.executor.execute(it)}, executable, args)
+                runProcess({ project.executor.execute(it) }, executable, args)
         }
         if (compilerMessages) {
             // TODO: as for now it captures output only in the driver task.
@@ -267,9 +271,10 @@ open class KonanLocalTest : KonanTest() {
     }
 
     private operator fun ProcessOutput.plus(other: ProcessOutput) = ProcessOutput(
-            stdOut + other.stdOut,
-            stdErr + other.stdErr,
-            exitCode + other.exitCode)
+        stdOut + other.stdOut,
+        stdErr + other.stdErr,
+        exitCode + other.exitCode
+    )
 
     private fun ProcessOutput.check() {
         val exitCodeMismatch = !expectedExitStatusChecker(exitCode)
@@ -278,7 +283,8 @@ open class KonanLocalTest : KonanTest() {
                 "Expected exit status: $expectedExitStatus, actual: $exitCode"
             else
                 "Actual exit status doesn't match with exit status checker: $exitCode"
-            check(expectedFail) { """
+            check(expectedFail) {
+                """
                     |Test failed. $message
                     |stdout:
                     |$stdOut
@@ -301,7 +307,8 @@ open class KonanLocalTest : KonanTest() {
             println("Expected failure. $message")
         }
 
-        check ((exitCodeMismatch || goldValueMismatch) || !expectedFail) { """
+        check((exitCodeMismatch || goldValueMismatch) || !expectedFail) {
+            """
             |Unexpected pass:
             | * exit code mismatch: $exitCodeMismatch
             | * gold value mismatch: $goldValueMismatch
@@ -423,8 +430,8 @@ open class KonanDynamicTest : KonanStandaloneTest() {
         val sourceFile = File(cSource)
         val prefixedName = if (HostManager.hostIsMingw) name else "lib$name"
         val res = sourceFile.readText()
-                .replace("#include \"testlib_api.h\"", "#include \"${prefixedName}_api.h\"")
-                .replace("testlib", prefixedName)
+            .replace("#include \"testlib_api.h\"", "#include \"${prefixedName}_api.h\"")
+            .replace("testlib", prefixedName)
         val newFileName = "$outputDirectory/${sourceFile.name}"
         println(newFileName)
         File(newFileName).run {
@@ -437,21 +444,26 @@ open class KonanDynamicTest : KonanStandaloneTest() {
     private fun clang() {
         val log = ByteArrayOutputStream()
         val plugin = project.convention.getPlugin(ExecClang::class.java)
-        val execResult = plugin.execKonanClang(project.testTarget, Action<ExecSpec> {
-            it.workingDir = File(outputDirectory)
-            it.executable = "clang"
-            val artifactsDir = "$outputDirectory/${project.testTarget}"
-            it.args = listOf(processCSource(),
+        val execResult = plugin.execKonanClang(
+            project.testTarget,
+            Action<ExecSpec> {
+                it.workingDir = File(outputDirectory)
+                it.executable = "clang"
+                val artifactsDir = "$outputDirectory/${project.testTarget}"
+                it.args = listOf(
+                    processCSource(),
                     "-o", executable,
                     "-I", artifactsDir,
                     "-L", artifactsDir,
                     "-l", name,
-                    "-Wl,-rpath,$artifactsDir")
+                    "-Wl,-rpath,$artifactsDir"
+                )
 
-            it.standardOutput = log
-            it.errorOutput = log
-            it.isIgnoreExitValue = true
-        })
+                it.standardOutput = log
+                it.errorOutput = log
+                it.isIgnoreExitValue = true
+            }
+        )
         log.toString("UTF-8").also {
             project.file("$executable.compilation.log").writeText(it)
             println(it)

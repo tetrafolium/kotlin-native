@@ -9,8 +9,8 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.konan.target.HostManager
 import javax.inject.Inject
@@ -55,11 +55,11 @@ internal val Project.jvmJson: String
 
 internal val Project.commonBenchmarkProperties: Map<String, Any>
     get() = mapOf(
-            "cpu" to System.getProperty("os.arch"),
-            "os" to System.getProperty("os.name"),
-            "jdkVersion" to System.getProperty("java.version"),
-            "jdkVendor" to System.getProperty("java.vendor"),
-            "kotlinVersion" to kotlinVersion
+        "cpu" to System.getProperty("os.arch"),
+        "os" to System.getProperty("os.name"),
+        "jdkVersion" to System.getProperty("java.version"),
+        "jdkVendor" to System.getProperty("java.vendor"),
+        "kotlinVersion" to kotlinVersion
     )
 
 open class BenchmarkExtension @Inject constructor(val project: Project) {
@@ -75,20 +75,20 @@ open class BenchmarkExtension @Inject constructor(val project: Project) {
     val dependencies: BenchmarkDependencies = BenchmarkDependencies()
 
     fun dependencies(action: BenchmarkDependencies.() -> Unit) =
-            dependencies.action()
+        dependencies.action()
 
     fun dependencies(action: Closure<*>) {
         ConfigureUtil.configure(action, dependencies)
     }
 
-    inner class BenchmarkDependencies  {
+    inner class BenchmarkDependencies {
         public val sourceSets: NamedDomainObjectContainer<KotlinSourceSet>
             get() = project.kotlin.sourceSets
 
         fun project(path: String): Dependency = project.dependencies.project(mapOf("path" to path))
 
         fun project(path: String, configuration: String): Dependency =
-                project.dependencies.project(mapOf("path" to path, "configuration" to configuration))
+            project.dependencies.project(mapOf("path" to path, "configuration" to configuration))
 
         fun common(notation: Any) = sourceSets.commonMain.dependencies {
             implementation(notation)
@@ -103,7 +103,7 @@ open class BenchmarkExtension @Inject constructor(val project: Project) {
 /**
  * A plugin configuring a benchmark Kotlin/Native project.
  */
-abstract class BenchmarkingPlugin: Plugin<Project> {
+abstract class BenchmarkingPlugin : Plugin<Project> {
     protected abstract val Project.nativeExecutable: String
     protected abstract val Project.nativeLinkTask: Task
     protected abstract val Project.benchmark: BenchmarkExtension
@@ -113,9 +113,9 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
     protected val mingwPath: String = System.getenv("MINGW64_DIR") ?: "c:/msys64/mingw64"
 
     protected open fun Project.determinePreset(): AbstractKotlinNativeTargetPreset<*> =
-            defaultHostPreset(this).also { preset ->
-                logger.quiet("$project has been configured for ${preset.name} platform.")
-            } as AbstractKotlinNativeTargetPreset<*>
+        defaultHostPreset(this).also { preset ->
+            logger.quiet("$project has been configured for ${preset.name} platform.")
+        } as AbstractKotlinNativeTargetPreset<*>
 
     protected abstract fun NamedDomainObjectContainer<KotlinSourceSet>.configureSources(project: Project)
 
@@ -148,7 +148,7 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
     protected open fun KotlinNativeTarget.configureNativeOutput(project: Project) {
         binaries.executable(NATIVE_EXECUTABLE_NAME, listOf(project.benchmark.buildType)) {
             if (HostManager.hostIsMingw) {
-                linkerOpts.add("-L${mingwPath}/lib")
+                linkerOpts.add("-L$mingwPath/lib")
             }
 
             runTask!!.apply {
@@ -178,8 +178,10 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
     }
 
     protected open fun Project.configureNativeTask(nativeTarget: KotlinNativeTarget): Task {
-        val konanRun = createRunTask(this, "konanRun", nativeLinkTask,
-                nativeExecutable, buildDir.resolve(nativeBenchResults).absolutePath).apply {
+        val konanRun = createRunTask(
+            this, "konanRun", nativeLinkTask,
+            nativeExecutable, buildDir.resolve(nativeBenchResults).absolutePath
+        ).apply {
             group = BENCHMARKING_GROUP
             description = "Runs the benchmark for Kotlin/Native."
         }
@@ -207,10 +209,10 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
     }
 
     protected open fun getCompilerFlags(project: Project, nativeTarget: KotlinNativeTarget) =
-            compilerFlagsFromBinary(project) + nativeTarget.compilations.main.kotlinOptions.freeCompilerArgs.map { "\"$it\"" }
+        compilerFlagsFromBinary(project) + nativeTarget.compilations.main.kotlinOptions.freeCompilerArgs.map { "\"$it\"" }
 
     protected open fun Project.collectCodeSize(applicationName: String) =
-            getCodeSizeBenchmark(applicationName, nativeExecutable)
+        getCodeSizeBenchmark(applicationName, nativeExecutable)
 
     protected open fun Project.configureKonanJsonTask(nativeTarget: KotlinNativeTarget): Task {
         return tasks.create("konanJsonReport") {
@@ -224,12 +226,12 @@ abstract class BenchmarkingPlugin: Plugin<Project> {
                 else getNativeCompileTime(project, applicationName, benchmark.compileTasks)
 
                 val properties = commonBenchmarkProperties + mapOf(
-                        "type" to "native",
-                        "compilerVersion" to konanVersion,
-                        "flags" to getCompilerFlags(project, nativeTarget).sorted(),
-                        "benchmarks" to benchContents,
-                        "compileTime" to listOf(nativeCompileTime),
-                        "codeSize" to collectCodeSize(applicationName)
+                    "type" to "native",
+                    "compilerVersion" to konanVersion,
+                    "flags" to getCompilerFlags(project, nativeTarget).sorted(),
+                    "benchmarks" to benchContents,
+                    "compileTime" to listOf(nativeCompileTime),
+                    "codeSize" to collectCodeSize(applicationName)
                 )
 
                 val output = createJsonReport(properties)

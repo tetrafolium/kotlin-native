@@ -54,7 +54,7 @@ fun filterPrime(v: Int): Boolean {
     if (v % 2 == 0)
         return false
     var i = 3
-    while (i*i <= v) {
+    while (i * i <= v) {
         if (v % i == 0)
             return false
         i += 2
@@ -97,4 +97,3 @@ inline fun Sequence<Int>.cnt(predicate: (Int) -> Boolean): Int {
     }
     return count
 }
-

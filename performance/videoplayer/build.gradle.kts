@@ -17,7 +17,7 @@ val toolSuffix = if (System.getProperty("os.name").startsWith("Windows")) ".bat"
 val binarySuffix = getNativeProgramExtension()
 
 val linkerOpts = when {
-    PlatformInfo.isMac() -> listOf("-linker-options","-L/opt/local/lib", "-linker-options", "-L/usr/local/lib")
+    PlatformInfo.isMac() -> listOf("-linker-options", "-L/opt/local/lib", "-linker-options", "-L/usr/local/lib")
     PlatformInfo.isLinux() -> listOf("-linker-options", "-L/usr/lib/x86_64-linux-gnu", "-linker-options", "-L/usr/lib64")
     PlatformInfo.isWindows() -> listOf("-linker-options", "-L$mingwPath/lib")
     else -> error("Unsupported platform")
@@ -48,7 +48,7 @@ var includeDirsSdl = when {
     else -> error("Unsupported platform")
 }
 
-val defaultCompilerOpts =  listOf("-g")
+val defaultCompilerOpts = listOf("-g")
 val buildOpts = getCompileOnlyBenchmarksOpts(project, defaultCompilerOpts)
 
 compileBenchmark {

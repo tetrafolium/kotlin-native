@@ -3,10 +3,10 @@
  * that can be found in the LICENSE file.
  */
 import org.jetbrains.kotlin.konan.properties.KonanPropertiesLoader
-import org.jetbrains.kotlin.konan.util.DependencyProcessor
-import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.Distribution
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.presetName
+import org.jetbrains.kotlin.konan.util.DependencyProcessor
 
 /**
  * Creates an archive with LLVM distribution without files
@@ -14,20 +14,20 @@ import org.jetbrains.kotlin.konan.target.presetName
  *
  * For example, it excludes binaries that are part of LLVM testing infrastructure.
  */
-inline fun <reified T: AbstractArchiveTask> createLlvmPackingTask(
-        host: KonanTarget,
-        whitelist: File?,
-        blacklist: File?,
-        crossinline additionalConfiguration: T.() -> Unit
+inline fun <reified T : AbstractArchiveTask> createLlvmPackingTask(
+    host: KonanTarget,
+    whitelist: File?,
+    blacklist: File?,
+    crossinline additionalConfiguration: T.() -> Unit
 ) {
     val distribution = Distribution(rootProject.projectDir.absolutePath)
     val reducedLlvmAppendix = distribution.properties
-            .getProperty("reducedLlvmAppendix")
+        .getProperty("reducedLlvmAppendix")
     val propertiesLoader = object : KonanPropertiesLoader(
-            host = host,
-            target = host,
-            properties = distribution.properties,
-            baseDir = DependencyProcessor.defaultDependenciesRoot.absolutePath
+        host = host,
+        target = host,
+        properties = distribution.properties,
+        baseDir = DependencyProcessor.defaultDependenciesRoot.absolutePath
     ) {}
 
     val hostName = host.presetName.capitalize()
@@ -52,13 +52,13 @@ inline fun <reified T: AbstractArchiveTask> createLlvmPackingTask(
         // See: https://ant.apache.org/manual/dirtasks.html
         whitelist?.let {
             it.readLines()
-                    .filter { !it.startsWith("#") && it.isNotBlank() }
-                    .forEach(this::include)
+                .filter { !it.startsWith("#") && it.isNotBlank() }
+                .forEach(this::include)
         }
         blacklist?.let {
             it.readLines()
-                    .filter { !it.startsWith("#") && it.isNotBlank() }
-                    .forEach(this::exclude)
+                .filter { !it.startsWith("#") && it.isNotBlank() }
+                .forEach(this::exclude)
         }
         from(propertiesLoader.absoluteLlvmHome)
         destinationDirectory.set(buildDir.resolve("artifacts"))
@@ -68,23 +68,23 @@ inline fun <reified T: AbstractArchiveTask> createLlvmPackingTask(
 }
 
 createLlvmPackingTask<Tar>(
-        KonanTarget.MACOS_X64,
-        whitelist = file("macos_llvm_whitelist"),
-        blacklist = null
+    KonanTarget.MACOS_X64,
+    whitelist = file("macos_llvm_whitelist"),
+    blacklist = null
 ) {
     compression = Compression.GZIP
 }
 
 createLlvmPackingTask<Tar>(
-        KonanTarget.LINUX_X64,
-        whitelist = file("linux_llvm_whitelist"),
-        blacklist = file("linux_llvm_blacklist")
+    KonanTarget.LINUX_X64,
+    whitelist = file("linux_llvm_whitelist"),
+    blacklist = file("linux_llvm_blacklist")
 ) {
     compression = Compression.GZIP
 }
 
 createLlvmPackingTask<Zip>(
-        KonanTarget.MINGW_X64,
-        whitelist = file("mingw_llvm_whitelist"),
-        blacklist = file("mingw_llvm_blacklist")
+    KonanTarget.MINGW_X64,
+    whitelist = file("mingw_llvm_whitelist"),
+    blacklist = file("mingw_llvm_blacklist")
 ) {}

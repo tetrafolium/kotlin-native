@@ -1,9 +1,9 @@
 package org.jetbrains.kotlin.benchmark
 
-import org.gradle.jvm.tasks.Jar
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.plugin.mpp.Executable
@@ -27,14 +27,14 @@ open class KotlinNativeBenchmarkExtension @Inject constructor(project: Project) 
     var posixSrcDirs: Collection<Any> = emptyList()
 
     fun BenchmarkExtension.BenchmarkDependencies.jvm(notation: Any) = sourceSets.jvmMain.dependencies {
-            implementation(notation)
-        }
+        implementation(notation)
+    }
 }
 
 /**
  * A plugin configuring a benchmark Kotlin/Native project.
  */
-open class KotlinNativeBenchmarkingPlugin: BenchmarkingPlugin() {
+open class KotlinNativeBenchmarkingPlugin : BenchmarkingPlugin() {
     override fun Project.configureJvmJsonTask(jvmRun: Task): Task {
         return tasks.create("jvmJsonReport") {
             it.group = BENCHMARKING_GROUP
@@ -47,11 +47,11 @@ open class KotlinNativeBenchmarkingPlugin: BenchmarkingPlugin() {
                 val benchContents = buildDir.resolve(jvmBenchResults).readText()
 
                 val properties: Map<String, Any> = commonBenchmarkProperties + mapOf(
-                        "type" to "jvm",
-                        "compilerVersion" to kotlinVersion,
-                        "benchmarks" to benchContents,
-                        "compileTime" to listOf(jvmCompileTime),
-                        "codeSize" to getCodeSizeBenchmark(applicationName, jarPath.absolutePath)
+                    "type" to "jvm",
+                    "compilerVersion" to kotlinVersion,
+                    "benchmarks" to benchContents,
+                    "compileTime" to listOf(jvmCompileTime),
+                    "codeSize" to getCodeSizeBenchmark(applicationName, jarPath.absolutePath)
                 )
 
                 val output = createJsonReport(properties)
@@ -108,7 +108,7 @@ open class KotlinNativeBenchmarkingPlugin: BenchmarkingPlugin() {
     }
 
     override fun getCompilerFlags(project: Project, nativeTarget: KotlinNativeTarget) =
-            super.getCompilerFlags(project, nativeTarget) + project.nativeBinary.freeCompilerArgs.map { "\"$it\"" }
+        super.getCompilerFlags(project, nativeTarget) + project.nativeBinary.freeCompilerArgs.map { "\"$it\"" }
 
     override fun NamedDomainObjectContainer<KotlinSourceSet>.configureSources(project: Project) {
         project.benchmark.let {

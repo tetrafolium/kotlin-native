@@ -33,7 +33,8 @@ class TaskTests {
     @Test
     fun `Plugin should support separate run tasks for different binaries`() {
         val project = KonanProject.createEmpty(projectDirectory).apply {
-            buildFile.appendText("""
+            buildFile.appendText(
+                """
                 konanArtifacts {
                     program('foo') {
                         srcDir 'src/foo/kotlin'
@@ -42,22 +43,25 @@ class TaskTests {
                         srcDir 'src/bar/kotlin'
                     }
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
         project.generateSrcFile(
-                listOf("src", "foo", "kotlin"),
-                "main.kt",
-                "fun main(args: Array<String>) = println(\"Run Foo: \${args[0]}, \${args[1]}\")")
+            listOf("src", "foo", "kotlin"),
+            "main.kt",
+            "fun main(args: Array<String>) = println(\"Run Foo: \${args[0]}, \${args[1]}\")"
+        )
         project.generateSrcFile(
-                listOf("src", "bar", "kotlin"),
-                "main.kt",
-                "fun main(args: Array<String>) = println(\"Run Bar: \${args[0]}, \${args[1]}\")")
+            listOf("src", "bar", "kotlin"),
+            "main.kt",
+            "fun main(args: Array<String>) = println(\"Run Bar: \${args[0]}, \${args[1]}\")"
+        )
         val resultFoo = project.createRunner()
-                .withArguments("runFoo", "-PrunArgs=arg1 arg2")
-                .build()
+            .withArguments("runFoo", "-PrunArgs=arg1 arg2")
+            .build()
         val resultAll = project.createRunner()
-                .withArguments("run", "-PrunArgs=arg1 arg2")
-                .build()
+            .withArguments("run", "-PrunArgs=arg1 arg2")
+            .build()
 
         assertTrue(resultFoo.output.contains("Run Foo: arg1, arg2"), "No Foo output for 'runFoo'")
         assertFalse(resultFoo.output.contains("Run Bar: "), "There is Bar output for 'runFoo'")

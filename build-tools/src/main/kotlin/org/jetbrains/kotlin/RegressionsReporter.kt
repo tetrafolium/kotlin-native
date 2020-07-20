@@ -4,25 +4,12 @@
  */
 package org.jetbrains.kotlin
 
-import groovy.lang.Closure
-import org.gradle.api.Action
+import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-
-import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
-
 import org.jetbrains.report.json.*
-
 import java.io.FileInputStream
-import java.io.IOException
-import java.io.File
-import java.util.concurrent.TimeUnit
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.Base64
 import java.util.Properties
 
 /**
@@ -39,21 +26,22 @@ import java.util.Properties
 open class RegressionsReporter : DefaultTask() {
 
     val slackUsers = mapOf(
-            "olonho" to "nikolay.igotti",
-            "nikolay.igotti" to "nikolay.igotti",
-            "ilya.matveev" to "ilya.matveev",
-            "ilmat192" to "ilya.matveev",
-            "vasily.v.levchenko" to "minamoto",
-            "vasily.levchenko" to "minamoto",
-            "alexander.gorshenev" to "alexander.gorshenev",
-            "igor.chevdar" to "igor.chevdar",
-            "pavel.punegov" to "Pavel Punegov",
-            "dmitriy.dolovov" to "dmitriy.dolovov",
-            "svyatoslav.scherbina" to "svyatoslav.scherbina",
-            "sbogolepov" to "sergey.bogolepov",
-            "Alexey.Zubakov" to "Alexey.Zubakov",
-            "kirill.shmakov" to "kirill.shmakov",
-            "elena.lepilkina" to "elena.lepilkina")
+        "olonho" to "nikolay.igotti",
+        "nikolay.igotti" to "nikolay.igotti",
+        "ilya.matveev" to "ilya.matveev",
+        "ilmat192" to "ilya.matveev",
+        "vasily.v.levchenko" to "minamoto",
+        "vasily.levchenko" to "minamoto",
+        "alexander.gorshenev" to "alexander.gorshenev",
+        "igor.chevdar" to "igor.chevdar",
+        "pavel.punegov" to "Pavel Punegov",
+        "dmitriy.dolovov" to "dmitriy.dolovov",
+        "svyatoslav.scherbina" to "svyatoslav.scherbina",
+        "sbogolepov" to "sergey.bogolepov",
+        "Alexey.Zubakov" to "Alexey.Zubakov",
+        "kirill.shmakov" to "kirill.shmakov",
+        "elena.lepilkina" to "elena.lepilkina"
+    )
 
     @Input
     lateinit var currentBenchmarksReportFile: String
@@ -74,16 +62,16 @@ open class RegressionsReporter : DefaultTask() {
     var bundleBuild: Boolean = false
 
     private fun tabUrl(buildId: String, buildTypeId: String, tab: String) =
-            "$teamCityUrl/viewLog.html?buildId=$buildId&buildTypeId=$buildTypeId&tab=$tab"
+        "$teamCityUrl/viewLog.html?buildId=$buildId&buildTypeId=$buildTypeId&tab=$tab"
 
     private fun testReportUrl(buildId: String, buildTypeId: String) =
-            tabUrl(buildId, buildTypeId, "testsInfo")
+        tabUrl(buildId, buildTypeId, "testsInfo")
 
     private fun previousBuildLocator(buildTypeId: String, branchName: String) =
-            "buildType:id:$buildTypeId,branch:name:$branchName,status:SUCCESS,state:finished,count:1"
+        "buildType:id:$buildTypeId,branch:name:$branchName,status:SUCCESS,state:finished,count:1"
 
     private fun changesListUrl(buildLocator: String) =
-            "$teamCityUrl/app/rest/changes/?locator=build:$buildLocator"
+        "$teamCityUrl/app/rest/changes/?locator=build:$buildLocator"
 
     private fun getCommits(buildLocator: String, user: String, password: String): CommitsList {
         val changes = try {
@@ -97,8 +85,8 @@ open class RegressionsReporter : DefaultTask() {
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))
@@ -110,12 +98,12 @@ open class RegressionsReporter : DefaultTask() {
 
         // Get branch.
         val currentBuild = getBuild("id:$buildId", user, password)
-        val branch = getBuildProperty(currentBuild,"branchName")
+        val branch = getBuildProperty(currentBuild, "branchName")
 
         val testReportUrl = testReportUrl(buildId, buildTypeId)
 
         // Get previous build on branch.
-        val builds = getBuild(previousBuildLocator(buildTypeId,branch), user, password)
+        val builds = getBuild(previousBuildLocator(buildTypeId, branch), user, password)
 
         // Get changes description.
         val changesList = getCommits("id:$buildId", user, password)
@@ -130,29 +118,31 @@ open class RegressionsReporter : DefaultTask() {
 
         // Get compare to build.
         val compareToBuild = getBuild(previousBuildLocator(buildTypeId, defaultBranch), user, password)
-        val compareToBuildLink = getBuildProperty(compareToBuild,"webUrl")
-        val compareToBuildNumber = getBuildProperty(compareToBuild,"number")
+        val compareToBuildLink = getBuildProperty(compareToBuild, "webUrl")
+        val compareToBuildNumber = getBuildProperty(compareToBuild, "number")
         val target = System.getProperty("os.name").replace("\\s".toRegex(), "")
 
         // Generate comparison report.
         val output = arrayOf("$analyzer", "-r", "html", "$currentBenchmarksReportFile", "artifactory:$compareToBuildNumber:$target:$artifactoryFileName", "-o", "$htmlReport")
-                .runCommand()
+            .runCommand()
 
         if (output.contains("Uncaught exception")) {
-            error("Error during comparasion of $currentBenchmarksReportFile and " +
+            error(
+                "Error during comparasion of $currentBenchmarksReportFile and " +
                     "artifactory:$compareToBuildNumber:$target:$artifactoryFileName with $analyzer! " +
-                    "Please check files existance and their correctness.")
+                    "Please check files existance and their correctness."
+            )
         }
         arrayOf("$analyzer", "-r", "statistics", "$currentBenchmarksReportFile", "artifactory:$compareToBuildNumber:$target:$artifactoryFileName", "-o", "$summaryFile")
-                .runCommand()
+            .runCommand()
 
         val reportLink = "https://kotlin-native-perf-summary.labs.jb.gg/?target=$target&build=$buildNumber"
         val detailedReportLink = "https://kotlin-native-performance.labs.jb.gg/?" +
-                "report=artifactory:$buildNumber:$target:$artifactoryFileName&" +
-                "compareTo=artifactory:$compareToBuildNumber:$target:$artifactoryFileName"
+            "report=artifactory:$buildNumber:$target:$artifactoryFileName&" +
+            "compareTo=artifactory:$compareToBuildNumber:$target:$artifactoryFileName"
 
         val title = "\n*Performance report for target $target (build $buildNumber)* - $reportLink\n" +
-                "*Detailed info - * $detailedReportLink"
+            "*Detailed info - * $detailedReportLink"
 
         val header = "$title\n$changesInfo\n\nCompare to build $compareToBuildNumber: $compareToBuildLink\n\n"
         val footer = "*Benchmarks statistics:* $testReportUrl"

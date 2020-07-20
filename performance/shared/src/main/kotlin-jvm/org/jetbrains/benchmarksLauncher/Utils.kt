@@ -43,7 +43,7 @@ actual fun printStderr(message: String) {
 }
 
 actual fun currentTime(): String =
-        SimpleDateFormat("HH:mm:ss").format(Date())
+    SimpleDateFormat("HH:mm:ss").format(Date())
 
 actual fun nanoTime(): Long = System.nanoTime()
 
@@ -71,4 +71,3 @@ actual class Random actual constructor() {
         }
     }
 }
-

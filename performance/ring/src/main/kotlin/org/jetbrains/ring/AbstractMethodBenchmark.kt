@@ -30,23 +30,22 @@ open class AbstractMethodBenchmark {
     private val sequenceMap = HashMap<Char, Int>()
 
     init {
-        var i = 0;
+        var i = 0
         for (ch in sequence) {
-            sequenceMap[ch] = i++;
+            sequenceMap[ch] = i++
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun sortStrings(): Set<String> {
         val res = arr.subList(0, if (BENCHMARK_SIZE < arr.size) BENCHMARK_SIZE else arr.size).toSet()
         return res
     }
 
-    //Benchmark
+    // Benchmark
     fun sortStringsWithComparator(): Set<String> {
         val res = mutableSetOf<String>()
         res.addAll(arr.subList(0, if (BENCHMARK_SIZE < arr.size) BENCHMARK_SIZE else arr.size))
         return res
     }
 }
-

@@ -12,13 +12,13 @@ import org.jetbrains.kotlin.konan.properties.propertyList
 import org.jetbrains.kotlin.konan.properties.saveProperties
 import org.jetbrains.kotlin.konan.target.*
 import org.jetbrains.kotlin.library.KLIB_PROPERTY_NATIVE_TARGETS
+import org.jetbrains.report.json.*
 import java.io.File
-import java.util.concurrent.TimeUnit
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.Base64
-import org.jetbrains.report.json.*
 import java.nio.file.Path
+import java.util.Base64
+import java.util.concurrent.TimeUnit
 import org.jetbrains.kotlin.konan.file.File as KFile
 
 //region Project properties.
@@ -48,14 +48,16 @@ val Project.testOutputExternal
     get() = (findProperty("testOutputExternal") as File).toString()
 
 val Project.kotlinNativeDist
-    get() = this.rootProject.file(this.findProperty("org.jetbrains.kotlin.native.home")
-            ?: this.findProperty("konan.home") ?: "dist")
+    get() = this.rootProject.file(
+        this.findProperty("org.jetbrains.kotlin.native.home")
+            ?: this.findProperty("konan.home") ?: "dist"
+    )
 
 @Suppress("UNCHECKED_CAST")
 val Project.globalTestArgs: List<String>
     get() = with(findProperty("globalTestArgs")) {
-            if (this is Array<*>) this.toList() as List<String>
-            else this as List<String>
+        if (this is Array<*>) this.toList() as List<String>
+        else this as List<String>
     }
 
 val Project.testTargetSupportsCodeCoverage: Boolean
@@ -68,9 +70,12 @@ val Project.testTargetSupportsCodeCoverage: Boolean
  */
 fun codesign(project: Project, path: String) {
     check(HostManager.hostIsMac) { "Apple specific code signing" }
-    val (stdOut, stdErr, exitCode) = runProcess(executor = localExecutor(project), executable = "/usr/bin/codesign",
-            args = listOf("--verbose", "-s", "-", path))
-    check(exitCode == 0) { """
+    val (stdOut, stdErr, exitCode) = runProcess(
+        executor = localExecutor(project), executable = "/usr/bin/codesign",
+        args = listOf("--verbose", "-s", "-", path)
+    )
+    check(exitCode == 0) {
+        """
         |Codesign failed with exitCode: $exitCode
         |stdout: $stdOut
         |stderr: $stdErr
@@ -88,10 +93,10 @@ fun Project.getFilesToCompile(compile: List<String>, exclude: List<String>): Lis
     // create list of tests to compile
     return compile.flatMap { f ->
         project.file(f)
-                .walk()
-                .filter { it.isFile && it.name.endsWith(".kt") && !excludeFiles.contains(it.absolutePath) }
-                .map{ it.absolutePath }
-                .asIterable()
+            .walk()
+            .filter { it.isFile && it.name.endsWith(".kt") && !excludeFiles.contains(it.absolutePath) }
+            .map { it.absolutePath }
+            .asIterable()
     }
 }
 
@@ -147,33 +152,35 @@ fun Task.dependsOnKonanBuildingTask(artifact: String, target: KonanTarget) {
 
 //endregion
 // Run command line from string.
-fun Array<String>.runCommand(workingDir: File = File("."),
-                             timeoutAmount: Long = 60,
-                             timeoutUnit: TimeUnit = TimeUnit.SECONDS): String {
+fun Array<String>.runCommand(
+    workingDir: File = File("."),
+    timeoutAmount: Long = 60,
+    timeoutUnit: TimeUnit = TimeUnit.SECONDS
+): String {
     return try {
         ProcessBuilder(*this)
-                .directory(workingDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .start().apply {
-                    waitFor(timeoutAmount, timeoutUnit)
-                }.inputStream.bufferedReader().readText()
+            .directory(workingDir)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start().apply {
+                waitFor(timeoutAmount, timeoutUnit)
+            }.inputStream.bufferedReader().readText()
     } catch (e: Exception) {
         error("Couldn't run command $this")
     }
 }
 
 fun String.splitCommaSeparatedOption(optionName: String) =
-        split("\\s*,\\s*".toRegex()).map {
-            if (it.isNotEmpty()) listOf(optionName, it) else listOf(null)
-        }.flatten().filterNotNull()
+    split("\\s*,\\s*".toRegex()).map {
+        if (it.isNotEmpty()) listOf(optionName, it) else listOf(null)
+    }.flatten().filterNotNull()
 
 data class Commit(val revision: String, val developer: String, val webUrlWithDescription: String)
 
 val teamCityUrl = "http://buildserver.labs.intellij.net"
 
 // List of commits.
-class CommitsList(data: JsonElement): ConvertedFromJson {
+class CommitsList(data: JsonElement) : ConvertedFromJson {
 
     val commits: List<Commit>
 
@@ -188,9 +195,10 @@ class CommitsList(data: JsonElement): ConvertedFromJson {
             }
             changesElement.jsonArray.map {
                 with(it as JsonObject) {
-                    Commit(elementToString(getRequiredField("version"), "version"),
-                            elementToString(getRequiredField("username"), "username"),
-                            elementToString(getRequiredField("webUrl"), "webUrl")
+                    Commit(
+                        elementToString(getRequiredField("version"), "version"),
+                        elementToString(getRequiredField("username"), "username"),
+                        elementToString(getRequiredField("webUrl"), "webUrl")
                     )
                 }
             }
@@ -199,46 +207,52 @@ class CommitsList(data: JsonElement): ConvertedFromJson {
 }
 
 fun buildsUrl(buildLocator: String) =
-        "$teamCityUrl/app/rest/builds/?locator=$buildLocator"
+    "$teamCityUrl/app/rest/builds/?locator=$buildLocator"
 
 fun getBuild(buildLocator: String, user: String, password: String) =
-        try {
-            sendGetRequest(buildsUrl(buildLocator), user, password)
-        } catch (t: Throwable) {
-            error("Try to get build! TeamCity is unreachable!")
-        }
+    try {
+        sendGetRequest(buildsUrl(buildLocator), user, password)
+    } catch (t: Throwable) {
+        error("Try to get build! TeamCity is unreachable!")
+    }
 
-fun sendGetRequest(url: String, username: String? = null, password: String? = null) : String {
+fun sendGetRequest(url: String, username: String? = null, password: String? = null): String {
     val connection = URL(url).openConnection() as HttpURLConnection
     if (username != null && password != null) {
         val auth = Base64.getEncoder().encode(("$username:$password").toByteArray()).toString(Charsets.UTF_8)
         connection.addRequestProperty("Authorization", "Basic $auth")
     }
-    connection.setRequestProperty("Accept", "application/json");
+    connection.setRequestProperty("Accept", "application/json")
     connection.connect()
     return connection.inputStream.use { it.reader().use { reader -> reader.readText() } }
 }
 
 fun getBuildProperty(buildJsonDescription: String, property: String) =
-        with(JsonTreeParser.parse(buildJsonDescription) as JsonObject) {
-            if (getPrimitive("count").int == 0) {
-                error("No build information on TeamCity for $buildJsonDescription!")
-            }
-            (getArray("build").getObject(0).getPrimitive(property) as JsonLiteral).unquoted()
+    with(JsonTreeParser.parse(buildJsonDescription) as JsonObject) {
+        if (getPrimitive("count").int == 0) {
+            error("No build information on TeamCity for $buildJsonDescription!")
         }
+        (getArray("build").getObject(0).getPrimitive(property) as JsonLiteral).unquoted()
+    }
 
 @JvmOverloads
-fun compileSwift(project: Project, target: KonanTarget, sources: List<String>, options: List<String>,
-                 output: Path, fullBitcode: Boolean = false) {
+fun compileSwift(
+    project: Project,
+    target: KonanTarget,
+    sources: List<String>,
+    options: List<String>,
+    output: Path,
+    fullBitcode: Boolean = false
+) {
     val platform = project.platformManager.platform(target)
     assert(platform.configurables is AppleConfigurables)
     val configs = platform.configurables as AppleConfigurables
     val compiler = configs.absoluteTargetToolchain + "/usr/bin/swiftc"
 
     val swiftTarget = when (target) {
-        KonanTarget.IOS_X64   -> "x86_64-apple-ios" + configs.osVersionMin
+        KonanTarget.IOS_X64 -> "x86_64-apple-ios" + configs.osVersionMin
         KonanTarget.IOS_ARM64 -> "arm64-apple-ios" + configs.osVersionMin
-        KonanTarget.TVOS_X64   -> "x86_64-apple-tvos" + configs.osVersionMin
+        KonanTarget.TVOS_X64 -> "x86_64-apple-tvos" + configs.osVersionMin
         KonanTarget.TVOS_ARM64 -> "arm64-apple-tvos" + configs.osVersionMin
         KonanTarget.MACOS_X64 -> "x86_64-apple-macosx" + configs.osVersionMin
         KonanTarget.WATCHOS_X86 -> "i386-apple-watchos" + configs.osVersionMin
@@ -247,23 +261,25 @@ fun compileSwift(project: Project, target: KonanTarget, sources: List<String>, o
     }
 
     val args = listOf("-sdk", configs.absoluteTargetSysRoot, "-target", swiftTarget) +
-            options + "-o" + output.toString() + sources +
-            if (fullBitcode) listOf("-embed-bitcode", "-Xlinker", "-bitcode_verify") else listOf("-embed-bitcode-marker")
+        options + "-o" + output.toString() + sources +
+        if (fullBitcode) listOf("-embed-bitcode", "-Xlinker", "-bitcode_verify") else listOf("-embed-bitcode-marker")
 
     val (stdOut, stdErr, exitCode) = runProcess(executor = localExecutor(project), executable = compiler, args = args)
 
-    println("""
+    println(
+        """
         |$compiler finished with exit code: $exitCode
         |options: ${args.joinToString(separator = " ")}
         |stdout: $stdOut
         |stderr: $stdErr
-        """.trimMargin())
+        """.trimMargin()
+    )
     check(exitCode == 0) { "Compilation failed" }
     check(output.toFile().exists()) { "Compiler swiftc hasn't produced an output file: $output" }
 }
 
 fun targetSupportsMimallocAllocator(targetName: String) =
-        HostManager().targetByName(targetName).supportsMimallocAllocator()
+    HostManager().targetByName(targetName).supportsMimallocAllocator()
 
 fun Project.mergeManifestsByTargets(source: File, destination: File) {
     logger.info("Merging manifests: $source -> $destination")
@@ -276,29 +292,29 @@ fun Project.mergeManifestsByTargets(source: File, destination: File) {
 
     // check that all properties except for KLIB_PROPERTY_NATIVE_TARGETS are equivalent
     val mismatchedProperties = (sourceProperties.keys + destinationProperties.keys)
-            .asSequence()
-            .map { it.toString() }
-            .filter { it != KLIB_PROPERTY_NATIVE_TARGETS }
-            .sorted()
-            .mapNotNull { propertyKey: String ->
-                val sourceProperty: String? = sourceProperties.getProperty(propertyKey)
-                val destinationProperty: String? = destinationProperties.getProperty(propertyKey)
-                when {
-                    sourceProperty == null -> "\"$propertyKey\" is absent in $sourceFile"
-                    destinationProperty == null -> "\"$propertyKey\" is absent in $destinationFile"
-                    sourceProperty == destinationProperty -> {
-                        // properties match, OK
-                        null
-                    }
-                    sourceProperties.propertyList(propertyKey, escapeInQuotes = true).toSet() ==
-                            destinationProperties.propertyList(propertyKey, escapeInQuotes = true).toSet() -> {
-                        // properties match, OK
-                        null
-                    }
-                    else -> "\"$propertyKey\" differ: [$sourceProperty] vs [$destinationProperty]"
+        .asSequence()
+        .map { it.toString() }
+        .filter { it != KLIB_PROPERTY_NATIVE_TARGETS }
+        .sorted()
+        .mapNotNull { propertyKey: String ->
+            val sourceProperty: String? = sourceProperties.getProperty(propertyKey)
+            val destinationProperty: String? = destinationProperties.getProperty(propertyKey)
+            when {
+                sourceProperty == null -> "\"$propertyKey\" is absent in $sourceFile"
+                destinationProperty == null -> "\"$propertyKey\" is absent in $destinationFile"
+                sourceProperty == destinationProperty -> {
+                    // properties match, OK
+                    null
                 }
+                sourceProperties.propertyList(propertyKey, escapeInQuotes = true).toSet() ==
+                    destinationProperties.propertyList(propertyKey, escapeInQuotes = true).toSet() -> {
+                    // properties match, OK
+                    null
+                }
+                else -> "\"$propertyKey\" differ: [$sourceProperty] vs [$destinationProperty]"
             }
-            .toList()
+        }
+        .toList()
 
     check(mismatchedProperties.isEmpty()) {
         buildString {
@@ -329,20 +345,22 @@ fun Project.buildStaticLibrary(cSources: Collection<File>, output: File, objDir:
 
     objDir.mkdirs()
     exec {
-        it.commandLine(platform.clang.clangC(
+        it.commandLine(
+            platform.clang.clangC(
                 "-c",
                 *cSources.map { it.absolutePath }.toTypedArray()
-        ))
+            )
+        )
         it.workingDir(objDir)
     }
 
     output.parentFile.mkdirs()
     exec {
         it.commandLine(
-                "${platform.configurables.absoluteLlvmHome}/bin/llvm-ar",
-                "-rc",
-                output,
-                *fileTree(objDir).files.toTypedArray()
+            "${platform.configurables.absoluteLlvmHome}/bin/llvm-ar",
+            "-rc",
+            output,
+            *fileTree(objDir).files.toTypedArray()
         )
     }
 }

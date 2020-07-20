@@ -24,7 +24,7 @@ interface KonanArtifactSpec {
     fun artifactName(name: String)
 }
 
-interface KonanArtifactWithLibrariesSpec: KonanArtifactSpec {
+interface KonanArtifactWithLibrariesSpec : KonanArtifactSpec {
     fun libraries(closure: Closure<Unit>)
     fun libraries(action: Action<KonanLibrariesSpec>)
     fun libraries(configure: KonanLibrariesSpec.() -> Unit)
@@ -34,14 +34,14 @@ interface KonanArtifactWithLibrariesSpec: KonanArtifactSpec {
     fun dependencies(closure: Closure<Unit>)
 }
 
-interface KonanBuildingSpec: KonanArtifactWithLibrariesSpec {
+interface KonanBuildingSpec : KonanArtifactWithLibrariesSpec {
     fun dumpParameters(flag: Boolean)
 
     fun extraOpts(vararg values: Any)
     fun extraOpts(values: List<Any>)
 }
 
-interface KonanCompileSpec: KonanBuildingSpec {
+interface KonanCompileSpec : KonanBuildingSpec {
     fun srcDir(dir: Any)
 
     fun srcFiles(vararg files: Any)
@@ -77,7 +77,7 @@ interface KonanCompileSpec: KonanBuildingSpec {
     fun measureTime(flag: Boolean)
 }
 
-interface KonanInteropSpec: KonanBuildingSpec {
+interface KonanInteropSpec : KonanBuildingSpec {
 
     interface IncludeDirectoriesSpec {
         fun allHeaders(vararg includeDirs: Any)

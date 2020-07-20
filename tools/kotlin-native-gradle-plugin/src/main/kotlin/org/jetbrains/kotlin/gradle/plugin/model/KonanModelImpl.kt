@@ -22,11 +22,9 @@ import org.jetbrains.kotlin.gradle.plugin.konan.konanArtifactsContainer
 import org.jetbrains.kotlin.gradle.plugin.konan.konanExtension
 import org.jetbrains.kotlin.gradle.plugin.konan.konanHome
 import org.jetbrains.kotlin.gradle.plugin.konan.konanVersion
-import org.jetbrains.kotlin.konan.CURRENT
 import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import java.io.File
-
 
 object KonanToolingModelBuilder : ToolingModelBuilder {
 
@@ -47,9 +45,8 @@ object KonanToolingModelBuilder : ToolingModelBuilder {
     private val Project.hasKonanPlugin: Boolean
         get() = with(pluginManager) {
             hasPlugin("konan") ||
-            hasPlugin("org.jetbrains.kotlin.konan")
+                hasPlugin("org.jetbrains.kotlin.konan")
         }
-
 
     override fun buildAll(modelName: String, project: Project): KonanModel =
         when {
@@ -67,13 +64,13 @@ internal data class KonanModelImpl(
 ) : KonanModel
 
 internal data class KonanModelArtifactImpl(
-        override val name: String,
-        override val file: File,
-        override val type: CompilerOutputKind,
-        override val targetPlatform: String,
-        override val buildTaskName: String,
-        override val srcDirs: List<File>,
-        override val srcFiles: List<File>,
-        override val libraries: List<File>,
-        override val searchPaths: List<File>
+    override val name: String,
+    override val file: File,
+    override val type: CompilerOutputKind,
+    override val targetPlatform: String,
+    override val buildTaskName: String,
+    override val srcDirs: List<File>,
+    override val srcFiles: List<File>,
+    override val libraries: List<File>,
+    override val searchPaths: List<File>
 ) : KonanModelArtifact

@@ -5,8 +5,6 @@
 
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
 import kotlin.test.*
 
 class ArgumentsTests {
@@ -27,8 +25,12 @@ class ArgumentsTests {
         val argParser = ArgParser("testParser")
         val output by argParser.argument(ArgType.String, "output", "Output file")
         val inputs by argParser.argument(ArgType.String, description = "Input files").vararg()
-        argParser.parse(arrayOf("out.txt", "input1.txt", "input2.txt", "input3.txt",
-                "input4.txt"))
+        argParser.parse(
+            arrayOf(
+                "out.txt", "input1.txt", "input2.txt", "input3.txt",
+                "input4.txt"
+            )
+        )
         assertEquals("out.txt", output)
         assertEquals(4, inputs.size)
     }

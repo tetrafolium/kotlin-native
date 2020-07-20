@@ -42,7 +42,8 @@ open class ToolingModelTests {
     @Test
     fun `The model should be serialized without exceptions`() {
         val project = KonanProject.createEmpty(projectDirectory).apply {
-            buildFile.appendText("""
+            buildFile.appendText(
+                """
                 konanArtifacts {
                     library('foo') {
                         srcDir 'src/foo/kotlin'
@@ -77,7 +78,8 @@ open class ToolingModelTests {
                         }
                     }
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
 
             generateSrcFile("main.kt")
             generateSrcFile(Paths.get("src", "foo", "kotlin"), "foo.kt", "fun foo() = 1")
@@ -99,7 +101,8 @@ open class ToolingModelTests {
             generateSrcFile(listOf("src", "baz"), "baz.kt", "fun baz() = 0")
             generateSrcFile("main.kt")
             createSubDir("custom_repo")
-            buildFile.appendText("""
+            buildFile.appendText(
+                """
                 konanArtifacts {
                     library('foo') {
                         srcDir 'src/foo1'
@@ -205,7 +208,8 @@ open class ToolingModelTests {
                         }
                     }
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
         }
         project.createRunner().withArguments("testModelData").build()
     }
@@ -214,7 +218,8 @@ open class ToolingModelTests {
     fun `The model should support maven libraries`() {
         val repoDir = projectDirectory.resolve("repo").absolutePath.escapeBackSlashes()
         val dependency = KonanProject.createEmpty(projectDirectory).apply {
-            buildFile.appendText("""
+            buildFile.appendText(
+                """
                 group 'test'
                 version '1.0'
 
@@ -231,7 +236,8 @@ open class ToolingModelTests {
                         }
                     }
                 }
-            """.trimIndent())
+                """.trimIndent()
+            )
             generateSrcFile("main.kt")
         }
         dependency.createRunner().withArguments("build", "publish").build()
@@ -239,7 +245,6 @@ open class ToolingModelTests {
         val dependentDir = projectDirectory.resolve("dependent").apply {
             mkdirs()
         }
-
 
         val dependent = ProjectBuilder.builder().withProjectDir(dependentDir).build() as ProjectInternal
 
@@ -260,5 +265,4 @@ open class ToolingModelTests {
         val library = libraries[0].name
         assertEquals("foo.klib", library, "Incorrect library name.")
     }
-
 }

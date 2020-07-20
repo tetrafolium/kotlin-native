@@ -19,7 +19,7 @@ package org.jetbrains.ring
 val OBJ = Any()
 
 open class ParameterNotNullAssertionBenchmark {
-    
+
     fun methodWithOneNotnullParameter(p: Any): Any {
         return p
     }
@@ -44,34 +44,33 @@ open class ParameterNotNullAssertionBenchmark {
         return p
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeOneArgWithNullCheck(): Any {
         return methodWithOneNotnullParameter(OBJ)
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeOneArgWithoutNullCheck(): Any {
         return privateMethodWithOneNotnullParameter(OBJ)
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeTwoArgsWithNullCheck(): Any {
         return methodWithTwoNotnullParameters(OBJ, OBJ)
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeTwoArgsWithoutNullCheck(): Any {
         return privateMethodWithTwoNotnullParameters(OBJ, OBJ)
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeEightArgsWithNullCheck(): Any {
         return methodWithEightNotnullParameters(OBJ, OBJ, OBJ, OBJ, OBJ, OBJ, OBJ, OBJ)
     }
 
-    //Benchmark
+    // Benchmark
     fun invokeEightArgsWithoutNullCheck(): Any {
         return privateMethodWithEightNotnullParameters(OBJ, OBJ, OBJ, OBJ, OBJ, OBJ, OBJ, OBJ)
     }
 }
-

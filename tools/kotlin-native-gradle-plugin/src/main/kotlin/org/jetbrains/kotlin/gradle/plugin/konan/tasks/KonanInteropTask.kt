@@ -21,7 +21,6 @@ import org.gradle.api.Action
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import org.gradle.util.ConfigureUtil
-import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 import org.gradle.workers.WorkerExecutor
@@ -29,8 +28,6 @@ import org.jetbrains.kotlin.gradle.plugin.konan.*
 import org.jetbrains.kotlin.gradle.plugin.konan.KonanInteropSpec.IncludeDirectoriesSpec
 import org.jetbrains.kotlin.gradle.plugin.model.KonanModelArtifact
 import org.jetbrains.kotlin.gradle.plugin.model.KonanModelArtifactImpl
-import org.jetbrains.kotlin.konan.CURRENT
-import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.library.defaultResolver
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.Distribution
@@ -69,12 +66,12 @@ open class KonanInteropTask @Inject constructor(@Internal val workerExecutor: Wo
 
     @Optional @Input var packageName: String? = null
 
-    @Input val compilerOpts   = mutableListOf<String>()
-    @Input val linkerOpts     = mutableListOf<String>()
+    @Input val compilerOpts = mutableListOf<String>()
+    @Input val linkerOpts = mutableListOf<String>()
 
     @Nested val includeDirs = IncludeDirectoriesSpecImpl()
 
-    @InputFiles val headers   = mutableSetOf<FileCollection>()
+    @InputFiles val headers = mutableSetOf<FileCollection>()
     @InputFiles val linkFiles = mutableSetOf<FileCollection>()
 
     fun buildArgs() = mutableListOf<String>().apply {
@@ -115,7 +112,7 @@ open class KonanInteropTask @Inject constructor(@Internal val workerExecutor: Wo
 
     // region DSL.
 
-    inner class IncludeDirectoriesSpecImpl: IncludeDirectoriesSpec {
+    inner class IncludeDirectoriesSpecImpl : IncludeDirectoriesSpec {
         @Input val allHeadersDirs = mutableSetOf<File>()
         @Input val headerFilterDirs = mutableSetOf<File>()
 
@@ -180,20 +177,20 @@ open class KonanInteropTask @Inject constructor(@Internal val workerExecutor: Wo
         )
 
         return KonanModelArtifactImpl(
-                artifactName,
-                artifact,
-                CompilerOutputKind.LIBRARY,
-                konanTarget.name,
-                name,
-                listOfNotNull(defFile.parentFile),
-                listOf(defFile),
-                libraries.asFiles(resolver),
-                repos.toList()
+            artifactName,
+            artifact,
+            CompilerOutputKind.LIBRARY,
+            konanTarget.name,
+            name,
+            listOfNotNull(defFile.parentFile),
+            listOf(defFile),
+            libraries.asFiles(resolver),
+            repos.toList()
         )
     }
     // endregion
 
-    internal interface RunToolParameters: WorkParameters {
+    internal interface RunToolParameters : WorkParameters {
         var taskName: String
         var args: List<String>
     }

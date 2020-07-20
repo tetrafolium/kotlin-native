@@ -1,6 +1,5 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-import org.jetbrains.kotlin.RunKotlinNativeTask
 import org.jetbrains.kotlin.BenchmarkRepeatingType
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 /*
  * Copyright 2010-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license

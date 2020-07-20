@@ -7,7 +7,7 @@ import org.gradle.api.tasks.Copy
 /**
  * A task that copies samples and replaces direct repository URLs with ones provided by the cache-redirector service.
  */
-open class CopySamples: Copy() {
+open class CopySamples : Copy() {
 
     var samplesDir = project.file("samples")
 

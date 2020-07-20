@@ -16,9 +16,9 @@
 
 package org.jetbrains.ring
 
-import kotlin.native.concurrent.FreezableAtomicReference as KAtomicRef
-import kotlin.native.concurrent.isFrozen
 import kotlin.native.concurrent.freeze
+import kotlin.native.concurrent.isFrozen
+import kotlin.native.concurrent.FreezableAtomicReference as KAtomicRef
 
 public actual class AtomicRef<T> constructor(@PublishedApi internal val a: KAtomicRef<T>) {
     public actual inline var value: T

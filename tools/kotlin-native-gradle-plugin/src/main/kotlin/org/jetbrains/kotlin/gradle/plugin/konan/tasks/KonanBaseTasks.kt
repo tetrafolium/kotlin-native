@@ -46,7 +46,7 @@ internal val Project.simpleOsName
     get() = HostManager.simpleOsName()
 
 /** A task with a KonanTarget specified. */
-abstract class KonanTargetableTask: DefaultTask() {
+abstract class KonanTargetableTask : DefaultTask() {
 
     @get:Input
     val konanTargetName: String
@@ -67,7 +67,7 @@ abstract class KonanTargetableTask: DefaultTask() {
 }
 
 /** A task building an artifact. */
-abstract class KonanArtifactTask: KonanTargetableTask(), KonanArtifactSpec {
+abstract class KonanArtifactTask : KonanTargetableTask(), KonanArtifactSpec {
 
     open val artifact: File
         @OutputFile get() = destinationDir.resolve(artifactFullName)
@@ -96,7 +96,7 @@ abstract class KonanArtifactTask: KonanTargetableTask(), KonanArtifactSpec {
         configuration = project.configurations.maybeCreate("artifact$artifactName")
         platformConfiguration = project.configurations.create("artifact${artifactName}_${target.name}")
         platformConfiguration.extendsFrom(configuration)
-        platformConfiguration.attributes{
+        platformConfiguration.attributes {
             it.attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage::class.java, Usage.NATIVE_LINK))
             it.attribute(CppBinary.LINKAGE_ATTRIBUTE, Linkage.STATIC)
             it.attribute(CppBinary.OPTIMIZED_ATTRIBUTE, false)
@@ -106,37 +106,40 @@ abstract class KonanArtifactTask: KonanTargetableTask(), KonanArtifactSpec {
 
         val artifactNameWithoutSuffix = artifact.name.removeSuffix("$artifactSuffix")
         project.pluginManager.withPlugin("maven-publish") {
-            platformConfiguration.artifacts.add(object: PublishArtifact {
+            platformConfiguration.artifacts.add(object : PublishArtifact {
                 override fun getName(): String = artifactNameWithoutSuffix
                 override fun getExtension() = if (artifactSuffix.startsWith('.')) artifactSuffix.substring(1) else artifactSuffix
                 override fun getType() = artifactSuffix
-                override fun getClassifier():String? = target.name
+                override fun getClassifier(): String? = target.name
                 override fun getFile() = artifact
                 override fun getDate() = Date(artifact.lastModified())
                 override fun getBuildDependencies(): TaskDependency =
-                        DefaultTaskDependency().apply { add(this@KonanArtifactTask) }
+                    DefaultTaskDependency().apply { add(this@KonanArtifactTask) }
             })
             val objectFactory = project.objects
             val linkUsage = objectFactory.named(Usage::class.java, Usage.NATIVE_LINK)
             val konanSoftwareComponent = config.mainVariant
             val variantName = "${artifactNameWithoutSuffix}_${target.name}"
-            val context = DefaultUsageContext(object:UsageContext {
-                override fun getUsage(): Usage = linkUsage
-                override fun getName(): String = "${variantName}Link"
-                override fun getCapabilities(): MutableSet<out Capability> = mutableSetOf()
-                override fun getDependencies(): MutableSet<out ModuleDependency> = mutableSetOf()
-                override fun getDependencyConstraints(): MutableSet<out DependencyConstraint> = mutableSetOf()
-                override fun getArtifacts(): MutableSet<out PublishArtifact> = platformConfiguration.allArtifacts
-                override fun getAttributes(): AttributeContainer = platformConfiguration.attributes
-                override fun getGlobalExcludes(): Set<ExcludeRule> = emptySet()
-            }, platformConfiguration.allArtifacts, platformConfiguration)
+            val context = DefaultUsageContext(
+                object : UsageContext {
+                    override fun getUsage(): Usage = linkUsage
+                    override fun getName(): String = "${variantName}Link"
+                    override fun getCapabilities(): MutableSet<out Capability> = mutableSetOf()
+                    override fun getDependencies(): MutableSet<out ModuleDependency> = mutableSetOf()
+                    override fun getDependencyConstraints(): MutableSet<out DependencyConstraint> = mutableSetOf()
+                    override fun getArtifacts(): MutableSet<out PublishArtifact> = platformConfiguration.allArtifacts
+                    override fun getAttributes(): AttributeContainer = platformConfiguration.attributes
+                    override fun getGlobalExcludes(): Set<ExcludeRule> = emptySet()
+                },
+                platformConfiguration.allArtifacts, platformConfiguration
+            )
             konanSoftwareComponent.addVariant(
                 compatibleVariantIdentity(
                     project,
                     variantName,
-                    project.provider{ artifactName },
-                    project.provider{ project.group.toString() },
-                    project.provider{ project.version.toString() },
+                    project.provider { artifactName },
+                    project.provider { project.group.toString() },
+                    project.provider { project.version.toString() },
                     false,
                     false,
                     target,
@@ -163,7 +166,7 @@ abstract class KonanArtifactTask: KonanTargetableTask(), KonanArtifactSpec {
 }
 
 /** Task building an artifact with libraries */
-abstract class KonanArtifactWithLibrariesTask: KonanArtifactTask(), KonanArtifactWithLibrariesSpec {
+abstract class KonanArtifactWithLibrariesTask : KonanArtifactTask(), KonanArtifactWithLibrariesSpec {
     @Nested
     val libraries = KonanLibrariesSpec(this, project)
 

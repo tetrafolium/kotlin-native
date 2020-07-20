@@ -5,14 +5,14 @@
 
 package org.jetbrains.complexNumbers
 import kotlinx.cinterop.*
+import platform.Foundation.*
+import platform.darwin.*
 import platform.posix.*
-import kotlin.math.sqrt
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlin.random.Random
-import platform.Foundation.*
-import platform.darwin.*
 
 actual typealias ComplexNumber = Complex
 
@@ -38,19 +38,18 @@ actual class ComplexNumbersBenchmark actual constructor() {
     }
 
     actual fun classInheritance() {
-         class InvertedNumber(val value: Double) : CustomNumberProtocol, NSObject() {
-            override fun add(other: CustomNumberProtocol) : CustomNumberProtocol =
-                    if (other is InvertedNumber)
-                        InvertedNumber(-value + sqrt(other.value))
-                    else
-                        error("Expected object of InvertedNumber class")
+        class InvertedNumber(val value: Double) : CustomNumberProtocol, NSObject() {
+            override fun add(other: CustomNumberProtocol): CustomNumberProtocol =
+                if (other is InvertedNumber)
+                    InvertedNumber(-value + sqrt(other.value))
+                else
+                    error("Expected object of InvertedNumber class")
 
-
-            override fun sub(other: CustomNumberProtocol) : CustomNumberProtocol =
-                    if (other is InvertedNumber)
-                        InvertedNumber(-value - sqrt(other.value))
-                    else
-                        error("Expected object of InvertedNumber class")
+            override fun sub(other: CustomNumberProtocol): CustomNumberProtocol =
+                if (other is InvertedNumber)
+                    InvertedNumber(-value - sqrt(other.value))
+                else
+                    error("Expected object of InvertedNumber class")
         }
 
         val result = InvertedNumber(0.0)
@@ -88,7 +87,7 @@ actual class ComplexNumbersBenchmark actual constructor() {
         return result
     }
 
-    inline private fun fftRoutine(invert:Boolean = false): Array<Complex> {
+    private inline fun fftRoutine(invert: Boolean = false): Array<Complex> {
         var lg = 0
         while ((1 shl lg) < complexNumbersSequence.size) {
             lg++
@@ -107,11 +106,11 @@ actual class ComplexNumbersBenchmark actual constructor() {
             val base = Complex(cos(angle), sin(angle))
             for (i in 0 until complexNumbersSequence.size / 2 step length) {
                 var value = Complex(1.0, 1.0)
-                for (j in 0 until length/2) {
+                for (j in 0 until length / 2) {
                     val first = sequence[i + j]
-                    val second = sequence[i + j + length/2].mul(value)
+                    val second = sequence[i + j + length / 2].mul(value)
                     sequence[i + j] = first.add(second) as Complex
-                    sequence[i + j + length/2] = first.sub(second) as Complex
+                    sequence[i + j + length / 2] = first.sub(second) as Complex
                     value = value.mul(base)
                 }
             }

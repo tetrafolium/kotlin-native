@@ -55,7 +55,7 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
 
         override fun convert(value: kotlin.String, name: kotlin.String): kotlin.Int =
             value.toIntOrNull()
-                    ?: throw ParsingException("Option $name is expected to be integer number. $value is provided.")
+                ?: throw ParsingException("Option $name is expected to be integer number. $value is provided.")
     }
 
     /**
@@ -67,7 +67,7 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
 
         override fun convert(value: kotlin.String, name: kotlin.String): kotlin.Double =
             value.toDoubleOrNull()
-                    ?: throw ParsingException("Option $name is expected to be double number. $value is provided.")
+                ?: throw ParsingException("Option $name is expected to be double number. $value is provided.")
     }
 
     /**

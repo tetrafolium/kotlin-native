@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.renders
 
 import org.jetbrains.analyzer.*
 import org.jetbrains.report.BenchmarkResult
 
 // Report render to text format.
-class TeamCityStatisticsRender: Render() {
+class TeamCityStatisticsRender : Render() {
     override val name: String
         get() = "teamcity"
 
@@ -47,11 +46,13 @@ class TeamCityStatisticsRender: Render() {
     }
 
     private fun renderSummaryBecnhmarkValue(benchmark: BenchmarkResult, metric: String) =
-            content.append("##teamcity[testMetadata testName='${benchmark.name}' name='$metric'" +
-                    " type='number' value='${benchmark.score}']\n")
+        content.append(
+            "##teamcity[testMetadata testName='${benchmark.name}' name='$metric'" +
+                " type='number' value='${benchmark.score}']\n"
+        )
 
     // Produce benchmark as test in TeamCity
-    private fun renderBenchmark(benchmark: BenchmarkResult , duration: Double) {
+    private fun renderBenchmark(benchmark: BenchmarkResult, duration: Double) {
         content.append("##teamcity[testStarted name='${benchmark.name}']\n")
         if (benchmark.status == BenchmarkResult.Status.FAILED) {
             content.append("##teamcity[testFailed name='${benchmark.name}']\n")

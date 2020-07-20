@@ -25,17 +25,15 @@ import org.gradle.api.tasks.Internal
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanArtifactWithLibrariesTask
 import org.jetbrains.kotlin.gradle.plugin.tasks.KonanBuildingTask
 import org.jetbrains.kotlin.konan.*
-import org.jetbrains.kotlin.konan.CompilerVersion
 import org.jetbrains.kotlin.konan.library.defaultResolver
-import org.jetbrains.kotlin.konan.library.impl.KonanLibraryImpl
 import org.jetbrains.kotlin.konan.target.Distribution
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.library.SearchPathResolver
 import java.io.File
 
 open class KonanLibrariesSpec(
-        @Internal val task: KonanArtifactWithLibrariesTask,
-        @Internal val project: Project
+    @Internal val task: KonanArtifactWithLibrariesTask,
+    @Internal val project: Project
 ) {
 
     @InputFiles val files = mutableSetOf<FileCollection>()
@@ -72,13 +70,13 @@ open class KonanLibrariesSpec(
     // DSL Methods
 
     /** Absolute path */
-    fun file(file: Any)                   = files.add(project.files(file))
-    fun files(vararg files: Any)          = this.files.addAll(files.map { project.files(it) })
+    fun file(file: Any) = files.add(project.files(file))
+    fun files(vararg files: Any) = this.files.addAll(files.map { project.files(it) })
     fun files(collection: FileCollection) = this.files.add(collection)
 
     /** The compiler with search the library in repos */
-    fun klib(lib: String)             = namedKlibs.add(lib)
-    fun klibs(vararg libs: String)    = namedKlibs.addAll(libs)
+    fun klib(lib: String) = namedKlibs.add(lib)
+    fun klibs(vararg libs: String) = namedKlibs.addAll(libs)
     fun klibs(libs: Iterable<String>) = namedKlibs.addAll(libs)
 
     private fun klibInternal(lib: KonanBuildingConfig<*>, friend: Boolean) {
@@ -86,12 +84,14 @@ open class KonanLibrariesSpec(
             throw InvalidUserDataException("Config ${lib.name} is not a library")
         }
 
-        val libraryTask = lib[target] ?:
-            throw InvalidUserDataException("Library ${lib.name} has no target ${target.visibleName}")
+        val libraryTask = lib[target]
+            ?: throw InvalidUserDataException("Library ${lib.name} has no target ${target.visibleName}")
 
         if (libraryTask == task) {
-            throw InvalidUserDataException("Attempt to use a library as its own dependency: " +
-                    "${task.name} (in project: ${project.path})")
+            throw InvalidUserDataException(
+                "Attempt to use a library as its own dependency: " +
+                    "${task.name} (in project: ${project.path})"
+            )
         }
         artifacts.add(libraryTask)
         task.dependsOn(libraryTask)
@@ -120,8 +120,10 @@ open class KonanLibrariesSpec(
     /** Direct link to a config */
     fun artifact(artifact: KonanInteropLibrary) = klib(artifact)
 
-    private fun allArtifactsFromInternal(libraryProjects: Array<out Project>,
-                                         filter: (KonanBuildingConfig<*>) -> Boolean) {
+    private fun allArtifactsFromInternal(
+        libraryProjects: Array<out Project>,
+        filter: (KonanBuildingConfig<*>) -> Boolean
+    ) {
         libraryProjects.forEach { prj ->
             project.evaluationDependsOn(prj)
             prj.konanArtifactsContainer.filter(filter).forEach {

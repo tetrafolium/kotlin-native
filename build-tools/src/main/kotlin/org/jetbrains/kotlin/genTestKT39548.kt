@@ -9,7 +9,8 @@ fun genTestKT39548(file: File) {
         }
     }
 
-    val text = """
+    val text =
+        """
             import kotlin.test.*
 
             fun $longName(): Int = 42

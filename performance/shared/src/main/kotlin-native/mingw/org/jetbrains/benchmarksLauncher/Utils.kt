@@ -16,19 +16,19 @@
 
 package org.jetbrains.benchmarksLauncher
 
+import kotlinx.cinterop.*
 import platform.posix.*
 import platform.windows.*
-import kotlinx.cinterop.*
 
 actual fun currentTime() =
-        memScoped {
-            val timeVal = alloc<timeval>()
-            mingw_gettimeofday(timeVal.ptr, null)
-            val sec = alloc<LongVar>()
-            sec.value = timeVal.tv_sec.convert()
-            val nowtm = localtime(sec.ptr)
-            var timeBuffer = ByteArray(1024)
-            strftime(timeBuffer.refTo(0), timeBuffer.size.toULong(), "%H:%M:%S", nowtm)
+    memScoped {
+        val timeVal = alloc<timeval>()
+        mingw_gettimeofday(timeVal.ptr, null)
+        val sec = alloc<LongVar>()
+        sec.value = timeVal.tv_sec.convert()
+        val nowtm = localtime(sec.ptr)
+        var timeBuffer = ByteArray(1024)
+        strftime(timeBuffer.refTo(0), timeBuffer.size.toULong(), "%H:%M:%S", nowtm)
 
-            timeBuffer.toKString()
-        }
+        timeBuffer.toKString()
+    }

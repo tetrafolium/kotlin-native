@@ -24,13 +24,14 @@ import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
-
 import java.io.File
 import javax.inject.Inject
 
-open class CompileToBitcode @Inject constructor(@InputDirectory val srcRoot: File,
-                                                val folderName: String,
-                                                val target: String) : DefaultTask() {
+open class CompileToBitcode @Inject constructor(
+    @InputDirectory val srcRoot: File,
+    val folderName: String,
+    val target: String
+) : DefaultTask() {
     enum class Language {
         C, CPP
     }
@@ -63,11 +64,15 @@ open class CompileToBitcode @Inject constructor(@InputDirectory val srcRoot: Fil
             val languageFlags = when (language) {
                 Language.C ->
                     // Used flags provided by original build of allocator C code.
-                    listOf("-std=gnu11", "-O3", "-Wall", "-Wextra", "-Wno-unknown-pragmas",
-                            "-Werror", "-ftls-model=initial-exec", "-Wno-unused-function")
+                    listOf(
+                        "-std=gnu11", "-O3", "-Wall", "-Wextra", "-Wno-unknown-pragmas",
+                        "-Werror", "-ftls-model=initial-exec", "-Wno-unused-function"
+                    )
                 Language.CPP ->
-                    listOfNotNull("-std=c++14", "-Werror", "-O2",
-                            "-fPIC".takeIf { !HostManager().targetByName(target).isMINGW })
+                    listOfNotNull(
+                        "-std=c++14", "-Werror", "-O2",
+                        "-fPIC".takeIf { !HostManager().targetByName(target).isMINGW }
+                    )
             }
             return commonFlags + languageFlags + compilerArgs
         }
@@ -86,7 +91,7 @@ open class CompileToBitcode @Inject constructor(@InputDirectory val srcRoot: Fil
         }
 
     @OutputFile
-    val outFile = File(targetDir, "${folderName}.bc")
+    val outFile = File(targetDir, "$folderName.bc")
 
     @TaskAction
     fun compile() {
@@ -94,20 +99,23 @@ open class CompileToBitcode @Inject constructor(@InputDirectory val srcRoot: Fil
         objDir.mkdirs()
         val plugin = project.convention.getPlugin(ExecClang::class.java)
 
-        plugin.execKonanClang(target, Action {
-            it.workingDir = objDir
-            it.executable = executable
-            it.args = compilerFlags + inputFiles.map { it.absolutePath }
-        })
+        plugin.execKonanClang(
+            target,
+            Action {
+                it.workingDir = objDir
+                it.executable = executable
+                it.args = compilerFlags + inputFiles.map { it.absolutePath }
+            }
+        )
 
         if (!skipLinkagePhase) {
             project.exec {
                 val llvmDir = project.findProperty("llvmDir")
                 it.executable = "$llvmDir/bin/llvm-link"
                 it.args = listOf("-o", outFile.absolutePath) + linkerArgs +
-                        project.fileTree(objDir) {
-                            it.include("**/*.bc")
-                        }.files.map { it.absolutePath }
+                    project.fileTree(objDir) {
+                        it.include("**/*.bc")
+                    }.files.map { it.absolutePath }
             }
         }
     }

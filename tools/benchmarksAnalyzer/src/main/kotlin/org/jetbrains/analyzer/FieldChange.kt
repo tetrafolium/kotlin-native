@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.analyzer
 
 // Report with changes of different fields.

@@ -6,28 +6,28 @@
 package org.jetbrains.kotlin.cli.klib
 
 // TODO: Extract `library` package as a shared jar?
+import org.jetbrains.kotlin.backend.common.serialization.metadata.DynamicTypeDeserializer
+import org.jetbrains.kotlin.builtins.konan.KonanBuiltIns
 import org.jetbrains.kotlin.config.ApiVersion
 import org.jetbrains.kotlin.config.LanguageVersion
 import org.jetbrains.kotlin.config.LanguageVersionSettingsImpl
+import org.jetbrains.kotlin.descriptors.deserialization.PlatformDependentTypeTransformer
 import org.jetbrains.kotlin.descriptors.impl.ModuleDescriptorImpl
+import org.jetbrains.kotlin.descriptors.konan.isNativeStdlib
 import org.jetbrains.kotlin.konan.file.File
-import org.jetbrains.kotlin.library.KLIB_FILE_EXTENSION_WITH_DOT
+import org.jetbrains.kotlin.konan.library.KonanLibrary
+import org.jetbrains.kotlin.konan.library.resolverByName
 import org.jetbrains.kotlin.konan.target.Distribution
 import org.jetbrains.kotlin.konan.target.PlatformManager
 import org.jetbrains.kotlin.konan.util.DependencyProcessor
-import org.jetbrains.kotlin.library.unpackZippedKonanLibraryTo
 import org.jetbrains.kotlin.konan.util.KlibMetadataFactories
-import org.jetbrains.kotlin.backend.common.serialization.metadata.DynamicTypeDeserializer
-import org.jetbrains.kotlin.descriptors.konan.isNativeStdlib
-import org.jetbrains.kotlin.builtins.konan.KonanBuiltIns
-import org.jetbrains.kotlin.descriptors.deserialization.PlatformDependentTypeTransformer
-import org.jetbrains.kotlin.util.Logger
-import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf
-import org.jetbrains.kotlin.konan.library.KonanLibrary
-import org.jetbrains.kotlin.konan.library.resolverByName
 import org.jetbrains.kotlin.konan.util.KonanHomeProvider
+import org.jetbrains.kotlin.library.KLIB_FILE_EXTENSION_WITH_DOT
+import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf
 import org.jetbrains.kotlin.library.metadata.parseModuleHeader
+import org.jetbrains.kotlin.library.unpackZippedKonanLibraryTo
 import org.jetbrains.kotlin.storage.LockBasedStorageManager
+import org.jetbrains.kotlin.util.Logger
 import java.lang.System.out
 import kotlin.system.exitProcess
 
@@ -61,8 +61,7 @@ private fun parseArgs(args: Array<String>): Map<String, List<String>> {
     return commandLine
 }
 
-
-class Command(args: Array<String>){
+class Command(args: Array<String>) {
     init {
         if (args.size < 2) {
             printUsage()
@@ -100,7 +99,6 @@ open class ModuleDeserializer(val library: ByteArray) {
 
     val packageFragmentNameList: List<String>
         get() = moduleHeader.packageFragmentNameList
-
 }
 
 class Library(val name: String, val requestedRepository: String?, val target: String) {
@@ -119,7 +117,7 @@ class Library(val name: String, val requestedRepository: String?, val target: St
         println("Resolved to: ${library.libraryName.File().absolutePath}")
         println("Module name: $moduleName")
         println("ABI version: $headerAbiVersion")
-        println("Compiler version: ${headerCompilerVersion}")
+        println("Compiler version: $headerCompilerVersion")
         println("Library version: $headerLibraryVersion")
         println("Metadata version: $headerMetadataVersion")
         println("IR version: $headerIrVersion")
@@ -151,11 +149,9 @@ class Library(val name: String, val requestedRepository: String?, val target: St
             val library = libraryInRepo(repository, name)
             if (blind) warn("Removing The previously installed $name from $repository.")
             library
-
         } catch (e: Throwable) {
             if (!blind) println(e.message)
             null
-
         }
         library?.libraryFile?.deleteRecursively()
     }
@@ -170,15 +166,17 @@ class Library(val name: String, val requestedRepository: String?, val target: St
         val defaultModules = mutableListOf<ModuleDescriptorImpl>()
         if (!module.isNativeStdlib()) {
             val resolver = resolverByName(
-                    emptyList(),
-                    distributionKlib = Distribution(KonanHomeProvider.determineKonanHome()).klib,
-                    skipCurrentDir = true,
-                    logger = KlibToolLogger)
+                emptyList(),
+                distributionKlib = Distribution(KonanHomeProvider.determineKonanHome()).klib,
+                skipCurrentDir = true,
+                logger = KlibToolLogger
+            )
             resolver.defaultLinks(false, true, true)
-                    .mapTo(defaultModules) {
-                        KlibFactories.DefaultDeserializedDescriptorFactory.createDescriptor(
-                                it, versionSpec, storageManager, module.builtIns, null)
-                    }
+                .mapTo(defaultModules) {
+                    KlibFactories.DefaultDeserializedDescriptorFactory.createDescriptor(
+                        it, versionSpec, storageManager, module.builtIns, null
+                    )
+                }
         }
 
         (defaultModules + module).let { allModules ->
@@ -193,18 +191,18 @@ val currentLanguageVersion = LanguageVersion.LATEST_STABLE
 val currentApiVersion = ApiVersion.LATEST_STABLE
 
 fun libraryInRepo(repository: File, name: String) =
-        resolverByName(listOf(repository.absolutePath), skipCurrentDir = true, logger = KlibToolLogger).resolve(name)
+    resolverByName(listOf(repository.absolutePath), skipCurrentDir = true, logger = KlibToolLogger).resolve(name)
 
 fun libraryInCurrentDir(name: String) = resolverByName(emptyList(), logger = KlibToolLogger).resolve(name)
 
 fun libraryInRepoOrCurrentDir(repository: File, name: String) =
-        resolverByName(listOf(repository.absolutePath), logger = KlibToolLogger).resolve(name)
+    resolverByName(listOf(repository.absolutePath), logger = KlibToolLogger).resolve(name)
 
 fun main(args: Array<String>) {
     val command = Command(args)
 
     val targetManager = PlatformManager(KonanHomeProvider.determineKonanHome())
-            .targetManager(command.options["-target"]?.last())
+        .targetManager(command.options["-target"]?.last())
     val target = targetManager.targetName
 
     val repository = command.options["-repository"]?.last()
@@ -212,11 +210,10 @@ fun main(args: Array<String>) {
     val library = Library(command.library, repository, target)
 
     when (command.verb) {
-        "contents"  -> library.contents()
-        "info"      -> library.info()
-        "install"   -> library.install()
-        "remove"    -> library.remove()
-        else        -> error("Unknown command ${command.verb}.")
+        "contents" -> library.contents()
+        "info" -> library.info()
+        "install" -> library.install()
+        "remove" -> library.remove()
+        else -> error("Unknown command ${command.verb}.")
     }
 }
-

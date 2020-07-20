@@ -6,11 +6,11 @@
 package org.jetbrains.kotlin.cli.klib.test
 
 import com.intellij.openapi.util.text.StringUtil
-import kotlin.test.*
 import org.jetbrains.kotlin.cli.klib.*
 import org.jetbrains.kotlin.konan.target.Distribution
 import org.jetbrains.kotlin.konan.target.HostManager
 import java.nio.file.Paths
+import kotlin.test.*
 
 class ContentsTest {
 
@@ -24,9 +24,9 @@ class ContentsTest {
             println(output.trim().toString())
         }
         assertEquals(
-                StringUtil.convertLineSeparators(expected()),
-                StringUtil.convertLineSeparators(output.trim().toString()),
-                "klib contents test failed for library: $library"
+            StringUtil.convertLineSeparators(expected()),
+            StringUtil.convertLineSeparators(output.trim().toString()),
+            "klib contents test failed for library: $library"
         )
     }
 

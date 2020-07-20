@@ -35,17 +35,17 @@ open class KonanGenerateCMakeTask : DefaultTask() {
         val libraries = project.konanArtifactsContainer.toList().filterIsInstance<KonanLibrary>()
         val programs = project.konanArtifactsContainer.toList().filterIsInstance<KonanProgram>()
         val cMakeLists = generateCMakeLists(
-                project.name,
-                interops,
-                libraries,
-                programs
+            project.name,
+            interops,
+            libraries,
+            programs
         )
         File(project.projectDir, "CMakeLists.txt")
-                .writeText(cMakeLists)
+            .writeText(cMakeLists)
 
         // This directory is filled out by the IDE
         File(project.projectDir, "KotlinCMakeModule")
-                .mkdir()
+            .mkdir()
     }
 
     private val host = HostManager.host
@@ -59,43 +59,47 @@ open class KonanGenerateCMakeTask : DefaultTask() {
         val cMakeCurrentListDir = "$" + "{CMAKE_CURRENT_LIST_DIR}"
 
         return buildString {
-            appendln("""
+            appendln(
+                """
                 cmake_minimum_required(VERSION 3.8)
 
                 set(CMAKE_MODULE_PATH $cMakeCurrentListDir/KotlinCMakeModule)
 
                 project($projectName Kotlin)
-            """.trimIndent())
+                """.trimIndent()
+            )
             appendln()
 
             for (interop in interops) {
                 val task = interop[host] ?: continue
                 appendln(
-                        Call("cinterop")
-                                .arg("NAME", interop.name)
-                                .arg("DEF_FILE", task.defFile.relativePath.toString().crossPlatformPath)
-                                .arg("COMPILER_OPTS", task.cMakeCompilerOpts)
+                    Call("cinterop")
+                        .arg("NAME", interop.name)
+                        .arg("DEF_FILE", task.defFile.relativePath.toString().crossPlatformPath)
+                        .arg("COMPILER_OPTS", task.cMakeCompilerOpts)
                 )
             }
 
             for (library in libraries) {
                 val task = library[host] ?: continue
                 appendln(
-                        Call("konanc_library")
-                                .arg("NAME", library.name)
-                                .arg("SOURCES", task.cMakeSources)
-                                .arg("LIBRARIES", task.cMakeLibraries)
-                                .arg("LINKER_OPTS", task.cMakeLinkerOpts))
+                    Call("konanc_library")
+                        .arg("NAME", library.name)
+                        .arg("SOURCES", task.cMakeSources)
+                        .arg("LIBRARIES", task.cMakeLibraries)
+                        .arg("LINKER_OPTS", task.cMakeLinkerOpts)
+                )
             }
 
             for (program in programs) {
                 val task = program[host] ?: continue
                 appendln(
-                        Call("konanc_executable")
-                                .arg("NAME", program.name)
-                                .arg("SOURCES", task.cMakeSources)
-                                .arg("LIBRARIES", task.cMakeLibraries)
-                                .arg("LINKER_OPTS", task.cMakeLinkerOpts))
+                    Call("konanc_executable")
+                        .arg("NAME", program.name)
+                        .arg("SOURCES", task.cMakeSources)
+                        .arg("LIBRARIES", task.cMakeLibraries)
+                        .arg("LINKER_OPTS", task.cMakeLinkerOpts)
+                )
             }
         }
     }
@@ -110,7 +114,7 @@ open class KonanGenerateCMakeTask : DefaultTask() {
 
     private val KonanInteropTask.cMakeCompilerOpts: String
         get() = (compilerOpts + includeDirs.allHeadersDirs.map { "-I${it.absolutePath.crossPlatformPath}" })
-                .joinToString(" ")
+            .joinToString(" ")
 
     private val KonanCompileTask.cMakeSources: String
         get() = allSources.flatMap { it.asCMakeSourceList }.joinToString(" ")
@@ -135,13 +139,13 @@ private class Call(val name: String) {
     }
 
     override fun toString(): String =
-            buildString {
-                append(name)
-                append("(")
-                for ((key, value) in args) {
-                    appendln()
-                    append("    $key $value")
-                }
-                appendln(")")
+        buildString {
+            append(name)
+            append("(")
+            for ((key, value) in args) {
+                appendln()
+                append("    $key $value")
             }
+            appendln(")")
+        }
 }

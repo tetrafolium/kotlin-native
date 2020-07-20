@@ -7,21 +7,21 @@ import org.jetbrains.benchmarksLauncher.*
 
 actual class NumericalLauncher : Launcher() {
     override val benchmarks = BenchmarksCollection(
-            mutableMapOf(
-                    "BellardPi" to BenchmarkEntry(::konanBellardPi),
-                    "BellardPiCinterop" to BenchmarkEntry(::clangBellardPi)
-            )
+        mutableMapOf(
+            "BellardPi" to BenchmarkEntry(::konanBellardPi),
+            "BellardPiCinterop" to BenchmarkEntry(::clangBellardPi)
+        )
     )
 }
 
 fun konanBellardPi() {
-    for (n in 1 .. 1000 step 9) {
+    for (n in 1..1000 step 9) {
         val result = pi_nth_digit(n)
         Blackhole.consume(result)
     }
 }
 
 fun clangBellardPi() {
-    for (n in 1 .. 1000 step 9)
-            cinterop.pi_nth_digit(n)
+    for (n in 1..1000 step 9)
+        cinterop.pi_nth_digit(n)
 }

@@ -11,15 +11,15 @@ import org.jetbrains.kotlin.library.MetadataLibrary
  * Provides access to metadata using default compiler's routine.
  */
 internal class TrivialLibraryProvider(
-        private val library: MetadataLibrary
+    private val library: MetadataLibrary
 ) : KlibModuleMetadata.MetadataLibraryProvider {
 
     override val moduleHeaderData: ByteArray
         get() = library.moduleHeaderData
 
     override fun packageMetadata(fqName: String, partName: String): ByteArray =
-            library.packageMetadata(fqName, partName)
+        library.packageMetadata(fqName, partName)
 
     override fun packageMetadataParts(fqName: String): Set<String> =
-            library.packageMetadataParts(fqName)
+        library.packageMetadataParts(fqName)
 }

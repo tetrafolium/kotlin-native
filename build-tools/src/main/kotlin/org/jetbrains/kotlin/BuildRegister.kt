@@ -8,13 +8,11 @@ package org.jetbrains.kotlin
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-
 import org.jetbrains.report.json.*
-
-import java.io.FileInputStream
-import java.io.OutputStreamWriter
 import java.io.BufferedReader
+import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Properties
@@ -45,7 +43,7 @@ open class BuildRegister : DefaultTask() {
     val buildNumberRegex: Regex = "\\d+(\\.\\d+)+(-M\\d)?-(\\w+)-\\d+".toRegex()
     val performanceServer = "https://kotlin-native-perf-summary.labs.jb.gg"
 
-    private fun sendPostRequest(url: String, body: String) : String {
+    private fun sendPostRequest(url: String, body: String): String {
         val connection = URL(url).openConnection() as HttpURLConnection
         return connection.apply {
             setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -71,35 +69,41 @@ open class BuildRegister : DefaultTask() {
         }
     }
 
-    fun getAdditionalInfo(analyzer: String, reportFile: String, alwaysExists: Boolean, benchmarkName: String,
-                          showedName: String = benchmarkName) :
-            performanceAdditionalResult? {
-        val output = arrayOf(analyzer, "summary", "--compile", "samples",
+    fun getAdditionalInfo(
+        analyzer: String,
+        reportFile: String,
+        alwaysExists: Boolean,
+        benchmarkName: String,
+        showedName: String = benchmarkName
+    ):
+        performanceAdditionalResult? {
+            val output = arrayOf(
+                analyzer, "summary", "--compile", "samples",
                 "--compile-samples", benchmarkName, "--codesize-samples", benchmarkName,
-                "--codesize-normalize", "artifactory:builds/goldenResults.csv", reportFile)
+                "--codesize-normalize", "artifactory:builds/goldenResults.csv", reportFile
+            )
                 .runCommand()
 
-
-        val buildInfoParts = output.split(',')
-        if (buildInfoParts.size != additionalInfoTokens) {
-            val message = "Problems with getting summary information using $analyzer and $reportFile. $output"
-            if (!alwaysExists) {
-                println(message)
-                return null
+            val buildInfoParts = output.split(',')
+            if (buildInfoParts.size != additionalInfoTokens) {
+                val message = "Problems with getting summary information using $analyzer and $reportFile. $output"
+                if (!alwaysExists) {
+                    println(message)
+                    return null
+                }
+                error(message)
             }
-            error(message)
+            val (failures, compileTime, codeSize) = buildInfoParts.map { it.trim() }
+            val codeSizeInfo = "$showedName-$codeSize"
+            val compileTimeInfo = "$showedName-$compileTime"
+            return performanceAdditionalResult(failures, compileTimeInfo, codeSizeInfo)
         }
-        val (failures, compileTime, codeSize) = buildInfoParts.map { it.trim() }
-        val codeSizeInfo = "$showedName-$codeSize"
-        val compileTimeInfo = "$showedName-$compileTime"
-        return performanceAdditionalResult(failures, compileTimeInfo, codeSizeInfo)
-    }
 
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))
@@ -111,16 +115,18 @@ open class BuildRegister : DefaultTask() {
 
         // Get branch.
         val currentBuild = getBuild("id:$buildId", teamCityUser, teamCityPassword)
-        val branch = getBuildProperty(currentBuild,"branchName")
+        val branch = getBuildProperty(currentBuild, "branchName")
 
         val target = System.getProperty("os.name").replace("\\s".toRegex(), "")
 
         // Get summary information.
-        val output = arrayOf("$analyzer", "summary", "--exec-samples", "all", "--compile", "samples",
-                "--compile-samples", "HelloWorld,Videoplayer", "--codesize-samples", "all",
-                "--exec-normalize", "artifactory:builds/goldenResults.csv",
-                "--codesize-normalize", "artifactory:builds/goldenResults.csv", "$currentBenchmarksReportFile")
-                .runCommand()
+        val output = arrayOf(
+            "$analyzer", "summary", "--exec-samples", "all", "--compile", "samples",
+            "--compile-samples", "HelloWorld,Videoplayer", "--codesize-samples", "all",
+            "--exec-normalize", "artifactory:builds/goldenResults.csv",
+            "--codesize-normalize", "artifactory:builds/goldenResults.csv", "$currentBenchmarksReportFile"
+        )
+            .runCommand()
 
         // Postprocess information.
         val buildInfoParts = output.split(',')
@@ -143,17 +149,21 @@ open class BuildRegister : DefaultTask() {
 
         // Collect framework run details.
         if (target == "MacOSX") {
-            val frameworkResults = getAdditionalInfo(analyzer, currentBenchmarksReportFile, true,
-                    "FrameworkBenchmarksAnalyzer")
+            val frameworkResults = getAdditionalInfo(
+                analyzer, currentBenchmarksReportFile, true,
+                "FrameworkBenchmarksAnalyzer"
+            )
             frameworkResults?.let {
                 val (_, frameworkCompileTime, frameworkCodeSize) = it
                 codeSizeInfo += ";$frameworkCodeSize"
                 compileTimeInfo += ";$frameworkCompileTime"
             }
 
-            val spaceResults = getAdditionalInfo(analyzer,
-                    "artifactory:$buildNumber:$target:spaceFrameworkReport.json", false,
-                    "circlet_iosX64", "SpaceFramework_iosX64")
+            val spaceResults = getAdditionalInfo(
+                analyzer,
+                "artifactory:$buildNumber:$target:spaceFrameworkReport.json", false,
+                "circlet_iosX64", "SpaceFramework_iosX64"
+            )
             spaceResults?.let {
                 val (failures, frameworkCompileTime, frameworkCodeSize) = it
                 failuresNumber += failures.toInt()
@@ -163,9 +173,11 @@ open class BuildRegister : DefaultTask() {
         }
 
         if (target == "Linux") {
-            val coroutinesResults = getAdditionalInfo(analyzer,
-                    "artifactory:$buildNumber:$target:externalReport.json", false,
-                    "kotlinx.coroutines")
+            val coroutinesResults = getAdditionalInfo(
+                analyzer,
+                "artifactory:$buildNumber:$target:externalReport.json", false,
+                "kotlinx.coroutines"
+            )
             coroutinesResults?.let {
                 val (failures, libraryCompileTime, libraryCodeSize) = it
                 failuresNumber += failures.toInt()
@@ -196,6 +208,5 @@ open class BuildRegister : DefaultTask() {
         } else {
             println("Skipping registration. Current branch $branch, need registration for $onlyBranch!")
         }
-
     }
 }

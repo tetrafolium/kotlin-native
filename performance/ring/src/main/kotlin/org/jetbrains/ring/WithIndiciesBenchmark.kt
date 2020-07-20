@@ -30,7 +30,7 @@ open class WithIndiciesBenchmark {
         _data = list
     }
 
-    //Benchmark
+    // Benchmark
     fun withIndicies() {
         for ((index, value) in data.withIndex()) {
             if (filterLoad(value)) {
@@ -40,7 +40,7 @@ open class WithIndiciesBenchmark {
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun withIndiciesManual() {
         var index = 0
         for (value in data) {

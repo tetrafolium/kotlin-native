@@ -43,4 +43,3 @@ actual class IntMatrixBenchmark actual constructor() {
         error("Benchmark intMatrixBenchmark is unsupported on JVM!")
     }
 }
-

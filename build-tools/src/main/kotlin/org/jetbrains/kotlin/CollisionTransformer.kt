@@ -8,17 +8,17 @@ package org.jetbrains.kotlin
 import com.github.jengelman.gradle.plugins.shadow.transformers.Transformer
 import com.github.jengelman.gradle.plugins.shadow.transformers.TransformerContext
 import org.gradle.api.file.FileTreeElement
-import shadow.org.apache.tools.zip.ZipOutputStream
-import java.io.File
 import shadow.org.apache.commons.io.IOUtils
 import shadow.org.apache.tools.zip.ZipEntry
 import shadow.org.apache.tools.zip.ZipFile
+import shadow.org.apache.tools.zip.ZipOutputStream
+import java.io.File
 
-class CollisionTransformer: Transformer {
+class CollisionTransformer : Transformer {
     var resolvedConflicts = mutableMapOf<String, File>()
     private val foundConflictsFiles = mutableSetOf<String>()
 
-    override fun canTransformResource(element: FileTreeElement): Boolean  {
+    override fun canTransformResource(element: FileTreeElement): Boolean {
         val result = element.name in resolvedConflicts.keys
         if (result) {
             foundConflictsFiles.add(element.name)

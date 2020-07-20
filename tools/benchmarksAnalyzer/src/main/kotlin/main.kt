@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 @file:OptIn(ExperimentalCli::class)
-import org.jetbrains.analyzer.sendGetRequest
-import org.jetbrains.analyzer.readFile
-import org.jetbrains.analyzer.SummaryBenchmarksReport
 import kotlinx.cli.*
+import org.jetbrains.analyzer.SummaryBenchmarksReport
+import org.jetbrains.analyzer.readFile
+import org.jetbrains.analyzer.sendGetRequest
 import org.jetbrains.renders.*
 import org.jetbrains.report.*
 import org.jetbrains.report.json.*
@@ -26,7 +26,7 @@ abstract class Connector {
     abstract val connectorPrefix: String
 
     fun isCompatible(fileName: String) =
-            fileName.startsWith(connectorPrefix)
+        fileName.startsWith(connectorPrefix)
 
     abstract fun getFileContent(fileLocation: String, user: String? = null): String
 }
@@ -47,8 +47,10 @@ object ArtifactoryConnector : Connector() {
         }
         // Used builds description format.
         if (fileParameters.size != fileParametersSize) {
-            error("To get file from Artifactory, please, specify, build number from TeamCity and target" +
-                    " in format artifactory:build_number:target:filename")
+            error(
+                "To get file from Artifactory, please, specify, build number from TeamCity and target" +
+                    " in format artifactory:build_number:target:filename"
+            )
         }
         val (buildNumber, target, fileName) = fileParameters
         val accessFileUrl = "$artifactoryUrl/$target/$buildNumber/$fileName"
@@ -56,7 +58,7 @@ object ArtifactoryConnector : Connector() {
     }
 }
 
-object TeamCityConnector: Connector() {
+object TeamCityConnector : Connector() {
     override val connectorPrefix = "teamcity:"
     val teamCityUrl = "http://buildserver.labs.intellij.net"
 
@@ -65,9 +67,12 @@ object TeamCityConnector: Connector() {
         val buildLocator = fileDescription.substringBeforeLast(':')
         val fileName = fileDescription.substringAfterLast(':')
         if (fileDescription == fileLocation ||
-                fileDescription == buildLocator || fileName == fileDescription) {
-            error("To get file from TeamCity, please, specify, build locator and filename on TeamCity" +
-                    " in format teamcity:build_locator:filename")
+            fileDescription == buildLocator || fileName == fileDescription
+        ) {
+            error(
+                "To get file from TeamCity, please, specify, build locator and filename on TeamCity" +
+                    " in format teamcity:build_locator:filename"
+            )
         }
         val accessFileUrl = "$teamCityUrl/app/rest/builds/$buildLocator/artifacts/content/$fileName"
         val userName = user?.substringBefore(':')
@@ -111,45 +116,67 @@ fun parseNormalizeResults(results: String): Map<String, Map<String, Double>> {
 fun mergeCompilerFlags(reports: List<BenchmarksReport>) =
     reports.map {
         val benchmarks = it.benchmarks.values.flatten().asSequence().filter { it.metric == BenchmarkResult.Metric.COMPILE_TIME }
-                .map { it.shortName }.distinct().sorted().joinToString()
+            .map { it.shortName }.distinct().sorted().joinToString()
         "${it.compiler.backend.flags.joinToString()} for [$benchmarks]"
     }
 
 fun mergeReportsWithDetailedFlags(reports: List<BenchmarksReport>) =
-        if (reports.size > 1) {
-            // Merge reports.
-            val detailedFlags = mergeCompilerFlags(reports)
-            reports.map {
-                BenchmarksReport(it.env, it.benchmarks.values.flatten(),
-                        Compiler(Compiler.Backend(it.compiler.backend.type, it.compiler.backend.version, detailedFlags),
-                                it.compiler.kotlinVersion))
-            }.reduce { result, it -> result + it }
-        } else {
-            reports.first()
-        }
+    if (reports.size > 1) {
+        // Merge reports.
+        val detailedFlags = mergeCompilerFlags(reports)
+        reports.map {
+            BenchmarksReport(
+                it.env, it.benchmarks.values.flatten(),
+                Compiler(
+                    Compiler.Backend(it.compiler.backend.type, it.compiler.backend.version, detailedFlags),
+                    it.compiler.kotlinVersion
+                )
+            )
+        }.reduce { result, it -> result + it }
+    } else {
+        reports.first()
+    }
 
 fun main(args: Array<String>) {
-    class Summary: Subcommand("summary", "Output summary information") {
-        val exec by option(ArgType.Choice(listOf("samples", "geomean")),
-                description = "Execution time way of calculation").default("geomean")
-        val execSamples by option(ArgType.String, "exec-samples",
-                description = "Samples used for execution time metric (value 'all' allows use all samples)")
-                .delimiter(",")
-        val execNormalize by option(ArgType.String, "exec-normalize",
-                description = "File with golden results which should be used for normalization")
-        val compile by option(ArgType.Choice(listOf("samples", "geomean")),
-                description = "Compile time way of calculation").default("geomean")
-        val compileSamples by option(ArgType.String, "compile-samples",
-                description = "Samples used for compile time metric (value 'all' allows use all samples)")
-                .delimiter(",")
-        val compileNormalize by option(ArgType.String, "compile-normalize",
-                description = "File with golden results which should be used for normalization")
-        val codesize by option(ArgType.Choice(listOf("samples", "geomean")),
-                description = "Code size way of calculation").default("geomean")
-        val codesizeSamples by option(ArgType.String, "codesize-samples",
-                description = "Samples used for code size metric (value 'all' allows use all samples)").delimiter(",")
-        val codesizeNormalize by option(ArgType.String, "codesize-normalize",
-                description = "File with golden results which should be used for normalization")
+    class Summary : Subcommand("summary", "Output summary information") {
+        val exec by option(
+            ArgType.Choice(listOf("samples", "geomean")),
+            description = "Execution time way of calculation"
+        ).default("geomean")
+        val execSamples by option(
+            ArgType.String, "exec-samples",
+            description = "Samples used for execution time metric (value 'all' allows use all samples)"
+        )
+            .delimiter(",")
+        val execNormalize by option(
+            ArgType.String, "exec-normalize",
+            description = "File with golden results which should be used for normalization"
+        )
+        val compile by option(
+            ArgType.Choice(listOf("samples", "geomean")),
+            description = "Compile time way of calculation"
+        ).default("geomean")
+        val compileSamples by option(
+            ArgType.String, "compile-samples",
+            description = "Samples used for compile time metric (value 'all' allows use all samples)"
+        )
+            .delimiter(",")
+        val compileNormalize by option(
+            ArgType.String, "compile-normalize",
+            description = "File with golden results which should be used for normalization"
+        )
+        val codesize by option(
+            ArgType.Choice(listOf("samples", "geomean")),
+            description = "Code size way of calculation"
+        ).default("geomean")
+        val codesizeSamples by option(
+            ArgType.String, "codesize-samples",
+            description = "Samples used for code size metric (value 'all' allows use all samples)"
+        ).delimiter(",")
+        val codesizeNormalize by option(
+            ArgType.String, "codesize-normalize",
+            description = "File with golden results which should be used for normalization"
+        )
         val user by option(ArgType.String, shortName = "u", description = "User access information for authorization")
         val mainReport by argument(ArgType.String, description = "Main report for analysis")
 
@@ -174,22 +201,33 @@ fun main(args: Array<String>) {
                 add(benchsReport.failedBenchmarks.size.toString())
                 if (!execSamples.isEmpty()) {
                     val filterExec = if (execSamples.first() == "all") null else execSamples
-                    add(benchsReport.getResultsByMetric(BenchmarkResult.Metric.EXECUTION_TIME,
-                            exec == "geomean", filterExec, executionNormalize).joinToString(";"))
+                    add(
+                        benchsReport.getResultsByMetric(
+                            BenchmarkResult.Metric.EXECUTION_TIME,
+                            exec == "geomean", filterExec, executionNormalize
+                        ).joinToString(";")
+                    )
                 }
 
                 if (!compileSamples.isEmpty()) {
                     val filterCompile = if (compileSamples.first() == "all") null else compileSamples
-                    add(benchsReport.getResultsByMetric(BenchmarkResult.Metric.COMPILE_TIME,
-                            compile == "geomean", filterCompile, compileNormalize).joinToString(";"))
+                    add(
+                        benchsReport.getResultsByMetric(
+                            BenchmarkResult.Metric.COMPILE_TIME,
+                            compile == "geomean", filterCompile, compileNormalize
+                        ).joinToString(";")
+                    )
                 }
 
                 if (!codesizeSamples.isEmpty()) {
                     val filterCodesize = if (codesizeSamples.first() == "all") null else codesizeSamples
-                    add(benchsReport.getResultsByMetric(BenchmarkResult.Metric.CODE_SIZE,
-                            codesize == "geomean", filterCodesize, codesizeNormalize).joinToString(";"))
+                    add(
+                        benchsReport.getResultsByMetric(
+                            BenchmarkResult.Metric.CODE_SIZE,
+                            codesize == "geomean", filterCodesize, codesizeNormalize
+                        ).joinToString(";")
+                    )
                 }
-
             }
             println(results.joinToString())
         }
@@ -202,12 +240,18 @@ fun main(args: Array<String>) {
     val compareToReport by argParser.argument(ArgType.String, description = "Report to compare to").optional()
 
     val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
-    val epsValue by argParser.option(ArgType.Double, "eps", "e",
-            "Meaningful performance changes").default(1.0)
-    val useShortForm by argParser.option(ArgType.Boolean, "short", "s",
-            "Show short version of report").default(false)
-    val renders by argParser.option(ArgType.Choice(listOf("text", "html", "teamcity", "statistics", "metrics")),
-        shortName = "r", description = "Renders for showing information").multiple().default(listOf("text"))
+    val epsValue by argParser.option(
+        ArgType.Double, "eps", "e",
+        "Meaningful performance changes"
+    ).default(1.0)
+    val useShortForm by argParser.option(
+        ArgType.Boolean, "short", "s",
+        "Show short version of report"
+    ).default(false)
+    val renders by argParser.option(
+        ArgType.Choice(listOf("text", "html", "teamcity", "statistics", "metrics")),
+        shortName = "r", description = "Renders for showing information"
+    ).multiple().default(listOf("text"))
     val user by argParser.option(ArgType.String, shortName = "u", description = "User access information for authorization")
 
     if (argParser.parse(args).commandName == "benchmarksAnalyzer") {
@@ -219,9 +263,11 @@ fun main(args: Array<String>) {
         }
 
         // Generate comparasion report.
-        val summaryReport = SummaryBenchmarksReport(mainBenchsReport,
-                compareToBenchsReport,
-                epsValue)
+        val summaryReport = SummaryBenchmarksReport(
+            mainBenchsReport,
+            compareToBenchsReport,
+            epsValue
+        )
 
         var outputFile = output
         renders.forEach {

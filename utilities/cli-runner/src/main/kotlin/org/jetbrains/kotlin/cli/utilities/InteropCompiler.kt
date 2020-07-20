@@ -33,20 +33,22 @@ fun invokeInterop(flavor: String, args: Array<String>): Array<String>? {
 
     val buildDir = File("$outputFileName-build")
     val generatedDir = File(buildDir, "kotlin")
-    val nativesDir = File(buildDir,"natives")
+    val nativesDir = File(buildDir, "natives")
     val manifest = File(buildDir, "manifest.properties")
-    val cstubsName ="cstubs"
+    val cstubsName = "cstubs"
     val libraries = arguments.library
     val repos = arguments.repo
     val targetRequest = if (arguments is CInteropArguments) arguments.target
-        else (arguments as JSInteropArguments).target
+    else (arguments as JSInteropArguments).target
     val target = PlatformManager(KonanHomeProvider.determineKonanHome()).targetManager(targetRequest).target
 
-    val cinteropArgsToCompiler = interop(flavor, args,
-            InternalInteropOptions(generatedDir.absolutePath,
-                    nativesDir.absolutePath,manifest.path,
-                    cstubsName.takeIf { flavor == "native" }
-            )
+    val cinteropArgsToCompiler = interop(
+        flavor, args,
+        InternalInteropOptions(
+            generatedDir.absolutePath,
+            nativesDir.absolutePath, manifest.path,
+            cstubsName.takeIf { flavor == "native" }
+        )
     ) ?: return null // There is no need in compiler invocation if we're generating only metadata.
 
     val nativeStubs =
@@ -61,7 +63,8 @@ fun invokeInterop(flavor: String, args: Array<String>): Array<String>? {
         "-o", outputFileName,
         "-target", target.visibleName,
         "-manifest", manifest.path,
-        "-Xtemporary-files-dir=$temporaryFilesDir") +
+        "-Xtemporary-files-dir=$temporaryFilesDir"
+    ) +
         nativeStubs +
         cinteropArgsToCompiler +
         libraries.flatMap { listOf("-library", it) } +
@@ -74,5 +77,3 @@ fun invokeInterop(flavor: String, args: Array<String>): Array<String>? {
         shortModuleName?.let { arrayOf("$SHORT_MODULE_NAME_ARG=$it") }.orEmpty() +
         arguments.kotlincOption
 }
-
-

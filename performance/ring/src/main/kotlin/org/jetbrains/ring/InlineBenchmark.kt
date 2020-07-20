@@ -32,7 +32,7 @@ inline fun loadInline(value: Int, size: Int): Int {
     return acc
 }
 
-fun <T: Any> loadGeneric(value: T, size: Int): Int {
+fun <T : Any> loadGeneric(value: T, size: Int): Int {
     var acc = 0
     for (i in 0..size) {
         acc = acc xor value.hashCode()
@@ -40,7 +40,7 @@ fun <T: Any> loadGeneric(value: T, size: Int): Int {
     return acc
 }
 
-inline fun <T: Any> loadGenericInline(value: T, size: Int): Int {
+inline fun <T : Any> loadGenericInline(value: T, size: Int): Int {
     var acc = 0
     for (i in 0..size) {
         acc = acc xor value.hashCode()
@@ -51,22 +51,22 @@ inline fun <T: Any> loadGenericInline(value: T, size: Int): Int {
 open class InlineBenchmark {
     private var value = 2138476523
 
-    //Benchmark
+    // Benchmark
     fun calculate(): Int {
         return load(value, BENCHMARK_SIZE)
     }
 
-    //Benchmark
+    // Benchmark
     fun calculateInline(): Int {
         return loadInline(value, BENCHMARK_SIZE)
     }
 
-    //Benchmark
+    // Benchmark
     fun calculateGeneric(): Int {
         return loadGeneric(value, BENCHMARK_SIZE)
     }
 
-    //Benchmark
+    // Benchmark
     fun calculateGenericInline(): Int {
         return loadGenericInline(value, BENCHMARK_SIZE)
     }

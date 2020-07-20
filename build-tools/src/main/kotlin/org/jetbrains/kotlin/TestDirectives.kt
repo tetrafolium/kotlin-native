@@ -11,9 +11,11 @@ import java.util.regex.Pattern
 
 private const val MODULE_DELIMITER = ",\\s*"
 // This pattern is a copy from the kotlin/compiler/tests-common/tests/org/jetbrains/kotlin/test/TestFiles.java
-private val FILE_OR_MODULE_PATTERN: Pattern = Pattern.compile("(?://\\s*MODULE:\\s*([^()\\n]+)(?:\\(([^()]+(?:" +
+private val FILE_OR_MODULE_PATTERN: Pattern = Pattern.compile(
+    "(?://\\s*MODULE:\\s*([^()\\n]+)(?:\\(([^()]+(?:" +
         "$MODULE_DELIMITER[^()]+)*)\\))?\\s*(?:\\(([^()]+(?:$MODULE_DELIMITER[^()]+)*)\\))?\\s*)?//\\s*FILE:\\s*(.*)$",
-        Pattern.MULTILINE)
+    Pattern.MULTILINE
+)
 
 /**
  * Creates test files from the given source file that may contain different test directives.
@@ -27,8 +29,12 @@ fun buildCompileList(source: Path, outputDirectory: String): List<TestFile> {
     val srcText = srcFile.readText().replace(Regex("<!.*?!>(.*?)<!>")) { match -> match.groupValues[1] }
 
     if (srcText.contains("// WITH_COROUTINES")) {
-        result.add(TestFile("helpers.kt", "$outputDirectory/helpers.kt",
-                createTextForHelpers(true), TestModule.support))
+        result.add(
+            TestFile(
+                "helpers.kt", "$outputDirectory/helpers.kt",
+                createTextForHelpers(true), TestModule.support
+            )
+        )
     }
 
     val matcher = FILE_OR_MODULE_PATTERN.matcher(srcText)
@@ -47,11 +53,13 @@ fun buildCompileList(source: Path, outputDirectory: String): List<TestFile> {
 
             if (moduleName != null) {
                 moduleName = moduleName.trim { it <= ' ' }
-                module = TestModule("${srcFile.name}.$moduleName",
-                        moduleDependencies.parseModuleList().map {
-                            if (it != "support") "${srcFile.name}.$it" else it
-                        },
-                        moduleFriends.parseModuleList().map { "${srcFile.name}.$it" })
+                module = TestModule(
+                    "${srcFile.name}.$moduleName",
+                    moduleDependencies.parseModuleList().map {
+                        if (it != "support") "${srcFile.name}.$it" else it
+                    },
+                    moduleFriends.parseModuleList().map { "${srcFile.name}.$it" }
+                )
             }
 
             val fileName = matcher.group(4)
@@ -70,8 +78,8 @@ fun buildCompileList(source: Path, outputDirectory: String): List<TestFile> {
 }
 
 private fun String?.parseModuleList() = this
-        ?.split(Pattern.compile(MODULE_DELIMITER), 0)
-        ?: emptyList()
+    ?.split(Pattern.compile(MODULE_DELIMITER), 0)
+    ?: emptyList()
 
 /**
  * Test module from the test source declared by the [FILE_OR_MODULE_PATTERN].
@@ -82,9 +90,9 @@ private fun String?.parseModuleList() = this
  *  - [support] for a helper sources like Coroutines support.
  */
 data class TestModule(
-        val name: String,
-        val dependencies: List<String>,
-        val friends: List<String>
+    val name: String,
+    val dependencies: List<String>,
+    val friends: List<String>
 ) {
     fun isDefaultModule() = this == default || name.endsWith(".main")
 
@@ -97,10 +105,11 @@ data class TestModule(
 /**
  * Represent a single test file that belongs to the [module].
  */
-data class TestFile(val name: String,
-                    val path: String,
-                    var text: String = "",
-                    val module: TestModule = TestModule.default
+data class TestFile(
+    val name: String,
+    val path: String,
+    var text: String = "",
+    val module: TestModule = TestModule.default
 ) {
     /**
      * Writes [text] to the file created from the [path].
@@ -108,8 +117,8 @@ data class TestFile(val name: String,
     fun writeTextToFile() {
         Paths.get(path).takeUnless { text.isEmpty() }?.run {
             parent.toFile()
-                    .takeUnless { it.exists() }
-                    ?.mkdirs()
+                .takeUnless { it.exists() }
+                ?.mkdirs()
             toFile().writeText(text)
         }
     }

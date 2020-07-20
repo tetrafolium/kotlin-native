@@ -5,20 +5,14 @@
 
 package org.jetbrains.kotlin
 
-import groovy.lang.Closure
-import org.gradle.api.Action
-import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
-
-import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import com.ullink.slack.simpleslackapi.SlackAttachment
 import com.ullink.slack.simpleslackapi.SlackPreparedMessage
-
-import java.io.FileInputStream
+import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
 import java.io.File
+import java.io.FileInputStream
 import java.util.Properties
 
 /**
@@ -36,8 +30,8 @@ open class RegressionsSummaryReporter : DefaultTask() {
     @TaskAction
     fun run() {
         // Get TeamCity properties.
-        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE") ?:
-            error("Can't load teamcity config!")
+        val teamcityConfig = System.getenv("TEAMCITY_BUILD_PROPERTIES_FILE")
+            ?: error("Can't load teamcity config!")
 
         val buildProperties = Properties()
         buildProperties.load(FileInputStream(teamcityConfig))
@@ -56,7 +50,7 @@ open class RegressionsSummaryReporter : DefaultTask() {
                     val propertyValue = matchResult?.groups?.get(2)?.value
                     if (propertyName != null && propertyValue != null) {
                         results[propertyName]?.let { it[key] = propertyValue }
-                                ?: run { results.put(propertyName, mutableMapOf(key to propertyValue)) }
+                            ?: run { results.put(propertyName, mutableMapOf(key to propertyValue)) }
                     }
                 }
             }
@@ -68,7 +62,7 @@ open class RegressionsSummaryReporter : DefaultTask() {
                 append("$property: ${targets.map {(target, value) -> "$value ($target)"}.joinToString(" | ")}\n")
             }
         }
-        val summaryStatus = results["status"]?.values?.fold("STABLE") {summary, element ->
+        val summaryStatus = results["status"]?.values?.fold("STABLE") { summary, element ->
             when {
                 summary == "FAILED" || element == "FAILED" -> "FAILED"
                 summary == "FIXED" || element == "FIXED" -> "FIXED"
@@ -79,7 +73,7 @@ open class RegressionsSummaryReporter : DefaultTask() {
         }
 
         val attachement = SlackAttachment()
-        with (attachement) {
+        with(attachement) {
             setTitle("Performance Summary (build $buildNumber)")
             setTitleLink("https://buildserver.labs.intellij.net/viewLog.html?buildId=$buildId&buildTypeId=$buildTypeId")
             setText(message)
@@ -96,8 +90,8 @@ open class RegressionsSummaryReporter : DefaultTask() {
 
         val channel = session.findChannelByName(buildProperties.getProperty("konan-channel-name"))
         val preparedMessage = SlackPreparedMessage.Builder()
-                .addAttachment(attachement)
-                .build()
+            .addAttachment(attachement)
+            .build()
         session.sendMessage(channel, preparedMessage)
 
         session.disconnect()

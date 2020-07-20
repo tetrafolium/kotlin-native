@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.analyzer
 import org.jetbrains.report.BenchmarkResult
 import kotlin.math.abs
@@ -26,7 +25,7 @@ import kotlin.math.sqrt
 // Entity to describe avarage values which conssists of mean and variance values.
 data class MeanVariance(val mean: Double, val variance: Double) {
     override fun toString(): String {
-        val format = { number: Double -> number.format(2)}
+        val format = { number: Double -> number.format(2) }
         return "${format(mean)} ± ${format(variance)}"
     }
 }
@@ -36,10 +35,12 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
 
     // Calculate difference in percentage compare to another.
     fun calcPercentageDiff(other: MeanVarianceBenchmark): MeanVariance {
-        assert(other.meanBenchmark.score >= 0 &&
+        assert(
+            other.meanBenchmark.score >= 0 &&
                 other.varianceBenchmark.score >= 0 &&
                 other.meanBenchmark.score - other.varianceBenchmark.score != 0.0,
-                { "Mean and variance should be positive and not equal!" })
+            { "Mean and variance should be positive and not equal!" }
+        )
         val exactMean = (meanBenchmark.score - other.meanBenchmark.score) / other.meanBenchmark.score
         // Analyze intervals. Calculate difference between border points.
         val (bigValue, smallValue) = if (meanBenchmark.score > other.meanBenchmark.score) Pair(this, other) else Pair(other, this)
@@ -52,20 +53,22 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
             return MeanVariance(0.0, 0.0)
         }
         val mean = ((smallValueIntervalEnd - bigValueIntervalStart) / bigValueIntervalStart) *
-                (if (meanBenchmark.score > other.meanBenchmark.score) -1 else 1)
+            (if (meanBenchmark.score > other.meanBenchmark.score) -1 else 1)
 
         val maxValueChange = ((bigValueIntervalEnd - smallValueIntervalEnd) / bigValueIntervalEnd)
-        val minValueChange =  ((bigValueIntervalStart - smallValueIntervalStart) / bigValueIntervalStart)
+        val minValueChange = ((bigValueIntervalStart - smallValueIntervalStart) / bigValueIntervalStart)
         val variance = abs(abs(mean) - max(minValueChange, maxValueChange))
         return MeanVariance(mean * 100, variance * 100)
     }
 
     // Calculate ratio value compare to another.
     fun calcRatio(other: MeanVarianceBenchmark): MeanVariance {
-        assert(other.meanBenchmark.score >= 0 &&
+        assert(
+            other.meanBenchmark.score >= 0 &&
                 other.varianceBenchmark.score >= 0 &&
                 other.meanBenchmark.score - other.varianceBenchmark.score != 0.0,
-                { "Mean and variance should be positive and not equal!" })
+            { "Mean and variance should be positive and not equal!" }
+        )
         val mean = meanBenchmark.score / other.meanBenchmark.score
         val minRatio = (meanBenchmark.score - varianceBenchmark.score) / (other.meanBenchmark.score + other.varianceBenchmark.score)
         val maxRatio = (meanBenchmark.score + varianceBenchmark.score) / (other.meanBenchmark.score - other.varianceBenchmark.score)
@@ -75,7 +78,6 @@ data class MeanVarianceBenchmark(val meanBenchmark: BenchmarkResult, val varianc
 
     override fun toString(): String =
         "${meanBenchmark.score.format()} ± ${varianceBenchmark.score.format()}"
-
 }
 
 fun geometricMean(values: Collection<Double>, totalNumber: Int = values.size) =
@@ -88,7 +90,7 @@ fun geometricMean(values: Collection<Double>, totalNumber: Int = values.size) =
     }
 
 fun computeMeanVariance(samples: List<Double>): MeanVariance {
-    val zStar = 1.67    // Critical point for 90% confidence of normal distribution.
+    val zStar = 1.67 // Critical point for 90% confidence of normal distribution.
     val mean = samples.sum() / samples.size
     val variance = samples.indices.sumByDouble { (samples[it] - mean) * (samples[it] - mean) } / samples.size
     val confidenceInterval = sqrt(variance / samples.size) * zStar
@@ -97,7 +99,7 @@ fun computeMeanVariance(samples: List<Double>): MeanVariance {
 
 // Calculate avarage results for bencmarks (each becnhmark can be run several times).
 fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): BenchmarksTable {
-    return benchmarks.map {(name, resultsSet) ->
+    return benchmarks.map { (name, resultsSet) ->
         val repeatedSequence = IntArray(resultsSet.size)
         var metric = BenchmarkResult.Metric.EXECUTION_TIME
         var currentStatus = BenchmarkResult.Status.PASSED
@@ -122,24 +124,30 @@ fun collectMeanResults(benchmarks: Map<String, List<BenchmarkResult>>): Benchmar
         repeatedSequence.forEachIndexed { index, element ->
             if (index != 0)
                 if ((element - repeatedSequence[index - 1]) != 1)
-                    println("Check data consistency. For benchmark '$name' there is no run" +
-                            " between ${repeatedSequence[index - 1]} and $element.")
+                    println(
+                        "Check data consistency. For benchmark '$name' there is no run" +
+                            " between ${repeatedSequence[index - 1]} and $element."
+                    )
         }
 
         // Create mean and variance benchmarks result.
         val scoreMeanVariance = computeMeanVariance(resultsSet.map { it.score })
         val runtimeInUsMeanVariance = computeMeanVariance(resultsSet.map { it.runtimeInUs })
-        val meanBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.mean, metric,
-                runtimeInUsMeanVariance.mean, repeatedSequence[resultsSet.size - 1],
-                currentWarmup)
-        val varianceBenchmark = BenchmarkResult(name, currentStatus, scoreMeanVariance.variance, metric,
-                runtimeInUsMeanVariance.variance, repeatedSequence[resultsSet.size - 1],
-                currentWarmup)
+        val meanBenchmark = BenchmarkResult(
+            name, currentStatus, scoreMeanVariance.mean, metric,
+            runtimeInUsMeanVariance.mean, repeatedSequence[resultsSet.size - 1],
+            currentWarmup
+        )
+        val varianceBenchmark = BenchmarkResult(
+            name, currentStatus, scoreMeanVariance.variance, metric,
+            runtimeInUsMeanVariance.variance, repeatedSequence[resultsSet.size - 1],
+            currentWarmup
+        )
         name to MeanVarianceBenchmark(meanBenchmark, varianceBenchmark)
     }.toMap()
 }
 
 fun collectBenchmarksDurations(benchmarks: Map<String, List<BenchmarkResult>>): Map<String, Double> =
-        benchmarks.map { (name, resultsSet) ->
-            name to resultsSet.sumByDouble { it.runtimeInUs }
-        }.toMap()
+    benchmarks.map { (name, resultsSet) ->
+        name to resultsSet.sumByDouble { it.runtimeInUs }
+    }.toMap()

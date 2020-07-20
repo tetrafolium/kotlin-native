@@ -16,10 +16,8 @@
 
 package org.jetbrains.ring
 
-import org.jetbrains.benchmarksLauncher.Blackhole
-
 open class LocalObjectsBenchmark {
-    //Benchmark
+    // Benchmark
     fun localArray(): Int {
         val size = 48
         val array = IntArray(size)

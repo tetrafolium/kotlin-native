@@ -38,9 +38,12 @@ fun main(args: Array<String>) {
     app.use(express.static("ui"))
 
     val server = http.createServer(app)
-    app.listen(port, {
-        println("App listening on port " + port + "!")
-    })
+    app.listen(
+        port,
+        {
+            println("App listening on port " + port + "!")
+        }
+    )
 
     app.use("/", router())
 }

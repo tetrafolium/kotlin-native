@@ -14,17 +14,26 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.build
 
 import org.jetbrains.report.*
 import org.jetbrains.report.json.*
 
-data class Build(val buildNumber: String, val startTime: String, val finishTime: String, val branch: String,
-                 val commits: String, val buildType: String, val failuresNumber: Int, val executionTime: String,
-                 val compileTime: String, val codeSize: String, val bundleSize: String?) {
+data class Build(
+    val buildNumber: String,
+    val startTime: String,
+    val finishTime: String,
+    val branch: String,
+    val commits: String,
+    val buildType: String,
+    val failuresNumber: Int,
+    val executionTime: String,
+    val compileTime: String,
+    val codeSize: String,
+    val bundleSize: String?
+) {
 
-    companion object: EntityFromJsonFactory<Build> {
+    companion object : EntityFromJsonFactory<Build> {
         override fun create(data: JsonElement): Build {
             if (data is JsonObject) {
                 val buildNumber = elementToString(data.getRequiredField("buildNumber"), "buildNumber")
@@ -38,8 +47,10 @@ data class Build(val buildNumber: String, val startTime: String, val finishTime:
                 val compileTime = elementToString(data.getRequiredField("compileTime"), "compileTime")
                 val codeSize = elementToString(data.getRequiredField("codeSize"), "codeSize")
                 val bundleSize = elementToStringOrNull(data.getRequiredField("bundleSize"), "bundleSize")
-                return Build(buildNumber, startTime, finishTime, branch, commits, buildType, failuresNumber, executionTime,
-                        compileTime, codeSize, bundleSize)
+                return Build(
+                    buildNumber, startTime, finishTime, branch, commits, buildType, failuresNumber, executionTime,
+                    compileTime, codeSize, bundleSize
+                )
             } else {
                 error("Top level entity is expected to be an object. Please, check origin files.")
             }
@@ -61,7 +72,7 @@ data class Build(val buildNumber: String, val startTime: String, val finishTime:
     val date: String by lazy {
         val matchResult = "^(\\d{4})(\\d{2})(\\d{2})".toRegex().find(startTime)?.groupValues
         matchResult?.let { "${matchResult[3]}/${matchResult[2]}/${matchResult[1]}" }
-                ?: error { "Wrong format of time $startTime" }
+            ?: error { "Wrong format of time $startTime" }
     }
     val formattedStartTime: String by lazy {
         formatTime(startTime)

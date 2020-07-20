@@ -11,27 +11,27 @@ fun createTextForHelpers(isReleaseCoroutines: Boolean): String {
     val coroutinesPackage = "kotlin.coroutines"
 
     val emptyContinuationBody =
-            if (isReleaseCoroutines)
-                """
+        if (isReleaseCoroutines)
+            """
                 |override fun resumeWith(result: Result<Any?>) {
                 |   result.getOrThrow()
                 |}
             """.trimMargin()
-            else
-                """
+        else
+            """
                 |override fun resume(data: Any?) {}
                 |override fun resumeWithException(exception: Throwable) { throw exception }
             """.trimMargin()
 
     val handleResultContinuationBody =
-            if (isReleaseCoroutines)
-                """
+        if (isReleaseCoroutines)
+            """
                 |override fun resumeWith(result: Result<T>) {
                 |   x(result.getOrThrow())
                 |}
             """.trimMargin()
-            else
-                """
+        else
+            """
                 |override fun resumeWithException(exception: Throwable) {
                 |   throw exception
                 |}
@@ -40,14 +40,14 @@ fun createTextForHelpers(isReleaseCoroutines: Boolean): String {
             """.trimMargin()
 
     val handleExceptionContinuationBody =
-            if (isReleaseCoroutines)
-                """
+        if (isReleaseCoroutines)
+            """
                 |override fun resumeWith(result: Result<Any?>) {
                 |   result.exceptionOrNull()?.let(x)
                 |}
             """.trimMargin()
-            else
-                """
+        else
+            """
                 |override fun resumeWithException(exception: Throwable) {
                 |   x(exception)
                 |}
@@ -56,8 +56,8 @@ fun createTextForHelpers(isReleaseCoroutines: Boolean): String {
             """.trimMargin()
 
     val continuationAdapterBody =
-            if (isReleaseCoroutines)
-                """
+        if (isReleaseCoroutines)
+            """
                 |override fun resumeWith(result: Result<T>) {
                 |   if (result.isSuccess) {
                 |       resume(result.getOrThrow())
@@ -69,8 +69,8 @@ fun createTextForHelpers(isReleaseCoroutines: Boolean): String {
                 |abstract fun resumeWithException(exception: Throwable)
                 |abstract fun resume(value: T)
             """.trimMargin()
-            else
-                ""
+        else
+            ""
 
     return """
             |package helpers

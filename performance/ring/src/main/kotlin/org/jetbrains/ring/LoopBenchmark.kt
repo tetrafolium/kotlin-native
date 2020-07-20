@@ -30,35 +30,35 @@ open class LoopBenchmark {
         array = list.toTypedArray()
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayLoop() {
         for (x in array) {
             Blackhole.consume(x)
         }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayIndexLoop() {
         for (i in array.indices) {
             Blackhole.consume(array[i])
         }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun rangeLoop() {
         for (i in 0..BENCHMARK_SIZE) {
             Blackhole.consume(i)
         }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayListLoop() {
         for (x in arrayList) {
             Blackhole.consume(x)
         }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayWhileLoop() {
         var i = 0
         val s = array.size
@@ -68,12 +68,12 @@ open class LoopBenchmark {
         }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayForeachLoop() {
         array.forEach { Blackhole.consume(it) }
     }
 
-    //Benchmark 
+    // Benchmark 
     fun arrayListForeachLoop() {
         arrayList.forEach { Blackhole.consume(it) }
     }

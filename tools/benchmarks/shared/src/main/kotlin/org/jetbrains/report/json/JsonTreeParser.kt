@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // A bit changed part of kotlinx.serialization plugin
 package org.jetbrains.report.json
 

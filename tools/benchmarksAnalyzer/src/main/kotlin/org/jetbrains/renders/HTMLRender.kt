@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.renders
 
 import org.jetbrains.analyzer.*
 import org.jetbrains.report.*
-
-import kotlin.math.sin
 import kotlin.math.abs
 import kotlin.math.pow
+import kotlin.math.sin
 
 private fun <T : Comparable<T>> clamp(value: T, minValue: T, maxValue: T): T =
-        minOf(maxOf(value, minValue), maxValue)
+    minOf(maxOf(value, minValue), maxValue)
 
 // Natural number.
 class Natural(initValue: Int) {
@@ -69,9 +67,9 @@ abstract class Tag(val name: String) : Element {
     }
 
     private fun renderAttributes(): String =
-            attributes.map { (attr, value) ->
-                "$attr=\"$value\""
-            }.joinToString(separator = " ", prefix = " ")
+        attributes.map { (attr, value) ->
+            "$attr=\"$value\""
+        }.joinToString(separator = " ", prefix = " ")
 
     override fun toString(): String {
         val builder = StringBuilder()
@@ -200,11 +198,11 @@ fun html(init: HTML.() -> Unit): HTML {
 }
 
 // Report render to html format.
-class HTMLRender: Render() {
+class HTMLRender : Render() {
     override val name: String
         get() = "html"
 
-    override fun render (report: SummaryBenchmarksReport, onlyChanges: Boolean) =
+    override fun render(report: SummaryBenchmarksReport, onlyChanges: Boolean) =
         html {
             head {
                 title { +"Benchmarks report" }
@@ -235,7 +233,7 @@ class HTMLRender: Render() {
                     span("navbar-brand mb-0 h1") { +"Benchmarks report" }
                 }
                 div("container-fluid") {
-                    p{}
+                    p {}
                     renderEnvironmentTable(report.environments)
                     renderCompilerTable(report.compilers)
                     hr {}
@@ -294,8 +292,8 @@ class HTMLRender: Render() {
                 tr {
                     th { + "OS" }
                     th { + "CPU" }
-                    th { + "Version"}
-                    th { + "Vendor"}
+                    th { + "Version" }
+                    th { + "Vendor" }
                 }
             }
             renderEnvironment(firstEnvironment, "First")
@@ -336,7 +334,7 @@ class HTMLRender: Render() {
                 tr {
                     th { + "Type" }
                     th { + "Version" }
-                    th { + "Flags"}
+                    th { + "Flags" }
                 }
             }
             renderCompiler(firstCompiler, "First")
@@ -358,8 +356,12 @@ class HTMLRender: Render() {
         }
     }
 
-    private fun BodyTag.renderCollapsedData(name: String, isCollapsed: Boolean = false, colorStyle: String = "",
-                                            init: BodyTag.() -> Unit) {
+    private fun BodyTag.renderCollapsedData(
+        name: String,
+        isCollapsed: Boolean = false,
+        colorStyle: String = "",
+        init: BodyTag.() -> Unit
+    ) {
         val show = if (!isCollapsed) "show" else ""
         val tagName = name.replace(' ', '_')
         div("accordion") {
@@ -419,9 +421,9 @@ class HTMLRender: Render() {
 
         val benchmarksWithChangedStatus = report.getBenchmarksWithChangedStatus()
         val newFailures = benchmarksWithChangedStatus
-                .filter { it.current == BenchmarkResult.Status.FAILED }
+            .filter { it.current == BenchmarkResult.Status.FAILED }
         val newPasses = benchmarksWithChangedStatus
-                .filter { it.current == BenchmarkResult.Status.PASSED }
+            .filter { it.current == BenchmarkResult.Status.PASSED }
 
         table {
             attributes["class"] = "table table-sm table-striped table-hover"
@@ -515,15 +517,19 @@ class HTMLRender: Render() {
                             td { +"${report.regressions.size}" }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        maximumRegression/maxOf(maximumRegression, abs(maximumImprovement)))
-                                        .backgroundStyle
+                                    maximumRegression / maxOf(maximumRegression, abs(maximumImprovement))
+                                )
+                                    .backgroundStyle
                                 +formatValue(maximumRegression, true)
                             }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        regressionsGeometricMean/maxOf(regressionsGeometricMean,
-                                                            abs(improvementsGeometricMean)))
-                                        .backgroundStyle
+                                    regressionsGeometricMean / maxOf(
+                                        regressionsGeometricMean,
+                                        abs(improvementsGeometricMean)
+                                    )
+                                )
+                                    .backgroundStyle
                                 +formatValue(report.regressionsGeometricMean, true)
                             }
                         }
@@ -534,15 +540,19 @@ class HTMLRender: Render() {
                             td { +"${report.improvements.size}" }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        maximumImprovement/maxOf(maximumRegression, abs(maximumImprovement)))
-                                        .backgroundStyle
+                                    maximumImprovement / maxOf(maximumRegression, abs(maximumImprovement))
+                                )
+                                    .backgroundStyle
                                 +formatValue(report.maximumImprovement, true)
                             }
                             td {
                                 attributes["bgcolor"] = ColoredCell(
-                                        improvementsGeometricMean/maxOf(regressionsGeometricMean,
-                                                        abs(improvementsGeometricMean)))
-                                        .backgroundStyle
+                                    improvementsGeometricMean / maxOf(
+                                        regressionsGeometricMean,
+                                        abs(improvementsGeometricMean)
+                                    )
+                                )
+                                    .backgroundStyle
                                 +formatValue(report.improvementsGeometricMean, true)
                             }
                         }
@@ -552,8 +562,11 @@ class HTMLRender: Render() {
         }
     }
 
-    private fun TableBlock.renderBenchmarksDetails(fullSet: Map<String, SummaryBenchmark>,
-                                                   bucket: Map<String, ScoreChange>? = null, rowStyle: String? = null) {
+    private fun TableBlock.renderBenchmarksDetails(
+        fullSet: Map<String, SummaryBenchmark>,
+        bucket: Map<String, ScoreChange>? = null,
+        rowStyle: String? = null
+    ) {
         if (bucket != null && !bucket.isEmpty()) {
             // Find max ratio.
             val maxRatio = bucket.values.map { it.second.mean }.max()!!
@@ -568,15 +581,19 @@ class HTMLRender: Render() {
                     td { +"${fullSet.getValue(name).first}" }
                     td { +"${fullSet.getValue(name).second}" }
                     td {
-                        attributes["bgcolor"] = ColoredCell(if (bucket.values.first().first.mean == 0.0) null
-                            else change.first.mean / abs(bucket.values.first().first.mean))
-                                .backgroundStyle
+                        attributes["bgcolor"] = ColoredCell(
+                            if (bucket.values.first().first.mean == 0.0) null
+                            else change.first.mean / abs(bucket.values.first().first.mean)
+                        )
+                            .backgroundStyle
                         +"${change.first.toString() + " %"}"
                     }
                     td {
                         val scaledRatio = if (maxRatio == 0.0) null else change.second.mean / maxRatio
-                        attributes["bgcolor"] = ColoredCell(scaledRatio,
-                                borderPositive = { cellValue -> cellValue > 1.0 / maxRatio }).backgroundStyle
+                        attributes["bgcolor"] = ColoredCell(
+                            scaledRatio,
+                            borderPositive = { cellValue -> cellValue > 1.0 / maxRatio }
+                        ).backgroundStyle
                         +"${change.second}"
                     }
                 }
@@ -618,19 +635,24 @@ class HTMLRender: Render() {
                     th { +"Ratio" }
                 }
             }
-            val geoMeanChangeMap = report.geoMeanScoreChange?.
-                    let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
+            val geoMeanChangeMap = report.geoMeanScoreChange
+                ?.let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
 
             tbody {
                 renderBenchmarksDetails(
-                        mutableMapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanBenchmark),
-                        geoMeanChangeMap, "border-bottom: 2.3pt solid black; border-top: 2.3pt solid black")
+                    mutableMapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanBenchmark),
+                    geoMeanChangeMap, "border-bottom: 2.3pt solid black; border-top: 2.3pt solid black"
+                )
                 renderBenchmarksDetails(report.mergedReport, report.regressions)
                 renderBenchmarksDetails(report.mergedReport, report.improvements)
                 if (!onlyChanges) {
                     // Print all remaining results.
-                    renderBenchmarksDetails(report.mergedReport.filter { it.key !in report.regressions.keys &&
-                            it.key !in report.improvements.keys })
+                    renderBenchmarksDetails(
+                        report.mergedReport.filter {
+                            it.key !in report.regressions.keys &&
+                                it.key !in report.improvements.keys
+                        }
+                    )
                 }
             }
         }
@@ -638,10 +660,10 @@ class HTMLRender: Render() {
 
     data class Color(val red: Double, val green: Double, val blue: Double) {
         operator fun times(coefficient: Double) =
-                Color(red * coefficient, green * coefficient, blue * coefficient)
+            Color(red * coefficient, green * coefficient, blue * coefficient)
 
         operator fun plus(other: Color) =
-                Color(red + other.red, green + other.green, blue + other.blue)
+            Color(red + other.red, green + other.green, blue + other.blue)
 
         override fun toString() =
             "#" + buildString {
@@ -651,16 +673,19 @@ class HTMLRender: Render() {
             }
     }
 
-    class ColoredCell(val scaledValue: Double?, val reverse: Boolean = false,
-                      val borderPositive: (cellValue: Double) -> Boolean = { cellValue -> cellValue > 0 }) {
+    class ColoredCell(
+        val scaledValue: Double?,
+        val reverse: Boolean = false,
+        val borderPositive: (cellValue: Double) -> Boolean = { cellValue -> cellValue > 0 }
+    ) {
         val value: Double
-        val neutralColor = Color(1.0,1.0 , 1.0)
+        val neutralColor = Color(1.0, 1.0, 1.0)
         val negativeColor = Color(0.0, 1.0, 0.0)
         val positiveColor = Color(1.0, 0.0, 0.0)
 
         init {
-            value = scaledValue?.let { if (abs(scaledValue) <= 1.0) scaledValue else error ("Value should be scaled in range [-1.0; 1.0]") }
-                    ?: 0.0
+            value = scaledValue?.let { if (abs(scaledValue) <= 1.0) scaledValue else error("Value should be scaled in range [-1.0; 1.0]") }
+                ?: 0.0
         }
 
         val backgroundStyle: String

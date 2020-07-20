@@ -5,8 +5,6 @@
 
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
 import kotlin.test.*
 
 class ErrorTests {
@@ -16,8 +14,11 @@ class ErrorTests {
         val addendums by argParser.argument(ArgType.Int, "addendums", description = "Addendums").multiple(2)
         val output by argParser.argument(ArgType.String, "output", "Output file")
         val debugMode by argParser.option(ArgType.Boolean, "debug", "d", "Debug mode")
-        val exception = assertFailsWith<IllegalStateException> { argParser.parse(
-                arrayOf("2", "-d", "3", "out.txt", "something", "else", "in", "string")) }
+        val exception = assertFailsWith<IllegalStateException> {
+            argParser.parse(
+                arrayOf("2", "-d", "3", "out.txt", "something", "else", "in", "string")
+            )
+        }
         assertTrue("Too many arguments! Couldn't process argument something" in exception.message!!)
     }
 
@@ -46,8 +47,10 @@ class ErrorTests {
     fun testWrongChoice() {
         val argParser = ArgParser("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
-        val renders by argParser.option(ArgType.Choice(listOf("text", "html")),
-                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
+        val renders by argParser.option(
+            ArgType.Choice(listOf("text", "html")),
+            "renders", "r", "Renders for showing information"
+        ).multiple().default(listOf("text"))
         val exception = assertFailsWith<IllegalStateException> {
             argParser.parse(arrayOf("-r", "xml"))
         }

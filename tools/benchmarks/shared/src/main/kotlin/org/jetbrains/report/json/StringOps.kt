@@ -16,7 +16,7 @@
 
 package org.jetbrains.report.json
 
-private fun toHexChar(i: Int) : Char {
+private fun toHexChar(i: Int): Char {
     val d = i and 0xf
     return if (d < 10) (d + '0'.toInt()).toChar()
     else (d - 10 + 'a'.toInt()).toChar()
@@ -39,7 +39,7 @@ private val ESCAPE_CHARS: Array<String?> = arrayOfNulls<String>(128).apply {
     this[0x0c] = "\\f"
 }
 
-internal fun StringBuilder.printQuoted(value: String)  {
+internal fun StringBuilder.printQuoted(value: String) {
     append(STRING)
     var lastPos = 0
     val length = value.length

@@ -42,18 +42,18 @@ fun Xcode.getLatestSimulatorRuntimeFor(target: KonanTarget, osMinVersion: String
 
 // Result of `xcrun simctl list runtimes -j`.
 data class ListRuntimesReport(
-        @Expose val runtimes: List<SimulatorRuntimeDescriptor>
+    @Expose val runtimes: List<SimulatorRuntimeDescriptor>
 )
 
 data class SimulatorRuntimeDescriptor(
-        @Expose val version: String,
-        // bundlePath field may not exist in the old Xcode (prior to 10.3).
-        @Expose val bundlePath: String? = null,
-        @Expose val isAvailable: Boolean? = null,
-        @Expose val availability: String? = null,
-        @Expose val name: String,
-        @Expose val identifier: String,
-        @Expose val buildversion: String
+    @Expose val version: String,
+    // bundlePath field may not exist in the old Xcode (prior to 10.3).
+    @Expose val bundlePath: String? = null,
+    @Expose val isAvailable: Boolean? = null,
+    @Expose val availability: String? = null,
+    @Expose val name: String,
+    @Expose val identifier: String,
+    @Expose val buildversion: String
 ) {
     /**
      * Different Xcode/macOS combinations give different fields that checks

@@ -16,15 +16,15 @@
 
 package org.jetbrains.kotlin
 
-import org.gradle.api.Action
 import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 import org.gradle.util.ConfigureUtil
-import org.jetbrains.kotlin.konan.target.*
 import org.jetbrains.kotlin.konan.file.*
+import org.jetbrains.kotlin.konan.target.*
 
 class ExecClang(private val project: Project) {
 
@@ -44,7 +44,7 @@ class ExecClang(private val project: Project) {
 
         if (listOf("clang", "clang++").contains(executable)) {
             val llvmDir = project.findProperty("llvmDir")
-            return "${llvmDir}/bin/$executable"
+            return "$llvmDir/bin/$executable"
         } else {
             throw GradleException("unsupported clang executable: $executable")
         }
@@ -97,7 +97,7 @@ class ExecClang(private val project: Project) {
 
                     val hostPlatform = project.findProperty("hostPlatform") as Platform
                     environment["PATH"] = project.files(hostPlatform.clang.clangPaths).asPath +
-                            java.io.File.pathSeparator + environment["PATH"]
+                        java.io.File.pathSeparator + environment["PATH"]
                     args(defaultArgs)
                 }
             }

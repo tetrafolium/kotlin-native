@@ -64,22 +64,24 @@ open class MetadataComparisonTest : DefaultTask() {
         val tool = if (HostManager.hostIsMingw) "cinterop.bat" else "cinterop"
         val cinterop = File("${dist.canonicalPath}/bin/$tool").absolutePath
         val args = listOf(
-                "-def", defFile.absolutePath,
-                "-mode", mode.name.toLowerCase(),
-                "-target", project.testTarget.visibleName,
-                "-no-default-libs", "-no-endorsed-libs",
-                "-o", output
+            "-def", defFile.absolutePath,
+            "-mode", mode.name.toLowerCase(),
+            "-target", project.testTarget.visibleName,
+            "-no-default-libs", "-no-endorsed-libs",
+            "-o", output
         )
         runProcess(localExecutor(project), cinterop, args).let { result ->
             if (result.exitCode != 0) {
-                println("""
+                println(
+                    """
                     cinterop failed.
                     exitCode: ${result.exitCode}
                     stdout:
                     ${result.stdOut}
                     stderr:
                     ${result.stdErr}
-                """.trimIndent())
+                    """.trimIndent()
+                )
             }
         }
         return File(output)

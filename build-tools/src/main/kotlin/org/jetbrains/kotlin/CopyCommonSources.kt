@@ -54,11 +54,11 @@ open class CopyCommonSources : DefaultTask() {
             sourcePath.copyFilteredTo(tempDir)
 
             project.ant.invokeMethod(
-                    "zip",
-                    mapOf(
-                            "destfile" to outputDir.resolve(targetFileName).absolutePath,
-                            "basedir" to tempDir.absolutePath
-                    )
+                "zip",
+                mapOf(
+                    "destfile" to outputDir.resolve(targetFileName).absolutePath,
+                    "basedir" to tempDir.absolutePath
+                )
             )
         }
     }
@@ -76,4 +76,3 @@ open class CopyCommonSources : DefaultTask() {
         }
     }
 }
-

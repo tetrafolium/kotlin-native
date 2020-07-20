@@ -34,8 +34,10 @@ interface MultipleOptionType {
  *
  * You can use [ArgParser.option] function to declare an option.
  */
-abstract class Option<TResult> internal constructor(delegate: ArgumentValueDelegate<TResult>,
-                                                    owner: CLIEntityWrapper) : CLIEntity<TResult>(delegate, owner)
+abstract class Option<TResult> internal constructor(
+    delegate: ArgumentValueDelegate<TResult>,
+    owner: CLIEntityWrapper
+) : CLIEntity<TResult>(delegate, owner)
 
 /**
  * The base class of an option with a single value.
@@ -43,9 +45,10 @@ abstract class Option<TResult> internal constructor(delegate: ArgumentValueDeleg
  * A required option or an option with a default value is represented with the [SingleOption] inheritor.
  * An option having nullable value is represented with the [SingleNullableOption] inheritor.
  */
-abstract class AbstractSingleOption<T : Any, TResult, DefaultRequired: DefaultRequiredType> internal constructor(
+abstract class AbstractSingleOption<T : Any, TResult, DefaultRequired : DefaultRequiredType> internal constructor(
     delegate: ArgumentValueDelegate<TResult>,
-    owner: CLIEntityWrapper) :
+    owner: CLIEntityWrapper
+) :
     Option<TResult>(delegate, owner) {
     /**
      * Check descriptor for this kind of option.
@@ -62,8 +65,10 @@ abstract class AbstractSingleOption<T : Any, TResult, DefaultRequired: DefaultRe
  *
  * The [value] of such option is non-null.
  */
-class SingleOption<T : Any, DefaultType: DefaultRequiredType> internal constructor(descriptor: OptionDescriptor<T, T>,
-                                                                                   owner: CLIEntityWrapper) :
+class SingleOption<T : Any, DefaultType : DefaultRequiredType> internal constructor(
+    descriptor: OptionDescriptor<T, T>,
+    owner: CLIEntityWrapper
+) :
     AbstractSingleOption<T, T, DefaultRequiredType>(ArgumentSingleValue(descriptor), owner) {
     init {
         checkDescriptor(descriptor)
@@ -85,11 +90,11 @@ class SingleNullableOption<T : Any> internal constructor(descriptor: OptionDescr
  *
  * The [value] property of such option has type `List<T>`.
  */
-class MultipleOption<T : Any, OptionType : MultipleOptionType, DefaultType: DefaultRequiredType> internal constructor(
+class MultipleOption<T : Any, OptionType : MultipleOptionType, DefaultType : DefaultRequiredType> internal constructor(
     descriptor: OptionDescriptor<T, List<T>>,
     owner: CLIEntityWrapper
 ) :
-    Option<List<T>>( ArgumentMultipleValues(descriptor), owner) {
+    Option<List<T>>(ArgumentMultipleValues(descriptor), owner) {
     init {
         if (!descriptor.multiple && descriptor.delimiter == null) {
             failAssertion("Option with multiple values can't be initialized with descriptor for single one.")
@@ -101,42 +106,44 @@ class MultipleOption<T : Any, OptionType : MultipleOptionType, DefaultType: Defa
  * Allows the option to have several values specified in command line string.
  * Number of values is unlimited.
  */
-fun <T : Any, TResult, DefaultType: DefaultRequiredType> AbstractSingleOption<T, TResult, DefaultType>.multiple():
-        MultipleOption<T, MultipleOptionType.Repeated, DefaultType> {
-    val newOption = with(delegate.cast<ParsingValue<T, T>>().descriptor as OptionDescriptor) {
-        MultipleOption<T, MultipleOptionType.Repeated, DefaultType>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, listOfNotNull(defaultValue),
-                required, true, delimiter, deprecatedWarning
-            ), owner
-        )
+fun <T : Any, TResult, DefaultType : DefaultRequiredType> AbstractSingleOption<T, TResult, DefaultType>.multiple():
+    MultipleOption<T, MultipleOptionType.Repeated, DefaultType> {
+        val newOption = with(delegate.cast<ParsingValue<T, T>>().descriptor as OptionDescriptor) {
+            MultipleOption<T, MultipleOptionType.Repeated, DefaultType>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                    description, listOfNotNull(defaultValue),
+                    required, true, delimiter, deprecatedWarning
+                ),
+                owner
+            )
+        }
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}
 
 /**
  * Allows the option to have several values specified in command line string.
  * Number of values is unlimited.
  */
-fun <T : Any, DefaultType: DefaultRequiredType> MultipleOption<T, MultipleOptionType.Delimited, DefaultType>.multiple():
-        MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequiredType> {
-    val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
-        if (multiple) {
-            error("Try to use modifier multiple() twice on option ${fullName ?: ""}")
+fun <T : Any, DefaultType : DefaultRequiredType> MultipleOption<T, MultipleOptionType.Delimited, DefaultType>.multiple():
+    MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequiredType> {
+        val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
+            if (multiple) {
+                error("Try to use modifier multiple() twice on option ${fullName ?: ""}")
+            }
+            MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequiredType>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                    description, defaultValue?.toList() ?: listOf(),
+                    required, true, delimiter, deprecatedWarning
+                ),
+                owner
+            )
         }
-        MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequiredType>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
-                required, true, delimiter, deprecatedWarning
-            ), owner
-        )
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}
 
 /**
  * Specifies the default value for the option, that will be used when no value is provided for it
@@ -150,7 +157,8 @@ fun <T : Any> SingleNullableOption<T>.default(value: T): SingleOption<T, Default
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, value, required, multiple, delimiter, deprecatedWarning
-            ), owner
+            ),
+            owner
         )
     }
     owner.entity = newOption
@@ -165,21 +173,22 @@ fun <T : Any> SingleNullableOption<T>.default(value: T): SingleOption<T, Default
  * @throws IllegalArgumentException if provided default value is empty collection.
  */
 fun <T : Any, OptionType : MultipleOptionType>
-        MultipleOption<T, OptionType, DefaultRequiredType.None>.default(value: Collection<T>):
-        MultipleOption<T, OptionType, DefaultRequiredType.Default> {
-    val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
-        require(value.isNotEmpty()) { "Default value for option can't be empty collection." }
-        MultipleOption<T, OptionType, DefaultRequiredType.Default>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName,
-                shortName, description, value.toList(),
-                required, multiple, delimiter, deprecatedWarning
-            ), owner
-        )
+MultipleOption<T, OptionType, DefaultRequiredType.None>.default(value: Collection<T>):
+    MultipleOption<T, OptionType, DefaultRequiredType.Default> {
+        val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
+            require(value.isNotEmpty()) { "Default value for option can't be empty collection." }
+            MultipleOption<T, OptionType, DefaultRequiredType.Default>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName,
+                    shortName, description, value.toList(),
+                    required, multiple, delimiter, deprecatedWarning
+                ),
+                owner
+            )
+        }
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}
 
 /**
  * Requires the option to be always provided in command line.
@@ -191,7 +200,8 @@ fun <T : Any> SingleNullableOption<T>.required(): SingleOption<T, DefaultRequire
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName,
                 shortName, description, defaultValue,
                 true, multiple, delimiter, deprecatedWarning
-            ), owner
+            ),
+            owner
         )
     }
     owner.entity = newOption
@@ -202,20 +212,21 @@ fun <T : Any> SingleNullableOption<T>.required(): SingleOption<T, DefaultRequire
  * Requires the option to be always provided in command line.
  */
 fun <T : Any, OptionType : MultipleOptionType>
-        MultipleOption<T, OptionType, DefaultRequiredType.None>.required():
-        MultipleOption<T, OptionType, DefaultRequiredType.Required> {
-    val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
-        MultipleOption<T, OptionType, DefaultRequiredType.Required>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
-                true, multiple, delimiter, deprecatedWarning
-            ), owner
-        )
+MultipleOption<T, OptionType, DefaultRequiredType.None>.required():
+    MultipleOption<T, OptionType, DefaultRequiredType.Required> {
+        val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
+            MultipleOption<T, OptionType, DefaultRequiredType.Required>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                    description, defaultValue?.toList() ?: listOf(),
+                    true, multiple, delimiter, deprecatedWarning
+                ),
+                owner
+            )
+        }
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}
 
 /**
  * Allows the option to have several values joined with [delimiter] specified in command line string.
@@ -225,21 +236,23 @@ fun <T : Any, OptionType : MultipleOptionType>
  *
  * @param delimiterValue delimiter used to separate string value to option values list.
  */
-fun <T : Any, DefaultRequired: DefaultRequiredType> AbstractSingleOption<T, *, DefaultRequired>.delimiter(
-    delimiterValue: String):
-        MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired> {
-    val newOption = with(delegate.cast<ParsingValue<T, T>>().descriptor as OptionDescriptor) {
-        MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, listOfNotNull(defaultValue),
-                required, multiple, delimiterValue, deprecatedWarning
-            ), owner
-        )
+fun <T : Any, DefaultRequired : DefaultRequiredType> AbstractSingleOption<T, *, DefaultRequired>.delimiter(
+    delimiterValue: String
+):
+    MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired> {
+        val newOption = with(delegate.cast<ParsingValue<T, T>>().descriptor as OptionDescriptor) {
+            MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                    description, listOfNotNull(defaultValue),
+                    required, multiple, delimiterValue, deprecatedWarning
+                ),
+                owner
+            )
+        }
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}
 
 /**
  * Allows the option to have several values joined with [delimiter] specified in command line string.
@@ -249,18 +262,20 @@ fun <T : Any, DefaultRequired: DefaultRequiredType> AbstractSingleOption<T, *, D
  *
  * @param delimiterValue delimiter used to separate string value to option values list.
  */
-fun <T : Any, DefaultRequired: DefaultRequiredType> MultipleOption<T, MultipleOptionType.Repeated, DefaultRequired>.delimiter(
-    delimiterValue: String):
-        MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequired> {
-    val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
-        MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequired>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
-                required, multiple, delimiterValue, deprecatedWarning
-            ), owner
-        )
+fun <T : Any, DefaultRequired : DefaultRequiredType> MultipleOption<T, MultipleOptionType.Repeated, DefaultRequired>.delimiter(
+    delimiterValue: String
+):
+    MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequired> {
+        val newOption = with(delegate.cast<ParsingValue<T, List<T>>>().descriptor as OptionDescriptor) {
+            MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequired>(
+                OptionDescriptor(
+                    optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                    description, defaultValue?.toList() ?: listOf(),
+                    required, multiple, delimiterValue, deprecatedWarning
+                ),
+                owner
+            )
+        }
+        owner.entity = newOption
+        return newOption
     }
-    owner.entity = newOption
-    return newOption
-}

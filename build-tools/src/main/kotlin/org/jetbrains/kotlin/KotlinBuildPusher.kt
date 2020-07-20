@@ -91,7 +91,7 @@ open class KotlinBuildPusher : DefaultTask() {
     }
 }
 
-internal fun StringBuilder.paired(tag:String, body:StringBuilder.()->Unit) {
+internal fun StringBuilder.paired(tag: String, body: StringBuilder.() -> Unit) {
     appendln("<$tag>")
     body()
     appendln("</$tag>")
@@ -103,4 +103,3 @@ internal fun StringBuilder.lastChanges(body: StringBuilder.() -> Unit) = paired(
 internal fun StringBuilder.change(build: String) = appendln("<change locator=\"build:$build\"/>")
 internal fun StringBuilder.properties(body: StringBuilder.() -> Unit) = paired("properties", body)
 internal fun StringBuilder.property(key: String, value: String) = appendln("<property name=\"$key\" value=\"$value\"/>")
-

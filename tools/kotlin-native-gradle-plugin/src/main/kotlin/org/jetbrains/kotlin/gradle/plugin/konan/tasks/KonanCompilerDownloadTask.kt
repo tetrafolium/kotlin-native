@@ -58,9 +58,9 @@ open class KonanCompilerDownloadTask : DefaultTask() {
                 val parentDir = DependencyProcessor.localKonanDir
                 logger.info("Downloading Kotlin/Native compiler from $downloadUrlDirectory/$konanCompiler into $parentDir")
                 DependencyProcessor(
-                        parentDir,
-                        downloadUrlDirectory,
-                        mapOf(konanCompiler to listOf(DependencySource.Remote.Public))
+                    parentDir,
+                    downloadUrlDirectory,
+                    mapOf(konanCompiler to listOf(DependencySource.Remote.Public))
                 ).run()
             } catch (e: IOException) {
                 throw GradleScriptException("Cannot download Kotlin/Native compiler", e)

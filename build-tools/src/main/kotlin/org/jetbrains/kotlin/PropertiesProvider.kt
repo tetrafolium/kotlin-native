@@ -13,13 +13,13 @@ class PropertiesProvider(val project: Project) {
     }
 
     fun findProperty(name: String): Any? =
-            project.findProperty(name) ?: localProperties.getProperty(name)
+        project.findProperty(name) ?: localProperties.getProperty(name)
 
     fun getProperty(name: String): Any =
-            findProperty(name) ?: throw IllegalArgumentException("No such property: $name")
+        findProperty(name) ?: throw IllegalArgumentException("No such property: $name")
 
     fun hasProperty(name: String): Boolean =
-            project.hasProperty(name) || localProperties.containsKey(name)
+        project.hasProperty(name) || localProperties.containsKey(name)
 
     val xcodeMajorVersion: String?
         get() = findProperty("xcodeMajorVersion") as String?

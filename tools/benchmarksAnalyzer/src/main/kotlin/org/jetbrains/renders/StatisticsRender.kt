@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.renders
 
 import org.jetbrains.analyzer.*
@@ -25,7 +24,7 @@ enum class Status {
 }
 
 // Report render to short summary statistics.
-class StatisticsRender: Render() {
+class StatisticsRender : Render() {
     override val name: String
         get() = "statistics"
 
@@ -34,9 +33,9 @@ class StatisticsRender: Render() {
     override fun render(report: SummaryBenchmarksReport, onlyChanges: Boolean): String {
         val benchmarksWithChangedStatus = report.getBenchmarksWithChangedStatus()
         val newPasses = benchmarksWithChangedStatus
-                .filter { it.current == BenchmarkResult.Status.PASSED }
+            .filter { it.current == BenchmarkResult.Status.PASSED }
         val newFailures = benchmarksWithChangedStatus
-                .filter { it.current == BenchmarkResult.Status.FAILED }
+            .filter { it.current == BenchmarkResult.Status.FAILED }
         if (report.failedBenchmarks.isNotEmpty()) {
             content.append("failed: ${report.failedBenchmarks.size}\n")
         }
@@ -53,7 +52,7 @@ class StatisticsRender: Render() {
                 content.append("regressions: ${report.regressions.size}\nimprovements: ${report.improvements.size}")
                 Status.UNSTABLE
             }
-            report.improvements.isNotEmpty() && report.regressions.isEmpty() ->  {
+            report.improvements.isNotEmpty() && report.regressions.isEmpty() -> {
                 content.append("improvements: ${report.improvements.size}")
                 Status.IMPROVED
             }

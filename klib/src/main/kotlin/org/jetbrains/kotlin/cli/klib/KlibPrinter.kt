@@ -23,8 +23,8 @@ class KlibPrinter(out: Appendable) {
         get() = kind == CallableMemberDescriptor.Kind.FAKE_OVERRIDE
 
     val DeclarationDescriptor.shouldBePrinted: Boolean
-        get() = this is ClassifierDescriptorWithTypeParameters && isPublicOrProtected
-                || this is CallableMemberDescriptor && isPublicOrProtected && !isFakeOverride
+        get() = this is ClassifierDescriptorWithTypeParameters && isPublicOrProtected ||
+            this is CallableMemberDescriptor && isPublicOrProtected && !isFakeOverride
 
     private fun Printer.printBody(header: CharSequence, block: () -> Unit) {
         println()
@@ -50,7 +50,7 @@ class KlibPrinter(out: Appendable) {
         val renderer = when {
             // Don't render modality for non-override final methods and interface methods.
             containingDeclaration is ClassDescriptor && containingDeclaration.kind == ClassKind.INTERFACE ||
-            modality == Modality.FINAL && overriddenDescriptors.isEmpty() ->
+                modality == Modality.FINAL && overriddenDescriptors.isEmpty() ->
                 Renderers.WITHOUT_MODALITY
             else -> Renderers.DEFAULT
         }
@@ -158,5 +158,4 @@ class KlibPrinter(out: Appendable) {
             modifiers -= DescriptorRendererModifier.MODALITY
         }
     }
-
 }

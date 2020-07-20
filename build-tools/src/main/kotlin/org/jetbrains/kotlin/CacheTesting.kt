@@ -37,21 +37,21 @@ fun configureCacheTesting(project: Project): CacheTesting? {
 
         if (!(project.property("useCustomDist") as Boolean)) {
             val tasks = listOf(
-                    "${target}CrossDist",
-                    "${target}CrossDistRuntime",
-                    "distCompiler"
+                "${target}CrossDist",
+                "${target}CrossDistRuntime",
+                "distCompiler"
             ).map { task -> project.rootProject.tasks.getByName(task) }
 
             it.dependsOn(tasks)
         }
 
         it.commandLine(
-                "$dist/bin/konanc",
-                "-p", cacheKind.visibleName,
-                "-o", "$cacheDir/stdlib-cache",
-                "-Xmake-cache=$stdlib",
-                "-no-default-libs", "-nostdlib",
-                "-g"
+            "$dist/bin/konanc",
+            "-p", cacheKind.visibleName,
+            "-o", "$cacheDir/stdlib-cache",
+            "-Xmake-cache=$stdlib",
+            "-no-default-libs", "-nostdlib",
+            "-g"
         )
     }
 

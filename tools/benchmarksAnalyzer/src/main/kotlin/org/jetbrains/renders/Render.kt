@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.renders
 
 import org.jetbrains.analyzer.*
 import org.jetbrains.report.BenchmarkResult
-
-import kotlin.math.abs
 
 // Base class for printing report in different formats.
 abstract class Render {
@@ -50,11 +47,11 @@ abstract class Render {
     }
 
     protected fun formatValue(number: Double, isPercent: Boolean = false): String =
-            if (isPercent) number.format(2) + "%" else number.format()
+        if (isPercent) number.format(2) + "%" else number.format()
 }
 
 // Report render to text format.
-class TextRender: Render() {
+class TextRender : Render() {
     override val name: String
         get() = "text"
 
@@ -102,10 +99,16 @@ class TextRender: Render() {
         if (!benchmarksWithChangedStatus.isEmpty()) {
             append("Changes in status")
             append(headerSeparator)
-            printStatusChangeInfo(benchmarksWithChangedStatus
-                    .filter { it.current == BenchmarkResult.Status.FAILED }, "New failures")
-            printStatusChangeInfo(benchmarksWithChangedStatus
-                    .filter { it.current == BenchmarkResult.Status.PASSED }, "New passes")
+            printStatusChangeInfo(
+                benchmarksWithChangedStatus
+                    .filter { it.current == BenchmarkResult.Status.FAILED },
+                "New failures"
+            )
+            printStatusChangeInfo(
+                benchmarksWithChangedStatus
+                    .filter { it.current == BenchmarkResult.Status.PASSED },
+                "New passes"
+            )
             append()
         }
     }
@@ -134,54 +137,66 @@ class TextRender: Render() {
             append("Performance summary")
             append(headerSeparator)
             if (!report.regressions.isEmpty()) {
-                append("Regressions: Maximum = ${formatValue(report.maximumRegression, true)}," +
-                        " Geometric mean = ${formatValue(report.regressionsGeometricMean, true)}")
+                append(
+                    "Regressions: Maximum = ${formatValue(report.maximumRegression, true)}," +
+                        " Geometric mean = ${formatValue(report.regressionsGeometricMean, true)}"
+                )
             }
             if (!report.improvements.isEmpty()) {
-                append("Improvements: Maximum = ${formatValue(report.maximumImprovement, true)}," +
-                        " Geometric mean = ${formatValue(report.improvementsGeometricMean, true)}")
+                append(
+                    "Improvements: Maximum = ${formatValue(report.maximumImprovement, true)}," +
+                        " Geometric mean = ${formatValue(report.improvementsGeometricMean, true)}"
+                )
             }
             append()
         }
     }
 
-    private fun formatColumn(content:String, isWide: Boolean = false): String =
-            content.padEnd(if (isWide) wideColumnWidth else standardColumnWidth, ' ')
+    private fun formatColumn(content: String, isWide: Boolean = false): String =
+        content.padEnd(if (isWide) wideColumnWidth else standardColumnWidth, ' ')
 
-    private fun printBenchmarksDetails(fullSet: Map<String, SummaryBenchmark>,
-                                       bucket: Map<String, ScoreChange>? = null) {
+    private fun printBenchmarksDetails(
+        fullSet: Map<String, SummaryBenchmark>,
+        bucket: Map<String, ScoreChange>? = null
+    ) {
         if (bucket != null) {
             // There are changes in performance.
             // Output changed benchmarks.
             for ((name, change) in bucket) {
-                append(formatColumn(name, true) +
+                append(
+                    formatColumn(name, true) +
                         formatColumn(fullSet.getValue(name).first.toString()) +
                         formatColumn(fullSet.getValue(name).second.toString()) +
                         formatColumn(change.first.toString() + " %") +
-                        formatColumn(change.second.toString()))
+                        formatColumn(change.second.toString())
+                )
             }
         } else {
             // Output all values without performance changes.
             val placeholder = "-"
             for ((name, value) in fullSet) {
-                append(formatColumn(name, true) +
+                append(
+                    formatColumn(name, true) +
                         formatColumn(value.first?.toString() ?: placeholder) +
                         formatColumn(value.second?.toString() ?: placeholder) +
                         formatColumn(placeholder) +
-                        formatColumn(placeholder))
+                        formatColumn(placeholder)
+                )
             }
         }
     }
 
     private fun printTableLineSeparator(tableWidth: Int) =
-            append("${"-".padEnd(tableWidth, '-')}")
+        append("${"-".padEnd(tableWidth, '-')}")
 
     private fun printPerformanceTableHeader(): Int {
         val wideColumns = listOf(formatColumn("Benchmark", true))
-        val standardColumns = listOf(formatColumn("First score"),
-                formatColumn("Second score"),
-                formatColumn("Percent"),
-                formatColumn("Ratio"))
+        val standardColumns = listOf(
+            formatColumn("First score"),
+            formatColumn("Second score"),
+            formatColumn("Percent"),
+            formatColumn("Ratio")
+        )
         val tableWidth = wideColumnWidth * wideColumns.size + standardColumnWidth * standardColumns.size
         append("${wideColumns.joinToString(separator = "")}${standardColumns.joinToString(separator = "")}")
         printTableLineSeparator(tableWidth)
@@ -200,18 +215,23 @@ class TextRender: Render() {
 
         val tableWidth = printPerformanceTableHeader()
         // Print geometric mean.
-        val geoMeanChangeMap = report.geoMeanScoreChange?.
-                let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
+        val geoMeanChangeMap = report.geoMeanScoreChange
+            ?.let { mapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanScoreChange!!) }
         printBenchmarksDetails(
-                mutableMapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanBenchmark),
-                geoMeanChangeMap)
+            mutableMapOf(report.geoMeanBenchmark.first!!.meanBenchmark.name to report.geoMeanBenchmark),
+            geoMeanChangeMap
+        )
         printTableLineSeparator(tableWidth)
         printBenchmarksDetails(report.mergedReport, report.regressions)
         printBenchmarksDetails(report.mergedReport, report.improvements)
         if (!onlyChanges) {
             // Print all remaining results.
-            printBenchmarksDetails(report.mergedReport.filter { it.key !in report.regressions.keys &&
-                    it.key !in report.improvements.keys })
+            printBenchmarksDetails(
+                report.mergedReport.filter {
+                    it.key !in report.regressions.keys &&
+                        it.key !in report.improvements.keys
+                }
+            )
         }
     }
 }

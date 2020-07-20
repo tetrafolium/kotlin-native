@@ -25,7 +25,7 @@ package org.jetbrains.ring
 open class PrimeListBenchmark {
     private var primes: MutableList<Int> = mutableListOf()
 
-    //Benchmark
+    // Benchmark
     fun calcDirect() {
         primes.clear()
         primes.add(2)
@@ -46,7 +46,7 @@ open class PrimeListBenchmark {
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun calcEratosthenes() {
         primes.clear()
         primes.addAll(2..BENCHMARK_SIZE)

@@ -20,26 +20,26 @@ import org.jetbrains.benchmarksLauncher.Blackhole
 
 open class IntBaselineBenchmark {
 
-    //Benchmark
+    // Benchmark
     fun consume() {
         for (item in 1..BENCHMARK_SIZE) {
             Blackhole.consume(item)
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun allocateList(): List<Int> {
         val list = ArrayList<Int>(BENCHMARK_SIZE)
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun allocateArray(): IntArray {
         val list = IntArray(BENCHMARK_SIZE)
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun allocateListAndFill(): List<Int> {
         val list = ArrayList<Int>(BENCHMARK_SIZE)
         for (item in 1..BENCHMARK_SIZE) {
@@ -48,7 +48,7 @@ open class IntBaselineBenchmark {
         return list
     }
 
-    //Benchmark
+    // Benchmark
     fun allocateArrayAndFill(): IntArray {
         var index = 0
         val list = IntArray(BENCHMARK_SIZE)

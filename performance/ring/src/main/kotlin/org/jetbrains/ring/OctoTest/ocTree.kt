@@ -4,20 +4,20 @@ open class OctoTree<T>(val depth: Int) {
     private var root: Node<T>? = null
     private var actual = false
 
-    //-------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------//
 
     fun get(x: Int, y: Int, z: Int): T? {
         var dep = depth
         var iter = root
         while (true) {
-            if (iter == null)           return null
+            if (iter == null) return null
             else if (iter is Node.Leaf) return iter.value
 
             iter = (iter as Node.Branch<T>).nodes[number(x, y, z, --dep)]
         }
     }
 
-    //-------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------//
 
     fun set(x: Int, y: Int, z: Int, value: T) {
         if (root == null) root = Node.Branch()
@@ -27,17 +27,17 @@ open class OctoTree<T>(val depth: Int) {
         actual = false
     }
 
-    //-------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------//
 
     override fun toString(): String = root.toString()
 
-    //-------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------//
 
     sealed class Node<T> {
 
         abstract fun set(x: Int, y: Int, z: Int, value: T, depth: Int): Boolean
 
-        //---------------------------------------------------------------------//
+        // ---------------------------------------------------------------------//
 
         class Leaf<T>(var value: T) : Node<T>() {
 
@@ -48,7 +48,7 @@ open class OctoTree<T>(val depth: Int) {
             override fun toString(): String = "L{$value}"
         }
 
-        //---------------------------------------------------------------------//
+        // ---------------------------------------------------------------------//
 
         class Branch<T>() : Node<T>() {
 
@@ -110,7 +110,7 @@ open class OctoTree<T>(val depth: Int) {
         }
     }
 
-    //-------------------------------------------------------------------------//
+    // -------------------------------------------------------------------------//
 
     companion object {
         fun number(x: Int, y: Int, z: Int, depth: Int): Int {

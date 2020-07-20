@@ -60,7 +60,7 @@ sealed class JsonElement {
         get() = this === JsonNull
 
     private fun error(element: String): Nothing =
-            throw JsonElementTypeMismatchException(this::class.toString(), element)
+        throw JsonElementTypeMismatchException(this::class.toString(), element)
 }
 
 /**
@@ -144,8 +144,8 @@ sealed class JsonPrimitive : JsonElement() {
  * Strings are always quoted.
  */
 data class JsonLiteral internal constructor(
-        private val body: Any,
-        private val isString: Boolean
+    private val body: Any,
+    private val isString: Boolean
 ) : JsonPrimitive() {
 
     override val content = body.toString()
@@ -167,8 +167,8 @@ data class JsonLiteral internal constructor(
     constructor(string: String) : this(string, true)
 
     override fun toString() =
-            if (isString) buildString { printQuoted(content) }
-            else content
+        if (isString) buildString { printQuoted(content) }
+        else content
 
     fun unquoted() = content
 }
@@ -207,7 +207,7 @@ data class JsonObject(val content: Map<String, JsonElement>) : JsonElement(), Ma
      * @throws JsonElementTypeMismatchException if element is present, but has invalid type
      */
     fun getPrimitive(key: String): JsonPrimitive = get(key) as? JsonPrimitive
-            ?: unexpectedJson(key, "JsonPrimitive")
+        ?: unexpectedJson(key, "JsonPrimitive")
 
     /**
      * Returns [JsonObject] associated with given [key]
@@ -216,7 +216,7 @@ data class JsonObject(val content: Map<String, JsonElement>) : JsonElement(), Ma
      * @throws JsonElementTypeMismatchException if element is present, but has invalid type
      */
     fun getObject(key: String): JsonObject = get(key) as? JsonObject
-            ?: unexpectedJson(key, "JsonObject")
+        ?: unexpectedJson(key, "JsonObject")
 
     /**
      * Returns [JsonArray] associated with given [key]
@@ -225,7 +225,7 @@ data class JsonObject(val content: Map<String, JsonElement>) : JsonElement(), Ma
      * @throws JsonElementTypeMismatchException if element is present, but has invalid type
      */
     fun getArray(key: String): JsonArray = get(key) as? JsonArray
-            ?: unexpectedJson(key, "JsonArray")
+        ?: unexpectedJson(key, "JsonArray")
 
     /**
      * Returns [JsonPrimitive] associated with given [key] or `null` if element
@@ -252,7 +252,7 @@ data class JsonObject(val content: Map<String, JsonElement>) : JsonElement(), Ma
      * @throws JsonElementTypeMismatchException if element is present, but has invalid type
      */
     inline fun <reified J : JsonElement> getAs(key: String): J = get(key) as? J
-            ?: unexpectedJson(key, J::class.toString())
+        ?: unexpectedJson(key, J::class.toString())
 
     /**
      * Returns [J] associated with given [key] or `null` if element
@@ -262,9 +262,9 @@ data class JsonObject(val content: Map<String, JsonElement>) : JsonElement(), Ma
 
     override fun toString(): String {
         return content.entries.joinToString(
-                prefix = "{",
-                postfix = "}",
-                transform = {(k, v) -> """"$k": $v"""}
+            prefix = "{",
+            postfix = "}",
+            transform = { (k, v) -> """"$k": $v""" }
         )
     }
 }
@@ -278,21 +278,21 @@ data class JsonArray(val content: List<JsonElement>) : JsonElement(), List<JsonE
      * @throws JsonElementTypeMismatchException if element has invalid type
      */
     fun getPrimitive(index: Int) = content[index] as? JsonPrimitive
-            ?: unexpectedJson("at $index", "JsonPrimitive")
+        ?: unexpectedJson("at $index", "JsonPrimitive")
 
     /**
      * Returns [index]-th element of an array as [JsonObject]
      * @throws JsonElementTypeMismatchException if element has invalid type
      */
     fun getObject(index: Int) = content[index] as? JsonObject
-            ?: unexpectedJson("at $index", "JsonObject")
+        ?: unexpectedJson("at $index", "JsonObject")
 
     /**
      * Returns [index]-th element of an array as [JsonArray]
      * @throws JsonElementTypeMismatchException if element has invalid type
      */
     fun getArray(index: Int) = content[index] as? JsonArray
-            ?: unexpectedJson("at $index", "JsonArray")
+        ?: unexpectedJson("at $index", "JsonArray")
 
     /**
      * Returns [index]-th element of an array as [JsonPrimitive] or `null` if element is missing or has different type
@@ -314,7 +314,7 @@ data class JsonArray(val content: List<JsonElement>) : JsonElement(), List<JsonE
      * @throws JsonElementTypeMismatchException if element has invalid type
      */
     inline fun <reified J : JsonElement> getAs(index: Int): J = content[index] as? J
-            ?: unexpectedJson("at $index", J::class.toString())
+        ?: unexpectedJson("at $index", J::class.toString())
 
     /**
      * Returns [index]-th element of an array as [J] or `null` if element is missing or has different type
@@ -325,4 +325,4 @@ data class JsonArray(val content: List<JsonElement>) : JsonElement(), List<JsonE
 }
 
 fun unexpectedJson(key: String, expected: String): Nothing =
-        throw JsonElementTypeMismatchException(key, expected)
+    throw JsonElementTypeMismatchException(key, expected)

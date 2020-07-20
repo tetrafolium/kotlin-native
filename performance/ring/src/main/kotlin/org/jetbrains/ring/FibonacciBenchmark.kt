@@ -27,12 +27,12 @@ package org.jetbrains.ring
 
 open class FibonacciBenchmark {
 
-    //Benchmark
+    // Benchmark
     fun calcClassic(): Long {
         var a = 1L
         var b = 2L
         val size = BENCHMARK_SIZE
-        for (i in 0..size-1) {
+        for (i in 0..size - 1) {
             val next = a + b
             a = b
             b = next
@@ -40,7 +40,7 @@ open class FibonacciBenchmark {
         return b
     }
 
-    //Benchmark
+    // Benchmark
     fun calc(): Long {
         // This test works CRITICALLY slower compared with java equivalent (05.03.2015)
         var a = 1L
@@ -54,13 +54,13 @@ open class FibonacciBenchmark {
         return b
     }
 
-    //Benchmark
+    // Benchmark
     fun calcWithProgression(): Long {
         // This test works CRITICALLY slower compared with java equivalent (05.03.2015)
         var a = 1L
         var b = 2L
         // Probably for with step is the reason of slowness
-        for (i in 1..2*BENCHMARK_SIZE-1 step 2) {
+        for (i in 1..2 * BENCHMARK_SIZE - 1 step 2) {
             val next = a + b
             a = b
             b = next
@@ -68,13 +68,13 @@ open class FibonacciBenchmark {
         return b
     }
 
-    //Benchmark
+    // Benchmark
     fun calcSquare(): Long {
         // This test works CRITICALLY slower compared with java equivalent (05.03.2015)
         var a = 1L
         var b = 2L
         val s = BENCHMARK_SIZE.toLong()
-        val limit = s*s
+        val limit = s * s
         // Probably for with downTo is the reason of slowness
         for (i in limit downTo 1) {
             val next = a + b

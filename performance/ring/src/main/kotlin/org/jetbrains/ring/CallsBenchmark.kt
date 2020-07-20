@@ -134,7 +134,7 @@ open class CallsBenchmark {
         override fun foo() = 117
     }
 
-    class D: A() {
+    class D : A() {
         override fun foo() = 314
     }
 
@@ -196,11 +196,13 @@ open class CallsBenchmark {
         val a2 = a2
         val a3 = a3
         for (i in 0 until RUNS)
-            x += (when (i % 3) {
-                1 -> a1
-                2 -> a2
-                else -> a3
-            }).foo()
+            x += (
+                when (i % 3) {
+                    1 -> a1
+                    2 -> a2
+                    else -> a3
+                }
+                ).foo()
         return x
     }
 
@@ -230,11 +232,13 @@ open class CallsBenchmark {
         val i2 = i2
         val i3 = i3
         for (i in 0 until RUNS)
-            x += (when (i % 3) {
-                1 -> i1
-                2 -> i2
-                else -> i3
-            }).foo()
+            x += (
+                when (i % 3) {
+                    1 -> i1
+                    2 -> i2
+                    else -> i3
+                }
+                ).foo()
         return x
     }
 
@@ -248,14 +252,16 @@ open class CallsBenchmark {
         val i5 = i5
         val i6 = i6
         for (i in 0 until RUNS)
-            x += (when (i % 6) {
-                1 -> i1
-                2 -> i2
-                3 -> i3
-                4 -> i4
-                5 -> i5
-                else -> i6
-            }).foo()
+            x += (
+                when (i % 6) {
+                    1 -> i1
+                    2 -> i2
+                    3 -> i3
+                    4 -> i4
+                    5 -> i5
+                    else -> i6
+                }
+                ).foo()
         return x
     }
 

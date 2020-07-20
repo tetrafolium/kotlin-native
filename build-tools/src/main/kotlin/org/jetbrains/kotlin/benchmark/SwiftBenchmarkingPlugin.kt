@@ -5,20 +5,19 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.jetbrains.kotlin.*
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.AbstractKotlinNativeTargetPreset
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import java.io.File
-import javax.inject.Inject
 import java.nio.file.Paths
+import javax.inject.Inject
 import kotlin.reflect.KClass
 
 enum class CodeSizeEntity { FRAMEWORK, EXECUTABLE }
 
 open class SwiftBenchmarkExtension @Inject constructor(project: Project) : BenchmarkExtension(project) {
     var swiftSources: List<String> = emptyList()
-    var useCodeSize: CodeSizeEntity = CodeSizeEntity.FRAMEWORK         // use as code size metric framework size or executable
+    var useCodeSize: CodeSizeEntity = CodeSizeEntity.FRAMEWORK // use as code size metric framework size or executable
 }
 
 /**
@@ -84,24 +83,27 @@ open class SwiftBenchmarkingPlugin : BenchmarkingPlugin() {
             task.doLast {
                 val frameworkParentDirPath = framework.outputDirectory.absolutePath
                 val options = listOf("-O", "-wmo", "-Xlinker", "-rpath", "-Xlinker", frameworkParentDirPath, "-F", frameworkParentDirPath)
-                compileSwift(project, nativeTarget.konanTarget, benchmark.swiftSources, options,
-                        Paths.get(buildDir.absolutePath, benchmark.applicationName), false)
+                compileSwift(
+                    project, nativeTarget.konanTarget, benchmark.swiftSources, options,
+                    Paths.get(buildDir.absolutePath, benchmark.applicationName), false
+                )
             }
         }
     }
 
     override fun Project.collectCodeSize(applicationName: String) =
-            getCodeSizeBenchmark(applicationName,
-                    if (benchmark.useCodeSize == CodeSizeEntity.FRAMEWORK)
-                        File("${framework.outputFile.absolutePath}/$nativeFrameworkName").canonicalPath
-                    else
-                        nativeExecutable
-            )
+        getCodeSizeBenchmark(
+            applicationName,
+            if (benchmark.useCodeSize == CodeSizeEntity.FRAMEWORK)
+                File("${framework.outputFile.absolutePath}/$nativeFrameworkName").canonicalPath
+            else
+                nativeExecutable
+        )
 
     override fun getCompilerFlags(project: Project, nativeTarget: KotlinNativeTarget) =
-            if (project.benchmark.useCodeSize == CodeSizeEntity.FRAMEWORK) {
-                super.getCompilerFlags(project, nativeTarget) + framework.freeCompilerArgs.map { "\"$it\"" }
-            } else {
-                listOf("-O", "-wmo")
-            }
+        if (project.benchmark.useCodeSize == CodeSizeEntity.FRAMEWORK) {
+            super.getCompilerFlags(project, nativeTarget) + framework.freeCompilerArgs.map { "\"$it\"" }
+        } else {
+            listOf("-O", "-wmo")
+        }
 }

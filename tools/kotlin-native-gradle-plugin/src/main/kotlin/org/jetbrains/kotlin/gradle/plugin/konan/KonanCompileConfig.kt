@@ -21,27 +21,28 @@ import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.project.ProjectInternal
 import org.jetbrains.kotlin.gradle.plugin.tasks.*
-import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.KonanTarget.WASM32
 import java.io.File
 
-abstract class KonanCompileConfig<T: KonanCompileTask>(name: String,
-                                                       type: Class<T>,
-                                                       project: ProjectInternal,
-                                                       targets: Iterable<String>)
-    : KonanBuildingConfig<T>(name, type, project, targets), KonanCompileSpec {
+abstract class KonanCompileConfig<T : KonanCompileTask>(
+    name: String,
+    type: Class<T>,
+    project: ProjectInternal,
+    targets: Iterable<String>
+) :
+    KonanBuildingConfig<T>(name, type, project, targets), KonanCompileSpec {
 
     protected abstract val typeForDescription: String
 
     override fun generateTaskDescription(task: T) =
-            "Build the Kotlin/Native $typeForDescription '${task.name}' for target '${task.konanTarget}'"
+        "Build the Kotlin/Native $typeForDescription '${task.name}' for target '${task.konanTarget}'"
 
     override fun generateAggregateTaskDescription(task: Task) =
-            "Build the Kotlin/Native $typeForDescription '${task.name}' for all supported and declared targets"
+        "Build the Kotlin/Native $typeForDescription '${task.name}' for all supported and declared targets"
 
     override fun generateTargetAliasTaskDescription(task: Task, targetName: String) =
-            "Build the Kotlin/Native $typeForDescription '${task.name}' for target '$targetName'"
+        "Build the Kotlin/Native $typeForDescription '${task.name}' for target '$targetName'"
 
     override fun srcDir(dir: Any) = forEach { it.srcDir(dir) }
     override fun srcFiles(vararg files: Any) = forEach { it.srcFiles(*files) }
@@ -72,13 +73,15 @@ abstract class KonanCompileConfig<T: KonanCompileTask>(name: String,
     override fun dependencies(closure: Closure<Unit>) = forEach { it.dependencies(closure) }
 }
 
-open class KonanProgram(name: String,
-                        project: ProjectInternal,
-                        targets: Iterable<String> = project.konanExtension.targets
-) : KonanCompileConfig<KonanCompileProgramTask>(name,
-        KonanCompileProgramTask::class.java,
-        project,
-        targets
+open class KonanProgram(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
+) : KonanCompileConfig<KonanCompileProgramTask>(
+    name,
+    KonanCompileProgramTask::class.java,
+    project,
+    targets
 ) {
     override val typeForDescription: String
         get() = "executable"
@@ -87,14 +90,17 @@ open class KonanProgram(name: String,
         get() = project.konanBinBaseDir
 }
 
-open class KonanDynamic(name: String,
-                        project: ProjectInternal,
-                        targets: Iterable<String> = project.konanExtension.targets)
-    : KonanCompileConfig<KonanCompileDynamicTask>(name,
+open class KonanDynamic(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
+) :
+    KonanCompileConfig<KonanCompileDynamicTask>(
+        name,
         KonanCompileDynamicTask::class.java,
         project,
         targets
-) {
+    ) {
     override val typeForDescription: String
         get() = "dynamic library"
 
@@ -104,14 +110,17 @@ open class KonanDynamic(name: String,
     override fun targetIsSupported(target: KonanTarget): Boolean = target != WASM32
 }
 
-open class KonanFramework(name: String,
-                          project: ProjectInternal,
-                          targets: Iterable<String> = project.konanExtension.targets)
-    : KonanCompileConfig<KonanCompileFrameworkTask>(name,
+open class KonanFramework(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
+) :
+    KonanCompileConfig<KonanCompileFrameworkTask>(
+        name,
         KonanCompileFrameworkTask::class.java,
         project,
         targets
-) {
+    ) {
     override val typeForDescription: String
         get() = "framework"
 
@@ -122,14 +131,17 @@ open class KonanFramework(name: String,
         target.family.isAppleFamily
 }
 
-open class KonanLibrary(name: String,
-                        project: ProjectInternal,
-                        targets: Iterable<String> = project.konanExtension.targets)
-    : KonanCompileConfig<KonanCompileLibraryTask>(name,
+open class KonanLibrary(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
+) :
+    KonanCompileConfig<KonanCompileLibraryTask>(
+        name,
         KonanCompileLibraryTask::class.java,
         project,
         targets
-) {
+    ) {
     override val typeForDescription: String
         get() = "library"
 
@@ -137,25 +149,28 @@ open class KonanLibrary(name: String,
         get() = project.konanLibsBaseDir
 }
 
-open class KonanBitcode(name: String,
-                        project: ProjectInternal,
-                        targets: Iterable<String> = project.konanExtension.targets)
-    : KonanCompileConfig<KonanCompileBitcodeTask>(name,
+open class KonanBitcode(
+    name: String,
+    project: ProjectInternal,
+    targets: Iterable<String> = project.konanExtension.targets
+) :
+    KonanCompileConfig<KonanCompileBitcodeTask>(
+        name,
         KonanCompileBitcodeTask::class.java,
         project,
         targets
-) {
+    ) {
     override val typeForDescription: String
         get() = "bitcode"
 
     override fun generateTaskDescription(task: KonanCompileBitcodeTask) =
-            "Generates bitcode for the artifact '${task.name}' and target '${task.konanTarget}'"
+        "Generates bitcode for the artifact '${task.name}' and target '${task.konanTarget}'"
 
     override fun generateAggregateTaskDescription(task: Task) =
-            "Generates bitcode for the artifact '${task.name}' for all supported and declared targets'"
+        "Generates bitcode for the artifact '${task.name}' for all supported and declared targets'"
 
     override fun generateTargetAliasTaskDescription(task: Task, targetName: String) =
-            "Generates bitcode for the artifact '${task.name}' for '$targetName'"
+        "Generates bitcode for the artifact '${task.name}' for '$targetName'"
 
     override val defaultBaseDir: File
         get() = project.konanBitcodeBaseDir

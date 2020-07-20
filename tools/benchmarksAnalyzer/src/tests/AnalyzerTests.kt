@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.analyzer
 
-import kotlin.test.*
-import kotlin.math.abs
 import org.jetbrains.report.BenchmarkResult
+import kotlin.math.abs
+import kotlin.test.*
 
 class AnalyzerTests {
     private val eps = 0.000001
@@ -62,7 +61,7 @@ class AnalyzerTests {
         val expectedMean = -9.99809998
         val expectedVariance = 0.0021
         assertTrue(abs(percent.mean - expectedMean) < eps)
-        //assertTrue(abs(percent.variance - expectedVariance) < eps)
+        // assertTrue(abs(percent.variance - expectedVariance) < eps)
     }
 
     @Test

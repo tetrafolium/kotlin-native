@@ -16,8 +16,8 @@
 
 package org.jetbrains.typesBenchmarks
 
-import kotlin.random.Random
 import kotlinx.cinterop.*
+import kotlin.random.Random
 
 const val benchmarkSize = 1000
 
@@ -36,9 +36,9 @@ actual class StringBenchmark actual constructor() {
 
     fun generateRandomString(): String {
         return (1..benchmarkSize)
-                .map { i -> Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
+            .map { i -> Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("")
     }
 
     actual fun stringToCBenchmark() {
@@ -61,7 +61,7 @@ actual class StringBenchmark actual constructor() {
     }
 }
 
-actual class IntMatrixBenchmark actual constructor(){
+actual class IntMatrixBenchmark actual constructor() {
     val matrixSize = 1000
     val first = generateMatrix(matrixSize)
     val second = generateMatrix(matrixSize)
@@ -82,10 +82,12 @@ actual class IntMatrixBenchmark actual constructor(){
             for (i in (0 until matrixSize)) {
                 result[i] = allocArray<IntVar>(matrixSize)
             }
-            val resultMatrix = multiplyMatrix(matrixSize, matrixSize,
-                    first.map { it.toCValues().ptr }.toCValues().ptr,
-                    matrixSize, matrixSize,
-                    second.map { it.toCValues().ptr }.toCValues().ptr)
+            val resultMatrix = multiplyMatrix(
+                matrixSize, matrixSize,
+                first.map { it.toCValues().ptr }.toCValues().ptr,
+                matrixSize, matrixSize,
+                second.map { it.toCValues().ptr }.toCValues().ptr
+            )
             val resultOutput = buildString {
                 for (i in (0 until matrixSize)) {
                     for (j in (0 until matrixSize)) {
@@ -105,9 +107,11 @@ actual class IntBenchmark actual constructor() {
 
     actual fun intBenchmark() {
         for (i in 1..benchmarkSize) {
-            average(array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7], array[8],
-                    array[9], array[10], array[11], array[12], array[13], array[14], array[15], array[16],
-                    array[17], array[18], array[19])
+            average(
+                array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7], array[8],
+                array[9], array[10], array[11], array[12], array[13], array[14], array[15], array[16],
+                array[17], array[18], array[19]
+            )
         }
     }
 }
@@ -125,9 +129,11 @@ actual class BoxedIntBenchmark actual constructor() {
 
     actual fun boxedIntBenchmark() {
         for (i in 1..benchmarkSize) {
-            average(array[0]!!, array[1]!!, array[2]!!, array[3]!!, array[4]!!, array[5]!!, array[6]!!, array[7]!!, array[8]!!,
-                    array[9]!!, array[10]!!, array[11]!!, array[12]!!, array[13]!!, array[14]!!, array[15]!!, array[16]!!,
-                    array[17]!!, array[18]!!, array[19]!!)
+            average(
+                array[0]!!, array[1]!!, array[2]!!, array[3]!!, array[4]!!, array[5]!!, array[6]!!, array[7]!!, array[8]!!,
+                array[9]!!, array[10]!!, array[11]!!, array[12]!!, array[13]!!, array[14]!!, array[15]!!, array[16]!!,
+                array[17]!!, array[18]!!, array[19]!!
+            )
         }
     }
 }

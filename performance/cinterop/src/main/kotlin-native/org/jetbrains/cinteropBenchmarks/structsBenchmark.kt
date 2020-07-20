@@ -28,8 +28,7 @@ actual fun structBenchmark() {
                 0
             } else if (first.pointed.string.toKString().contains(second.pointed.string.toKString())) {
                 1
-            }
-            else {
+            } else {
                 0
             }
         }
@@ -45,7 +44,7 @@ actual fun structBenchmark() {
             elementsList.add(element)
         }
         val summary = elementsList.map { multiplyElementS(it.readValue(), (0..10).random()) }
-                .reduce { acc, it -> sumElementSPtr(acc.ptr, it.ptr)!!.pointed.readValue() }
+            .reduce { acc, it -> sumElementSPtr(acc.ptr, it.ptr)!!.pointed.readValue() }
         val intValue = summary.useContents { integer }
         elementsList.last().contains!!(elementsList.last().ptr, elementsList.first().ptr)
     }
@@ -64,7 +63,7 @@ actual fun unionBenchmark() {
             it.floatValue = it.integer + sqrt(it.integer.toDouble()).toFloat()
         }
         val summary = elementsList.map { multiplyElementU(it.readValue(), (0..10).random()) }
-                .reduce { acc, it -> sumElementUPtr(acc.ptr, it.ptr)!!.pointed.readValue() }
+            .reduce { acc, it -> sumElementUPtr(acc.ptr, it.ptr)!!.pointed.readValue() }
         summary.useContents { integer }
     }
 }

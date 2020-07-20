@@ -71,7 +71,7 @@ interface ArgumentValueDelegate<T> {
  * Abstract base class for subcommands.
  */
 @ExperimentalCli
-abstract class Subcommand(val name: String, val actionDescription: String): ArgParser(name) {
+abstract class Subcommand(val name: String, val actionDescription: String) : ArgParser(name) {
     /**
      * Execute action if subcommand was provided.
      */
@@ -191,8 +191,10 @@ open class ArgParser(
         GNU
     }
 
-    @Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.",
-        ReplaceWith("OptionPrefixStyle", "kotlinx.cli.OptionPrefixStyle"))
+    @Deprecated(
+        "OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.",
+        ReplaceWith("OptionPrefixStyle", "kotlinx.cli.OptionPrefixStyle")
+    )
     @Suppress("TOPLEVEL_TYPEALIASES_ONLY")
     typealias OPTION_PREFIX_STYLE = OptionPrefixStyle
 
@@ -233,8 +235,13 @@ open class ArgParser(
                 For more information, please, see https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
                 """.trimIndent()
             }
-        val option = SingleNullableOption(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type,
-                fullName, shortName, description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
+        val option = SingleNullableOption(
+            OptionDescriptor(
+                optionFullFormPrefix, optionShortFromPrefix, type,
+                fullName, shortName, description, deprecatedWarning = deprecatedWarning
+            ),
+            CLIEntityWrapper()
+        )
         option.owner.entity = option
         declaredOptions.add(option.owner)
         return option
@@ -251,15 +258,19 @@ open class ArgParser(
                 // Previous argument has default value.
                 if (previous.descriptor.defaultValueSet) {
                     if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
-                        error("Default value of argument ${previous.descriptor.fullName} will be unused,  " +
-                                "because next argument ${currentArgument.descriptor.fullName} is always required and has no default value.")
+                        error(
+                            "Default value of argument ${previous.descriptor.fullName} will be unused,  " +
+                                "because next argument ${currentArgument.descriptor.fullName} is always required and has no default value."
+                        )
                     }
                 }
                 // Previous argument is optional.
                 if (!previous.descriptor.required) {
                     if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
-                        error("Argument ${previous.descriptor.fullName} will be always required, " +
-                                "because next argument ${currentArgument.descriptor.fullName} is always required.")
+                        error(
+                            "Argument ${previous.descriptor.fullName} will be always required, " +
+                                "because next argument ${currentArgument.descriptor.fullName} is always required."
+                        )
                     }
                 }
             }
@@ -294,9 +305,14 @@ open class ArgParser(
         fullName: String? = null,
         description: String? = null,
         deprecatedWarning: String? = null
-    ) : SingleArgument<T, DefaultRequiredType.Required> {
-        val argument = SingleArgument<T, DefaultRequiredType.Required>(ArgDescriptor(type, fullName, 1,
-                description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
+    ): SingleArgument<T, DefaultRequiredType.Required> {
+        val argument = SingleArgument<T, DefaultRequiredType.Required>(
+            ArgDescriptor(
+                type, fullName, 1,
+                description, deprecatedWarning = deprecatedWarning
+            ),
+            CLIEntityWrapper()
+        )
         argument.owner.entity = argument
         declaredArguments.add(argument.owner)
         return argument
@@ -366,7 +382,7 @@ open class ArgParser(
     /**
      * Save value as option value.
      */
-    private fun <T : Any, U: Any> saveAsOption(parsingValue: ParsingValue<T, U>, value: String) {
+    private fun <T : Any, U : Any> saveAsOption(parsingValue: ParsingValue<T, U>, value: String) {
         parsingValue.addValue(value)
     }
 
@@ -452,7 +468,8 @@ open class ArgParser(
      */
     private fun recognizeAndSaveOptionShortForm(candidate: String, argIterator: Iterator<String>): Boolean {
         if (!candidate.startsWith(optionShortFromPrefix) ||
-            optionFullFormPrefix != optionShortFromPrefix && candidate.startsWith(optionFullFormPrefix)) return false
+            optionFullFormPrefix != optionShortFromPrefix && candidate.startsWith(optionFullFormPrefix)
+        ) return false
         // Try to find exact match.
         val option = candidate.substring(optionShortFromPrefix.length)
         val argValue = shortNames[option]
@@ -476,11 +493,11 @@ open class ArgParser(
                         if (it.descriptor.type.hasParameter) {
                             printError(
                                 "Option $optionShortFromPrefix$opt can't be used in option combination $candidate, " +
-                                        "because parameter value of type ${it.descriptor.type.description} should be " +
-                                        "provided for current option."
+                                    "because parameter value of type ${it.descriptor.type.description} should be " +
+                                    "provided for current option."
                             )
                         }
-                    }?: printError("Unknown option $optionShortFromPrefix$opt in option combination $candidate.")
+                    } ?: printError("Unknown option $optionShortFromPrefix$opt in option combination $candidate.")
 
                     saveOptionWithoutParameter(shortNames["$opt"]!!)
                 }
@@ -538,14 +555,13 @@ open class ArgParser(
                 }
                 with(value.descriptor as OptionDescriptor) {
                     if (shortName != null && shortNames.containsKey(shortName)) {
-                        error("Option with short name ${shortName} was already added.")
+                        error("Option with short name $shortName was already added.")
                     }
                     shortName?.let {
                         shortNames[it] = value
                     }
                 }
                 options[it] = value
-
             } ?: error("Option was added, but unnamed. Added option under №${index + 1}")
         }
 
@@ -590,8 +606,11 @@ open class ArgParser(
                 if (treatAsOption && arg.startsWith('-')) {
                     // Candidate in being option.
                     // Option is found.
-                    if (!(recognizeAndSaveOptionShortForm(arg, argIterator) ||
-                                recognizeAndSaveOptionFullForm(arg, argIterator))) {
+                    if (!(
+                        recognizeAndSaveOptionShortForm(arg, argIterator) ||
+                            recognizeAndSaveOptionFullForm(arg, argIterator)
+                        )
+                    ) {
                         // State is changed so next options are arguments.
                         if (!treatAsOption) {
                             // Argument is found.

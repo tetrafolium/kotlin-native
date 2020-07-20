@@ -3,12 +3,11 @@
  * that can be found in the LICENSE file.
  */
 
-import org.jetbrains.benchmarksLauncher.*
 import kotlinx.cli.*
+import org.jetbrains.benchmarksLauncher.*
 
-class SwiftLauncher: Launcher() {
+class SwiftLauncher : Launcher() {
     override val benchmarks = BenchmarksCollection(
-            mutableMapOf(
-            )
+        mutableMapOf()
     )
 }

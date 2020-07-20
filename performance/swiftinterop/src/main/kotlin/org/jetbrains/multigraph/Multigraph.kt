@@ -20,11 +20,11 @@ data class Edge<T>(val id: UInt, val from: T, val to: T, val cost: Cost) {
     }
 
     override fun hashCode(): Int =
-            from.hashCode() * 31.0.pow(2.0).toInt() + to.hashCode() * 31 + cost.hashCode()
+        from.hashCode() * 31.0.pow(2.0).toInt() + to.hashCode() * 31 + cost.hashCode()
 }
 
-class EdgeAbsenceMultigraphException(message: String): Exception(message) {}
-class VertexAbsenceMultigraphException(message: String): Exception(message) {}
+class EdgeAbsenceMultigraphException(message: String) : Exception(message)
+class VertexAbsenceMultigraphException(message: String) : Exception(message)
 
 class Multigraph<T>() {
     private var edges = mutableMapOf<T, MutableList<Edge<T>>>()
@@ -95,23 +95,25 @@ class Multigraph<T>() {
     }
 
     fun getTo(edgeId: UInt) =
-            getEdgeById(edgeId).to
+        getEdgeById(edgeId).to
 
     fun getFrom(edgeId: UInt) =
-            getEdgeById(edgeId).from
+        getEdgeById(edgeId).from
 
     fun getCost(edgeId: UInt) =
-            getEdgeById(edgeId).cost
+        getEdgeById(edgeId).cost
 
     fun getEdgesFrom(vertex: T) =
-            edges[vertex] ?: listOf<Edge<T>>()
+        edges[vertex] ?: listOf<Edge<T>>()
 
     fun isEmpty() = edges.isEmpty()
 
     fun searchRoutesWithLimits(start: T, finish: T, limits: Cost): List<List<UInt>> {
-        data class WaveStep(val costs: MutableList<Cost> = mutableListOf(),
-                            val routes: MutableList<MutableList<UInt>> = mutableListOf(),
-                            val vertexes: MutableList<MutableList<T>> = mutableListOf())
+        data class WaveStep(
+            val costs: MutableList<Cost> = mutableListOf(),
+            val routes: MutableList<MutableList<UInt>> = mutableListOf(),
+            val vertexes: MutableList<MutableList<T>> = mutableListOf()
+        )
 
         val currentStepsState = mutableMapOf<T, WaveStep>()
         var oldFront = mutableSetOf<T>(start)

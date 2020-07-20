@@ -11,34 +11,38 @@ import kotlin.comparisons.compareBy
 enum class Transport { CAR, UNDERGROUND, BUS, TROLLEYBUS, TRAM, TAXI, FOOT }
 enum class Interest { SIGHT, CULTURE, PARK, ENTERTAINMENT }
 
-class PlaceAbsenceException(message: String): Exception(message) {}
+class PlaceAbsenceException(message: String) : Exception(message)
 
-data class RouteCost(val moneyCost: Double, val timeCost: Double, val interests: Set<Interest>, val transport: Set<Transport>): Cost {
+data class RouteCost(val moneyCost: Double, val timeCost: Double, val interests: Set<Interest>, val transport: Set<Transport>) : Cost {
     private val comparator = compareBy<RouteCost>({ it.moneyCost }, { it.timeCost }, { it.interests.size }, { it.transport.size })
 
     override operator fun plus(other: Cost) =
-            if (other is RouteCost) {
-                RouteCost(moneyCost + other.moneyCost, timeCost + other.timeCost,
-                        interests.union(other.interests), transport.union(other.transport))
-            } else {
-                error("Expected type is RouteCost")
-            }
+        if (other is RouteCost) {
+            RouteCost(
+                moneyCost + other.moneyCost, timeCost + other.timeCost,
+                interests.union(other.interests), transport.union(other.transport)
+            )
+        } else {
+            error("Expected type is RouteCost")
+        }
 
     override operator fun minus(other: Cost) =
-            if (other is RouteCost) {
-                RouteCost(if (moneyCost > other.moneyCost) moneyCost - other.moneyCost else 0.0,
-                        if (timeCost > other.timeCost) timeCost - other.timeCost else 0.0,
-                        interests.subtract(other.interests), transport.subtract(other.transport))
-            } else {
-                error("Expected type is RouteCost")
-            }
+        if (other is RouteCost) {
+            RouteCost(
+                if (moneyCost > other.moneyCost) moneyCost - other.moneyCost else 0.0,
+                if (timeCost > other.timeCost) timeCost - other.timeCost else 0.0,
+                interests.subtract(other.interests), transport.subtract(other.transport)
+            )
+        } else {
+            error("Expected type is RouteCost")
+        }
 
     override operator fun compareTo(other: Cost) =
-            if (other is RouteCost) {
-                comparator.compare(this, other)
-            } else {
-                error("Expected type is RouteCost")
-            }
+        if (other is RouteCost) {
+            comparator.compare(this, other)
+        } else {
+            error("Expected type is RouteCost")
+        }
 }
 
 internal var placeCounter = 0u
@@ -56,7 +60,7 @@ data class Place(val geoCoordinateX: Double, val geoCoordinateY: Double, val nam
         get() = "Place $name($geoCoordinateX;$geoCoordinateY)"
 
     fun compareTo(other: Place) =
-            comparator.compare(this, other)
+        comparator.compare(this, other)
 }
 
 data class Path(val from: Place, val to: Place, val cost: RouteCost)
@@ -116,7 +120,7 @@ class CityMap {
         graph.getEdgeById(id)
 
     fun getAllStraightRoutesFrom(place: Place) =
-            graph.getEdgesFrom(place).map { Path(graph.getFrom(it.id), graph.getTo(it.id), graph.getCost(it.id) as RouteCost) }
+        graph.getEdgesFrom(place).map { Path(graph.getFrom(it.id), graph.getTo(it.id), graph.getCost(it.id) as RouteCost) }
 
     fun isEmpty() = graph.isEmpty()
 }

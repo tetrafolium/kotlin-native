@@ -6,12 +6,12 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
-import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
 // TODO: Implement as a part of the gradle plugin
-open class KlibInstall: Exec() {
+open class KlibInstall : Exec() {
     @InputFile
     lateinit var klib: File
     var repo: File = project.rootDir
@@ -30,16 +30,17 @@ open class KlibInstall: Exec() {
         val result = super.configure(config)
         val konanHomePath = project.findProperty("org.jetbrains.kotlin.native.home") ?: "dist"
         val konanHome = project.rootProject.file(konanHomePath)
-        val suffix = if (HostManager.host == KonanTarget.MINGW_X64) ".bat" else  ""
+        val suffix = if (HostManager.host == KonanTarget.MINGW_X64) ".bat" else ""
         val klibProgram = "$konanHome/bin/klib$suffix"
 
         doFirst {
             repo.mkdirs()
 
-            commandLine(klibProgram,
-                    "install", klib.absolutePath,
-                    "-target", target,
-                    "-repository", repo.absolutePath
+            commandLine(
+                klibProgram,
+                "install", klib.absolutePath,
+                "-target", target,
+                "-repository", repo.absolutePath
             )
         }
         return result

@@ -33,7 +33,7 @@ import org.jetbrains.kotlin.gradle.utils.isGradleVersionAtLeast
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.util.visibleName
 
-interface KotlinNativePlatform: NativePlatform {
+interface KotlinNativePlatform : NativePlatform {
     val target: KonanTarget
 }
 
@@ -49,7 +49,7 @@ fun KonanTarget.getGradleCPU(): ArchitectureInternal = architecture.visibleName.
     Architectures.forInput(it)
 }
 
-fun KonanTarget.toTargetMachine(objectFactory: ObjectFactory): TargetMachine = object: TargetMachine {
+fun KonanTarget.toTargetMachine(objectFactory: ObjectFactory): TargetMachine = object : TargetMachine {
     override fun getOperatingSystemFamily(): OperatingSystemFamily =
         getGradleOSFamily(objectFactory)
 
@@ -57,11 +57,10 @@ fun KonanTarget.toTargetMachine(objectFactory: ObjectFactory): TargetMachine = o
         objectFactory.named(MachineArchitecture::class.java, this@toTargetMachine.architecture.visibleName)
 }
 
-class DefaultKotlinNativePlatform(name: String, override val target: KonanTarget):
-        DefaultNativePlatform(name, target.getGradleOS(), target.getGradleCPU()),
-        KotlinNativePlatform
-{
-    constructor(target: KonanTarget): this(target.visibleName, target)
+class DefaultKotlinNativePlatform(name: String, override val target: KonanTarget) :
+    DefaultNativePlatform(name, target.getGradleOS(), target.getGradleCPU()),
+    KotlinNativePlatform {
+    constructor(target: KonanTarget) : this(target.visibleName, target)
 
     // TODO: Extend ImmutableDefaultNativePlatform and get rid of these methods after switch to Gradle 4.8
     private fun notImplemented(): Nothing = throw NotImplementedError("Not Implemented in Kotlin/Native plugin")

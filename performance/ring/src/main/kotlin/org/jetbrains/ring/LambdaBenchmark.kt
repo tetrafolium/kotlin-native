@@ -28,7 +28,7 @@ open class LambdaBenchmark {
         globalAddendum = Random.nextInt(20)
     }
 
-    //Benchmark
+    // Benchmark
     fun noncapturingLambda(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {
@@ -37,7 +37,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun noncapturingLambdaNoInline(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {
@@ -46,7 +46,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun capturingLambda(): Int {
         val addendum = globalAddendum + 1
         var x: Int = 0
@@ -56,7 +56,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun capturingLambdaNoInline(): Int {
         val addendum = globalAddendum + 1
         var x: Int = 0
@@ -66,7 +66,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun mutatingLambda(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {
@@ -75,7 +75,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun mutatingLambdaNoInline(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {
@@ -84,7 +84,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun methodReference(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {
@@ -93,7 +93,7 @@ open class LambdaBenchmark {
         return x
     }
 
-    //Benchmark
+    // Benchmark
     fun methodReferenceNoInline(): Int {
         var x: Int = 0
         for (i in 0..BENCHMARK_SIZE) {

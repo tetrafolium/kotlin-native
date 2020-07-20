@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package org.jetbrains.report
 
 import org.jetbrains.report.json.*
@@ -30,15 +29,15 @@ interface JsonSerializable {
     }
 }
 
-interface EntityFromJsonFactory<T>: ConvertedFromJson {
+interface EntityFromJsonFactory<T> : ConvertedFromJson {
     fun create(data: JsonElement): T
 }
 
 // Class for benchcmarks report with all information of run.
-class BenchmarksReport(val env: Environment, benchmarksList: List<BenchmarkResult>, val compiler: Compiler):
-        JsonSerializable {
+class BenchmarksReport(val env: Environment, benchmarksList: List<BenchmarkResult>, val compiler: Compiler) :
+    JsonSerializable {
 
-    companion object: EntityFromJsonFactory<BenchmarksReport> {
+    companion object : EntityFromJsonFactory<BenchmarksReport> {
         override fun create(data: JsonElement): BenchmarksReport {
             if (data is JsonObject) {
                 val env = Environment.create(data.getRequiredField("env"))
@@ -62,7 +61,7 @@ class BenchmarksReport(val env: Environment, benchmarksList: List<BenchmarkResul
 
         // Made a map of becnhmarks with name as key from list.
         private fun structBenchmarks(benchmarksList: List<BenchmarkResult>) =
-                benchmarksList.groupBy{ it.name }
+            benchmarksList.groupBy { it.name }
     }
 
     val benchmarks: Map<String, List<BenchmarkResult>> = structBenchmarks(benchmarksList)
@@ -85,27 +84,27 @@ class BenchmarksReport(val env: Environment, benchmarksList: List<BenchmarkResul
             }
         }
         mergedBenchmarks.putAll(other.benchmarks)
-        return BenchmarksReport(env, mergedBenchmarks.flatMap{it.value}, compiler)
+        return BenchmarksReport(env, mergedBenchmarks.flatMap { it.value }, compiler)
     }
 
     // Concatenate benchmarks report if they have same environment and compiler.
     operator fun plus(other: BenchmarksReport): BenchmarksReport {
         if (compiler != other.compiler || env != other.env) {
-            error ("It's impossible to concat reports from different machines!")
+            error("It's impossible to concat reports from different machines!")
         }
         return merge(other)
     }
 }
 
 // Class for kotlin compiler
-data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerializable {
+data class Compiler(val backend: Backend, val kotlinVersion: String) : JsonSerializable {
 
     enum class BackendType(val type: String) {
         JVM("jvm"),
         NATIVE("native")
     }
 
-    companion object: EntityFromJsonFactory<Compiler> {
+    companion object : EntityFromJsonFactory<Compiler> {
         override fun create(data: JsonElement): Compiler {
             if (data is JsonObject) {
                 val backend = Backend.create(data.getRequiredField("backend"))
@@ -121,8 +120,8 @@ data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerial
     }
 
     // Class for compiler backend
-    data class Backend(val type: BackendType, val version: String, val flags: List<String>): JsonSerializable {
-        companion object: EntityFromJsonFactory<Backend> {
+    data class Backend(val type: BackendType, val version: String, val flags: List<String>) : JsonSerializable {
+        companion object : EntityFromJsonFactory<Backend> {
             override fun create(data: JsonElement): Backend {
                 if (data is JsonObject) {
                     val typeElement = data.getRequiredField("type")
@@ -145,16 +144,16 @@ data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerial
         }
 
         override fun toJson(): String {
-            val result = """
+            val result =
+                """
             {
                 "type": "${type.type}",
-                "version": "${version}""""
+                "version": "$version""""
             // Don't print flags field if there is no one.
             if (flags.isEmpty()) {
                 return """$result
                 }"""
-            }
-            else {
+            } else {
                 return """
                     $result,
                 "flags": ${arrayToJson(flags)}
@@ -168,16 +167,16 @@ data class Compiler(val backend: Backend, val kotlinVersion: String): JsonSerial
         return """
         {
             "backend": ${backend.toJson()},
-            "kotlinVersion": "${kotlinVersion}"
+            "kotlinVersion": "$kotlinVersion"
         }
         """
     }
 }
 
 // Class for description of environment of benchmarks run
-data class Environment(val machine: Machine, val jdk: JDKInstance): JsonSerializable {
+data class Environment(val machine: Machine, val jdk: JDKInstance) : JsonSerializable {
 
-    companion object: EntityFromJsonFactory<Environment> {
+    companion object : EntityFromJsonFactory<Environment> {
         override fun create(data: JsonElement): Environment {
             if (data is JsonObject) {
                 val machine = Machine.create(data.getRequiredField("machine"))
@@ -191,8 +190,8 @@ data class Environment(val machine: Machine, val jdk: JDKInstance): JsonSerializ
     }
 
     // Class for description of machine used for benchmarks run.
-    data class Machine(val cpu: String, val os: String): JsonSerializable {
-        companion object: EntityFromJsonFactory<Machine> {
+    data class Machine(val cpu: String, val os: String) : JsonSerializable {
+        companion object : EntityFromJsonFactory<Machine> {
             override fun create(data: JsonElement): Machine {
                 if (data is JsonObject) {
                     val cpu = elementToString(data.getRequiredField("cpu"), "cpu")
@@ -216,8 +215,8 @@ data class Environment(val machine: Machine, val jdk: JDKInstance): JsonSerializ
     }
 
     // Class for description of jdk used for benchmarks run.
-    data class JDKInstance(val version: String, val vendor: String): JsonSerializable {
-        companion object: EntityFromJsonFactory<JDKInstance> {
+    data class JDKInstance(val version: String, val vendor: String) : JsonSerializable {
+        companion object : EntityFromJsonFactory<JDKInstance> {
             override fun create(data: JsonElement): JDKInstance {
                 if (data is JsonObject) {
                     val version = elementToString(data.getRequiredField("version"), "version")
@@ -250,9 +249,15 @@ data class Environment(val machine: Machine, val jdk: JDKInstance): JsonSerializ
     }
 }
 
-class BenchmarkResult(val name: String, val status: Status,
-                      val score: Double, val metric: Metric, val runtimeInUs: Double,
-                      val repeat: Int, val warmup: Int): JsonSerializable {
+class BenchmarkResult(
+    val name: String,
+    val status: Status,
+    val score: Double,
+    val metric: Metric,
+    val runtimeInUs: Double,
+    val repeat: Int,
+    val warmup: Int
+) : JsonSerializable {
 
     enum class Metric(val suffix: String, val value: String) {
         EXECUTION_TIME("", "EXECUTION_TIME"),
@@ -262,20 +267,20 @@ class BenchmarkResult(val name: String, val status: Status,
 
     constructor(name: String, score: Double) : this(name, Status.PASSED, score, Metric.EXECUTION_TIME, 0.0, 0, 0)
 
-    companion object: EntityFromJsonFactory<BenchmarkResult> {
+    companion object : EntityFromJsonFactory<BenchmarkResult> {
 
         override fun create(data: JsonElement): BenchmarkResult {
             if (data is JsonObject) {
                 var name = elementToString(data.getRequiredField("name"), "name")
                 val metricElement = data.getOptionalField("metric")
                 val metric = if (metricElement != null && metricElement is JsonLiteral)
-                                metricFromString(metricElement.unquoted()) ?: Metric.EXECUTION_TIME
-                            else Metric.EXECUTION_TIME
+                    metricFromString(metricElement.unquoted()) ?: Metric.EXECUTION_TIME
+                else Metric.EXECUTION_TIME
                 name += metric.suffix
                 val statusElement = data.getRequiredField("status")
                 if (statusElement is JsonLiteral) {
                     val status = statusFromString(statusElement.unquoted())
-                            ?: error("Status should be PASSED or FAILED")
+                        ?: error("Status should be PASSED or FAILED")
 
                     val score = elementToDouble(data.getRequiredField("score"), "score")
                     val runtimeInUs = elementToDouble(data.getRequiredField("runtimeInUs"), "runtimeInUs")
@@ -305,11 +310,11 @@ class BenchmarkResult(val name: String, val status: Status,
         {
             "name": "${name.removeSuffix(metric.suffix)}",
             "status": "${status.value}",
-            "score": ${score},
+            "score": $score,
             "metric": "${metric.value}",
-            "runtimeInUs": ${runtimeInUs},
-            "repeat": ${repeat},
-            "warmup": ${warmup}
+            "runtimeInUs": $runtimeInUs,
+            "repeat": $repeat,
+            "warmup": $warmup
         }
         """
     }

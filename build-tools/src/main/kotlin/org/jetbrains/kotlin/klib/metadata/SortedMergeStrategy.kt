@@ -14,7 +14,7 @@ import kotlinx.metadata.klib.fqName
 internal class SortedMergeStrategy : KlibModuleFragmentReadStrategy {
 
     override fun processModuleParts(parts: List<KmModuleFragment>): List<KmModuleFragment> =
-            parts.fold(KmModuleFragment(), ::joinFragments).let(::listOf)
+        parts.fold(KmModuleFragment(), ::joinFragments).let(::listOf)
 }
 
 /**
@@ -24,7 +24,7 @@ internal fun KmFunction.mangle(): String {
     val typeParameters = typeParameters.joinToString(prefix = "<", postfix = ">", transform = KmTypeParameter::name)
     val valueParameters = valueParameters.joinToString(prefix = "(", postfix = ")", transform = KmValueParameter::name)
     val receiver = receiverParameterType?.classifier
-    return "$receiver.${name}.$typeParameters.$valueParameters"
+    return "$receiver.$name.$typeParameters.$valueParameters"
 }
 
 internal fun KmProperty.mangle(): String {

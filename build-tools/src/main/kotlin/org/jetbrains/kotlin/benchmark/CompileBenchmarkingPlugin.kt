@@ -8,7 +8,7 @@ import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.*
 import javax.inject.Inject
 
-class BuildStep (private val _name: String): Named  {
+class BuildStep(private val _name: String) : Named {
     override fun getName(): String = _name
     lateinit var command: List<String>
 
@@ -17,10 +17,10 @@ class BuildStep (private val _name: String): Named  {
     }
 }
 
-class BuildStepContainer(project: Project): NamedDomainObjectContainer<BuildStep> by project.container(BuildStep::class.java) {
+class BuildStepContainer(project: Project) : NamedDomainObjectContainer<BuildStep> by project.container(BuildStep::class.java) {
     fun step(name: String, configure: Action<BuildStep>) =
         maybeCreate(name).apply { configure.execute(this) }
-    
+
     fun step(name: String, configure: Closure<Unit>) =
         step(name, ConfigureUtil.configureUsing(configure))
 }
@@ -38,7 +38,7 @@ open class CompileBenchmarkExtension @Inject constructor(val project: Project) {
 open class CompileBenchmarkingPlugin : Plugin<Project> {
 
     private val exitCodes: MutableMap<String, Int> = mutableMapOf()
-    
+
     private fun Project.configureUtilityTasks() {
         tasks.create("configureBuild") {
             it.doLast { mkdir(buildDir) }
@@ -48,7 +48,7 @@ open class CompileBenchmarkingPlugin : Plugin<Project> {
             it.delete(buildDir)
         }
     }
-    
+
     private fun Project.configureKonanRun(
         benchmarkExtension: CompileBenchmarkExtension
     ): Unit = with(benchmarkExtension) {
@@ -108,7 +108,7 @@ open class CompileBenchmarkingPlugin : Plugin<Project> {
     }
 
     private fun getCompilerFlags(benchmarkExtension: CompileBenchmarkExtension) =
-            benchmarkExtension.compilerOpts
+        benchmarkExtension.compilerOpts
 
     private fun Project.configureJvmRun(
         benchmarkExtension: CompileBenchmarkExtension
@@ -126,7 +126,7 @@ open class CompileBenchmarkingPlugin : Plugin<Project> {
             jvmRun.finalizedBy(it)
         }
     }
-    
+
     override fun apply(target: Project): Unit = with(target) {
         addTimeListener(this)
 

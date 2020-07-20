@@ -20,17 +20,17 @@ import kotlin.annotation.AnnotationTarget.*
 @RequiresOptIn("This API is experimental. It may be changed in the future without notice.", level = RequiresOptIn.Level.WARNING)
 @Retention(AnnotationRetention.BINARY)
 @Target(
-        CLASS,
-        ANNOTATION_CLASS,
-        PROPERTY,
-        FIELD,
-        LOCAL_VARIABLE,
-        VALUE_PARAMETER,
-        CONSTRUCTOR,
-        FUNCTION,
-        PROPERTY_GETTER,
-        PROPERTY_SETTER,
-        TYPEALIAS
+    CLASS,
+    ANNOTATION_CLASS,
+    PROPERTY,
+    FIELD,
+    LOCAL_VARIABLE,
+    VALUE_PARAMETER,
+    CONSTRUCTOR,
+    FUNCTION,
+    PROPERTY_GETTER,
+    PROPERTY_SETTER,
+    TYPEALIAS
 )
 
 public annotation class ExperimentalCli

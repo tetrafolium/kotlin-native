@@ -3,18 +3,23 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the licenses/LICENSE.txt file.
  */
 
-import org.jetbrains.benchmarksLauncher.*
 import kotlinx.cli.*
+import org.jetbrains.benchmarksLauncher.*
 
-expect class NumericalLauncher() : Launcher {
-}
+expect class NumericalLauncher() : Launcher
 
 fun main(args: Array<String>) {
     val launcher = NumericalLauncher()
-    BenchmarksRunner.runBenchmarks(args, { arguments: BenchmarkArguments ->
-        if (arguments is BaseBenchmarkArguments) {
-            launcher.launch(arguments.warmup, arguments.repeat, arguments.prefix,
-                    arguments.filter, arguments.filterRegex, arguments.verbose)
-        } else emptyList()
-    }, benchmarksListAction = launcher::benchmarksListAction)
+    BenchmarksRunner.runBenchmarks(
+        args,
+        { arguments: BenchmarkArguments ->
+            if (arguments is BaseBenchmarkArguments) {
+                launcher.launch(
+                    arguments.warmup, arguments.repeat, arguments.prefix,
+                    arguments.filter, arguments.filterRegex, arguments.verbose
+                )
+            } else emptyList()
+        },
+        benchmarksListAction = launcher::benchmarksListAction
+    )
 }

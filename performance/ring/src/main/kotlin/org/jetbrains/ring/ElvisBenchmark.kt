@@ -23,7 +23,7 @@ open class ElvisBenchmark {
 
     class Value(var value: Int)
 
-    var array : Array<Value?> = arrayOf()
+    var array: Array<Value?> = arrayOf()
 
     init {
         array = Array(BENCHMARK_SIZE) {
@@ -31,16 +31,16 @@ open class ElvisBenchmark {
         }
     }
 
-    //Benchmark
+    // Benchmark
     fun testElvis() {
         for (obj in array) {
             Blackhole.consume(obj?.value ?: 0)
         }
     }
 
-    class Composite(val x : Int, val y : Composite?)
+    class Composite(val x: Int, val y: Composite?)
 
-    fun check(a : Composite?) : Int {
+    fun check(a: Composite?): Int {
         return a?.y?.x ?: (a?.x ?: 3)
     }
 

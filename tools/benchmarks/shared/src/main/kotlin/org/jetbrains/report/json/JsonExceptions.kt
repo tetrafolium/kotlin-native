@@ -17,16 +17,16 @@
 package org.jetbrains.report.json
 
 class JsonInvalidValueInStrictModeException(value: Any, valueDescription: String) : Exception(
-        "$value is not a valid $valueDescription as per JSON spec.\n" +
-                "You can disable strict mode to serialize such values"
+    "$value is not a valid $valueDescription as per JSON spec.\n" +
+        "You can disable strict mode to serialize such values"
 ) {
     constructor(floatValue: Float) : this(floatValue, "float")
     constructor(doubleValue: Double) : this(doubleValue, "double")
 }
 
 class JsonUnknownKeyException(key: String) : Exception(
-        "Strict JSON encountered unknown key: $key\n" +
-                "You can disable strict mode to skip unknown keys"
+    "Strict JSON encountered unknown key: $key\n" +
+        "You can disable strict mode to skip unknown keys"
 )
 
 class JsonParsingException(position: Int, message: String) : Exception("Invalid JSON at $position: $message")

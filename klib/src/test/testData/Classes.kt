@@ -42,7 +42,6 @@ class A {
         val eVal = 0
         var eVar = ""
     }
-
 }
 
 data class F(val fVal: Int, var fVar: String) {
@@ -55,13 +54,13 @@ interface Interface {
     var iVar: String
 }
 
-open class OpenImpl: Interface {
+open class OpenImpl : Interface {
     override fun iFun() {}
     override val iVal = 0
     override var iVar = ""
 }
 
-class FinalImpl: OpenImpl() {
+class FinalImpl : OpenImpl() {
     override fun iFun() {}
     override val iVal = 0
     override var iVar = ""

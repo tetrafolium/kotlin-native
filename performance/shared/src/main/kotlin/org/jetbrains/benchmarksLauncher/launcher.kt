@@ -16,14 +16,15 @@
 @file:OptIn(ExperimentalCli::class)
 package org.jetbrains.benchmarksLauncher
 
-import org.jetbrains.report.BenchmarkResult
 import kotlinx.cli.*
+import org.jetbrains.report.BenchmarkResult
 
 data class RecordTimeMeasurement(
     val status: BenchmarkResult.Status,
     val iteration: Int,
     val warmupCount: Int,
-    val durationNs: Double)
+    val durationNs: Double
+)
 
 abstract class Launcher {
     abstract val benchmarks: BenchmarksCollection
@@ -56,7 +57,7 @@ abstract class Launcher {
     enum class LogLevel { DEBUG, OFF }
 
     class Logger(val level: LogLevel = LogLevel.OFF) {
-         fun log(message: String, messageLevel: LogLevel = LogLevel.DEBUG, usePrefix: Boolean = true) {
+        fun log(message: String, messageLevel: LogLevel = LogLevel.DEBUG, usePrefix: Boolean = true) {
             if (messageLevel == level) {
                 if (usePrefix) {
                     printStderr("[$level][${currentTime()}] $message")
@@ -67,12 +68,14 @@ abstract class Launcher {
         }
     }
 
-    fun runBenchmark(logger: Logger,
-                     numWarmIterations: Int,
-                     numberOfAttempts: Int,
-                     name: String,
-                     recordMeasurement: (RecordTimeMeasurement) -> Unit,
-                     benchmark: AbstractBenchmarkEntry) {
+    fun runBenchmark(
+        logger: Logger,
+        numWarmIterations: Int,
+        numberOfAttempts: Int,
+        name: String,
+        recordMeasurement: (RecordTimeMeasurement) -> Unit,
+        benchmark: AbstractBenchmarkEntry
+    ) {
         val benchmarkInstance = (benchmark as? BenchmarkEntryWithInit)?.ctor?.invoke()
         logger.log("Warm up iterations for benchmark $name\n")
         runBenchmark(benchmarkInstance, benchmark, numWarmIterations)
@@ -96,12 +99,14 @@ abstract class Launcher {
         logger.log("\n", usePrefix = false)
     }
 
-    fun launch(numWarmIterations: Int,
-               numberOfAttempts: Int,
-               prefix: String = "",
-               filters: Collection<String>? = null,
-               filterRegexes: Collection<String>? = null,
-               verbose: Boolean): List<BenchmarkResult> {
+    fun launch(
+        numWarmIterations: Int,
+        numberOfAttempts: Int,
+        prefix: String = "",
+        filters: Collection<String>? = null,
+        filterRegexes: Collection<String>? = null,
+        verbose: Boolean
+    ): List<BenchmarkResult> {
         val logger = if (verbose) Logger(LogLevel.DEBUG) else Logger()
         val regexes = filterRegexes?.map { it.toRegex() } ?: listOf()
         val filterSet = filters?.toHashSet() ?: hashSetOf()
@@ -115,23 +120,28 @@ abstract class Launcher {
         }
         val benchmarkResults = mutableListOf<BenchmarkResult>()
         for ((name, benchmark) in runningBenchmarks) {
-            val recordMeasurement : (RecordTimeMeasurement) -> Unit = {
-                benchmarkResults.add(BenchmarkResult(
-                    "$prefix$name",
-                    it.status,
-                    it.durationNs / 1000,
-                    BenchmarkResult.Metric.EXECUTION_TIME,
-                    it.durationNs / 1000,
-                    it.iteration + 1,
-                    it.warmupCount))
+            val recordMeasurement: (RecordTimeMeasurement) -> Unit = {
+                benchmarkResults.add(
+                    BenchmarkResult(
+                        "$prefix$name",
+                        it.status,
+                        it.durationNs / 1000,
+                        BenchmarkResult.Metric.EXECUTION_TIME,
+                        it.durationNs / 1000,
+                        it.iteration + 1,
+                        it.warmupCount
+                    )
+                )
             }
             try {
                 runBenchmark(logger, numWarmIterations, numberOfAttempts, name, recordMeasurement, benchmark)
             } catch (e: Throwable) {
                 printStderr("Failure while running benchmark $name: $e\n")
-                benchmarkResults.add(BenchmarkResult(
+                benchmarkResults.add(
+                    BenchmarkResult(
                         "$prefix$name", BenchmarkResult.Status.FAILED, 0.0,
-                        BenchmarkResult.Metric.EXECUTION_TIME, 0.0, numberOfAttempts, numWarmIterations)
+                        BenchmarkResult.Metric.EXECUTION_TIME, 0.0, numberOfAttempts, numWarmIterations
+                    )
                 )
             }
         }
@@ -147,24 +157,26 @@ abstract class Launcher {
 
 abstract class BenchmarkArguments(argParser: ArgParser)
 
-class BaseBenchmarkArguments(argParser: ArgParser): BenchmarkArguments(argParser) {
+class BaseBenchmarkArguments(argParser: ArgParser) : BenchmarkArguments(argParser) {
     val warmup by argParser.option(ArgType.Int, shortName = "w", description = "Number of warm up iterations")
-            .default(20)
-    val repeat by argParser.option(ArgType.Int, shortName = "r", description = "Number of each benchmark run").
-            default(60)
+        .default(20)
+    val repeat by argParser.option(ArgType.Int, shortName = "r", description = "Number of each benchmark run")
+        .default(60)
     val prefix by argParser.option(ArgType.String, shortName = "p", description = "Prefix added to benchmark name")
-            .default("")
+        .default("")
     val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
     val filter by argParser.option(ArgType.String, shortName = "f", description = "Benchmark to run").multiple()
-    val filterRegex by argParser.option(ArgType.String, shortName = "fr",
-            description = "Benchmark to run, described by a regular expression").multiple()
+    val filterRegex by argParser.option(
+        ArgType.String, shortName = "fr",
+        description = "Benchmark to run, described by a regular expression"
+    ).multiple()
     val verbose by argParser.option(ArgType.Boolean, shortName = "v", description = "Verbose mode of running")
-            .default(false)
+        .default(false)
 }
 
 object BenchmarksRunner {
-    fun parse(args: Array<String>, benchmarksListAction: ()->Unit): BenchmarkArguments? {
-        class List: Subcommand("list", "Show list of benchmarks") {
+    fun parse(args: Array<String>, benchmarksListAction: () -> Unit): BenchmarkArguments? {
+        class List : Subcommand("list", "Show list of benchmarks") {
             override fun execute() {
                 benchmarksListAction()
             }
@@ -183,11 +195,13 @@ object BenchmarksRunner {
         }
     }
 
-    fun runBenchmarks(args: Array<String>,
-                      run: (parser: BenchmarkArguments) -> List<BenchmarkResult>,
-                      parseArgs: (args: Array<String>, benchmarksListAction: ()->Unit) -> BenchmarkArguments? = this::parse,
-                      collect: (results: List<BenchmarkResult>, arguments: BenchmarkArguments) -> Unit = this::collect,
-                      benchmarksListAction: ()->Unit) {
+    fun runBenchmarks(
+        args: Array<String>,
+        run: (parser: BenchmarkArguments) -> List<BenchmarkResult>,
+        parseArgs: (args: Array<String>, benchmarksListAction: () -> Unit) -> BenchmarkArguments? = this::parse,
+        collect: (results: List<BenchmarkResult>, arguments: BenchmarkArguments) -> Unit = this::collect,
+        benchmarksListAction: () -> Unit
+    ) {
         val arguments = parseArgs(args, benchmarksListAction)
         arguments?.let {
             val results = run(arguments)
