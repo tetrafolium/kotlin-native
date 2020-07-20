@@ -26,15 +26,15 @@
 //--- Setup args --------------------------------------------------------------//
 
 OBJ_GETTER(setupArgs, int argc, const char** argv) {
-  // The count is one less, because we skip argv[0] which is the binary name.
-  ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, argc - 1, OBJ_RESULT);
-  ArrayHeader* array = result->array();
-  for (int index = 1; index < argc; index++) {
-    ObjHolder result;
-    CreateStringFromCString(argv[index], result.slot());
-    UpdateHeapRef(ArrayAddressOfElementAt(array, index - 1), result.obj());
-  }
-  return result;
+    // The count is one less, because we skip argv[0] which is the binary name.
+    ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, argc - 1, OBJ_RESULT);
+    ArrayHeader* array = result->array();
+    for (int index = 1; index < argc; index++) {
+        ObjHolder result;
+        CreateStringFromCString(argv[index], result.slot());
+        UpdateHeapRef(ArrayAddressOfElementAt(array, index - 1), result.obj());
+    }
+    return result;
 }
 
 //--- main --------------------------------------------------------------------//
@@ -48,21 +48,21 @@ extern "C" KInt Konan_run_start(int argc, const char** argv) {
 
 extern "C" RUNTIME_USED int Init_and_run_start(int argc, const char** argv, int memoryDeInit) {
 #ifdef KONAN_NO_CTORS_SECTION
-  extern void _Konan_constructors(void);
-  _Konan_constructors();
+    extern void _Konan_constructors(void);
+    _Konan_constructors();
 #endif
 
-  Kotlin_initRuntimeIfNeeded();
+    Kotlin_initRuntimeIfNeeded();
 
-  KInt exitStatus = Konan_run_start(argc, argv);
+    KInt exitStatus = Konan_run_start(argc, argv);
 
-  if (memoryDeInit) {
-    if (Kotlin_memoryLeakCheckerEnabled())
-      WaitNativeWorkersTermination();
-    Kotlin_deinitRuntimeIfNeeded();
-  }
+    if (memoryDeInit) {
+        if (Kotlin_memoryLeakCheckerEnabled())
+            WaitNativeWorkersTermination();
+        Kotlin_deinitRuntimeIfNeeded();
+    }
 
-  return exitStatus;
+    return exitStatus;
 }
 
 extern "C" RUNTIME_USED int Konan_main(int argc, const char** argv) {
@@ -84,6 +84,6 @@ extern "C" RUNTIME_USED int Konan_js_main(int argc, int memoryDeInit) {
     return Init_and_run_start(argc, (const char**)argv, memoryDeInit);
 }
 
-#endif 
+#endif
 
 #endif

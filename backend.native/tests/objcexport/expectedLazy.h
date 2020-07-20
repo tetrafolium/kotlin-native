@@ -265,10 +265,10 @@ __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("CoroutinesKt")))
 @interface KtCoroutinesKt : KtBase
 
-/**
- @note This method converts instances of CancellationException to errors.
- Other uncaught Kotlin exceptions are fatal.
-*/
+    /**
+     @note This method converts instances of CancellationException to errors.
+     Other uncaught Kotlin exceptions are fatal.
+    */
 + (void)suspendFunWithCompletionHandler:(void (^)(KtInt * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("suspendFun(completionHandler:)")));
 
 /**
@@ -478,9 +478,9 @@ __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("ThrowsEmptyKt")))
 @interface KtThrowsEmptyKt : KtBase
 
-/**
- @warning All uncaught Kotlin exceptions are fatal.
-*/
+    /**
+     @warning All uncaught Kotlin exceptions are fatal.
+    */
 + (BOOL)throwsEmptyAndReturnError:(NSError * _Nullable * _Nullable)error __attribute__((swift_name("throwsEmpty()")));
 @end;
 
@@ -735,10 +735,10 @@ __attribute__((swift_name("MethodsWithThrowsUnitCaller")))
 __attribute__((swift_name("Throwing")))
 @interface KtThrowing : KtBase <KtMethodsWithThrows>
 
-/**
- @note This method converts instances of MyException to errors.
- Other uncaught Kotlin exceptions are fatal.
-*/
+    /**
+     @note This method converts instances of MyException to errors.
+     Other uncaught Kotlin exceptions are fatal.
+    */
 - (instancetype _Nullable)initWithDoThrow:(BOOL)doThrow error:(NSError * _Nullable * _Nullable)error __attribute__((swift_name("init(doThrow:)"))) __attribute__((objc_designated_initializer));
 
 /**
@@ -818,10 +818,10 @@ __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("NotThrowing")))
 @interface KtNotThrowing : KtBase <KtMethodsWithThrows>
 
-/**
- @note This method converts instances of MyException to errors.
- Other uncaught Kotlin exceptions are fatal.
-*/
+    /**
+     @note This method converts instances of MyException to errors.
+     Other uncaught Kotlin exceptions are fatal.
+    */
 - (instancetype _Nullable)initAndReturnError:(NSError * _Nullable * _Nullable)error __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
 
 /**

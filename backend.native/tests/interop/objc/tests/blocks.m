@@ -14,7 +14,7 @@
 }
 
 +(void (^)(void)) notNullBlock {
-    return ^{};
+    return ^ {};
 }
 
 @end;

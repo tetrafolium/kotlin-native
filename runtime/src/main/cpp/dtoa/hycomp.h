@@ -59,9 +59,9 @@
  * EXE_EXTENSION_CHAR:     the executable has a delimiter that we want to stop at as part of argv[0].
  */
 
- /**
- * By default order doubles in the native (that is big/little endian) ordering.
- */
+/**
+* By default order doubles in the native (that is big/little endian) ordering.
+*/
 
 #define HY_PLATFORM_DOUBLE_ORDER
 
@@ -228,10 +228,10 @@ typedef double				SYS_FLOAT;
 
 typedef struct {
 #if !defined(HYS390X)
-	char stuff[16];
+    char stuff[16];
 #endif
-	char *ada;
-	void (*rawFnAddress)();
+    char *ada;
+    void (*rawFnAddress)();
 } HyFunctionDescriptor_T;
 
 #define TOC_UNWRAP_ADDRESS(wrappedPointer) (((HyFunctionDescriptor_T *) (wrappedPointer))->rawFnAddress)
@@ -471,7 +471,7 @@ typedef float ESSINGLE;
  * On some systems va_list is an array type.  This is probably in
  * violation of the ANSI C spec, but it's not entirely clear.  Because of
  * this, we end up with an undesired extra level of indirection if we take
- * the address of a va_list argument. 
+ * the address of a va_list argument.
  *
  * To get it right, always use the VA_PTR macro
  */

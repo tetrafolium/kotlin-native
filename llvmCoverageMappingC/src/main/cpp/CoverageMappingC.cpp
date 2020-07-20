@@ -31,7 +31,7 @@ using namespace llvm;
 using namespace llvm::coverage;
 
 namespace llvm {
-    DEFINE_SIMPLE_CONVERSION_FUNCTIONS(TargetLibraryInfoImpl, LLVMTargetLibraryInfoRef)
+DEFINE_SIMPLE_CONVERSION_FUNCTIONS(TargetLibraryInfoImpl, LLVMTargetLibraryInfoRef)
 }
 
 struct LLVMFunctionCoverage {
@@ -42,12 +42,12 @@ struct LLVMFunctionCoverage {
 
 static coverage::CounterMappingRegion::RegionKind determineRegionKind(const struct LLVMCoverageRegion& region) {
     switch (region.kind) {
-        case LLVMCoverageRegionKind::CODE:
-            return coverage::CounterMappingRegion::RegionKind::CodeRegion;
-        case LLVMCoverageRegionKind::GAP:
-            return coverage::CounterMappingRegion::RegionKind::GapRegion;
-        case LLVMCoverageRegionKind::EXPANSION:
-            return coverage::CounterMappingRegion::RegionKind::ExpansionRegion;
+    case LLVMCoverageRegionKind::CODE:
+        return coverage::CounterMappingRegion::RegionKind::CodeRegion;
+    case LLVMCoverageRegionKind::GAP:
+        return coverage::CounterMappingRegion::RegionKind::GapRegion;
+    case LLVMCoverageRegionKind::EXPANSION:
+        return coverage::CounterMappingRegion::RegionKind::ExpansionRegion;
     }
 }
 
@@ -59,11 +59,11 @@ static coverage::CounterMappingRegion createCounterMappingRegion(struct LLVMCove
     }
     const Counter &counter = coverage::Counter::getCounter(region.counterId);
     return coverage::CounterMappingRegion(counter, region.fileId, expandedFileId, region.lineStart,
-                                                        region.columnStart, region.lineEnd, region.columnEnd, regionKind);
+                                          region.columnStart, region.lineEnd, region.columnEnd, regionKind);
 }
 
 LLVMFunctionCoverage* LLVMWriteCoverageRegionMapping(unsigned int *fileIdMapping, size_t fileIdMappingSize,
-                                                struct LLVMCoverageRegion **mappingRegions, size_t mappingRegionsSize) {
+        struct LLVMCoverageRegion **mappingRegions, size_t mappingRegionsSize) {
     std::vector<coverage::CounterMappingRegion> counterMappingRegions;
     for (size_t i = 0; i < mappingRegionsSize; ++i) {
         struct LLVMCoverageRegion region = *mappingRegions[i];
@@ -92,7 +92,7 @@ static StructType *getFunctionRecordTy(LLVMContext &Ctx) {
 }
 
 static llvm::Constant *addFunctionMappingRecord(llvm::LLVMContext &Ctx, StringRef NameValue, uint64_t FuncHash,
-                                                const std::string &CoverageMapping) {
+        const std::string &CoverageMapping) {
     llvm::StructType *FunctionRecordTy = getFunctionRecordTy(Ctx);
 
 #define COVMAP_FUNC_RECORD(Type, LLVMType, Name, Init) Init,
@@ -104,18 +104,18 @@ static llvm::Constant *addFunctionMappingRecord(llvm::LLVMContext &Ctx, StringRe
 
 // See https://github.com/llvm/llvm-project/blob/fa8fa044ec46b94e64971efa8852df0d58114062/clang/lib/CodeGen/CoverageMappingGen.cpp#L1284.
 LLVMValueRef LLVMAddFunctionMappingRecord(LLVMContextRef context, const char *name, uint64_t hash,
-                                          struct LLVMFunctionCoverage *coverageMapping) {
+        struct LLVMFunctionCoverage *coverageMapping) {
     return llvm::wrap(addFunctionMappingRecord(*llvm::unwrap(context), name, hash, coverageMapping->coverageData));
 }
 
 // See https://github.com/llvm/llvm-project/blob/fa8fa044ec46b94e64971efa8852df0d58114062/clang/lib/CodeGen/CoverageMappingGen.cpp#L1335.
 // Please note that llvm/ProfileData/InstrProfData.inc refers to variable names of the function that includes it. So be careful with renaming.
 static llvm::GlobalVariable* emitCoverageGlobal(
-        llvm::LLVMContext &Ctx,
-        llvm::Module &module,
-        std::vector<llvm::Constant *> &FunctionRecords,
-        const llvm::SmallVector<StringRef, 16> &FilenameRefs,
-        const std::string &RawCoverageMappings) {
+    llvm::LLVMContext &Ctx,
+    llvm::Module &module,
+    std::vector<llvm::Constant *> &FunctionRecords,
+    const llvm::SmallVector<StringRef, 16> &FilenameRefs,
+    const std::string &RawCoverageMappings) {
 
     auto *Int32Ty = llvm::Type::getInt32Ty(Ctx);
 
@@ -164,7 +164,7 @@ static llvm::GlobalVariable* emitCoverageGlobal(
     auto covDataVal = llvm::ConstantStruct::get(covDataTy, makeArrayRef(TUDataVals));
     // Will be deleted when module is disposed.
     return new llvm::GlobalVariable(module, covDataTy, true, llvm::GlobalValue::InternalLinkage,
-            covDataVal, llvm::getCoverageMappingVarName());
+                                    covDataVal, llvm::getCoverageMappingVarName());
 }
 
 static std::string createRawCoverageMapping(struct LLVMFunctionCoverage **functionCoverages, size_t functionCoveragesSize) {
@@ -176,9 +176,9 @@ static std::string createRawCoverageMapping(struct LLVMFunctionCoverage **functi
 }
 
 LLVMValueRef LLVMCoverageEmit(LLVMModuleRef moduleRef,
-        LLVMValueRef *records, size_t recordsSize,
-        const char **filenames, int *filenamesIndices, size_t filenamesSize,
-        struct LLVMFunctionCoverage **functionCoverages, size_t functionCoveragesSize) {
+                              LLVMValueRef *records, size_t recordsSize,
+                              const char **filenames, int *filenamesIndices, size_t filenamesSize,
+                              struct LLVMFunctionCoverage **functionCoverages, size_t functionCoveragesSize) {
     LLVMContext &ctx = *unwrap(LLVMGetModuleContext(moduleRef));
     Module &module = *unwrap(moduleRef);
 
@@ -225,8 +225,8 @@ void LLVMAddInstrProfPass(LLVMPassManagerRef passManagerRef, const char* outputF
 }
 
 void LLVMKotlinAddTargetLibraryInfoWrapperPass(LLVMPassManagerRef passManagerRef, const char* targetTriple) {
-  legacy::PassManagerBase *passManager = unwrap(passManagerRef);
-  passManager->add(new TargetLibraryInfoWrapperPass(Triple(targetTriple)));
+    legacy::PassManagerBase *passManager = unwrap(passManagerRef);
+    passManager->add(new TargetLibraryInfoWrapperPass(Triple(targetTriple)));
 }
 
 void LLVMKotlinInitializeTargets() {

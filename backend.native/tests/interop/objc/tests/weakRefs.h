@@ -1,5 +1,5 @@
 #import <Foundation/NSObject.h>
 
 NSObject* createNSObject() {
-  return [NSObject new];
+    return [NSObject new];
 }

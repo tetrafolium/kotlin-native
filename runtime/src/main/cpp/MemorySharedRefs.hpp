@@ -12,63 +12,63 @@
 
 // TODO: Generalize for uses outside this file.
 enum class ErrorPolicy {
-  kIgnore,  // Ignore any errors. (i.e. unsafe mode)
-  kDefaultValue,  // Return the default value from the function when an error happens.
-  kThrow,  // Throw a Kotlin exception when an error happens. The exact exception is chosen by the callee.
-  kTerminate,  // Terminate immediately when an error happens.
+    kIgnore,  // Ignore any errors. (i.e. unsafe mode)
+    kDefaultValue,  // Return the default value from the function when an error happens.
+    kThrow,  // Throw a Kotlin exception when an error happens. The exact exception is chosen by the callee.
+    kTerminate,  // Terminate immediately when an error happens.
 };
 
 class KRefSharedHolder {
- public:
-  void initLocal(ObjHeader* obj);
+public:
+    void initLocal(ObjHeader* obj);
 
-  void init(ObjHeader* obj);
+    void init(ObjHeader* obj);
 
-  // Error if called from the wrong worker with non-frozen obj_.
-  template <ErrorPolicy errorPolicy>
-  ObjHeader* ref() const;
+    // Error if called from the wrong worker with non-frozen obj_.
+    template <ErrorPolicy errorPolicy>
+    ObjHeader* ref() const;
 
-  void dispose() const;
+    void dispose() const;
 
-  OBJ_GETTER0(describe) const;
+    OBJ_GETTER0(describe) const;
 
- private:
-  ObjHeader* obj_;
-  ForeignRefContext context_;
+private:
+    ObjHeader* obj_;
+    ForeignRefContext context_;
 };
 
 static_assert(std::is_trivially_destructible<KRefSharedHolder>::value,
-    "KRefSharedHolder destructor is not guaranteed to be called.");
+              "KRefSharedHolder destructor is not guaranteed to be called.");
 
 class BackRefFromAssociatedObject {
- public:
-  void initAndAddRef(ObjHeader* obj);
+public:
+    void initAndAddRef(ObjHeader* obj);
 
-  // Error if refCount is zero and it's called from the wrong worker with non-frozen obj_.
-  template <ErrorPolicy errorPolicy>
-  void addRef();
+    // Error if refCount is zero and it's called from the wrong worker with non-frozen obj_.
+    template <ErrorPolicy errorPolicy>
+    void addRef();
 
-  // Error if called from the wrong worker with non-frozen obj_.
-  template <ErrorPolicy errorPolicy>
-  bool tryAddRef();
+    // Error if called from the wrong worker with non-frozen obj_.
+    template <ErrorPolicy errorPolicy>
+    bool tryAddRef();
 
-  void releaseRef();
+    void releaseRef();
 
-  // Error if called from the wrong worker with non-frozen obj_.
-  template <ErrorPolicy errorPolicy>
-  ObjHeader* ref() const;
+    // Error if called from the wrong worker with non-frozen obj_.
+    template <ErrorPolicy errorPolicy>
+    ObjHeader* ref() const;
 
-  inline bool permanent() const {
-    return obj_->permanent(); // Safe to query from any thread.
-  }
+    inline bool permanent() const {
+        return obj_->permanent(); // Safe to query from any thread.
+    }
 
- private:
-  ObjHeader* obj_;
-  ForeignRefContext context_;
-  volatile int refCount;
+private:
+    ObjHeader* obj_;
+    ForeignRefContext context_;
+    volatile int refCount;
 };
 
 static_assert(std::is_trivially_destructible<BackRefFromAssociatedObject>::value,
-    "BackRefFromAssociatedObject destructor is not guaranteed to be called.");
+              "BackRefFromAssociatedObject destructor is not guaranteed to be called.");
 
 #endif // RUNTIME_MEMORYSHAREDREFS_HPP

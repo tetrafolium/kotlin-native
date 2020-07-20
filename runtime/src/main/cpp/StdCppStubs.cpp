@@ -26,13 +26,13 @@ RUNTIME_USED RUNTIME_WEAK extern "C" char* Konan_cxa_demangle(
     const char* __mangled_name, char* __output_buffer,
     size_t* __length, int* __status
 ) {
-  *__status = -2; // __mangled_name is not a valid name under the C++ ABI mangling rules.
-  return nullptr;
+    *__status = -2; // __mangled_name is not a valid name under the C++ ABI mangling rules.
+    return nullptr;
 }
 
 namespace std {
 void __throw_length_error(const char* __s __attribute__((unused))) {
-  RuntimeAssert(false, __s);
+    RuntimeAssert(false, __s);
 }
 
 }  // namespace std

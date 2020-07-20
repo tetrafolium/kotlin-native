@@ -71,11 +71,17 @@
 }
 
 + (GeterogeneousSmall)geterogeneousSmallFn {
-    return (GeterogeneousSmall){1, {1, 4, 9, 25}, 3, 4};
+    return (GeterogeneousSmall) {
+        1, {1, 4, 9, 25}, 3, 4
+    };
 }
 
 + (simd_quatf)simd_quatfFn {
-    return (simd_quatf){ {1, 4, 9, 25} };
+    return (simd_quatf) {
+        {
+            1, 4, 9, 25
+        }
+    };
 }
 
 @end;

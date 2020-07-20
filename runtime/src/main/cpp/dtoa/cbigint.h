@@ -28,29 +28,29 @@
 extern "C"
 {
 #endif
-  void multiplyHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2,
-                              IDATA length2, U_64 * result, IDATA length);
-  U_32 simpleAppendDecimalDigitHighPrecision (U_64 * arg1, IDATA length, U_64 digit);
-  KDouble toDoubleHighPrecision (U_64 * arg, IDATA length);
-  IDATA tenToTheEHighPrecision (U_64 * result, IDATA length, int e);
-  U_64 doubleMantissa (KDouble z);
-  IDATA compareHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
-  IDATA highestSetBitHighPrecision (U_64 * arg, IDATA length);
-  void subtractHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
-  IDATA doubleExponent (KDouble z);
-  U_32 simpleMultiplyHighPrecision (U_64 * arg1, IDATA length, U_64 arg2);
-  IDATA addHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
-  void simpleMultiplyAddHighPrecisionBigEndianFix (U_64 * arg1, IDATA length, U_64 arg2, U_32 * result);
-  IDATA lowestSetBit (U_64 * y);
-  IDATA timesTenToTheEHighPrecision (U_64 * result, IDATA length, int e);
-  void simpleMultiplyAddHighPrecision (U_64 * arg1, IDATA length, U_64 arg2, U_32 * result);
-  IDATA highestSetBit (U_64 * y);
-  IDATA lowestSetBitHighPrecision (U_64 * arg, IDATA length);
-  void simpleShiftLeftHighPrecision (U_64 * arg1, IDATA length, IDATA arg2);
-  UDATA floatMantissa (KFloat z);
-  U_64 simpleMultiplyHighPrecision64 (U_64 * arg1, IDATA length, U_64 arg2);
-  IDATA simpleAddHighPrecision (U_64 * arg1, IDATA length, U_64 arg2);
-  IDATA floatExponent (KFloat z);
+void multiplyHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2,
+                            IDATA length2, U_64 * result, IDATA length);
+U_32 simpleAppendDecimalDigitHighPrecision (U_64 * arg1, IDATA length, U_64 digit);
+KDouble toDoubleHighPrecision (U_64 * arg, IDATA length);
+IDATA tenToTheEHighPrecision (U_64 * result, IDATA length, int e);
+U_64 doubleMantissa (KDouble z);
+IDATA compareHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
+IDATA highestSetBitHighPrecision (U_64 * arg, IDATA length);
+void subtractHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
+IDATA doubleExponent (KDouble z);
+U_32 simpleMultiplyHighPrecision (U_64 * arg1, IDATA length, U_64 arg2);
+IDATA addHighPrecision (U_64 * arg1, IDATA length1, U_64 * arg2, IDATA length2);
+void simpleMultiplyAddHighPrecisionBigEndianFix (U_64 * arg1, IDATA length, U_64 arg2, U_32 * result);
+IDATA lowestSetBit (U_64 * y);
+IDATA timesTenToTheEHighPrecision (U_64 * result, IDATA length, int e);
+void simpleMultiplyAddHighPrecision (U_64 * arg1, IDATA length, U_64 arg2, U_32 * result);
+IDATA highestSetBit (U_64 * y);
+IDATA lowestSetBitHighPrecision (U_64 * arg, IDATA length);
+void simpleShiftLeftHighPrecision (U_64 * arg1, IDATA length, IDATA arg2);
+UDATA floatMantissa (KFloat z);
+U_64 simpleMultiplyHighPrecision64 (U_64 * arg1, IDATA length, U_64 arg2);
+IDATA simpleAddHighPrecision (U_64 * arg1, IDATA length, U_64 arg2);
+IDATA floatExponent (KFloat z);
 #if defined(__cplusplus)
 }
 #endif

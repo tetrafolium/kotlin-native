@@ -55,18 +55,18 @@ DICompositeTypeRef DICreateStructType(DIBuilderRef refBuilder,
                                       uint64_t elementsCount,
                                       DICompositeTypeRef refPlace);
 DICompositeTypeRef DICreateArrayType(DIBuilderRef refBuilder,
-                                      uint64_t size, uint64_t alignInBits,
-                                      DITypeOpaqueRef type,
-                                      uint64_t elementsCount);
+                                     uint64_t size, uint64_t alignInBits,
+                                     DITypeOpaqueRef type,
+                                     uint64_t elementsCount);
 
 DIDerivedTypeRef DICreateReferenceType(DIBuilderRef refBuilder, DITypeOpaqueRef refType);
 DIDerivedTypeRef DICreatePointerType(DIBuilderRef refBuilder, DITypeOpaqueRef refType);
 DICompositeTypeRef DICreateReplaceableCompositeType(DIBuilderRef refBuilder,
-                                                    int tag,
-                                                    const char *name,
-                                                    DIScopeOpaqueRef refScope,
-                                                    DIFileRef refFile,
-                                                    unsigned line);
+        int tag,
+        const char *name,
+        DIScopeOpaqueRef refScope,
+        DIFileRef refFile,
+        unsigned line);
 DIDerivedTypeRef DICreateMemberType(DIBuilderRef refBuilder,
                                     DIScopeOpaqueRef refScope,
                                     const char *name,
@@ -94,8 +94,8 @@ DISubprogramRef DICreateFunction(DIBuilderRef builder, DIScopeOpaqueRef scope,
                                  int isDefinition, unsigned scopeLine);
 
 DISubroutineTypeRef DICreateSubroutineType(DIBuilderRef builder,
-                                           DITypeOpaqueRef* types,
-                                           unsigned typesCount);
+        DITypeOpaqueRef* types,
+        unsigned typesCount);
 
 DILocalVariableRef DICreateAutoVariable(DIBuilderRef builder, DIScopeOpaqueRef scope, const char *name, DIFileRef file, unsigned line, DITypeOpaqueRef type);
 DILocalVariableRef DICreateParameterVariable(DIBuilderRef builder, DIScopeOpaqueRef scope, const char *name, unsigned argNo, DIFileRef file, unsigned line, DITypeOpaqueRef type);

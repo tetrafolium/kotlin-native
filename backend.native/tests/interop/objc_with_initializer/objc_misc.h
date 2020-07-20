@@ -1,11 +1,11 @@
 #include <Foundation/NSObject.h>
-@interface A:NSObject
+@interface A : NSObject
 
 @end
 
-@interface B:A
+@interface B : A
 +(A*)giveC;
 @end
 
-@interface C:A
+@interface C : A
 @end

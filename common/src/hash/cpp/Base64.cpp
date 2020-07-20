@@ -52,127 +52,130 @@ extern "C" {
 
 int EncodeBase64(
     const void* dataBuf, uint32_t dataLength, void* resultBuf, uint32_t resultSize) {
-  char *result = reinterpret_cast<char*>(resultBuf);
-  const uint8_t *data = reinterpret_cast<const uint8_t*>(dataBuf);
-  size_t resultIndex = 0;
-  size_t x;
-  uint32_t n = 0;
-  int padCount = dataLength % 3;
-  uint8_t n0, n1, n2, n3;
+    char *result = reinterpret_cast<char*>(resultBuf);
+    const uint8_t *data = reinterpret_cast<const uint8_t*>(dataBuf);
+    size_t resultIndex = 0;
+    size_t x;
+    uint32_t n = 0;
+    int padCount = dataLength % 3;
+    uint8_t n0, n1, n2, n3;
 
-  /* increment over the length of the string, three characters at a time */
-  for (x = 0; x < dataLength; x += 3) {
-    /* these three 8-bit (ASCII) characters become one 24-bit number */
-    n = ((uint32_t)data[x]) << 16;
+    /* increment over the length of the string, three characters at a time */
+    for (x = 0; x < dataLength; x += 3) {
+        /* these three 8-bit (ASCII) characters become one 24-bit number */
+        n = ((uint32_t)data[x]) << 16;
 
-    if ((x+1) < dataLength)
-      n += ((uint32_t)data[x+1]) << 8;
+        if ((x+1) < dataLength)
+            n += ((uint32_t)data[x+1]) << 8;
 
-    if ((x+2) < dataLength)
-      n += data[x+2];
+        if ((x+2) < dataLength)
+            n += data[x+2];
 
-    /* this 24-bit number gets separated into four 6-bit numbers */
-    n0 = (uint8_t)(n >> 18) & 63;
-    n1 = (uint8_t)(n >> 12) & 63;
-    n2 = (uint8_t)(n >> 6) & 63;
-    n3 = (uint8_t)n & 63;
+        /* this 24-bit number gets separated into four 6-bit numbers */
+        n0 = (uint8_t)(n >> 18) & 63;
+        n1 = (uint8_t)(n >> 12) & 63;
+        n2 = (uint8_t)(n >> 6) & 63;
+        n3 = (uint8_t)n & 63;
 
-    /*
-     * if we have one byte available, then its encoding is spread
-     * out over two characters
-     */
-    if (resultIndex >= resultSize)
-      return 1;   /* indicate failure: buffer too small */
-    result[resultIndex++] = kAlphabet[n0];
-    if (resultIndex >= resultSize)
-      return 1;   /* indicate failure: buffer too small */
-    result[resultIndex++] = kAlphabet[n1];
+        /*
+         * if we have one byte available, then its encoding is spread
+         * out over two characters
+         */
+        if (resultIndex >= resultSize)
+            return 1;   /* indicate failure: buffer too small */
+        result[resultIndex++] = kAlphabet[n0];
+        if (resultIndex >= resultSize)
+            return 1;   /* indicate failure: buffer too small */
+        result[resultIndex++] = kAlphabet[n1];
 
-    /*
-     * if we have only two bytes available, then their encoding is
-     * spread out over three chars
-     */
-    if ((x+1) < dataLength) {
-      if (resultIndex >= resultSize)
-        return 1;   /* indicate failure: buffer too small */
-      result[resultIndex++] = kAlphabet[n2];
+        /*
+         * if we have only two bytes available, then their encoding is
+         * spread out over three chars
+         */
+        if ((x+1) < dataLength) {
+            if (resultIndex >= resultSize)
+                return 1;   /* indicate failure: buffer too small */
+            result[resultIndex++] = kAlphabet[n2];
+        }
+
+        /*
+         * if we have all three bytes available, then their encoding is spread
+         * out over four characters
+         */
+        if ((x+2) < dataLength) {
+            if (resultIndex >= resultSize)
+                return 1;   /* indicate failure: buffer too small */
+            result[resultIndex++] = kAlphabet[n3];
+        }
     }
 
     /*
-     * if we have all three bytes available, then their encoding is spread
-     * out over four characters
+     * create and add padding that is required if we did not have a multiple of 3
+     * number of characters available
      */
-    if ((x+2) < dataLength) {
-      if (resultIndex >= resultSize)
-        return 1;   /* indicate failure: buffer too small */
-      result[resultIndex++] = kAlphabet[n3];
+    if (padCount > 0) {
+        for (; padCount < 3; padCount++) {
+            if (resultIndex >= resultSize)
+                return 1;   /* indicate failure: buffer too small */
+            result[resultIndex++] = '=';
+        }
     }
-  }
+    if (resultIndex >= resultSize)
+        return 1;   /* indicate failure: buffer too small */
 
-   /*
-    * create and add padding that is required if we did not have a multiple of 3
-    * number of characters available
-    */
-   if (padCount > 0) {
-      for (; padCount < 3; padCount++) {
-         if (resultIndex >= resultSize)
-           return 1;   /* indicate failure: buffer too small */
-         result[resultIndex++] = '=';
-      }
-   }
-   if (resultIndex >= resultSize)
-     return 1;   /* indicate failure: buffer too small */
+    result[resultIndex] = 0;
 
-   result[resultIndex] = 0;
-
-   return 0;   /* indicate success */
+    return 0;   /* indicate success */
 }
 
 int DecodeBase64(
     const char *in, uint32_t inLen, void* outBuf, uint32_t* outLen) {
-  uint8_t* out = reinterpret_cast<uint8_t*>(outBuf);
-  const char* end = in + inLen;
-  char iter = 0;
-  size_t buf = 0, len = 0;
+    uint8_t* out = reinterpret_cast<uint8_t*>(outBuf);
+    const char* end = in + inLen;
+    char iter = 0;
+    size_t buf = 0, len = 0;
 
-  while (in < end) {
-    unsigned char c = kDecode[*in++];
+    while (in < end) {
+        unsigned char c = kDecode[*in++];
 
-    switch (c) {
-      case WHITESPACE: continue;   /* skip whitespace */
-      case INVALID:    return 1;   /* invalid input, return error */
-      case EQUALS:                 /* pad character, end of data */
-        in = end;
-        continue;
-      default:
-        buf = buf << 6 | c;
-        iter++; // increment the number of iteration
-        /* If the buffer is full, split it into bytes */
-        if (iter == 4) {
-          if ((len += 3) > *outLen)
-            return 1; /* buffer overflow */
-          *(out++) = (buf >> 16) & 255;
-          *(out++) = (buf >> 8) & 255;
-          *(out++) = buf & 255;
-          buf = 0; iter = 0;
+        switch (c) {
+        case WHITESPACE:
+            continue;   /* skip whitespace */
+        case INVALID:
+            return 1;   /* invalid input, return error */
+        case EQUALS:                 /* pad character, end of data */
+            in = end;
+            continue;
+        default:
+            buf = buf << 6 | c;
+            iter++; // increment the number of iteration
+            /* If the buffer is full, split it into bytes */
+            if (iter == 4) {
+                if ((len += 3) > *outLen)
+                    return 1; /* buffer overflow */
+                *(out++) = (buf >> 16) & 255;
+                *(out++) = (buf >> 8) & 255;
+                *(out++) = buf & 255;
+                buf = 0;
+                iter = 0;
+            }
         }
     }
-  }
 
-  if (iter == 3) {
-    if ((len += 2) > *outLen)
-      return 1; /* buffer overflow */
-    *(out++) = (buf >> 10) & 255;
-    *(out++) = (buf >> 2) & 255;
-  }
-  else if (iter == 2) {
-    if (++len > *outLen)
-      return 1; /* buffer overflow */
-    *(out++) = (buf >> 4) & 255;
-  }
+    if (iter == 3) {
+        if ((len += 2) > *outLen)
+            return 1; /* buffer overflow */
+        *(out++) = (buf >> 10) & 255;
+        *(out++) = (buf >> 2) & 255;
+    }
+    else if (iter == 2) {
+        if (++len > *outLen)
+            return 1; /* buffer overflow */
+        *(out++) = (buf >> 4) & 255;
+    }
 
-  *outLen = len; /* modify to reflect the actual output size */
-  return 0;
+    *outLen = len; /* modify to reflect the actual output size */
+    return 0;
 }
 
 #ifdef __cplusplus

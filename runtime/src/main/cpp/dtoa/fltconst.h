@@ -18,7 +18,7 @@
 #if !defined(fltconst_h)
 #define fltconst_h
 
-#include "hycomp.h" 
+#include "hycomp.h"
 /* IEEE floats consist of: sign bit, exponent field, significand field
 	single:  31 = sign bit, 30..23 = exponent (8 bits), 22..0 = significand (23 bits)
 	double:  63 = sign bit, 62..52 = exponent (11 bits), 51..0 = significand (52 bits)
@@ -69,10 +69,10 @@
 #define SINGLE_MANTISSA_MASK	0x007FFFFF
 #define SINGLE_NAN_BITS				(SINGLE_EXPONENT_MASK | 0x00400000)
 typedef union u64u32dbl_tag {
-	U_64    u64val;
-	U_32    u32val[2];
+    U_64    u64val;
+    U_32    u32val[2];
     I_32    i32val[2];
-	double  dval;
+    double  dval;
 } U64U32DBL;
 /* Replace P_FLOAT_HI and P_FLOAT_LOW */
 /* These macros are used to access the high and low 32-bit parts of a double (64-bit) value. */
@@ -138,20 +138,20 @@ typedef union u64u32dbl_tag {
 #define SET_NINF_SNGL_PTR(fltptr) *U32P((fltptr)) = (SINGLE_EXPONENT_MASK | SINGLE_SIGN_MASK)
 
 #if defined(HY_WORD64)
- #define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) ((U64U32DBL *)(aDoublePtr))->u64val = ((U64U32DBL *)(dstPtr))->u64val
- #define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) ((U64U32DBL *)(dstPtr))->u64val = ((U64U32DBL *)(aDoublePtr))->u64val
- #define STORE_LONG(dstPtr, hi, lo) ((U64U32DBL *)(dstPtr))->u64val = (((U_64)(hi)) << 32) | (lo)
+#define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) ((U64U32DBL *)(aDoublePtr))->u64val = ((U64U32DBL *)(dstPtr))->u64val
+#define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) ((U64U32DBL *)(dstPtr))->u64val = ((U64U32DBL *)(aDoublePtr))->u64val
+#define STORE_LONG(dstPtr, hi, lo) ((U64U32DBL *)(dstPtr))->u64val = (((U_64)(hi)) << 32) | (lo)
 #else
- /* on some platforms (HP720) we cannot reference an unaligned float.  Build them by hand, one U_32 at a time. */
- #if defined(ATOMIC_FLOAT_ACCESS)
- #define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) HIGH_U32_FROM_DBL_PTR(dstPtr) = HIGH_U32_FROM_DBL_PTR(aDoublePtr); LOW_U32_FROM_DBL_PTR(dstPtr) = LOW_U32_FROM_DBL_PTR(aDoublePtr)
- #define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) HIGH_U32_FROM_DBL_PTR(aDoublePtr) = HIGH_U32_FROM_DBL_PTR(dstPtr); LOW_U32_FROM_DBL_PTR(aDoublePtr) = LOW_U32_FROM_DBL_PTR(dstPtr)
- #else
- #define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) (*(dstPtr) = *(aDoublePtr))
- #define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) (*(aDoublePtr) = *(dstPtr))
- #endif
+/* on some platforms (HP720) we cannot reference an unaligned float.  Build them by hand, one U_32 at a time. */
+#if defined(ATOMIC_FLOAT_ACCESS)
+#define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) HIGH_U32_FROM_DBL_PTR(dstPtr) = HIGH_U32_FROM_DBL_PTR(aDoublePtr); LOW_U32_FROM_DBL_PTR(dstPtr) = LOW_U32_FROM_DBL_PTR(aDoublePtr)
+#define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) HIGH_U32_FROM_DBL_PTR(aDoublePtr) = HIGH_U32_FROM_DBL_PTR(dstPtr); LOW_U32_FROM_DBL_PTR(aDoublePtr) = LOW_U32_FROM_DBL_PTR(dstPtr)
+#else
+#define PTR_DOUBLE_STORE(dstPtr, aDoublePtr) (*(dstPtr) = *(aDoublePtr))
+#define PTR_DOUBLE_VALUE(dstPtr, aDoublePtr) (*(aDoublePtr) = *(dstPtr))
+#endif
 
- #define STORE_LONG(dstPtr, hi, lo) HIGH_U32_FROM_LONG64_PTR(dstPtr) = (hi); LOW_U32_FROM_LONG64_PTR(dstPtr) = (lo)
+#define STORE_LONG(dstPtr, hi, lo) HIGH_U32_FROM_LONG64_PTR(dstPtr) = (hi); LOW_U32_FROM_LONG64_PTR(dstPtr) = (lo)
 #endif /* HY_WORD64 */
 
 #define PTR_SINGLE_VALUE(dstPtr, aSinglePtr) (*U32P(aSinglePtr) = *U32P(dstPtr))

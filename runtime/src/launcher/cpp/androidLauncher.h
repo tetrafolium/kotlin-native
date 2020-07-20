@@ -28,10 +28,10 @@ extern "C" {
 #endif
 
 struct NativeActivityState {
-  struct ANativeActivity* activity;
-  void* savedState;
-  size_t savedStateSize;
-  struct ALooper* looper;
+    struct ANativeActivity* activity;
+    void* savedState;
+    size_t savedStateSize;
+    struct ALooper* looper;
 };
 
 void getNativeActivityState(struct NativeActivityState* state);
@@ -41,41 +41,41 @@ void notifySysEventProcessed();
 #define LOOPER_ID_SYS 1
 
 typedef enum NativeActivityEventKind {
-  UNKNOWN,
-  DESTROY,
-  START,
-  RESUME,
-  SAVE_INSTANCE_STATE,
-  PAUSE,
-  STOP,
-  CONFIGURATION_CHANGED,
-  LOW_MEMORY,
-  WINDOW_GAINED_FOCUS,
-  WINDOW_LOST_FOCUS,
-  NATIVE_WINDOW_CREATED,
-  NATIVE_WINDOW_DESTROYED,
-  INPUT_QUEUE_CREATED,
-  INPUT_QUEUE_DESTROYED
+    UNKNOWN,
+    DESTROY,
+    START,
+    RESUME,
+    SAVE_INSTANCE_STATE,
+    PAUSE,
+    STOP,
+    CONFIGURATION_CHANGED,
+    LOW_MEMORY,
+    WINDOW_GAINED_FOCUS,
+    WINDOW_LOST_FOCUS,
+    NATIVE_WINDOW_CREATED,
+    NATIVE_WINDOW_DESTROYED,
+    INPUT_QUEUE_CREATED,
+    INPUT_QUEUE_DESTROYED
 } NativeActivityEventKind;
 
 struct NativeActivityEvent {
-  NativeActivityEventKind eventKind;
+    NativeActivityEventKind eventKind;
 };
 
 struct NativeActivitySaveStateEvent {
-  NativeActivityEventKind eventKind;
-  void* savedState;
-  size_t savedStateSize;
+    NativeActivityEventKind eventKind;
+    void* savedState;
+    size_t savedStateSize;
 };
 
 struct NativeActivityWindowEvent {
-  NativeActivityEventKind eventKind;
-  struct ANativeWindow* window;
+    NativeActivityEventKind eventKind;
+    struct ANativeWindow* window;
 };
 
 struct NativeActivityQueueEvent {
-  NativeActivityEventKind eventKind;
-  struct AInputQueue* queue;
+    NativeActivityEventKind eventKind;
+    struct AInputQueue* queue;
 };
 
 #ifdef __cplusplus

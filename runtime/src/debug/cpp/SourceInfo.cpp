@@ -35,8 +35,8 @@
 #endif
 
 typedef struct _CSTypeRef {
-  unsigned long type;
-  void* contents;
+    unsigned long type;
+    void* contents;
 } CSTypeRef;
 
 typedef CSTypeRef CSSymbolicatorRef;
@@ -45,8 +45,8 @@ typedef CSTypeRef CSSymbolRef;
 typedef CSTypeRef CSSourceInfoRef;
 
 typedef struct _CSRange {
-  unsigned long long location;
-  unsigned long long length;
+    unsigned long long location;
+    unsigned long long length;
 } CSRange;
 
 typedef unsigned long long CSArchitecture;
@@ -93,119 +93,121 @@ void (*CSShow)(CSTypeRef);
 #endif
 
 bool TryInitializeCoreSymbolication() {
-  void* cs = dlopen("/System/Library/PrivateFrameworks/CoreSymbolication.framework/CoreSymbolication", RTLD_LAZY);
-  if (!cs) return false;
+    void* cs = dlopen("/System/Library/PrivateFrameworks/CoreSymbolication.framework/CoreSymbolication", RTLD_LAZY);
+    if (!cs) return false;
 
 #define KONAN_CS_LOOKUP(name) name = (decltype(name)) dlsym(cs, #name); if (!name) return false;
 
-  KONAN_CS_LOOKUP(CSSymbolicatorCreateWithPid)
-  KONAN_CS_LOOKUP(CSSymbolicatorGetSymbolOwnerWithAddressAtTime)
-  KONAN_CS_LOOKUP(CSSymbolOwnerGetSourceInfoWithAddress)
-  KONAN_CS_LOOKUP(CSSourceInfoGetPath)
-  KONAN_CS_LOOKUP(CSSourceInfoGetLineNumber)
-  KONAN_CS_LOOKUP(CSSourceInfoGetColumn)
-  KONAN_CS_LOOKUP(CSIsNull)
-  KONAN_CS_LOOKUP(CSSourceInfoGetSymbol)
-  KONAN_CS_LOOKUP(CSSymbolForeachSourceInfo)
-  KONAN_CS_LOOKUP(CSSymbolOwnerGetSymbolWithAddress)
-  KONAN_CS_LOOKUP(CSSourceInfoGetRange)
+    KONAN_CS_LOOKUP(CSSymbolicatorCreateWithPid)
+    KONAN_CS_LOOKUP(CSSymbolicatorGetSymbolOwnerWithAddressAtTime)
+    KONAN_CS_LOOKUP(CSSymbolOwnerGetSourceInfoWithAddress)
+    KONAN_CS_LOOKUP(CSSourceInfoGetPath)
+    KONAN_CS_LOOKUP(CSSourceInfoGetLineNumber)
+    KONAN_CS_LOOKUP(CSSourceInfoGetColumn)
+    KONAN_CS_LOOKUP(CSIsNull)
+    KONAN_CS_LOOKUP(CSSourceInfoGetSymbol)
+    KONAN_CS_LOOKUP(CSSymbolForeachSourceInfo)
+    KONAN_CS_LOOKUP(CSSymbolOwnerGetSymbolWithAddress)
+    KONAN_CS_LOOKUP(CSSourceInfoGetRange)
 
 #if TRACE_SYMBOLICATION
-  KONAN_CS_LOOKUP(CSShow)
+    KONAN_CS_LOOKUP(CSShow)
 #endif
 #undef KONAN_CS_LOOKUP
 
-  symbolicator = CSSymbolicatorCreateWithPid(getpid());
-  return !CSIsNull(symbolicator);
+    symbolicator = CSSymbolicatorCreateWithPid(getpid());
+    return !CSIsNull(symbolicator);
 }
 
 } // namespace
 
 typedef struct {
-  const char * fileName;
-  int start;
-  int end;
+    const char * fileName;
+    int start;
+    int end;
 } SymbolSourceInfoLimits;
 
 extern "C" struct SourceInfo Kotlin_getSourceInfo(void* addr) {
-  __block SourceInfo result = { .fileName = nullptr, .lineNumber = -1, .column = -1 };
-  __block bool continueUpdateResult = true;
-  __block SymbolSourceInfoLimits limits = {.start = -1, .end = -1};
+    __block SourceInfo result = { .fileName = nullptr, .lineNumber = -1, .column = -1 };
+    __block bool continueUpdateResult = true;
+    __block SymbolSourceInfoLimits limits = {.start = -1, .end = -1};
 
-  static bool csIsAvailable = TryInitializeCoreSymbolication();
+    static bool csIsAvailable = TryInitializeCoreSymbolication();
 
-  if (csIsAvailable) {
-    unsigned long long address = static_cast<unsigned long long>((uintptr_t)addr);
+    if (csIsAvailable) {
+        unsigned long long address = static_cast<unsigned long long>((uintptr_t)addr);
 
-    CSSymbolOwnerRef symbolOwner = CSSymbolicatorGetSymbolOwnerWithAddressAtTime(symbolicator, address, kCSNow);
-    if (CSIsNull(symbolOwner))
-      return result;
-    CSSymbolRef symbol = CSSymbolOwnerGetSymbolWithAddress(symbolOwner, address);
-    if (CSIsNull(symbol))
-      return result;
-    SYM_LOG("Kotlin_getSourceInfo: address: %p\n", addr);
-    SYM_DUMP(symbol);
+        CSSymbolOwnerRef symbolOwner = CSSymbolicatorGetSymbolOwnerWithAddressAtTime(symbolicator, address, kCSNow);
+        if (CSIsNull(symbolOwner))
+            return result;
+        CSSymbolRef symbol = CSSymbolOwnerGetSymbolWithAddress(symbolOwner, address);
+        if (CSIsNull(symbol))
+            return result;
+        SYM_LOG("Kotlin_getSourceInfo: address: %p\n", addr);
+        SYM_DUMP(symbol);
 
 
-    /**
-     * ASSUMPTION: we assume that the _first_ and the _last_ source infos should belong to real function(symbol) the rest might belong to
-     * inlined functions.
-     */
-    CSSymbolForeachSourceInfo(symbol,
-      ^(CSSourceInfoRef ref) {
-        uint32_t lineNumber = CSSourceInfoGetLineNumber(ref);
-        if (lineNumber == 0)
-          return 0;
-        if (limits.start == -1) {
-          limits.start = lineNumber;
-          limits.fileName = CSSourceInfoGetPath(ref);
-        } else {
-          limits.end = lineNumber;
-        }
-        return 0;
-    });
-
-    SYM_LOG("limits: {%s %d..%d}\n", limits.fileName, limits.start, limits.end);
-    result.fileName = limits.fileName;
-
-    CSSymbolForeachSourceInfo(symbol,
-      ^(CSSourceInfoRef ref) {
-          uint32_t lineNumber = CSSourceInfoGetLineNumber(ref);
-          if (lineNumber == 0)
+        /**
+         * ASSUMPTION: we assume that the _first_ and the _last_ source infos should belong to real function(symbol) the rest might belong to
+         * inlined functions.
+         */
+        CSSymbolForeachSourceInfo(symbol,
+        ^(CSSourceInfoRef ref) {
+            uint32_t lineNumber = CSSourceInfoGetLineNumber(ref);
+            if (lineNumber == 0)
+                return 0;
+            if (limits.start == -1) {
+                limits.start = lineNumber;
+                limits.fileName = CSSourceInfoGetPath(ref);
+            } else {
+                limits.end = lineNumber;
+            }
             return 0;
-          SYM_DUMP(ref);
-          CSRange range = CSSourceInfoGetRange(ref);
-          const char* fileName = CSSourceInfoGetPath(ref);
-          /**
-           * We need to change API fo Kotlin_getSourceInfo to return information about inlines,
-           * but for a moment we have to track that we updating result info _only_ for upper level or _inlined at_ and
-           * don't go deeper. at deeper level we check only that we at the right _inlined at_ position.
-           */
-          if (continueUpdateResult
-              && strcmp(limits.fileName, fileName) == 0
-              && lineNumber >= limits.start
-              && lineNumber <= limits.end) {
-            result.lineNumber = lineNumber;
-            result.column = CSSourceInfoGetColumn(ref);
-          }
-          /**
-           * if found right inlined function don't bother with
-           * updating high level inlined _at_ source info
-           */
-          if (continueUpdateResult &&  (address >= range.location
-                                        && address < range.location + range.length))
-             continueUpdateResult = false;
+        });
 
-          return 0;
-   });
-  }
-  return result;
+        SYM_LOG("limits: {%s %d..%d}\n", limits.fileName, limits.start, limits.end);
+        result.fileName = limits.fileName;
+
+        CSSymbolForeachSourceInfo(symbol,
+        ^(CSSourceInfoRef ref) {
+            uint32_t lineNumber = CSSourceInfoGetLineNumber(ref);
+            if (lineNumber == 0)
+                return 0;
+            SYM_DUMP(ref);
+            CSRange range = CSSourceInfoGetRange(ref);
+            const char* fileName = CSSourceInfoGetPath(ref);
+            /**
+             * We need to change API fo Kotlin_getSourceInfo to return information about inlines,
+             * but for a moment we have to track that we updating result info _only_ for upper level or _inlined at_ and
+             * don't go deeper. at deeper level we check only that we at the right _inlined at_ position.
+             */
+            if (continueUpdateResult
+                    && strcmp(limits.fileName, fileName) == 0
+                    && lineNumber >= limits.start
+                    && lineNumber <= limits.end) {
+                result.lineNumber = lineNumber;
+                result.column = CSSourceInfoGetColumn(ref);
+            }
+            /**
+             * if found right inlined function don't bother with
+             * updating high level inlined _at_ source info
+             */
+            if (continueUpdateResult &&  (address >= range.location
+                                          && address < range.location + range.length))
+                continueUpdateResult = false;
+
+            return 0;
+        });
+    }
+    return result;
 }
 
 #else // KONAN_CORE_SYMBOLICATION
 
 extern "C" struct SourceInfo Kotlin_getSourceInfo(void* addr) {
-  return (SourceInfo) { .fileName = nullptr, .lineNumber = -1, .column = -1 };
+    return (SourceInfo) {
+        .fileName = nullptr, .lineNumber = -1, .column = -1
+    };
 }
 
 #endif // KONAN_CORE_SYMBOLICATION

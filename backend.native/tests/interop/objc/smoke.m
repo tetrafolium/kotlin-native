@@ -49,31 +49,31 @@ void replacePairElements(id <MutablePair> pair, int first, int second) {
 }
 
 int (^getSupplier(int x))(void) {
-    return ^{
+    return ^ {
         return x;
     };
 }
 
 Class (^ _Nonnull getClassGetter(NSObject* obj))() {
-    return ^{ return obj.class; };
+    return ^ { return obj.class; };
 }
 
 NSString* globalString = @"Global string";
 NSObject* globalObject = nil;
 
 int formatStringLength(NSString* format, ...) {
-  va_list args;
-  va_start(args, format);
-  NSString* result = [[NSString alloc] initWithFormat:format arguments:args];
-  va_end(args);
-  return result.length;
+    va_list args;
+    va_start(args, format);
+    NSString* result = [[NSString alloc] initWithFormat:format arguments:args];
+    va_end(args);
+    return result.length;
 }
 
 BOOL unexpectedDeallocation = NO;
 
 @implementation MustNotBeDeallocated
 -(void)dealloc {
-  unexpectedDeallocation = YES;
+    unexpectedDeallocation = YES;
 }
 @end;
 
@@ -88,7 +88,7 @@ static CustomRetainMethodsImpl* retainedCustomRetainMethodsImpl;
 }
 
 -(void)consumeSelf __attribute__((ns_consumes_self)) {
-  retainedCustomRetainMethodsImpl = self; // Retain to detect possible over-release.
+    retainedCustomRetainMethodsImpl = self; // Retain to detect possible over-release.
 }
 
 -(void (^)(void))returnRetainedBlock:(void (^)(void))block __attribute__((ns_returns_retained)) {

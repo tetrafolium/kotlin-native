@@ -73,7 +73,7 @@ typedef NS_ENUM(int32_t, ForwardDeclaredEnum) {
 @end;
 
 id createObjectWithFactory(id<ObjectFactory> factory) {
-  return [factory create];
+    return [factory create];
 }
 
 @protocol CustomRetainMethods
@@ -96,22 +96,22 @@ static MustNotBeDeallocated* retainedObj;
 static void (^retainedBlock)(void);
 
 void useCustomRetainMethods(id<CustomRetainMethods> p) {
-  MustNotBeDeallocated* obj = [MustNotBeDeallocated new];
-  retainedObj = obj; // Retain to detect possible over-release.
-  [p returnRetained:obj];
+    MustNotBeDeallocated* obj = [MustNotBeDeallocated new];
+    retainedObj = obj; // Retain to detect possible over-release.
+    [p returnRetained:obj];
 
-  [p consume:p];
-  [p consumeSelf];
+    [p consume:p];
+    [p consumeSelf];
 
-  MustNotBeDeallocated* capturedObj = [MustNotBeDeallocated new];
-  retainedBlock = ^{ [capturedObj description]; }; // Retain to detect possible over-release.
-  [p returnRetainedBlock:retainedBlock]();
+    MustNotBeDeallocated* capturedObj = [MustNotBeDeallocated new];
+    retainedBlock = ^ { [capturedObj description]; }; // Retain to detect possible over-release.
+    [p returnRetainedBlock:retainedBlock]();
 }
 
 id getPrinterProtocolRaw() {
-  return @protocol(Printer);
+    return @protocol(Printer);
 }
 
 Protocol* getPrinterProtocol() {
-  return @protocol(Printer);
+    return @protocol(Printer);
 }

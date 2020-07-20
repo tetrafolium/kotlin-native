@@ -19,24 +19,24 @@ int WaitOnCondVar(
     pthread_mutex_t* mutex,
     uint64_t timeoutNanoseconds,
     uint64_t* microsecondsPassed) {
-  struct timeval tvBefore;
-  // TODO: Error reporting?
-  gettimeofday(&tvBefore, nullptr);
-
-  struct timespec ts;
-  const uint64_t nanoseconds = tvBefore.tv_usec * 1000LL + timeoutNanoseconds;
-  ts.tv_sec = tvBefore.tv_sec + nanoseconds / kNanosecondsInASecond;
-  ts.tv_nsec = nanoseconds % kNanosecondsInASecond;
-  auto result = pthread_cond_timedwait(cond, mutex, &ts);
-
-  if (microsecondsPassed) {
-    struct timeval tvAfter;
+    struct timeval tvBefore;
     // TODO: Error reporting?
-    gettimeofday(&tvAfter, nullptr);
+    gettimeofday(&tvBefore, nullptr);
 
-    *microsecondsPassed = (tvAfter.tv_sec - tvBefore.tv_sec) * 1000000LL +
-        tvAfter.tv_usec - tvBefore.tv_usec;
-  }
+    struct timespec ts;
+    const uint64_t nanoseconds = tvBefore.tv_usec * 1000LL + timeoutNanoseconds;
+    ts.tv_sec = tvBefore.tv_sec + nanoseconds / kNanosecondsInASecond;
+    ts.tv_nsec = nanoseconds % kNanosecondsInASecond;
+    auto result = pthread_cond_timedwait(cond, mutex, &ts);
 
-  return result;
+    if (microsecondsPassed) {
+        struct timeval tvAfter;
+        // TODO: Error reporting?
+        gettimeofday(&tvAfter, nullptr);
+
+        *microsecondsPassed = (tvAfter.tv_sec - tvBefore.tv_sec) * 1000000LL +
+                              tvAfter.tv_usec - tvBefore.tv_usec;
+    }
+
+    return result;
 }

@@ -34,18 +34,18 @@ uint32_t next(octet_iterator &it, const octet_iterator end, uint32_t replacement
     uint32_t cp = 0;
     internal::utf_error err_code = utf8::internal::validate_next(it, end, cp);
     switch (err_code) {
-        case internal::UTF8_OK :
-            return cp;
-        case internal::INVALID_LEAD :
-        case internal::INVALID_CODE_POINT :
-        case internal::OVERLONG_SEQUENCE :
-            it++;
-            return replacement;
-        case internal::NOT_ENOUGH_ROOM :
-        case internal::INCOMPLETE_SEQUENCE :
-            // The whole incomplete sequence is replaced with one replacement codepoint.
-            for (it++; it < end && utf8::internal::is_trail(*it); it++);
-            return replacement;
+    case internal::UTF8_OK :
+        return cp;
+    case internal::INVALID_LEAD :
+    case internal::INVALID_CODE_POINT :
+    case internal::OVERLONG_SEQUENCE :
+        it++;
+        return replacement;
+    case internal::NOT_ENOUGH_ROOM :
+    case internal::INCOMPLETE_SEQUENCE :
+        // The whole incomplete sequence is replaced with one replacement codepoint.
+        for (it++; it < end && utf8::internal::is_trail(*it); it++);
+        return replacement;
     }
 }
 
@@ -114,7 +114,7 @@ template<typename u16bit_iterator, typename octet_iterator>
 inline octet_iterator utf16to8(u16bit_iterator start,
                                const u16bit_iterator end,
                                octet_iterator result) {
-  return utf16to8(start, end, result, default_replacement);
+    return utf16to8(start, end, result, default_replacement);
 }
 
 template<typename u16bit_iterator, typename octet_iterator>
@@ -138,7 +138,7 @@ template<typename u16bit_iterator, typename octet_iterator>
 inline u16bit_iterator utf8to16(octet_iterator start,
                                 const octet_iterator end,
                                 u16bit_iterator result) {
-  return utf8to16(start, end, result, default_replacement);
+    return utf8to16(start, end, result, default_replacement);
 }
 
 } // namespace with_replacement
